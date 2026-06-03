@@ -2,6 +2,10 @@ name = "allpro-api"
 main = "src/index.js"
 compatibility_date = "2024-04-21"
 
+# Secrets (wrangler secret put NAME): ADMIN_TOKEN, JWT_SECRET,
+# EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY,
+# EMAILJS_PRIVATE_KEY (optional), NOTIFY_EMAIL
+
 # Bindings to your D1 Databases
 [[d1_databases]]
 binding = "DB"

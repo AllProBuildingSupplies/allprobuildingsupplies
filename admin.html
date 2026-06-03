@@ -4,7 +4,6 @@
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Admin Panel — All Pro Building Supplies LLC</title>
 <link rel="stylesheet" href="assets/style.css"/>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 </head>
 <body>
@@ -120,7 +119,7 @@
     <input type="email" id="new-user-email" class="data-input" style="margin-bottom:16px;">
 
     <div class="modal-lbl" style="color:var(--white)">Login Password *</div>
-    <input type="text" id="new-user-password" class="data-input" style="margin-bottom:16px;" value="Welcome1!">
+    <input type="password" id="new-user-password" class="data-input" style="margin-bottom:16px;" value="Welcome1!">
     
     <div class="modal-lbl" style="color:var(--white)">Company Name</div>
     <input type="text" id="new-user-company" class="data-input" style="margin-bottom:20px;">
@@ -308,7 +307,9 @@
 
 <script>
 const API_BASE = window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api';
-const ADMIN_HEADERS = { 'Content-Type': 'application/json', 'Authorization': 'Bearer Admin2026!' };
+function getAdminHeaders(extra) {
+  return window.apbsAdminHeaders ? window.apbsAdminHeaders(extra || { 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' };
+}
 
 function escAttr(val) {
   return String(val == null ? '' : val)
@@ -332,13 +333,22 @@ function productFromOptionKey(key) {
 }
 
 // --- ADMIN AUTH GATE ---
-function checkAdminAuth() {
+async function checkAdminAuth() {
   const pin = document.getElementById('admin-pin').value;
-  if(pin === 'Admin2026!') { 
-    sessionStorage.setItem('apbs_admin_auth', 'true');
+  document.getElementById('admin-auth-err').style.display = 'none';
+  try {
+    const r = await fetch(API_BASE + '/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pin })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Login failed');
+    sessionStorage.setItem('apbs_admin_token', data.token);
     unlockAdmin();
-  } else {
+  } catch (e) {
     document.getElementById('admin-auth-err').style.display = 'block';
+    document.getElementById('admin-auth-err').textContent = e.message || 'Incorrect password.';
   }
 }
 document.getElementById('admin-pin').addEventListener('keypress', function (e) {
@@ -351,14 +361,7 @@ function unlockAdmin() {
   switchTab('orders');
 }
 
-if(sessionStorage.getItem('apbs_admin_auth') === 'true') unlockAdmin();
-
-// --- EMAILJS CONFIG ---
-const EMAILJS_SVC  = 'service_qefaa3x';   
-const EMAILJS_TPL  = 'template_nh3iqob';  
-const EMAILJS_KEY  = 'MNDXK3JgE890yvoA6';   
-const NOTIFY_EMAIL = 'orders@allprobuildingsupplies.com';
-if(window.emailjs) emailjs.init(EMAILJS_KEY);
+if (sessionStorage.getItem('apbs_admin_token')) unlockAdmin();
 
 let masterUsers = [], masterOrders = [], masterProducts = []; 
 let activeOrderObj = null; 
@@ -388,7 +391,7 @@ function switchTab(tab) {
 async function loadProducts() {
   const tbody = document.getElementById('prod-tbody');
   try {
-    const r = await fetch(API_BASE + '/products');
+    const r = await fetch(API_BASE + '/products', { headers: getAdminHeaders() });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
     if (!Array.isArray(data)) throw new Error(data.error || 'Invalid products response');
@@ -481,7 +484,7 @@ async function saveProducts() {
   });
   
   try {
-    const r = await fetch(API_BASE + '/admin/products/sync', { method:'POST', headers: ADMIN_HEADERS, body: JSON.stringify(payload) });
+    const r = await fetch(API_BASE + '/admin/products/sync', { method:'POST', headers: getAdminHeaders(), body: JSON.stringify(payload) });
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     showStatus('Products synchronized with D1 Database!', false); 
     loadProducts(); 
@@ -532,7 +535,7 @@ function processCSVUpload(event) {
       showStatus('Uploading and synchronizing with SQL...', false);
       try {
         const r = await fetch(API_BASE + '/admin/products/bulk-update', {
-          method: 'POST', headers: ADMIN_HEADERS, body: JSON.stringify(payload)
+          method: 'POST', headers: getAdminHeaders(), body: JSON.stringify(payload)
         });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         showStatus(`Success! ${payload.length} products updated/live.`, false);
@@ -567,7 +570,7 @@ function parseCSV(str) {
 // --- USERS LOGIC (D1 SQL) ---
 async function loadUsers() {
   try {
-    const r = await fetch(API_BASE + '/admin/users', { headers: ADMIN_HEADERS }); 
+    const r = await fetch(API_BASE + '/admin/users', { headers: getAdminHeaders() }); 
     masterUsers = await r.json();
     
     let html = '';
@@ -578,7 +581,7 @@ async function loadUsers() {
         <td data-label="Name">${u.fname} ${u.lname}</td>
         <td data-label="Email">${u.email}</td>
         <td data-label="Company">${u.company}</td>
-        <td data-label="Password"><input type="text" class="data-input pw-sel" data-id="${u.id}" value="${u.password || 'Welcome1!'}" style="width:120px;"></td>
+        <td data-label="Password"><input type="password" class="data-input pw-sel" data-id="${u.id}" value="" placeholder="New password (blank = keep)" style="width:160px;"></td>
         <td data-label="Status">
           <select class="data-input status-sel" data-id="${u.id}" style="background:${u.status==='approved'?'rgba(46,204,113,.1)':'var(--ink3)'}">
             <option value="pending" ${u.status==='pending'?'selected':''}>Pending</option>
@@ -626,17 +629,19 @@ async function createNewUser(e) {
 
   const btn = e.target; btn.textContent = 'Saving...'; btn.disabled = true;
 
+  const plainPw = document.getElementById('new-user-password').value.trim() || 'Welcome1!';
+  const hashedPw = await window.apbsHashPassword(plainPw);
   const newUser = {
     id: 'USR-' + Date.now().toString(36).toUpperCase(),
     fname: fname, lname: lname, email: email, 
     company: document.getElementById('new-user-company').value.trim(), 
     status: document.getElementById('new-user-status').value, 
     canOrderPieces: document.getElementById('new-user-pcs').value === 'true', 
-    password: document.getElementById('new-user-password').value.trim() || 'Welcome1!'
+    password: hashedPw
   };
 
   try {
-    const r = await fetch(API_BASE + '/admin/users', { method:'POST', headers: ADMIN_HEADERS, body: JSON.stringify(newUser) });
+    const r = await fetch(API_BASE + '/admin/users', { method:'POST', headers: getAdminHeaders(), body: JSON.stringify(newUser) });
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     showStatus('User created securely in D1!', false); 
     closeUserModal();
@@ -648,7 +653,7 @@ async function createNewUser(e) {
 
 async function deleteUser(id) { 
     if(confirm("Permanently delete this user from the SQL database?")) { 
-        await fetch(API_BASE + `/admin/users?id=${id}`, { method: 'DELETE', headers: ADMIN_HEADERS });
+        await fetch(API_BASE + `/admin/users?id=${id}`, { method: 'DELETE', headers: getAdminHeaders() });
         loadUsers(); 
     } 
 }
@@ -657,18 +662,21 @@ async function saveUsers() {
   const btn = event.target; btn.textContent = 'Saving...'; btn.disabled = true;
   const updates = [];
   
-  document.querySelectorAll('.status-sel').forEach(sel => {
+  for (const sel of document.querySelectorAll('.status-sel')) {
     const id = sel.dataset.id;
+    const pwRaw = document.querySelector(`.pw-sel[data-id="${id}"]`).value.trim();
+    let password = '********';
+    if (pwRaw) password = await window.apbsHashPassword(pwRaw);
     updates.push({
         id: id,
         status: sel.value,
         canOrderPieces: document.querySelector(`.pcs-sel[data-id="${id}"]`).value === 'true',
-        password: document.querySelector(`.pw-sel[data-id="${id}"]`).value.trim()
+        password: password
     });
-  });
+  }
 
   try {
-    const r = await fetch(API_BASE + '/admin/users/bulk', { method:'PUT', headers: ADMIN_HEADERS, body: JSON.stringify(updates) });
+    const r = await fetch(API_BASE + '/admin/users/bulk', { method:'PUT', headers: getAdminHeaders(), body: JSON.stringify(updates) });
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     showStatus('Security policies and passwords updated!', false); 
     loadUsers(); 
@@ -763,7 +771,7 @@ function initOrdersTableActions() {
 async function loadOrders() {
   const tbody = document.getElementById('orders-tbody');
   try {
-    const r = await fetch(API_BASE + '/admin/orders', { headers: ADMIN_HEADERS });
+    const r = await fetch(API_BASE + '/admin/orders', { headers: getAdminHeaders() });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     masterOrders = await r.json();
     if (!Array.isArray(masterOrders)) throw new Error(masterOrders.error || 'Invalid orders response');
@@ -987,7 +995,7 @@ async function deleteOrder(orderId) {
   try {
     const r = await fetch(API_BASE + '/admin/orders?id=' + encodeURIComponent(orderId), {
       method: 'DELETE',
-      headers: ADMIN_HEADERS
+      headers: getAdminHeaders()
     });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
@@ -1042,7 +1050,7 @@ async function saveOrderChanges() {
   activeOrderObj.total = newTotal;
   
   try {
-    const r = await fetch(API_BASE + '/admin/orders', { method:'POST', headers: ADMIN_HEADERS, body: JSON.stringify(activeOrderObj) });
+    const r = await fetch(API_BASE + '/admin/orders', { method:'POST', headers: getAdminHeaders(), body: JSON.stringify(activeOrderObj) });
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     showStatus('Order saved directly to SQL!', false); 
     closeOrderModal({target: {id: 'order-modal-overlay'}}); 
@@ -1121,7 +1129,7 @@ async function executeSendEmail() {
   
   let recipients = [];
   if(sendCust && activeOrderObj.customer.email) recipients.push(activeOrderObj.customer.email);
-  if(sendAdmin) recipients.push(NOTIFY_EMAIL);
+  if(sendAdmin) recipients.push('orders@allprobuildingsupplies.com');
   
   if(sendCustom) {
     document.querySelectorAll('.custom-email-input').forEach(inp => {
@@ -1140,37 +1148,27 @@ async function executeSendEmail() {
   else if(type === 'deliver') { htmlBody = buildDeliveredEmail(activeOrderObj, customNote); subject = 'Order Delivered — Thank You! | All Pro Building Supplies'; } 
   else if(type === 'invoice') { htmlBody = buildInvoiceEmail(activeOrderObj, customNote); subject = 'Invoice — Order ' + activeOrderObj.id + ' | All Pro Building Supplies'; }
 
-  let baseParams = {
-    email_body:  htmlBody,
-    order_id:    activeOrderObj.id,
-    customer:    activeOrderObj.customer.name + ' (' + activeOrderObj.customer.company + ')',
-    phone:       activeOrderObj.customer.phone,
-    delivery:    activeOrderObj.delivery.address,
-    po:          activeOrderObj.po || 'N/A',
-    notes:       activeOrderObj.notes || 'None',
-    total:       '$' + (activeOrderObj.total||0).toFixed(2),
-    placed_at:   new Date(activeOrderObj.placedAt).toLocaleString(),
-    admin_link:  'https://allprobuildingsupplies.com/admin.html',
-    cust_name:   activeOrderObj.customer.name
-  };
-
   const btn = document.getElementById('btn-execute-send');
   btn.disabled = true; btn.innerHTML = 'Sending...';
   msgEl.style.display = 'block'; msgEl.style.color = '#3498db'; msgEl.textContent = 'Processing request...';
 
-  let successCount = 0;
-  for(let email of recipients) {
-     try {
-       await emailjs.send(EMAILJS_SVC, EMAILJS_TPL, Object.assign({}, baseParams, { to_email: email, cust_email: email, email_subject: subject }));
-       successCount++;
-     } catch(e) { console.error("Failed to send to", email, e); }
-  }
-
-  if(successCount > 0) {
-    msgEl.style.color = '#2ecc71'; msgEl.textContent = 'Sent successfully to ' + successCount + ' recipient(s).';
-    btn.style.background = '#2ecc71'; btn.innerHTML = '✔ Done'; setTimeout(closeEmailModal, 1500);
-  } else {
-    msgEl.style.color = '#ff6b6b'; msgEl.textContent = 'Failed to send emails. Check EmailJS configuration.';
+  try {
+    const r = await fetch(API_BASE + '/admin/email/send', {
+      method: 'POST',
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ recipients, subject, htmlBody })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Send failed');
+    const successCount = data.sentCount || 0;
+    if (successCount > 0) {
+      msgEl.style.color = '#2ecc71'; msgEl.textContent = 'Sent successfully to ' + successCount + ' recipient(s).';
+      btn.style.background = '#2ecc71'; btn.innerHTML = '✔ Done'; setTimeout(closeEmailModal, 1500);
+    } else {
+      throw new Error('No emails were sent. Check Worker EmailJS secrets.');
+    }
+  } catch (e) {
+    msgEl.style.color = '#ff6b6b'; msgEl.textContent = e.message || 'Failed to send emails.';
     btn.disabled = false; btn.style.background = '#e74c3c'; btn.innerHTML = 'Retry Send';
   }
 }
