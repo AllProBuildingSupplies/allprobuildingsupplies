@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Checkout — All Pro Building Supplies LLC</title>
 <link rel="stylesheet" href="assets/style.css"/>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 </head>
 <body>
@@ -143,12 +142,6 @@
 <div id="global-footer"></div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────
-const EMAILJS_SVC  = 'service_qefaa3x';   // ← fill in after EmailJS setup
-const EMAILJS_TPL  = 'template_nh3iqob';  // ← fill in after EmailJS setup
-const EMAILJS_KEY  = 'MNDXK3JgE890yvoA6';   // ← fill in after EmailJS setup
-const NOTIFY_EMAIL = 'orders@allprobuildingsupplies.com';
-
 // ── AUTH & CART ───────────────────────────────────────────────────
 var currentUser = null;
 try{ currentUser = JSON.parse(sessionStorage.getItem('apbs_user')); }catch(e){}
@@ -187,7 +180,6 @@ function saveCart(c){ localStorage.setItem('apbs_cart', JSON.stringify(c)); }
   document.getElementById('f-company').value = currentUser.company||'';
 
   renderSummary(cart);
-  emailjs.init(EMAILJS_KEY);
 })();
 
 // ── DELIVERY TOGGLE ───────────────────────────────────────────────
@@ -211,9 +203,10 @@ function renderSummary(cart){
     var unitLabel = item.unit==='carton'
       ? Math.ceil(item.qty/item.pcsPerCtn)+' ctn ('+item.qty+' pcs)'
       : item.qty+' pcs';
+    var esc = window.apbsEscapeHtml || function(s){ return String(s); };
     linesEl.innerHTML +=
       '<div class="order-line">'
-      +'<div><div class="order-line-name">'+item.description+' '+item.size+'</div>'
+      +'<div><div class="order-line-name">'+esc(item.description)+' '+esc(item.size)+'</div>'
       +'<div class="order-line-sub">'+unitLabel+' × $'+parseFloat(item.unitPrice).toFixed(2)+'</div></div>'
       +'<div class="order-line-price">$'+lineTotal.toFixed(2)+'</div>'
       +'</div>';
@@ -292,11 +285,18 @@ async function placeOrder(){
 
   try{
     var api=(window.APBS_API_BASE||'https://allpro-api.baruch-6d5.workers.dev/api');
-    var saveRes=await fetch(api+'/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});
+    var saveRes=await fetch(api+'/orders',{
+      method:'POST',
+      headers:window.apbsAuthHeaders({'Content-Type':'application/json'}),
+      body:JSON.stringify(order)
+    });
     if(!saveRes.ok){
       var errBody=await saveRes.json().catch(function(){return{};});
       throw new Error(errBody.error||'Order could not be saved');
     }
+    var saved=await saveRes.json();
+    if(saved.total!=null) order.total=saved.total;
+    if(saved.items) order.items=saved.items;
     await sendNotification(order);
     saveCart([]);
     document.getElementById('checkout-wrap').style.display = 'none';
@@ -333,40 +333,20 @@ function buildStatusEmail(order, status){
 }
 
 async function sendNotification(order){
-  var params = {
-    to_email:    NOTIFY_EMAIL,
-    cust_email:  order.customer.email,
-    email_subject: 'New Order ' + order.id + ' — ' + order.customer.name + ' (' + order.customer.company + ')',
-    email_body:  buildConfirmEmail(order),
-    order_id:    order.id,
-    customer:    order.customer.name + ' (' + order.customer.company + ')',
-    phone:       order.customer.phone,
-    cust_email:  order.customer.email,
-    delivery:    order.delivery.method.toUpperCase() + ': ' + order.delivery.address,
-    po:          order.po || 'N/A',
-    notes:       order.notes || 'None',
-    total:       '$' + order.total.toFixed(2),
-    placed_at:   new Date(order.placedAt).toLocaleString(),
-    admin_link:  'https://allprobuildingsupplies.com/admin.html',
-    cust_name:   order.customer.name,
-    items:       order.items.map(function(i){ return i.description+' '+i.size+' — '+i.qty+' pcs = $'+i.lineTotal.toFixed(2); }).join('\n')
-  };
-  // Send to admin
+  var api=(window.APBS_API_BASE||'https://allpro-api.baruch-6d5.workers.dev/api');
   try{
-    await emailjs.send(EMAILJS_SVC, EMAILJS_TPL, Object.assign({}, params, {
-      cust_email: NOTIFY_EMAIL,
-      email_subject: 'New Order ' + order.id + ' — ' + order.customer.name + ' (' + order.customer.company + ')',
-      email_body: buildConfirmEmail(order)
-    }));
-  }catch(e){ console.warn('Admin email failed:', e); }
-  // Send to customer
-  try{
-    await emailjs.send(EMAILJS_SVC, EMAILJS_TPL, Object.assign({}, params, {
-      cust_email: order.customer.email,
-      email_subject: 'Order Received — ' + order.id + ' | All Pro Building Supplies',
-      email_body: buildConfirmEmail(order)
-    }));
-  } catch(e){ console.warn('Customer email failed:', e); }
+    await fetch(api+'/orders/notify',{
+      method:'POST',
+      headers:window.apbsAuthHeaders({'Content-Type':'application/json'}),
+      body:JSON.stringify({
+        orderId:order.id,
+        customerEmail:order.customer.email,
+        adminSubject:'New Order '+order.id+' — '+order.customer.name+(order.customer.company?' ('+order.customer.company+')':''),
+        subject:'Order Received — '+order.id+' | All Pro Building Supplies',
+        htmlBody:buildConfirmEmail(order)
+      })
+    });
+  }catch(e){ console.warn('Order notification email failed:', e); }
 }
 </script>
 <script src="assets/main.js"></script>

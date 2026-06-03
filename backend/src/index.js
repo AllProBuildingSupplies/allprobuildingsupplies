@@ -1,12 +1,21 @@
 // =====================================================================
-// ALL PRO BUILDING SUPPLIES - SECURE API WORKER (v2.0)
+// ALL PRO BUILDING SUPPLIES - SECURE API WORKER (v3.0)
 // =====================================================================
 
+const encoder = new TextEncoder();
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*', 
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
+
+function jsonResponse(data, status = 200, extraHeaders = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json', ...extraHeaders },
+  });
+}
 
 function normalizeSize(size) {
   if (size == null) return '';
@@ -20,9 +29,11 @@ function normalizeSize(size) {
 function findProduct(prods, code, size) {
   const c = String(code || '').trim();
   const n = normalizeSize(size);
-  return prods.find(p => String(p.code || '').trim() === c && normalizeSize(p.size) === n)
-    || prods.find(p => p.code === code && p.size === size)
-    || null;
+  return (
+    prods.find((p) => String(p.code || '').trim() === c && normalizeSize(p.size) === n) ||
+    prods.find((p) => p.code === code && p.size === size) ||
+    null
+  );
 }
 
 function mapOrderItem(it, prods) {
@@ -34,254 +45,627 @@ function mapOrderItem(it, prods) {
     qty: it.quantity,
     unitPrice: it.price_at_purchase,
     lineTotal: it.quantity * it.price_at_purchase,
-    description: match ? match.description : (it.product_sku ? 'Unknown Product' : 'Unknown Product'),
-    pcsPerCtn: match ? match.pack : 1
+    description: match ? match.description : 'Unknown Product',
+    pcsPerCtn: match ? match.pack : 1,
   };
 }
 
+function toPublicProduct(p) {
+  const qty = parseInt(p.qty, 10) || 0;
+  return {
+    code: p.code,
+    description: p.description,
+    size: p.size,
+    pack: p.pack,
+    image: p.image,
+    main_category: p.main_category,
+    sub_category: p.sub_category,
+    inStock: qty > 0,
+  };
+}
+
+function isSha256Hex(s) {
+  return typeof s === 'string' && /^[a-f0-9]{64}$/i.test(s);
+}
+
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', encoder.encode(String(text)));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function ensureStoredPassword(pw) {
+  if (!pw) return await sha256Hex('Welcome1!');
+  if (isSha256Hex(pw)) return pw.toLowerCase();
+  return sha256Hex(pw);
+}
+
+function b64urlEncode(obj) {
+  return btoa(JSON.stringify(obj)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function b64urlDecode(str) {
+  const pad = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
+  return JSON.parse(atob(str.replace(/-/g, '+').replace(/_/g, '/') + pad));
+}
+
+async function signToken(payload, secret, hours = 168) {
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const now = Math.floor(Date.now() / 1000);
+  const body = { ...payload, iat: now, exp: now + hours * 3600 };
+  const h = b64urlEncode(header);
+  const p = b64urlEncode(body);
+  const data = `${h}.${p}`;
+  const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
+  const s = btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  return `${data}.${s}`;
+}
+
+async function verifyToken(token, secret) {
+  if (!token || !secret) return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const data = `${parts[0]}.${parts[1]}`;
+  try {
+    const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+    const sigBin = Uint8Array.from(atob(parts[2].replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+    const valid = await crypto.subtle.verify('HMAC', key, sigBin, encoder.encode(data));
+    if (!valid) return null;
+    const payload = b64urlDecode(parts[1]);
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function getBearer(request) {
+  const h = request.headers.get('Authorization') || '';
+  return h.startsWith('Bearer ') ? h.slice(7).trim() : null;
+}
+
+function jwtSecret(env) {
+  return env.JWT_SECRET || env.ADMIN_TOKEN;
+}
+
+async function authFromRequest(request, env) {
+  const token = getBearer(request);
+  const secret = jwtSecret(env);
+  if (!token || !secret) return { admin: false, user: null };
+  const payload = await verifyToken(token, secret);
+  if (!payload) return { admin: false, user: null };
+  if (payload.role === 'admin') return { admin: true, user: null, payload };
+  if (payload.role === 'user' && payload.status === 'approved') {
+    return { admin: false, user: payload, payload };
+  }
+  return { admin: false, user: null };
+}
+
+function validateAndPriceItems(allProds, items) {
+  if (!items || items.length === 0) return { validated: [], total: 0 };
+  const validated = [];
+  let total = 0;
+  for (const i of items) {
+    const qty = parseInt(i.qty, 10);
+    if (!qty || qty < 1) return { error: `Invalid quantity for ${i.code || 'item'}` };
+    const match = findProduct(allProds, i.code, i.size);
+    if (!match) return { error: `Product not found: ${i.code} ${i.size}` };
+    const stock = parseInt(match.qty, 10) || 0;
+    if (qty > stock) return { error: `Insufficient stock for ${match.description} ${match.size} (max ${stock})` };
+    const unitPrice = parseFloat(match.price) || 0;
+    const lineTotal = unitPrice * qty;
+    total += lineTotal;
+    validated.push({
+      code: match.code,
+      size: match.size,
+      description: match.description,
+      qty,
+      unitPrice,
+      lineTotal,
+      pcsPerCtn: match.pack,
+    });
+  }
+  return { validated, total };
+}
+
+async function restoreOrderItemsStock(env, orderId) {
+  const { results: oldItems } = await env.DB.prepare('SELECT * FROM order_items WHERE order_id = ?').bind(orderId).all();
+  const stmts = oldItems.map((it) =>
+    env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(it.quantity, it.product_sku, it.size)
+  );
+  if (stmts.length) await env.DB.batch(stmts);
+  return oldItems;
+}
+
+async function applyOrderItemsStock(env, items) {
+  const stmts = items.map((it) =>
+    env.DB.prepare('UPDATE products SET qty = MAX(0, qty - ?) WHERE code = ? AND size = ?').bind(it.qty, it.code, it.size)
+  );
+  if (stmts.length) await env.DB.batch(stmts);
+}
+
+async function sendEmailJs(env, templateParams, toEmail) {
+  const serviceId = env.EMAILJS_SERVICE_ID;
+  const templateId = env.EMAILJS_TEMPLATE_ID;
+  const publicKey = env.EMAILJS_PUBLIC_KEY;
+  if (!serviceId || !templateId || !publicKey) {
+    return { skipped: true, reason: 'Email not configured' };
+  }
+  const body = {
+    service_id: serviceId,
+    template_id: templateId,
+    user_id: publicKey,
+    template_params: { ...templateParams, to_email: toEmail, cust_email: toEmail },
+  };
+  if (env.EMAILJS_PRIVATE_KEY) body.accessToken = env.EMAILJS_PRIVATE_KEY;
+  const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(txt || `EmailJS HTTP ${res.status}`);
+  }
+  return { ok: true };
+}
+
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
     }
 
     const url = new URL(request.url);
     const path = url.pathname;
-    
-    // Admin Security Verification
-    const isAdmin = request.headers.get('Authorization') === 'Bearer Admin2026!';
 
     try {
+      const auth = await authFromRequest(request, env);
+
       // ---------------------------------------------------------
-      // PUBLIC ROUTES (App & Website)
+      // PUBLIC ROUTES
       // ---------------------------------------------------------
       if (path === '/api/health' && request.method === 'GET') {
-        return new Response(JSON.stringify({ status: 'ok' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+        return jsonResponse({ status: 'ok' });
+      }
+
+      if (path === '/api/admin/login' && request.method === 'POST') {
+        const adminToken = env.ADMIN_TOKEN;
+        if (!adminToken) {
+          return jsonResponse({ error: 'Admin login not configured. Set ADMIN_TOKEN secret.' }, 503);
+        }
+        const { password } = await request.json();
+        if (password !== adminToken) {
+          return jsonResponse({ error: 'Incorrect password' }, 401);
+        }
+        const token = await signToken({ role: 'admin' }, jwtSecret(env), 24);
+        return jsonResponse({ success: true, token });
       }
 
       if (path === '/api/products' && request.method === 'GET') {
-        const { results } = await env.DB.prepare("SELECT * FROM products").all();
-        return new Response(JSON.stringify(results), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+        const { results } = await env.DB.prepare('SELECT * FROM products').all();
+        const trade = auth.admin || (auth.user && auth.user.status === 'approved');
+        const payload = trade ? results : results.map(toPublicProduct);
+        return jsonResponse(payload);
       }
 
       if (path === '/api/login' && request.method === 'POST') {
         const { email, password } = await request.json();
-        const { results } = await env.DB.prepare("SELECT * FROM users WHERE email = ? AND password = ?").bind(email.toLowerCase(), password).all();
-        if (results.length === 0) return new Response(JSON.stringify({ error: 'Invalid email or password' }), { status: 401, headers: corsHeaders });
+        const { results } = await env.DB.prepare('SELECT * FROM users WHERE email = ? AND password = ?')
+          .bind(email.toLowerCase(), password)
+          .all();
+        if (results.length === 0) return jsonResponse({ error: 'Invalid email or password' }, 401);
         const user = results[0];
-        if (user.status !== 'approved') return new Response(JSON.stringify({ error: 'Account pending approval.' }), { status: 403, headers: corsHeaders });
+        if (user.status !== 'approved') return jsonResponse({ error: 'Account pending approval.' }, 403);
+        const secret = jwtSecret(env);
+        if (!secret) return jsonResponse({ error: 'Auth not configured' }, 503);
+        const token = await signToken(
+          {
+            role: 'user',
+            sub: user.id,
+            email: user.email.toLowerCase(),
+            status: user.status,
+            canOrderPieces: user.canOrderPieces === 1,
+          },
+          secret
+        );
         delete user.password;
-        return new Response(JSON.stringify({ message: 'Login successful', token: 'secure-token-123', user: user }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+        return jsonResponse({ message: 'Login successful', token, user });
       }
 
       if (path === '/api/register' && request.method === 'POST') {
         const body = await request.json();
+        const storedPw = await ensureStoredPassword(body.password);
         try {
-          await env.DB.prepare(`INSERT INTO users (id, fname, lname, company, email, phone, password, status, canOrderPieces, registeredAt) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 1, ?)`).bind(body.id, body.fname, body.lname, body.company, body.email.toLowerCase(), body.phone, body.password, new Date().toISOString()).run();
+          await env.DB.prepare(
+            `INSERT INTO users (id, fname, lname, company, email, phone, password, status, canOrderPieces, registeredAt) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 1, ?)`
+          )
+            .bind(body.id, body.fname, body.lname, body.company, body.email.toLowerCase(), body.phone, storedPw, new Date().toISOString())
+            .run();
         } catch (e) {
           const msg = e && e.message ? String(e.message) : '';
           if (msg.includes('UNIQUE') || msg.includes('constraint')) {
-            return new Response(JSON.stringify({ error: 'An account with this email already exists.' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+            return jsonResponse({ error: 'An account with this email already exists.' }, 409);
           }
           throw e;
         }
-        return new Response(JSON.stringify({ message: 'Registration received!' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+        return jsonResponse({ message: 'Registration received!' });
       }
 
-      // NEW: Secure Public Orders Route (For Checkout Page)
-      if (path === '/api/orders' && request.method === 'POST') {
-        const o = await request.json();
-        
-        // Ensure required fields exist
-        if (!o.id || !o.customer || !o.customer.email) {
-          return new Response(JSON.stringify({ error: 'Missing required order data' }), { status: 400, headers: corsHeaders });
+      if (path === '/api/change-password' && request.method === 'POST') {
+        const { email, oldPassword, newPassword } = await request.json();
+        if (!email || !oldPassword || !newPassword) {
+          return jsonResponse({ error: 'All fields required' }, 400);
         }
+        const oldHash = isSha256Hex(oldPassword) ? oldPassword.toLowerCase() : await sha256Hex(oldPassword);
+        const newHash = isSha256Hex(newPassword) ? newPassword.toLowerCase() : await sha256Hex(newPassword);
+        const { results } = await env.DB.prepare('SELECT id FROM users WHERE email = ? AND password = ?')
+          .bind(email.toLowerCase(), oldHash)
+          .all();
+        if (results.length === 0) return jsonResponse({ error: 'Current password is incorrect' }, 401);
+        await env.DB.prepare('UPDATE users SET password = ? WHERE email = ?').bind(newHash, email.toLowerCase()).run();
+        return jsonResponse({ success: true });
+      }
+
+      if (path === '/api/contact' && request.method === 'POST') {
+        const body = await request.json();
+        const notify = env.NOTIFY_EMAIL || 'orders@allprobuildingsupplies.com';
+        const msg = [
+          `Name: ${body.firstName || ''} ${body.lastName || ''}`,
+          `Email: ${body.email || ''}`,
+          `Phone: ${body.phone || ''}`,
+          `Company: ${body.company || ''}`,
+          `Category: ${body.category || ''}`,
+          '',
+          body.message || '',
+        ].join('\n');
+        try {
+          await sendEmailJs(
+            env,
+            {
+              email_subject: `Contact — ${body.firstName || ''} ${body.lastName || ''}`.trim(),
+              email_body: `<pre style="font-family:sans-serif;white-space:pre-wrap">${msg.replace(/</g, '&lt;')}</pre>`,
+              cust_name: `${body.firstName || ''} ${body.lastName || ''}`.trim(),
+              customer: body.company || 'N/A',
+              phone: body.phone || 'N/A',
+              notes: body.message || '',
+            },
+            notify
+          );
+        } catch (e) {
+          return jsonResponse({ error: 'Could not send message. Please call 732-829-1940.' }, 500);
+        }
+        return jsonResponse({ success: true });
+      }
+
+      // ---------------------------------------------------------
+      // AUTHENTICATED USER ROUTES
+      // ---------------------------------------------------------
+      if (path === '/api/orders' && request.method === 'POST') {
+        if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const o = await request.json();
+        if (!o.id || !o.customer || !o.customer.email) {
+          return jsonResponse({ error: 'Missing required order data' }, 400);
+        }
+        const customerEmail = String(o.customer.email).trim().toLowerCase();
+        if (customerEmail !== auth.user.email) {
+          return jsonResponse({ error: 'Order email must match logged-in account' }, 403);
+        }
+
+        const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
+        const priced = validateAndPriceItems(allProds, o.items);
+        if (priced.error) return jsonResponse({ error: priced.error }, 400);
 
         const stmts = [
-          env.DB.prepare(`
-            INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `).bind(
-            o.id, o.customer.email.toLowerCase(), 'pending', o.total, 
-            o.delivery.method || 'delivery', o.delivery.address || '', 
-            o.po || '', o.notes || '', JSON.stringify(o.customer), o.placedAt
-          )
+          env.DB.prepare(
+            `INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ).bind(
+            o.id,
+            customerEmail,
+            'pending',
+            priced.total,
+            o.delivery?.method || 'delivery',
+            o.delivery?.address || '',
+            o.po || '',
+            o.notes || '',
+            JSON.stringify(o.customer),
+            o.placedAt || new Date().toISOString()
+          ),
         ];
 
-        if (o.items && o.items.length > 0) {
-          const { results: allProds } = await env.DB.prepare("SELECT * FROM products").all();
-          for (const i of o.items) {
-            const match = findProduct(allProds, i.code, i.size);
-            const canonSize = match ? match.size : normalizeSize(i.size);
-            const canonCode = match ? match.code : String(i.code || '').trim();
-            stmts.push(env.DB.prepare("INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)").bind(o.id, canonCode, canonSize, i.qty, i.unitPrice));
-            stmts.push(env.DB.prepare("UPDATE products SET qty = MAX(0, qty - ?) WHERE code = ? AND size = ?").bind(i.qty, canonCode, canonSize));
-          }
+        for (const i of priced.validated) {
+          stmts.push(
+            env.DB.prepare(
+              'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)'
+            ).bind(o.id, i.code, i.size, i.qty, i.unitPrice)
+          );
         }
-
         await env.DB.batch(stmts);
-        return new Response(JSON.stringify({ success: true, orderId: o.id }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        await applyOrderItemsStock(env, priced.validated);
+
+        return jsonResponse({ success: true, orderId: o.id, total: priced.total, items: priced.validated });
+      }
+
+      if (path === '/api/orders/notify' && request.method === 'POST') {
+        if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const { orderId, htmlBody, subject, adminSubject, customerEmail } = await request.json();
+        const notify = env.NOTIFY_EMAIL || 'orders@allprobuildingsupplies.com';
+        const results = { admin: false, customer: false };
+        try {
+          await sendEmailJs(
+            env,
+            { email_subject: adminSubject || `New Order ${orderId}`, email_body: htmlBody },
+            notify
+          );
+          results.admin = true;
+        } catch (_) {}
+        if (customerEmail) {
+          try {
+            await sendEmailJs(
+              env,
+              {
+                email_subject: subject || `Order Received — ${orderId}`,
+                email_body: htmlBody,
+              },
+              customerEmail
+            );
+            results.customer = true;
+          } catch (_) {}
+        }
+        return jsonResponse({ success: true, sent: results });
       }
 
       if (path === '/api/customer-orders' && request.method === 'POST') {
-        const { email } = await request.json();
-        if (!email || typeof email !== 'string') {
-          return new Response(JSON.stringify({ error: 'Email required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-        }
-        const em = email.trim().toLowerCase();
-        const orders = await env.DB.prepare(`
-          SELECT * FROM orders
-          WHERE LOWER(TRIM(user_id)) = ?
-             OR user_id = (SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1)
-          ORDER BY datetime(created_at) DESC
-        `).bind(em, em).all();
-        const items = await env.DB.prepare("SELECT * FROM order_items").all();
-        const prods = await env.DB.prepare("SELECT * FROM products").all();
-        const formattedOrders = orders.results.map(o => {
-          const orderItems = items.results.filter(it => it.order_id === o.id).map(it => mapOrderItem(it, prods.results));
+        if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const em = auth.user.email;
+        const orders = await env.DB.prepare(
+          `SELECT * FROM orders
+           WHERE LOWER(TRIM(user_id)) = ?
+              OR user_id = (SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1)
+           ORDER BY datetime(created_at) DESC`
+        )
+          .bind(em, em)
+          .all();
+        const items = await env.DB.prepare('SELECT * FROM order_items').all();
+        const prods = await env.DB.prepare('SELECT * FROM products').all();
+        const formattedOrders = orders.results.map((o) => {
+          const orderItems = items.results.filter((it) => it.order_id === o.id).map((it) => mapOrderItem(it, prods.results));
           let customer = { name: 'Unknown', email: em };
           try {
             if (o.customer_snapshot) customer = JSON.parse(o.customer_snapshot);
           } catch (_) {}
           return {
-            id: o.id, placedAt: o.created_at, status: o.status, total: o.total_amount,
+            id: o.id,
+            placedAt: o.created_at,
+            status: o.status,
+            total: o.total_amount,
             delivery: { method: o.delivery_method, address: o.delivery_address || '' },
-            po: o.po || '', notes: o.notes || '',
+            po: o.po || '',
+            notes: o.notes || '',
             customer,
-            items: orderItems
+            items: orderItems,
           };
         });
-        return new Response(JSON.stringify(formattedOrders), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return jsonResponse(formattedOrders);
       }
 
       // ---------------------------------------------------------
-      // SECURE ADMIN ROUTES
+      // ADMIN ROUTES
       // ---------------------------------------------------------
-      if (!path.startsWith('/api/admin')) return new Response(JSON.stringify({ error: 'Not Found' }), { status: 404, headers: corsHeaders });
-      if (!isAdmin) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
+      if (!path.startsWith('/api/admin')) {
+        return jsonResponse({ error: 'Not Found' }, 404);
+      }
+      if (!auth.admin) {
+        return jsonResponse({ error: 'Unauthorized' }, 401);
+      }
 
-      // -- USERS --
       if (path === '/api/admin/users' && request.method === 'GET') {
-        const { results } = await env.DB.prepare("SELECT * FROM users").all();
-        return new Response(JSON.stringify(results), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+        const { results } = await env.DB.prepare('SELECT * FROM users').all();
+        const safe = results.map((u) => {
+          const copy = { ...u };
+          delete copy.password;
+          return copy;
+        });
+        return jsonResponse(safe);
       }
-      
+
       if (path === '/api/admin/users' && request.method === 'POST') {
         const u = await request.json();
-        await env.DB.prepare(`INSERT INTO users (id, fname, lname, company, email, phone, password, status, canOrderPieces, registeredAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(u.id, u.fname, u.lname, u.company, u.email.toLowerCase(), u.phone || '', u.password, u.status, u.canOrderPieces ? 1 : 0, new Date().toISOString()).run();
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        const storedPw = await ensureStoredPassword(u.password);
+        await env.DB.prepare(
+          `INSERT INTO users (id, fname, lname, company, email, phone, password, status, canOrderPieces, registeredAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        )
+          .bind(u.id, u.fname, u.lname, u.company, u.email.toLowerCase(), u.phone || '', storedPw, u.status, u.canOrderPieces ? 1 : 0, new Date().toISOString())
+          .run();
+        return jsonResponse({ success: true });
       }
 
       if (path === '/api/admin/users' && request.method === 'DELETE') {
         const id = url.searchParams.get('id');
-        await env.DB.prepare("DELETE FROM users WHERE id = ?").bind(id).run();
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+        return jsonResponse({ success: true });
       }
 
       if (path === '/api/admin/users/bulk' && request.method === 'PUT') {
         const users = await request.json();
-        const stmts = users.map(u => env.DB.prepare("UPDATE users SET status = ?, canOrderPieces = ?, password = ? WHERE id = ?").bind(u.status, u.canOrderPieces ? 1 : 0, u.password, u.id));
+        const stmts = [];
+        for (const u of users) {
+          const pwRaw = (u.password || '').trim();
+          if (pwRaw && pwRaw !== '********') {
+            const pw = await ensureStoredPassword(pwRaw);
+            stmts.push(
+              env.DB.prepare('UPDATE users SET status = ?, canOrderPieces = ?, password = ? WHERE id = ?').bind(
+                u.status,
+                u.canOrderPieces ? 1 : 0,
+                pw,
+                u.id
+              )
+            );
+          } else {
+            stmts.push(
+              env.DB.prepare('UPDATE users SET status = ?, canOrderPieces = ? WHERE id = ?').bind(
+                u.status,
+                u.canOrderPieces ? 1 : 0,
+                u.id
+              )
+            );
+          }
+        }
         await env.DB.batch(stmts);
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        return jsonResponse({ success: true });
       }
 
-      // -- PRODUCTS --
-      // Wipe Clean Route (Used by Manual "Save Products" Button)
       if (path === '/api/admin/products/sync' && request.method === 'POST') {
         const products = await request.json();
-        const stmts = [env.DB.prepare("DELETE FROM products")]; // Wipe clean
+        const stmts = [env.DB.prepare('DELETE FROM products')];
         for (const p of products) {
           const mainCat = p.main_category != null ? String(p.main_category) : '';
           const subCat = p.sub_category != null ? String(p.sub_category) : '';
           const size = normalizeSize(p.size);
-          stmts.push(env.DB.prepare("INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(String(p.code || '').trim(), p.description, size, p.pack, p.qty, p.price, p.image, mainCat, subCat));
+          stmts.push(
+            env.DB.prepare(
+              'INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            ).bind(String(p.code || '').trim(), p.description, size, p.pack, p.qty, p.price, p.image, mainCat, subCat)
+          );
         }
-        await env.DB.batch(stmts); // Insert all new
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        await env.DB.batch(stmts);
+        return jsonResponse({ success: true });
       }
 
-      // NEW: Safe CSV Upsert Route (Insert or Update without wiping)
       if (path === '/api/admin/products/bulk-update' && request.method === 'POST') {
         const products = await request.json();
         const stmts = [];
         for (const p of products) {
           const mainCat = p.main_category != null ? String(p.main_category) : '';
           const subCat = p.sub_category != null ? String(p.sub_category) : '';
-          stmts.push(env.DB.prepare(`
+          stmts.push(
+            env.DB.prepare(`
             INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(code, size) DO UPDATE SET 
               description=excluded.description, pack=excluded.pack, 
               qty=excluded.qty, price=excluded.price, image=excluded.image,
               main_category=excluded.main_category, sub_category=excluded.sub_category
-          `).bind(String(p.code || '').trim(), p.description, normalizeSize(p.size), p.pack, p.qty, p.price, p.image, mainCat, subCat));
+          `).bind(
+              String(p.code || '').trim(),
+              p.description,
+              normalizeSize(p.size),
+              p.pack,
+              p.qty,
+              p.price,
+              p.image,
+              mainCat,
+              subCat
+            )
+          );
         }
         await env.DB.batch(stmts);
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        return jsonResponse({ success: true });
       }
 
-      // -- ORDERS --
       if (path === '/api/admin/orders' && request.method === 'GET') {
-        const orders = await env.DB.prepare("SELECT * FROM orders ORDER BY created_at DESC").all();
-        const items = await env.DB.prepare("SELECT * FROM order_items").all();
-        const prods = await env.DB.prepare("SELECT * FROM products").all();
+        const orders = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
+        const items = await env.DB.prepare('SELECT * FROM order_items').all();
+        const prods = await env.DB.prepare('SELECT * FROM products').all();
 
-        const formattedOrders = orders.results.map(o => {
-          const orderItems = items.results.filter(i => i.order_id === o.id).map(i => mapOrderItem(i, prods.results));
+        const formattedOrders = orders.results.map((o) => {
+          const orderItems = items.results.filter((i) => i.order_id === o.id).map((i) => mapOrderItem(i, prods.results));
           let customer = { name: 'Unknown' };
           try {
             if (o.customer_snapshot) customer = JSON.parse(o.customer_snapshot);
           } catch (_) {}
           return {
-            id: o.id, placedAt: o.created_at, status: o.status, total: o.total_amount,
+            id: o.id,
+            placedAt: o.created_at,
+            status: o.status,
+            total: o.total_amount,
             delivery: { method: o.delivery_method, address: o.delivery_address || '' },
-            po: o.po || '', notes: o.notes || '',
+            po: o.po || '',
+            notes: o.notes || '',
             customer,
-            items: orderItems
+            items: orderItems,
           };
         });
-        return new Response(JSON.stringify(formattedOrders), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+        return jsonResponse(formattedOrders);
       }
 
       if (path === '/api/admin/orders' && request.method === 'POST') {
         const o = await request.json();
+        const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
+        const priced = validateAndPriceItems(allProds, o.items || []);
+        if (priced.error && (o.items || []).length > 0) return jsonResponse({ error: priced.error }, 400);
+
+        await restoreOrderItemsStock(env, o.id);
+
         const stmts = [
-          env.DB.prepare(`
-            INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET status=excluded.status, total_amount=excluded.total_amount, delivery_address=excluded.delivery_address, po=excluded.po, notes=excluded.notes, customer_snapshot=excluded.customer_snapshot
-          `).bind(o.id, o.customer.email || 'unknown', o.status, o.total, o.delivery.method || 'delivery', o.delivery.address || '', o.po || '', o.notes || '', JSON.stringify(o.customer), o.placedAt),
-          env.DB.prepare("DELETE FROM order_items WHERE order_id = ?").bind(o.id)
+          env.DB.prepare(
+            `INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET status=excluded.status, total_amount=excluded.total_amount, delivery_address=excluded.delivery_address, po=excluded.po, notes=excluded.notes, customer_snapshot=excluded.customer_snapshot`
+          ).bind(
+            o.id,
+            o.customer?.email || 'unknown',
+            o.status,
+            priced.total || 0,
+            o.delivery?.method || 'delivery',
+            o.delivery?.address || '',
+            o.po || '',
+            o.notes || '',
+            JSON.stringify(o.customer || {}),
+            o.placedAt || new Date().toISOString()
+          ),
+          env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(o.id),
         ];
-        if (o.items && o.items.length > 0) {
-          const { results: allProds } = await env.DB.prepare("SELECT * FROM products").all();
-          for (const i of o.items) {
-            const match = findProduct(allProds, i.code, i.size);
-            const canonSize = match ? match.size : normalizeSize(i.size);
-            const canonCode = match ? match.code : String(i.code || '').trim();
-            stmts.push(env.DB.prepare("INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)").bind(o.id, canonCode, canonSize, i.qty, i.unitPrice));
-          }
+
+        const itemsToSave = priced.validated || [];
+        for (const i of itemsToSave) {
+          stmts.push(
+            env.DB.prepare(
+              'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)'
+            ).bind(o.id, i.code, i.size, i.qty, i.unitPrice)
+          );
         }
         await env.DB.batch(stmts);
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+
+        if (o.status !== 'cancelled' && itemsToSave.length > 0) {
+          const stockCheck = validateAndPriceItems(
+            (await env.DB.prepare('SELECT * FROM products').all()).results,
+            itemsToSave
+          );
+          if (stockCheck.error) return jsonResponse({ error: stockCheck.error }, 400);
+          await applyOrderItemsStock(env, itemsToSave);
+        }
+
+        return jsonResponse({ success: true, total: priced.total || 0 });
       }
 
       if (path === '/api/admin/orders' && request.method === 'DELETE') {
         const id = url.searchParams.get('id');
-        if (!id) {
-          return new Response(JSON.stringify({ error: 'Order id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-        }
+        if (!id) return jsonResponse({ error: 'Order id required' }, 400);
+        await restoreOrderItemsStock(env, id);
         await env.DB.batch([
-          env.DB.prepare("DELETE FROM order_items WHERE order_id = ?").bind(id),
-          env.DB.prepare("DELETE FROM orders WHERE id = ?").bind(id),
+          env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(id),
+          env.DB.prepare('DELETE FROM orders WHERE id = ?').bind(id),
         ]);
-        return new Response(JSON.stringify({ success: true, deletedId: id }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return jsonResponse({ success: true, deletedId: id });
       }
 
-      return new Response(JSON.stringify({ error: 'Route Not Found' }), { status: 404, headers: corsHeaders });
+      if (path === '/api/admin/email/send' && request.method === 'POST') {
+        const { recipients, subject, htmlBody } = await request.json();
+        const sent = [];
+        for (const email of recipients || []) {
+          try {
+            await sendEmailJs(env, { email_subject: subject, email_body: htmlBody }, email);
+            sent.push(email);
+          } catch (_) {}
+        }
+        return jsonResponse({ success: true, sentCount: sent.length, sent });
+      }
 
+      return jsonResponse({ error: 'Route Not Found' }, 404);
     } catch (error) {
-      return new Response(JSON.stringify({ error: 'Internal Server Error', details: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+      return jsonResponse({ error: 'Internal Server Error' }, 500);
     }
-  }
+  },
 };

@@ -141,7 +141,7 @@ async function fetchInventory(){
   }
   try{
     var api = (window.APBS_API_BASE||'https://allpro-api.baruch-6d5.workers.dev/api');
-    var pr = await fetch(api+'/products');
+    var pr = await fetch(api+'/products', { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} });
     if(pr.ok){
       var rows = await pr.json();
       for(var j=0;j<rows.length;j++){
@@ -220,9 +220,10 @@ async function renderCart(){
       ? '<div class="stock-warn">⚠ Max available: '+maxQty+'</div>' : '';
 
     var tr = document.createElement('tr');
+    var esc = window.apbsEscapeHtml || function(s){ return String(s); };
     tr.innerHTML =
-      '<td><div class="cart-prod-name">'+item.description+' '+item.size+'</div>'
-      +'<div class="cart-prod-sub">'+item.code+' &nbsp;|&nbsp; '+item.pcsPerCtn+' pcs/ctn</div></td>'
+      '<td><div class="cart-prod-name">'+esc(item.description)+' '+esc(item.size)+'</div>'
+      +'<div class="cart-prod-sub">'+esc(item.code)+' &nbsp;|&nbsp; '+item.pcsPerCtn+' pcs/ctn</div></td>'
       +'<td class="cart-price">$'+unitPrice.toFixed(2)+'</td>'
       +'<td><div class="unit-toggle">'
       +(canOrderPieces !== false ? '<label><input type="radio" name="unit-'+idx+'" value="piece" '+(item.unit==='piece'?'checked':'')+' onchange="setUnit('+idx+',\'piece\')"> Piece</label>' : '')

@@ -27,6 +27,40 @@ window.apbsFindProduct = function apbsFindProduct(products, code, size) {
   }) || null;
 };
 
+window.apbsHashPassword = async function apbsHashPassword(password) {
+  const data = new TextEncoder().encode(String(password));
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(function (b) { return b.toString(16).padStart(2, '0'); })
+    .join('');
+};
+
+window.apbsEscapeHtml = function apbsEscapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+};
+
+window.apbsGetAdminToken = function apbsGetAdminToken() {
+  return sessionStorage.getItem('apbs_admin_token') || '';
+};
+
+window.apbsAdminHeaders = function apbsAdminHeaders(extra) {
+  const token = window.apbsGetAdminToken();
+  const headers = { ...(extra || {}) };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  return headers;
+};
+
+window.apbsLogout = function apbsLogout() {
+  sessionStorage.removeItem('apbs_user');
+  sessionStorage.removeItem('apbs_token');
+  sessionStorage.removeItem('apbs_admin_auth');
+  sessionStorage.removeItem('apbs_admin_token');
+};
+
 window.apbsGetUser = function apbsGetUser() {
   try {
     return JSON.parse(sessionStorage.getItem("apbs_user") || "null");
@@ -226,13 +260,22 @@ function initGlobalScripts() {
     var loginBtn = document.getElementById('nav-login-btn');
     var nameEl   = document.getElementById('nav-logged-in-name');
 
+    var mobLogin = document.querySelector('.mobile-menu a[href="login.html"]');
     if(isLoggedIn){
       if(acctBtn) acctBtn.style.display = 'inline-flex';
       if(loginBtn) loginBtn.style.display = 'none';
       if(nameEl) nameEl.textContent = user.name || ((user.fname||'') + ' ' + (user.lname||'')).trim();
+      if(mobLogin) {
+        mobLogin.href = 'account.html';
+        mobLogin.textContent = 'My Account →';
+      }
     } else {
       if(acctBtn) acctBtn.style.display = 'none';
       if(loginBtn) loginBtn.style.display = 'inline-flex';
+      if(mobLogin) {
+        mobLogin.href = 'login.html';
+        mobLogin.textContent = 'Login / Register';
+      }
     }
   } catch(e) {}
 
@@ -251,10 +294,46 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden) ensureGlobalLayout();
 });
 
-// Global Form Button helper
-function submitForm(btn){
-  const orig=btn.innerHTML;
-  btn.innerHTML='✓ Sent! We\'ll respond shortly.';
-  btn.style.background='var(--ink3)';btn.style.color='var(--gold)';
-  setTimeout(()=>{btn.innerHTML=orig;btn.style.background='';btn.style.color=''},3500);
+// Contact form — wired on contact.html
+async function submitContactForm(btn) {
+  const form = btn.closest('.cf');
+  if (!form) return;
+  const get = function (sel) {
+    const el = form.querySelector(sel);
+    return el ? el.value.trim() : '';
+  };
+  const payload = {
+    firstName: get('.frow .fg:first-child .fi'),
+    lastName: get('.frow .fg:last-child .fi'),
+    email: get('.fg input[type="email"]'),
+    phone: get('.fg input[type="tel"]'),
+    company: get('.fg input[type="text"]'),
+    category: get('.fsel'),
+    message: get('.fta'),
+  };
+  if (!payload.email || !payload.message) {
+    alert('Please enter your email and message.');
+    return;
+  }
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const api = (window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api') + '/contact';
+    const r = await fetch(api, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error(data.error || 'Send failed');
+    btn.innerHTML = '✓ Sent! We\'ll respond shortly.';
+    btn.style.background = 'var(--ink3)';
+    btn.style.color = 'var(--gold)';
+    form.querySelectorAll('input, textarea, select').forEach(function (el) { el.value = ''; });
+  } catch (e) {
+    alert(e.message || 'Could not send. Please call 732-829-1940.');
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
 }

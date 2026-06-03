@@ -138,9 +138,37 @@ document.getElementById('log-pass').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') processLogin();
 });
 
-// Change password placeholder (Will be implemented later)
-function processChange(btn) {
-    showMsg('change', 'Password change via API is under construction.', true);
+async function processChange(btn) {
+  const email = document.getElementById('chg-email').value.trim();
+  const oldPw = document.getElementById('chg-old-pass').value;
+  const newPw = document.getElementById('chg-new-pass').value;
+  if (!email || !oldPw || !newPw) {
+    showMsg('change', 'Please fill in all fields.', true);
+    return;
+  }
+  if (newPw.length < 6) {
+    showMsg('change', 'New password must be at least 6 characters.', true);
+    return;
+  }
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = 'Updating...';
+  try {
+    const oldHash = await window.apbsHashPassword(oldPw);
+    const newHash = await window.apbsHashPassword(newPw);
+    const r = await fetch(window.APBS_API_BASE + '/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, oldPassword: oldHash, newPassword: newHash }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Update failed');
+    showMsg('change', 'Password updated. You can log in with your new password.', false);
+  } catch (e) {
+    showMsg('change', e.message || 'Could not update password.', true);
+  }
+  btn.disabled = false;
+  btn.textContent = orig;
 }
 </script>
 </body>

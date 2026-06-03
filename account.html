@@ -81,6 +81,14 @@ var currentUser = null;
     window.location.href = 'login.html';
     return;
   }
+  if (currentUser.status !== 'approved') {
+    document.querySelector('.acct-main').innerHTML =
+      '<p style="color:var(--silver);padding:40px;">Your trade account is <strong style="color:var(--gold)">' +
+      (currentUser.status || 'pending') +
+      '</strong>. You will be able to view orders once approved.</p>';
+    document.getElementById('display-status').textContent = currentUser.status || 'pending';
+    return;
+  }
 
   // Populate User Info
   document.getElementById('display-name').textContent = (currentUser.fname || '') + ' ' + (currentUser.lname || '');
@@ -103,8 +111,8 @@ async function loadOrders() {
     const api = (window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api') + '/customer-orders';
     const r = await fetch(api, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: currentUser.email })
+      headers: window.apbsAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({})
     });
     if (!r.ok) throw new Error('orders');
     let myOrders = await r.json();
@@ -141,7 +149,11 @@ async function loadOrders() {
 }
 
 function logout() {
-  sessionStorage.removeItem('apbs_user');
+  if (window.apbsLogout) window.apbsLogout();
+  else {
+    sessionStorage.removeItem('apbs_user');
+    sessionStorage.removeItem('apbs_token');
+  }
   window.location.href = 'login.html';
 }
 

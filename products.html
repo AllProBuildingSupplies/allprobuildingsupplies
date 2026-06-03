@@ -333,11 +333,26 @@ function onMobileSubChange(v) {
   setCatSub(v, null);
 }
 
+function applyUrlCategoryFilter() {
+  const mainParam = new URLSearchParams(window.location.search).get('main');
+  if (!mainParam || !window.catProductGroups) return;
+  const groups = window.catProductGroups;
+  let matchedKey = null;
+  Object.keys(groups).forEach(function (code) {
+    const g = groups[code];
+    const lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
+    if (lab.toLowerCase() === mainParam.toLowerCase()) matchedKey = catMainKey(g.mainCat);
+  });
+  if (matchedKey) setCatMain(matchedKey, null);
+}
+
 async function fetchAndRenderProducts() {
   try {
     const apiURL = window.APBS_API_BASE ? window.APBS_API_BASE + '/products' : 'https://allpro-api.baruch-6d5.workers.dev/api/products';
-    const r = await fetch(apiURL);
+    const r = await fetch(apiURL, { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const rows = await r.json();
+    if (!Array.isArray(rows)) throw new Error(rows.error || 'Invalid catalog response');
     
     let groups = {};
     
@@ -361,7 +376,8 @@ async function fetchAndRenderProducts() {
       groups[code].rows.push({ 
         size: row.size, 
         pack: row.pack, 
-        qty: parseInt(row.qty) || 0, 
+        qty: parseInt(row.qty, 10) || 0, 
+        inStock: row.inStock !== undefined ? !!row.inStock : (parseInt(row.qty, 10) || 0) > 0,
         price: parseFloat(row.price) || 0 
       });
     }
@@ -397,8 +413,12 @@ async function fetchAndRenderProducts() {
       `;
       
       data.rows.forEach(item => {
-        let isOOS = item.qty <= 0;
-        let availHtml = isOOS ? `<span style="color:var(--silver)">Call for Availability</span>` : `<span style="color:#4CAF50">&#9679; In Stock</span> <span class="qty-badge">${item.qty}</span>`;
+        let isOOS = isLoggedIn ? item.qty <= 0 : !item.inStock;
+        let availHtml = isOOS
+          ? `<span style="color:var(--silver)">Call for Availability</span>`
+          : (isLoggedIn
+            ? `<span style="color:#4CAF50">&#9679; In Stock</span> <span class="qty-badge">${item.qty}</span>`
+            : `<span style="color:#4CAF50">&#9679; In Stock</span>`);
         let priceHtml = isLoggedIn ? `<span style="color:var(--white);font-weight:500">$${item.price.toFixed(2)}</span>` : `<span class="price-locked">&#128274; Login to view</span>`;
         let btnHtml = '';
         
@@ -415,7 +435,7 @@ async function fetchAndRenderProducts() {
         html += `
           <tr data-code="${code}">
             <td>
-              ${item.size}
+              ${catEscHtml(item.size)}
               <div class="mobile-pack">${item.pack}/CTN</div>
             </td>
             <td><span class="qty-badge">${item.pack}/CTN</span></td>
@@ -433,6 +453,7 @@ async function fetchAndRenderProducts() {
     container.innerHTML = sectionChunks.join('');
     window.catProductGroups = groups;
     buildMainFilters(groups);
+    applyUrlCategoryFilter();
   } catch(e) {
     document.getElementById('prod-sections').innerHTML = '<div style="color:#ff6b6b;padding:40px;text-align:center;">Failed to load catalog. Please refresh.</div>';
     console.error(e);
