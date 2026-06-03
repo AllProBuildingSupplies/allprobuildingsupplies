@@ -746,6 +746,20 @@ function calcFromPieces() {
 }
 
 // --- ORDERS LOGIC (D1 SQL) ---
+function initOrdersTableActions() {
+  const tbody = document.getElementById('orders-tbody');
+  if (!tbody || tbody.dataset.actionsBound === '1') return;
+  tbody.dataset.actionsBound = '1';
+  tbody.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-order-action]');
+    if (!btn) return;
+    const orderId = btn.getAttribute('data-order-id');
+    if (!orderId) return;
+    if (btn.dataset.orderAction === 'edit') openOrderModal(orderId);
+    else if (btn.dataset.orderAction === 'delete') deleteOrder(orderId);
+  });
+}
+
 async function loadOrders() {
   const tbody = document.getElementById('orders-tbody');
   try {
@@ -764,8 +778,8 @@ async function loadOrders() {
         <td data-label="Total" style="font-family:monospace">$${(o.total||0).toFixed(2)}</td>
         <td data-label="Status"><span class="badge ${o.status}">${o.status}</span></td>
         <td data-label="Action" style="white-space:nowrap;">
-          <button class="btn-view" onclick="openOrderModal(${JSON.stringify(o.id)})">View & Edit</button>
-          <button class="btn-del" style="margin-left:8px;" onclick="deleteOrder(${JSON.stringify(o.id)})">Delete</button>
+          <button type="button" class="btn-view" data-order-action="edit" data-order-id="${escAttr(o.id)}">View & Edit</button>
+          <button type="button" class="btn-del" style="margin-left:8px;" data-order-action="delete" data-order-id="${escAttr(o.id)}">Delete</button>
         </td>
       </tr>`;
     });
@@ -1163,6 +1177,7 @@ async function executeSendEmail() {
 
 // Init
 document.addEventListener('DOMContentLoaded', () => { 
+  initOrdersTableActions();
   switchTab('orders'); loadOrders(); loadProducts(); loadUsers(); 
 });
 </script>
