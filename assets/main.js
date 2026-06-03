@@ -4,6 +4,29 @@
 
 window.APBS_API_BASE = "https://allpro-api.baruch-6d5.workers.dev/api";
 
+/** Canonical size for DB keys (strips inch marks, trims, collapses spaces). */
+window.normalizeProductSize = function normalizeProductSize(size) {
+  if (size == null) return '';
+  return String(size)
+    .trim()
+    .replace(/[\u201C\u201D\u2033\u2036]/g, '"')
+    .replace(/"/g, '')
+    .replace(/\s+/g, ' ');
+};
+
+window.apbsProductKey = function apbsProductKey(code, size) {
+  return String(code || '').trim() + '|' + window.normalizeProductSize(size);
+};
+
+window.apbsFindProduct = function apbsFindProduct(products, code, size) {
+  if (!Array.isArray(products)) return null;
+  const c = String(code || '').trim();
+  const n = window.normalizeProductSize(size);
+  return products.find(function (p) {
+    return String(p.code || '').trim() === c && window.normalizeProductSize(p.size) === n;
+  }) || null;
+};
+
 window.apbsGetUser = function apbsGetUser() {
   try {
     return JSON.parse(sessionStorage.getItem("apbs_user") || "null");

@@ -147,7 +147,7 @@ async function fetchInventory(){
       for(var j=0;j<rows.length;j++){
         var row = rows[j];
         var code = (row.code||'').trim();
-        var size = (row.size||'').replace(/\"/g,'').trim();
+        var size = (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(row.size);
         var qty = parseInt(row.qty)||0;
         liveInventory[code+'|'+size] = qty;
         liveInventory[code+'|'+size+'"'] = qty;
@@ -203,12 +203,11 @@ async function renderCart(){
   var totalItems = 0;
 
   cart.forEach(function(item, idx){
-    var key = item.code+'|'+item.size;
-    var invKey1 = item.code+'|'+item.size.replace(/"/g,'');
-    var invKey2 = item.code+'|'+item.size;
-    var maxQty = liveInventory[invKey1] !== undefined ? liveInventory[invKey1]
-               : liveInventory[invKey2] !== undefined ? liveInventory[invKey2]
-               : (item.maxQty || 9999);
+    var norm = window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); };
+    var sizeKey = norm(item.size);
+    if (item.size !== sizeKey) { item.size = sizeKey; }
+    var invKey = item.code + '|' + sizeKey;
+    var maxQty = liveInventory[invKey] !== undefined ? liveInventory[invKey] : (item.maxQty || 9999);
     // Cap qty at available stock
     if(item.qty > maxQty){ item.qty = maxQty; saveCart(cart); }
 

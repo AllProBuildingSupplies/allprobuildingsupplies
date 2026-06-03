@@ -241,6 +241,7 @@
             <option value="cancelled">Cancelled</option>
           </select>
           <button class="btn-save" style="width:100%;" onclick="saveOrderChanges()">💾 Save All Changes</button>
+          <button type="button" class="btn-del" id="btn-delete-order" style="width:100%;margin-top:12px;display:none;" onclick="deleteActiveOrder()">🗑 Delete Order Permanently</button>
         </div>
         
         <div>
@@ -309,6 +310,27 @@
 const API_BASE = window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api';
 const ADMIN_HEADERS = { 'Content-Type': 'application/json', 'Authorization': 'Bearer Admin2026!' };
 
+function escAttr(val) {
+  return String(val == null ? '' : val)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;');
+}
+
+function productOptionKey(code, size) {
+  return encodeURIComponent(String(code || '').trim() + '\x1e' + (window.normalizeProductSize ? window.normalizeProductSize(size) : String(size || '').trim()));
+}
+
+function productFromOptionKey(key) {
+  if (!key) return null;
+  const parts = decodeURIComponent(key).split('\x1e');
+  const code = parts[0];
+  const size = parts.slice(1).join('\x1e');
+  return (window.apbsFindProduct || function(prods, c, s) {
+    return prods.find(p => p.code === c && p.size === s);
+  })(masterProducts, code, size);
+}
+
 // --- ADMIN AUTH GATE ---
 function checkAdminAuth() {
   const pin = document.getElementById('admin-pin').value;
@@ -357,39 +379,54 @@ function switchTab(tab) {
   if(targetBtn) targetBtn.classList.add('active');
   const targetPanel = document.getElementById('tab-' + tab);
   if(targetPanel) targetPanel.classList.add('active');
+  if (tab === 'products') loadProducts();
+  if (tab === 'orders') loadOrders();
+  if (tab === 'users') loadUsers();
 }
 
 // --- OPTIMIZED TABLE BUILDERS ---
 async function loadProducts() {
+  const tbody = document.getElementById('prod-tbody');
   try {
-    const r = await fetch(API_BASE + '/products'); 
+    const r = await fetch(API_BASE + '/products');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
-    
+    if (!Array.isArray(data)) throw new Error(data.error || 'Invalid products response');
+
     masterProducts = data.map(p => ({
-        code: p.code, main_category: p.main_category || '', sub_category: p.sub_category || '',
-        description: p.description, size: p.size,
-        pack: p.pack, stock: parseInt(p.qty)||0, price: parseFloat(p.price)||0,
+        code: (p.code || '').trim(),
+        main_category: p.main_category || '',
+        sub_category: p.sub_category || '',
+        description: p.description || '',
+        size: window.normalizeProductSize ? window.normalizeProductSize(p.size) : (p.size || ''),
+        pack: p.pack,
+        stock: parseInt(p.qty, 10) || 0,
+        price: parseFloat(p.price) || 0,
         image: p.image || ''
     }));
 
     let html = '';
     masterProducts.forEach(p => {
       html += `<tr>
-        <td data-label="Category Code"><input class="data-input" value="${p.code||''}"></td>
-        <td data-label="Main category"><input class="data-input" value="${p.main_category||''}"></td>
-        <td data-label="Sub category"><input class="data-input" value="${p.sub_category||''}"></td>
-        <td data-label="Description"><input class="data-input" value="${p.description||''}"></td>
-        <td data-label="Size"><input class="data-input" value="${p.size||''}"></td>
-        <td data-label="Pcs / Ctn"><input type="number" class="data-input" value="${p.pack||''}"></td>
-        <td data-label="Inventory Qty"><input type="number" class="data-input" value="${p.stock||''}"></td>
-        <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" value="${p.price||''}"></td>
-        <td data-label="Image URL"><input class="data-input" value="${p.image||''}"></td>
+        <td data-label="Category Code"><input class="data-input" value="${escAttr(p.code)}"></td>
+        <td data-label="Main category"><input class="data-input" value="${escAttr(p.main_category)}"></td>
+        <td data-label="Sub category"><input class="data-input" value="${escAttr(p.sub_category)}"></td>
+        <td data-label="Description"><input class="data-input" value="${escAttr(p.description)}"></td>
+        <td data-label="Size"><input class="data-input" value="${escAttr(p.size)}"></td>
+        <td data-label="Pcs / Ctn"><input type="number" class="data-input" value="${escAttr(p.pack)}"></td>
+        <td data-label="Inventory Qty"><input type="number" class="data-input" value="${escAttr(p.stock)}"></td>
+        <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" value="${escAttr(p.price)}"></td>
+        <td data-label="Image URL"><input class="data-input" value="${escAttr(p.image)}"></td>
         <td data-label="Action"><button class="btn-del" onclick="this.closest('tr').remove()">Delete Row</button></td>
       </tr>`;
     });
-    document.getElementById('prod-tbody').innerHTML = html;
+    tbody.innerHTML = html || '<tr><td colspan="10" style="text-align:center;color:var(--silver);padding:24px;">No products in database. Add rows or upload a CSV.</td></tr>';
     populateProductDropdown();
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    console.error(e);
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load products. Check API connection.</td></tr>';
+    showStatus('Products load failed: ' + e.message, true);
+  }
 }
 
 function addProductRow() {
@@ -413,8 +450,10 @@ function populateProductDropdown() {
   const sel = document.getElementById('new-item-sel');
   if(!sel) return;
   let html = '<option value="">-- Select Product to Add --</option>';
-  masterProducts.forEach((p, idx) => {
-    html += `<option value="${idx}">${p.code} - ${p.description} ${p.size} ($${p.price.toFixed(2)}) [Stock: ${p.stock}]</option>`;
+  masterProducts.forEach((p) => {
+    const key = productOptionKey(p.code, p.size);
+    const label = `${p.code} - ${p.description} ${p.size} ($${p.price.toFixed(2)}) [Stock: ${p.stock}]`;
+    html += `<option value="${escAttr(key)}">${escAttr(label)}</option>`;
   });
   sel.innerHTML = html;
 }
@@ -432,7 +471,7 @@ async function saveProducts() {
             main_category: inputs[1].value.trim(),
             sub_category: inputs[2].value.trim(),
             description: inputs[3].value.trim(),
-            size: inputs[4].value.trim(),
+            size: (window.normalizeProductSize || function(s){ return String(s||'').trim(); })(inputs[4].value.trim()),
             pack: parseInt(inputs[5].value) || 1,
             qty: parseInt(inputs[6].value) || 0,
             price: parseFloat(inputs[7].value) || 0,
@@ -479,7 +518,7 @@ function processCSVUpload(event) {
       payload.push({
         code: cleanText(cols[0]),
         description: cleanText(cols[1]),
-        size: cleanText(cols[2]),
+        size: (window.normalizeProductSize || cleanText)(cleanText(cols[2])),
         pack: parseInt(cols[3]) || 1,
         qty: parseInt(cols[4]) || 0,
         price: parseFloat(cols[5]) || 0,
@@ -675,7 +714,8 @@ function updateItemPack() {
      document.getElementById('new-item-pack').value = '';
      currentItemPack = 1; currentItemStock = 0; return;
   }
-  const prod = masterProducts[sel.value];
+  const prod = productFromOptionKey(sel.value);
+  if (!prod) return;
   let packNum = parseInt(String(prod.pack).replace(/[^0-9]/g, ''));
   if(isNaN(packNum) || packNum <= 0) packNum = 1;
   currentItemPack = packNum; currentItemStock = prod.stock;
@@ -707,10 +747,13 @@ function calcFromPieces() {
 
 // --- ORDERS LOGIC (D1 SQL) ---
 async function loadOrders() {
+  const tbody = document.getElementById('orders-tbody');
   try {
-    const r = await fetch(API_BASE + '/admin/orders', { headers: ADMIN_HEADERS }); 
+    const r = await fetch(API_BASE + '/admin/orders', { headers: ADMIN_HEADERS });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     masterOrders = await r.json();
-    
+    if (!Array.isArray(masterOrders)) throw new Error(masterOrders.error || 'Invalid orders response');
+
     let html = '';
     masterOrders.forEach(o => {
       const dDate = new Date(o.placedAt).toLocaleDateString();
@@ -720,11 +763,18 @@ async function loadOrders() {
         <td data-label="Customer">${o.customer.name}<br><span style="font-size:10px;color:var(--silver)">${o.customer.company || ''}</span></td>
         <td data-label="Total" style="font-family:monospace">$${(o.total||0).toFixed(2)}</td>
         <td data-label="Status"><span class="badge ${o.status}">${o.status}</span></td>
-        <td data-label="Action"><button class="btn-view" onclick="openOrderModal('${o.id}')">View & Edit</button></td>
+        <td data-label="Action" style="white-space:nowrap;">
+          <button class="btn-view" onclick="openOrderModal(${JSON.stringify(o.id)})">View & Edit</button>
+          <button class="btn-del" style="margin-left:8px;" onclick="deleteOrder(${JSON.stringify(o.id)})">Delete</button>
+        </td>
       </tr>`;
     });
-    document.getElementById('orders-tbody').innerHTML = html;
-  } catch(e) { console.error(e); }
+    tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:var(--silver);padding:24px;">No orders yet.</td></tr>';
+  } catch(e) {
+    console.error(e);
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load orders.</td></tr>';
+    showStatus('Orders load failed: ' + e.message, true);
+  }
 }
 
 function toggleEditLock(status) {
@@ -756,10 +806,13 @@ function openOrderModal(orderId) {
   document.getElementById('new-item-pcs').value = '1';
   document.getElementById('new-item-pack').value = '';
 
+  const delBtn = document.getElementById('btn-delete-order');
   if (orderId) {
     activeOrderObj = masterOrders.find(o => o.id === orderId);
     document.getElementById('modal-main-title').textContent = 'Edit Order: ' + activeOrderObj.id;
+    if (delBtn) delBtn.style.display = 'block';
   } else {
+    if (delBtn) delBtn.style.display = 'none';
     activeOrderObj = {
       id: 'APB-' + Date.now().toString(36).toUpperCase(),
       placedAt: new Date().toISOString(),
@@ -796,12 +849,19 @@ function addItemToOrder() {
   
   if (sel.value === '') return alert('Please select a product to add.');
   
-  const prod = masterProducts[sel.value];
-  if(qty > prod.stock) qty = prod.stock; 
+  const prod = productFromOptionKey(sel.value);
+  if (!prod) return alert('Product not found. Refresh the products list and try again.');
+  if(qty > prod.stock) qty = prod.stock;
+  if (qty < 1) return alert('Quantity must be at least 1.');
   
   activeOrderObj.items.push({
-    code: prod.code, description: prod.description, size: prod.size,
-    pcsPerCtn: prod.pack, qty: qty, unitPrice: prod.price, lineTotal: prod.price * qty
+    code: prod.code,
+    description: prod.description,
+    size: prod.size,
+    pcsPerCtn: prod.pack,
+    qty: qty,
+    unitPrice: prod.price,
+    lineTotal: prod.price * qty
   });
   
   pcsInput.value = 1;
@@ -820,14 +880,19 @@ function renderEditableItems() {
     calcTotal += lineTot;
     
     let packNum = parseInt(String(item.pcsPerCtn).replace(/[^0-9]/g, '')) || 1;
-    let catalogItem = masterProducts.find(p => p.code === item.code);
+    let catalogItem = window.apbsFindProduct
+      ? window.apbsFindProduct(masterProducts, item.code, item.size)
+      : masterProducts.find(p => p.code === item.code && p.size === item.size);
     let maxAllowed = catalogItem ? (catalogItem.stock + item.qty) : item.qty;
+    const displayDesc = (item.description && item.description !== 'Unknown Product')
+      ? item.description
+      : (catalogItem ? catalogItem.description : item.description || 'Unknown Product');
     
     let currentCases = item.qty / packNum;
     let displayCases = Number.isInteger(currentCases) ? currentCases : currentCases.toFixed(2);
     
     html += `<tr>
-      <td data-label="Item">${item.description} ${item.size}<br><span style="font-size:10px;color:var(--silver)">${item.code} (Pack: ${item.pcsPerCtn || '-'})</span></td>
+      <td data-label="Item">${escAttr(displayDesc)} ${escAttr(item.size)}<br><span style="font-size:10px;color:var(--silver)">${escAttr(item.code)} (Pack: ${item.pcsPerCtn || '-'})</span></td>
       <td data-label="Cases"><input type="number" class="data-input edit-cases" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${displayCases}" min="0" step="any" style="width:70px;" oninput="rowCalcCases(${idx})"></td>
       <td data-label="Pieces"><input type="number" class="data-input edit-pcs" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${item.qty}" min="1" style="width:70px;" oninput="rowCalcPieces(${idx})"></td>
       <td data-label="Unit Price"><input type="number" step="0.01" class="data-input edit-price" data-idx="${idx}" value="${(item.unitPrice||0).toFixed(2)}" style="width:90px;" oninput="liveRecalc()"></td>
@@ -902,6 +967,33 @@ function closeOrderModal(e) {
   } 
 }
 
+async function deleteOrder(orderId) {
+  if (!orderId) return;
+  if (!confirm('Permanently delete order ' + orderId + '?\n\nAll line items will be removed. This cannot be undone.')) return;
+  try {
+    const r = await fetch(API_BASE + '/admin/orders?id=' + encodeURIComponent(orderId), {
+      method: 'DELETE',
+      headers: ADMIN_HEADERS
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.error || 'HTTP ' + r.status);
+    }
+    showStatus('Order ' + orderId + ' deleted.', false);
+    if (activeOrderObj && activeOrderObj.id === orderId) {
+      closeOrderModal({ target: { id: 'order-modal-overlay' } });
+    }
+    loadOrders();
+  } catch (e) {
+    showStatus('Delete failed: ' + e.message, true);
+  }
+}
+
+function deleteActiveOrder() {
+  if (!activeOrderObj || !activeOrderObj.id) return;
+  deleteOrder(activeOrderObj.id);
+}
+
 async function saveOrderChanges() {
   if(!activeOrderObj) return;
   const name = document.getElementById('edit-cust-name').value.trim();
@@ -919,8 +1011,19 @@ async function saveOrderChanges() {
   let qtys = document.querySelectorAll('.edit-pcs'), prices = document.querySelectorAll('.edit-price'), newTotal = 0;
   qtys.forEach((qInput, i) => {
     let q = parseInt(qInput.value) || 0, p = parseFloat(prices[i].value) || 0;
-    activeOrderObj.items[i].qty = q; activeOrderObj.items[i].unitPrice = p; 
-    activeOrderObj.items[i].lineTotal = q * p; newTotal += (q * p);
+    activeOrderObj.items[i].qty = q;
+    activeOrderObj.items[i].unitPrice = p;
+    activeOrderObj.items[i].lineTotal = q * p;
+    newTotal += (q * p);
+    const cat = window.apbsFindProduct
+      ? window.apbsFindProduct(masterProducts, activeOrderObj.items[i].code, activeOrderObj.items[i].size)
+      : null;
+    if (cat) {
+      activeOrderObj.items[i].code = cat.code;
+      activeOrderObj.items[i].size = cat.size;
+      activeOrderObj.items[i].description = cat.description;
+      activeOrderObj.items[i].pcsPerCtn = cat.pack;
+    }
   });
   activeOrderObj.total = newTotal;
   

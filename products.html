@@ -402,13 +402,14 @@ async function fetchAndRenderProducts() {
         let priceHtml = isLoggedIn ? `<span style="color:var(--white);font-weight:500">$${item.price.toFixed(2)}</span>` : `<span class="price-locked">&#128274; Login to view</span>`;
         let btnHtml = '';
         
-        let sizeClean = item.size.replace(/"/g,"&quot;");
+        let sizeCanon = (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(item.size);
+        let sizeAttr = sizeCanon.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
         let descClean = data.desc.replace(/"/g,"&quot;");
         
         if (isOOS) {
            btnHtml = `<button class="add-to-cart-btn" disabled style="border-color:#555;color:#555;cursor:not-allowed;">Out of Stock</button>`;
         } else {
-           btnHtml = `<button class="add-to-cart-btn" data-code="${code}" data-size="${sizeClean}" data-desc="${descClean}" data-pcs="${item.pack}" data-price="${item.price}" data-qty="${item.qty}" onclick="addToCart(this)">+ Cart</button>`;
+           btnHtml = `<button class="add-to-cart-btn" data-code="${code}" data-size="${sizeAttr}" data-desc="${descClean}" data-pcs="${item.pack}" data-price="${item.price}" data-qty="${item.qty}" onclick="addToCart(this)">+ Cart</button>`;
         }
         
         html += `
@@ -491,7 +492,7 @@ updateNavCount();
 
 function addToCart(btn){
   var code  = btn.dataset.code;
-  var size  = btn.dataset.size;
+  var size  = (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(btn.dataset.size);
   var desc  = btn.dataset.desc;
   var pcs   = parseInt(btn.dataset.pcs)||1;
   var price = parseFloat(btn.dataset.price)||0;

@@ -37,6 +37,10 @@ CREATE TABLE orders (
   status TEXT,
   total_amount REAL,
   delivery_method TEXT,
+  delivery_address TEXT,
+  po TEXT,
+  notes TEXT,
+  customer_snapshot TEXT,
   created_at TEXT
 );
 
@@ -44,7 +48,7 @@ CREATE TABLE order_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   order_id TEXT,
   product_sku TEXT,
-  size TEST,
+  size TEXT,
   quantity INTEGER,
   price_at_purchase REAL
 );

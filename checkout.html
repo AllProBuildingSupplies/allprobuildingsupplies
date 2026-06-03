@@ -273,10 +273,11 @@ async function placeOrder(){
     po: document.getElementById('f-po').value.trim(),
     notes: document.getElementById('f-notes').value.trim(),
     items: cart.map(function(item){
+      var norm = window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); };
       return {
         code: item.code,
         description: item.description,
-        size: item.size,
+        size: norm(item.size),
         qty: item.qty,
         unit: item.unit,
         pcsPerCtn: item.pcsPerCtn,

@@ -8,6 +8,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+function normalizeSize(size) {
+  if (size == null) return '';
+  return String(size)
+    .trim()
+    .replace(/[\u201C\u201D\u2033\u2036]/g, '"')
+    .replace(/"/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function findProduct(prods, code, size) {
+  const c = String(code || '').trim();
+  const n = normalizeSize(size);
+  return prods.find(p => String(p.code || '').trim() === c && normalizeSize(p.size) === n)
+    || prods.find(p => p.code === code && p.size === size)
+    || null;
+}
+
+function mapOrderItem(it, prods) {
+  const match = findProduct(prods, it.product_sku, it.size);
+  const canonSize = match ? match.size : normalizeSize(it.size);
+  return {
+    code: it.product_sku,
+    size: canonSize,
+    qty: it.quantity,
+    unitPrice: it.price_at_purchase,
+    lineTotal: it.quantity * it.price_at_purchase,
+    description: match ? match.description : (it.product_sku ? 'Unknown Product' : 'Unknown Product'),
+    pcsPerCtn: match ? match.pack : 1
+  };
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
@@ -78,9 +109,13 @@ export default {
         ];
 
         if (o.items && o.items.length > 0) {
+          const { results: allProds } = await env.DB.prepare("SELECT * FROM products").all();
           for (const i of o.items) {
-            stmts.push(env.DB.prepare("INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)").bind(o.id, i.code, i.size, i.qty, i.unitPrice));
-            stmts.push(env.DB.prepare("UPDATE products SET qty = MAX(0, qty - ?) WHERE code = ? AND size = ?").bind(i.qty, i.code, i.size));
+            const match = findProduct(allProds, i.code, i.size);
+            const canonSize = match ? match.size : normalizeSize(i.size);
+            const canonCode = match ? match.code : String(i.code || '').trim();
+            stmts.push(env.DB.prepare("INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)").bind(o.id, canonCode, canonSize, i.qty, i.unitPrice));
+            stmts.push(env.DB.prepare("UPDATE products SET qty = MAX(0, qty - ?) WHERE code = ? AND size = ?").bind(i.qty, canonCode, canonSize));
           }
         }
 
@@ -103,15 +138,7 @@ export default {
         const items = await env.DB.prepare("SELECT * FROM order_items").all();
         const prods = await env.DB.prepare("SELECT * FROM products").all();
         const formattedOrders = orders.results.map(o => {
-          const orderItems = items.results.filter(it => it.order_id === o.id).map(it => {
-            const match = prods.results.find(p => p.code === it.product_sku && p.size === it.size);
-            return {
-              code: it.product_sku, size: it.size, qty: it.quantity,
-              unitPrice: it.price_at_purchase, lineTotal: it.quantity * it.price_at_purchase,
-              description: match ? match.description : 'Unknown Product',
-              pcsPerCtn: match ? match.pack : 1
-            };
-          });
+          const orderItems = items.results.filter(it => it.order_id === o.id).map(it => mapOrderItem(it, prods.results));
           let customer = { name: 'Unknown', email: em };
           try {
             if (o.customer_snapshot) customer = JSON.parse(o.customer_snapshot);
@@ -166,7 +193,8 @@ export default {
         for (const p of products) {
           const mainCat = p.main_category != null ? String(p.main_category) : '';
           const subCat = p.sub_category != null ? String(p.sub_category) : '';
-          stmts.push(env.DB.prepare("INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(p.code, p.description, p.size, p.pack, p.qty, p.price, p.image, mainCat, subCat));
+          const size = normalizeSize(p.size);
+          stmts.push(env.DB.prepare("INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(String(p.code || '').trim(), p.description, size, p.pack, p.qty, p.price, p.image, mainCat, subCat));
         }
         await env.DB.batch(stmts); // Insert all new
         return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
@@ -186,7 +214,7 @@ export default {
               description=excluded.description, pack=excluded.pack, 
               qty=excluded.qty, price=excluded.price, image=excluded.image,
               main_category=excluded.main_category, sub_category=excluded.sub_category
-          `).bind(p.code, p.description, p.size, p.pack, p.qty, p.price, p.image, mainCat, subCat));
+          `).bind(String(p.code || '').trim(), p.description, normalizeSize(p.size), p.pack, p.qty, p.price, p.image, mainCat, subCat));
         }
         await env.DB.batch(stmts);
         return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
@@ -199,20 +227,16 @@ export default {
         const prods = await env.DB.prepare("SELECT * FROM products").all();
 
         const formattedOrders = orders.results.map(o => {
-          const orderItems = items.results.filter(i => i.order_id === o.id).map(i => {
-            const match = prods.results.find(p => p.code === i.product_sku && p.size === i.size);
-            return {
-              code: i.product_sku, size: i.size, qty: i.quantity,
-              unitPrice: i.price_at_purchase, lineTotal: i.quantity * i.price_at_purchase,
-              description: match ? match.description : 'Unknown Product',
-              pcsPerCtn: match ? match.pack : 1
-            };
-          });
+          const orderItems = items.results.filter(i => i.order_id === o.id).map(i => mapOrderItem(i, prods.results));
+          let customer = { name: 'Unknown' };
+          try {
+            if (o.customer_snapshot) customer = JSON.parse(o.customer_snapshot);
+          } catch (_) {}
           return {
             id: o.id, placedAt: o.created_at, status: o.status, total: o.total_amount,
             delivery: { method: o.delivery_method, address: o.delivery_address || '' },
             po: o.po || '', notes: o.notes || '',
-            customer: o.customer_snapshot ? JSON.parse(o.customer_snapshot) : { name: 'Unknown' },
+            customer,
             items: orderItems
           };
         });
@@ -230,12 +254,28 @@ export default {
           env.DB.prepare("DELETE FROM order_items WHERE order_id = ?").bind(o.id)
         ];
         if (o.items && o.items.length > 0) {
+          const { results: allProds } = await env.DB.prepare("SELECT * FROM products").all();
           for (const i of o.items) {
-            stmts.push(env.DB.prepare("INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)").bind(o.id, i.code, i.size, i.qty, i.unitPrice));
+            const match = findProduct(allProds, i.code, i.size);
+            const canonSize = match ? match.size : normalizeSize(i.size);
+            const canonCode = match ? match.code : String(i.code || '').trim();
+            stmts.push(env.DB.prepare("INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)").bind(o.id, canonCode, canonSize, i.qty, i.unitPrice));
           }
         }
         await env.DB.batch(stmts);
         return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+      }
+
+      if (path === '/api/admin/orders' && request.method === 'DELETE') {
+        const id = url.searchParams.get('id');
+        if (!id) {
+          return new Response(JSON.stringify({ error: 'Order id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        await env.DB.batch([
+          env.DB.prepare("DELETE FROM order_items WHERE order_id = ?").bind(id),
+          env.DB.prepare("DELETE FROM orders WHERE id = ?").bind(id),
+        ]);
+        return new Response(JSON.stringify({ success: true, deletedId: id }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
 
       return new Response(JSON.stringify({ error: 'Route Not Found' }), { status: 404, headers: corsHeaders });
