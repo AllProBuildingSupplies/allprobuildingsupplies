@@ -157,7 +157,7 @@ async function submitReg(){
 }
 function showErr(msg){
   const el=document.getElementById('global-err');
-  el.innerHTML=msg;el.style.display='block';
+  el.textContent=msg;el.style.display='block';
 }
 document.querySelectorAll('.fi').forEach(i=>i.addEventListener('input',()=>{
   i.classList.remove('err');
