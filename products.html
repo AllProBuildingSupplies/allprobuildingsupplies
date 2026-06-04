@@ -87,7 +87,7 @@
 let isLoggedIn = false;
 (function(){
   var sess = sessionStorage.getItem('apbs_user');
-  var user = null; try{ if(sess) user = JSON.parse(sess); }catch(e){}
+  var user = null; try{ if(sess) user = JSON.parse(sess); if(user && window.apbsNormalizeUser) window.apbsNormalizeUser(user); }catch(e){}
   isLoggedIn = user && user.status === 'approved';
   
   var loginBanner = document.getElementById('login-banner');
@@ -532,7 +532,7 @@ function addToCart(btn){
   if(existing){
     existing.qty = Math.min(existing.qty+1, maxQty);
   } else {
-    var defaultUnit = (sess && sess.canOrderPieces===false) ? 'carton' : 'piece';
+    var defaultUnit = (sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess)) ? 'carton' : 'piece';
     var defaultQty  = defaultUnit==='carton' ? pcs : 1;
     cart.push({code:code, size:size, description:desc, pcsPerCtn:pcs,
                unitPrice:price, qty:defaultQty, unit:defaultUnit, maxQty:maxQty});

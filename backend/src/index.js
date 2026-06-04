@@ -36,6 +36,70 @@ function findProduct(prods, code, size) {
   );
 }
 
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function userCanOrderPieces(user) {
+  return user && user.canOrderPieces !== false && user.canOrderPieces !== 0;
+}
+
+function buildOrderReceivedEmailHtml(order, items) {
+  const cust = order.customer || {};
+  const name = escapeHtml(cust.name || 'Customer');
+  const addr = escapeHtml(order.delivery?.address || '');
+  const po = escapeHtml(order.po || 'N/A');
+  const notes = escapeHtml(order.notes || 'None');
+  const orderId = escapeHtml(order.id);
+  const dateStr = escapeHtml(new Date(order.placedAt).toLocaleDateString());
+  const total = escapeHtml('$' + (Number(order.total) || 0).toFixed(2));
+  const rows = (items || [])
+    .map((i) => {
+      const desc = escapeHtml((i.description || '') + ' ' + (i.size || ''));
+      const line = escapeHtml('$' + (Number(i.lineTotal) || 0).toFixed(2));
+      const sub = escapeHtml(String(i.qty) + ' pcs @ $' + (Number(i.unitPrice) || 0).toFixed(2));
+      return `<tr><td style="padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #f0f0f0;">${desc}<br/><span style="font-size:11px;color:#888">${sub}</span></td><td style="padding:10px 14px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #f0f0f0;">${line}</td></tr>`;
+    })
+    .join('');
+  const poBlock =
+    order.po || order.notes
+      ? `<tr><td style="padding:0 36px 24px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf0;border:1px solid #f0e0a0;border-radius:4px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ${po}</div><div style="font-size:12px;color:#666;"><strong style="color:#333">Notes:</strong> ${notes}</div></td></tr></table></td></tr>`
+      : '';
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body style="margin:0;padding:0;background:#f4f4f4;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:4px;overflow:hidden;"><tr><td style="background:#0C1117;padding:28px 36px;border-bottom:4px solid #C8981F;"><div style="font-family:Arial Black,Arial,sans-serif;font-size:20px;font-weight:900;color:#FFFFFF;letter-spacing:2px;">ALL PRO BUILDING SUPPLIES</div><div style="font-size:11px;color:#C8981F;letter-spacing:3px;margin-top:3px;">LLC</div></td></tr><tr><td style="padding:32px 36px 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>${name}</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;">Thank you for your order! We have received it and will be in touch shortly.</p></td></tr><tr><td style="padding:24px 36px 0;"><table width="100%" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td style="padding:16px 20px;"><div style="font-size:10px;color:#888;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;">${orderId}</div></td><td style="padding:16px 20px;"><div style="font-size:10px;color:#888;">Date</div><div>${dateStr}</div></td><td style="padding:16px 20px;"><div style="font-size:10px;color:#888;">Delivery</div><div>${addr}</div></td></tr></table></td></tr><tr><td style="padding:24px 36px 0;"><table width="100%" style="border:1px solid #e8e8e8;">${rows}</table></td></tr><tr><td style="padding:0 36px;text-align:right;"><span style="font-size:22px;font-weight:700;">${total}</span></td></tr>${poBlock}<tr><td style="padding:24px 36px;"><p style="font-size:14px;color:#444;">Questions? Call <a href="tel:17328291940" style="color:#C8981F;">732-829-1940</a></p></td></tr></table></td></tr></table></body></html>`;
+}
+
+async function loadOwnedOrder(env, orderId, userEmail) {
+  const em = userEmail.toLowerCase();
+  const order = await env.DB.prepare(
+    `SELECT * FROM orders WHERE id = ? AND (LOWER(TRIM(user_id)) = ? OR user_id = (SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1))`
+  )
+    .bind(orderId, em, em)
+    .first();
+  if (!order) return null;
+  const itemRows = await env.DB.prepare('SELECT * FROM order_items WHERE order_id = ?').bind(orderId).all();
+  const prods = await env.DB.prepare('SELECT * FROM products').all();
+  const items = itemRows.results.map((it) => mapOrderItem(it, prods.results));
+  let customer = { name: 'Unknown', email: em };
+  try {
+    if (order.customer_snapshot) customer = JSON.parse(order.customer_snapshot);
+  } catch (_) {}
+  return {
+    id: order.id,
+    placedAt: order.created_at,
+    status: order.status,
+    total: order.total_amount,
+    delivery: { method: order.delivery_method, address: order.delivery_address || '' },
+    po: order.po || '',
+    notes: order.notes || '',
+    customer,
+    items,
+  };
+}
+
 function mapOrderItem(it, prods) {
   const match = findProduct(prods, it.product_sku, it.size);
   const canonSize = match ? match.size : normalizeSize(it.size);
@@ -288,8 +352,14 @@ export default {
 
       if (path === '/api/login' && request.method === 'POST') {
         const { email, password } = await request.json();
+        if (!email || typeof email !== 'string' || !String(email).trim()) {
+          return jsonResponse({ error: 'Email is required' }, 400);
+        }
+        if (!password) {
+          return jsonResponse({ error: 'Password is required' }, 400);
+        }
         const { results } = await env.DB.prepare('SELECT * FROM users WHERE email = ? AND password = ?')
-          .bind(email.toLowerCase(), password)
+          .bind(email.trim().toLowerCase(), password)
           .all();
         if (results.length === 0) return jsonResponse({ error: 'Invalid email or password' }, 401);
         const user = results[0];
@@ -307,17 +377,24 @@ export default {
           secret
         );
         delete user.password;
+        user.canOrderPieces = user.canOrderPieces === 1;
         return jsonResponse({ message: 'Login successful', token, user });
       }
 
       if (path === '/api/register' && request.method === 'POST') {
         const body = await request.json();
+        if (!body.email || typeof body.email !== 'string' || !String(body.email).trim()) {
+          return jsonResponse({ error: 'Email is required' }, 400);
+        }
+        if (!body.password) {
+          return jsonResponse({ error: 'Password is required' }, 400);
+        }
         const storedPw = await ensureStoredPassword(body.password);
         try {
           await env.DB.prepare(
             `INSERT INTO users (id, fname, lname, company, email, phone, password, status, canOrderPieces, registeredAt) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 1, ?)`
           )
-            .bind(body.id, body.fname, body.lname, body.company, body.email.toLowerCase(), body.phone, storedPw, new Date().toISOString())
+            .bind(body.id, body.fname, body.lname, body.company, body.email.trim().toLowerCase(), body.phone, storedPw, new Date().toISOString())
             .run();
         } catch (e) {
           const msg = e && e.message ? String(e.message) : '';
@@ -389,6 +466,14 @@ export default {
           return jsonResponse({ error: 'Order email must match logged-in account' }, 403);
         }
 
+        if (!userCanOrderPieces(auth.user)) {
+          for (const i of o.items || []) {
+            if (i.unit === 'piece') {
+              return jsonResponse({ error: 'Your account is limited to case/carton orders only.' }, 403);
+            }
+          }
+        }
+
         const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
         const priced = validateAndPriceItems(allProds, o.items);
         if (priced.error) return jsonResponse({ error: priced.error }, 400);
@@ -426,27 +511,24 @@ export default {
 
       if (path === '/api/orders/notify' && request.method === 'POST') {
         if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
-        const { orderId, htmlBody, subject, adminSubject, customerEmail } = await request.json();
+        const { orderId } = await request.json();
+        if (!orderId) return jsonResponse({ error: 'Order id required' }, 400);
+        const order = await loadOwnedOrder(env, orderId, auth.user.email);
+        if (!order) return jsonResponse({ error: 'Order not found' }, 404);
+        const htmlBody = buildOrderReceivedEmailHtml(order, order.items);
         const notify = env.NOTIFY_EMAIL || 'orders@allprobuildingsupplies.com';
+        const custEmail = (order.customer.email || auth.user.email).trim();
+        const company = order.customer.company ? ` (${order.customer.company})` : '';
+        const adminSubject = `New Order ${order.id} — ${order.customer.name || 'Customer'}${company}`;
+        const custSubject = `Order Received — ${order.id} | All Pro Building Supplies`;
         const results = { admin: false, customer: false };
         try {
-          await sendEmailJs(
-            env,
-            { email_subject: adminSubject || `New Order ${orderId}`, email_body: htmlBody },
-            notify
-          );
+          await sendEmailJs(env, { email_subject: adminSubject, email_body: htmlBody }, notify);
           results.admin = true;
         } catch (_) {}
-        if (customerEmail) {
+        if (custEmail) {
           try {
-            await sendEmailJs(
-              env,
-              {
-                email_subject: subject || `Order Received — ${orderId}`,
-                email_body: htmlBody,
-              },
-              customerEmail
-            );
+            await sendEmailJs(env, { email_subject: custSubject, email_body: htmlBody }, custEmail);
             results.customer = true;
           } catch (_) {}
         }

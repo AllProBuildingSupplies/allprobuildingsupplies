@@ -119,6 +119,7 @@ async function processLogin() {
     }
 
     // 4. Success! Save user session and redirect
+    if (window.apbsNormalizeUser) window.apbsNormalizeUser(result.user);
     sessionStorage.setItem('apbs_user', JSON.stringify(result.user));
     if (result.token) sessionStorage.setItem('apbs_token', result.token);
     

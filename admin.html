@@ -575,12 +575,12 @@ async function loadUsers() {
     
     let html = '';
     masterUsers.forEach(u => {
-      u.canOrderPieces = u.canOrderPieces === 1;
+      const piecesAllowed = u.canOrderPieces === 1 || u.canOrderPieces === true;
       html += `<tr>
-        <td data-label="ID" style="font-family:monospace;color:var(--silver);">${u.id}</td>
-        <td data-label="Name">${u.fname} ${u.lname}</td>
-        <td data-label="Email">${u.email}</td>
-        <td data-label="Company">${u.company}</td>
+        <td data-label="ID" style="font-family:monospace;color:var(--silver);">${escAttr(u.id)}</td>
+        <td data-label="Name">${escAttr(u.fname)} ${escAttr(u.lname)}</td>
+        <td data-label="Email">${escAttr(u.email)}</td>
+        <td data-label="Company">${escAttr(u.company || '')}</td>
         <td data-label="Password"><input type="password" class="data-input pw-sel" data-id="${u.id}" value="" placeholder="New password (blank = keep)" style="width:160px;"></td>
         <td data-label="Status">
           <select class="data-input status-sel" data-id="${u.id}" style="background:${u.status==='approved'?'rgba(46,204,113,.1)':'var(--ink3)'}">
@@ -591,8 +591,8 @@ async function loadUsers() {
         </td>
         <td data-label="Pieces Allowed">
           <select class="data-input pcs-sel" data-id="${u.id}">
-            <option value="true" ${u.canOrderPieces!==false?'selected':''}>Yes</option>
-            <option value="false" ${u.canOrderPieces===false?'selected':''}>Cases Only</option>
+            <option value="true" ${piecesAllowed?'selected':''}>Yes</option>
+            <option value="false" ${!piecesAllowed?'selected':''}>Cases Only</option>
           </select>
         </td>
         <td data-label="Action"><button class="btn-del" onclick="deleteUser('${u.id}')">Delete</button></td>
@@ -780,9 +780,9 @@ async function loadOrders() {
     masterOrders.forEach(o => {
       const dDate = new Date(o.placedAt).toLocaleDateString();
       html += `<tr>
-        <td data-label="Order ID" style="font-family:monospace;color:var(--gold);">${o.id}</td>
+        <td data-label="Order ID" style="font-family:monospace;color:var(--gold);">${escAttr(o.id)}</td>
         <td data-label="Date">${dDate}</td>
-        <td data-label="Customer">${o.customer.name}<br><span style="font-size:10px;color:var(--silver)">${o.customer.company || ''}</span></td>
+        <td data-label="Customer">${escAttr(o.customer.name || '')}<br><span style="font-size:10px;color:var(--silver)">${escAttr(o.customer.company || '')}</span></td>
         <td data-label="Total" style="font-family:monospace">$${(o.total||0).toFixed(2)}</td>
         <td data-label="Status"><span class="badge ${o.status}">${o.status}</span></td>
         <td data-label="Action" style="white-space:nowrap;">

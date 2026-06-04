@@ -75,6 +75,7 @@ var currentUser = null;
 (function init() {
   try {
     currentUser = JSON.parse(sessionStorage.getItem('apbs_user'));
+    if (window.apbsNormalizeUser) window.apbsNormalizeUser(currentUser);
   } catch(e) {}
   
   if (!currentUser) {
@@ -95,7 +96,8 @@ var currentUser = null;
   document.getElementById('display-company').textContent = currentUser.company || 'N/A';
   document.getElementById('display-email').textContent = currentUser.email || 'N/A';
   document.getElementById('display-status').textContent = currentUser.status || 'Pending';
-  document.getElementById('display-rights').textContent = currentUser.canOrderPieces === false ? 'Cases Only' : 'Pieces & Cases';
+  document.getElementById('display-rights').textContent =
+    (window.apbsCanOrderPieces && window.apbsCanOrderPieces(currentUser)) ? 'Pieces & Cases' : 'Cases Only';
   
   // FIX: Added protection for the asynchronous header injection
   let navNameEl = document.getElementById('nav-logged-in-name');

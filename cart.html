@@ -182,7 +182,7 @@ async function renderCart(){
   var canOrderPieces = true;
   try{
     var _sess = JSON.parse(sessionStorage.getItem('apbs_user'));
-    if(_sess && _sess.canOrderPieces === false) canOrderPieces = false;
+    if(_sess && window.apbsCanOrderPieces) canOrderPieces = window.apbsCanOrderPieces(_sess);
   }catch(e){}
   await fetchInventory();
   var cart = getCart();
@@ -273,7 +273,7 @@ function setUnit(idx, unit){
   var cart = getCart();
   // Block piece selection if not allowed
   var _u = null; try{ _u = JSON.parse(sessionStorage.getItem('apbs_user')); }catch(e){}
-  if(unit === 'piece' && _u && _u.canOrderPieces === false) return;
+  if(unit === 'piece' && _u && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(_u)) return;
   cart[idx].unit = unit;
   // If switching to carton, snap qty to nearest carton
   if(unit === 'carton'){

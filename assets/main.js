@@ -61,6 +61,19 @@ window.apbsLogout = function apbsLogout() {
   sessionStorage.removeItem('apbs_admin_token');
 };
 
+/** D1 stores 0/1; session may have number or boolean. */
+window.apbsCanOrderPieces = function apbsCanOrderPieces(user) {
+  if (!user) return true;
+  const v = user.canOrderPieces;
+  return v !== 0 && v !== false && v !== '0' && v !== 'false';
+};
+
+window.apbsNormalizeUser = function apbsNormalizeUser(user) {
+  if (!user) return user;
+  user.canOrderPieces = window.apbsCanOrderPieces(user);
+  return user;
+};
+
 window.apbsGetUser = function apbsGetUser() {
   try {
     return JSON.parse(sessionStorage.getItem("apbs_user") || "null");
@@ -307,7 +320,7 @@ async function submitContactForm(btn) {
     lastName: get('.frow .fg:last-child .fi'),
     email: get('.fg input[type="email"]'),
     phone: get('.fg input[type="tel"]'),
-    company: get('.fg input[type="text"]'),
+    company: get('#contact-company'),
     category: get('.fsel'),
     message: get('.fta'),
   };
