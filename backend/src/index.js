@@ -168,6 +168,43 @@ function validateAndPriceItems(allProds, items) {
   return { validated, total };
 }
 
+/** Admin orders: keep line unitPrice from the dashboard (discounts, free lines, etc.). */
+function validateAdminOrderItems(allProds, items, options = {}) {
+  const checkStock = options.checkStock !== false;
+  if (!items || items.length === 0) return { validated: [], total: 0 };
+  const validated = [];
+  let total = 0;
+  for (const i of items) {
+    const qty = parseInt(i.qty, 10);
+    if (!qty || qty < 1) return { error: `Invalid quantity for ${i.code || 'item'}` };
+    const match = findProduct(allProds, i.code, i.size);
+    if (!match) return { error: `Product not found: ${i.code} ${i.size}` };
+    if (checkStock) {
+      const stock = parseInt(match.qty, 10) || 0;
+      if (qty > stock) {
+        return { error: `Insufficient stock for ${match.description} ${match.size} (max ${stock})` };
+      }
+    }
+    const hasOverride = i.unitPrice !== undefined && i.unitPrice !== null && String(i.unitPrice).trim() !== '';
+    const unitPrice = hasOverride ? parseFloat(i.unitPrice) : parseFloat(match.price) || 0;
+    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+      return { error: `Invalid price for ${match.code} ${match.size}` };
+    }
+    const lineTotal = unitPrice * qty;
+    total += lineTotal;
+    validated.push({
+      code: match.code,
+      size: match.size,
+      description: match.description,
+      qty,
+      unitPrice,
+      lineTotal,
+      pcsPerCtn: match.pack,
+    });
+  }
+  return { validated, total };
+}
+
 async function restoreOrderItemsStock(env, orderId) {
   const { results: oldItems } = await env.DB.prepare('SELECT * FROM order_items WHERE order_id = ?').bind(orderId).all();
   const stmts = oldItems.map((it) =>
@@ -593,10 +630,11 @@ export default {
       if (path === '/api/admin/orders' && request.method === 'POST') {
         const o = await request.json();
         const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
-        const priced = validateAndPriceItems(allProds, o.items || []);
-        if (priced.error && (o.items || []).length > 0) return jsonResponse({ error: priced.error }, 400);
-
         await restoreOrderItemsStock(env, o.id);
+        const priced = validateAdminOrderItems(allProds, o.items || [], {
+          checkStock: o.status !== 'cancelled',
+        });
+        if (priced.error && (o.items || []).length > 0) return jsonResponse({ error: priced.error }, 400);
 
         const stmts = [
           env.DB.prepare(
@@ -629,11 +667,6 @@ export default {
         await env.DB.batch(stmts);
 
         if (o.status !== 'cancelled' && itemsToSave.length > 0) {
-          const stockCheck = validateAndPriceItems(
-            (await env.DB.prepare('SELECT * FROM products').all()).results,
-            itemsToSave
-          );
-          if (stockCheck.error) return jsonResponse({ error: stockCheck.error }, 400);
           await applyOrderItemsStock(env, itemsToSave);
         }
 
