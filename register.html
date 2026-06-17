@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
@@ -62,7 +62,7 @@
         <button class="auth-btn" id="reg-btn" onclick="submitReg()">
           <span id="reg-txt">Submit Request →</span>
         </button>
-        <p class="auth-note">Questions? Call <a href="tel:17328291940">732-829-1940</a> or email <a href="mailto:info@allprobuildingsupplies.com">info@allprobuildingsupplies.com</a></p>
+        <p class="auth-note">Questions? Call <a href="tel:17327341123">732-734-1123</a> or email <a href="mailto:info@allprobuildingsupplies.com">info@allprobuildingsupplies.com</a></p>
       </div>
       <div class="success-screen" id="reg-success">
         <div class="success-icon">✅</div>
@@ -140,7 +140,7 @@ async function submitReg(){
       if(r.status===409){
         showErr('An account with this email already exists. <a href="login.html" style="color:var(--gold)">Log in &#8594;</a>');
       }else{
-        showErr(data.error||'Registration failed. Please try again or call 732-829-1940.');
+        showErr(data.error||'Registration failed. Please try again or call 732-734-1123.');
       }
       btn.disabled=false;txt.textContent='Submit Request &#8594;';return;
     }
@@ -151,7 +151,7 @@ async function submitReg(){
     document.getElementById('reg-success').style.display='block';
 
   }catch(e){
-    showErr('Something went wrong &#8212; please try again or call 732-829-1940. ('+e.message+')');
+    showErr('Something went wrong &#8212; please try again or call 732-734-1123. ('+e.message+')');
     btn.disabled=false;txt.textContent='Submit Request &#8594;';
   }
 }

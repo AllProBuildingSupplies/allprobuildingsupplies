@@ -1,0 +1,659 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>All Pro Building Supplies LLC — Company Brochure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #0C1117;
+    --ink2: #151D26;
+    --ink3: #1E2A35;
+    --gold: #C8981F;
+    --gold2: #E2AF34;
+    --silver: #8BA0B2;
+    --smoke: #C8D4DC;
+    --white: #FFFFFF;
+  }
+
+  @page {
+    size: letter;
+    margin: 0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #888;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: 8.5in;
+    height: 11in;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    background: var(--ink);
+    color: var(--smoke);
+  }
+
+  .page:last-child { page-break-after: auto; }
+
+  /* ── PAGE 1: COVER ── */
+  .cover-topbar {
+    background: var(--gold);
+    padding: 10px 0.55in;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cover-topbar span {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .cover-topbar .badge {
+    background: var(--ink);
+    color: var(--gold);
+    padding: 4px 10px;
+    font-size: 8px;
+    letter-spacing: 2.5px;
+  }
+
+  .cover-body {
+    height: calc(11in - 38px - 1.35in);
+    padding: 0.5in 0.6in 0.4in;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+  }
+
+  .cover-body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 30%, rgba(200,152,31,.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cover-body > * { position: relative; z-index: 1; }
+
+  .cover-logo {
+    height: 1.15in;
+    width: auto;
+    margin-bottom: 0.35in;
+    filter: drop-shadow(0 4px 20px rgba(0,0,0,.4));
+  }
+
+  .cover-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--silver);
+    margin-bottom: 0.28in;
+  }
+
+  .cover-tag .dot {
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+
+  .cover-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.02;
+    color: var(--white);
+    max-width: 6.2in;
+    margin-bottom: 0.22in;
+  }
+
+  .cover-title em {
+    font-style: normal;
+    color: var(--gold2);
+  }
+
+  .cover-sub {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--silver);
+    font-weight: 300;
+    max-width: 5.4in;
+    margin-bottom: 0.35in;
+  }
+
+  .cover-sub b { color: var(--smoke); font-weight: 500; }
+
+  .cover-stats {
+    display: flex;
+    gap: 0.5in;
+    margin-top: auto;
+    padding-top: 0.25in;
+    border-top: 1px solid rgba(200,152,31,.2);
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cover-stat-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .cover-stat-lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--silver);
+    margin-top: 4px;
+  }
+
+  .cover-footer {
+    background: var(--gold);
+    height: 1.35in;
+    padding: 0.22in 0.55in;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.2in;
+    align-items: center;
+    position: relative;
+  }
+
+  .cover-footer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(0,0,0,.04) 20px, rgba(0,0,0,.04) 40px);
+  }
+
+  .cover-footer > * { position: relative; z-index: 1; }
+
+  .cf-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(12,17,23,.55);
+    margin-bottom: 3px;
+  }
+
+  .cf-value {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.3px;
+  }
+
+  .cf-value.sm { font-size: 11px; }
+
+  /* ── PAGE 2: CONTENT ── */
+  .content-page {
+    background: var(--ink);
+    padding: 0.45in 0.5in 0.4in;
+    display: flex;
+    flex-direction: column;
+    height: 11in;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.18in;
+    border-bottom: 2px solid var(--gold);
+    margin-bottom: 0.22in;
+  }
+
+  .content-header img { height: 0.45in; }
+
+  .content-header-right {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: var(--silver);
+    line-height: 1.6;
+  }
+
+  .content-header-right strong { color: var(--gold); }
+
+  .lbl {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .lbl::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  h2.section-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 0.14in;
+  }
+
+  h2.section-title span { color: var(--gold); }
+
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 0.2in;
+  }
+
+  .cat-card {
+    background: var(--ink2);
+    border: 1px solid rgba(200,152,31,.15);
+    border-left: 3px solid var(--gold);
+    padding: 10px 12px;
+  }
+
+  .cat-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .cat-desc {
+    font-size: 9.5px;
+    line-height: 1.45;
+    color: var(--silver);
+    font-weight: 300;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 0.22in;
+    margin-bottom: 0.18in;
+  }
+
+  .feat-list { list-style: none; }
+
+  .feat-list li {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 9.5px;
+    line-height: 1.45;
+    color: var(--silver);
+  }
+
+  .feat-list .ico {
+    color: var(--gold);
+    font-size: 11px;
+    flex-shrink: 0;
+    width: 16px;
+  }
+
+  .feat-list strong {
+    display: block;
+    color: var(--white);
+    font-size: 10px;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 1px;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .step {
+    background: var(--ink2);
+    border: 1px solid rgba(139,160,178,.12);
+    padding: 8px;
+    text-align: center;
+  }
+
+  .step-n {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .step-ttl {
+    font-family: 'Oswald', sans-serif;
+    font-size: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 3px;
+  }
+
+  .step-body {
+    font-size: 7.5px;
+    line-height: 1.4;
+    color: var(--silver);
+  }
+
+  .product-strip {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    background: var(--ink2);
+    border: 1px solid rgba(200,152,31,.12);
+    padding: 10px 14px;
+    margin-bottom: 0.16in;
+  }
+
+  .product-strip img {
+    height: 0.55in;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.3));
+  }
+
+  .product-strip-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .quote-box {
+    background: linear-gradient(135deg, var(--ink2) 0%, var(--ink3) 100%);
+    border: 1px solid rgba(200,152,31,.2);
+    padding: 12px 14px;
+    position: relative;
+  }
+
+  .quote-box::before {
+    content: '\201C';
+    font-family: 'Oswald', sans-serif;
+    font-size: 36px;
+    color: var(--gold);
+    opacity: .35;
+    position: absolute;
+    top: 2px;
+    left: 10px;
+    line-height: 1;
+  }
+
+  .quote-main {
+    font-size: 11px;
+    color: var(--white);
+    line-height: 1.5;
+    padding-left: 18px;
+    margin-bottom: 6px;
+  }
+
+  .quote-main strong { color: var(--gold2); }
+
+  .quote-sub {
+    font-size: 9px;
+    color: var(--silver);
+    line-height: 1.5;
+    padding-left: 18px;
+    font-weight: 300;
+  }
+
+  .cta-bar {
+    margin-top: auto;
+    background: var(--gold);
+    margin-left: -0.5in;
+    margin-right: -0.5in;
+    margin-bottom: -0.4in;
+    padding: 0.2in 0.5in;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .cta-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(-45deg, transparent, transparent 18px, rgba(0,0,0,.04) 18px, rgba(0,0,0,.04) 36px);
+  }
+
+  .cta-bar > * { position: relative; z-index: 1; }
+
+  .cta-h {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  .cta-s {
+    font-size: 10px;
+    color: rgba(12,17,23,.65);
+    margin-top: 3px;
+  }
+
+  .cta-contact {
+    text-align: right;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .cta-contact span {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    font-weight: 400;
+    color: rgba(12,17,23,.55);
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<section class="page">
+  <div class="cover-topbar">
+    <span>Available Now · Fast Turnaround · New Jersey</span>
+    <span class="badge">Trade &amp; Volume Pricing</span>
+  </div>
+
+  <div class="cover-body">
+    <img class="cover-logo" src="../images/logo.png" alt="All Pro Building Supplies"/>
+
+    <div class="cover-tag"><span class="dot"></span> Contractor-Grade Supply Partner</div>
+
+    <h1 class="cover-title">Building Supplies<br><em>That Keep</em> Jobs Moving.</h1>
+
+    <p class="cover-sub">
+      <b>All Pro Building Supplies LLC</b> delivers contractor-grade materials — building supplies, plumbing, hardware, and jobsite essentials. Call or email for pricing. We respond fast. No runaround.
+    </p>
+
+    <div class="cover-stats">
+      <div>
+        <div class="cover-stat-num">Fast</div>
+        <div class="cover-stat-lbl">Response Times</div>
+      </div>
+      <div>
+        <div class="cover-stat-num">Pro</div>
+        <div class="cover-stat-lbl">Grade Quality</div>
+      </div>
+      <div>
+        <div class="cover-stat-num">Real</div>
+        <div class="cover-stat-lbl">People, No Tickets</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <div>
+      <div class="cf-label">Call Us</div>
+      <div class="cf-value">732-734-1123</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="cf-label">Email for Pricing</div>
+      <div class="cf-value sm">info@allprobuildingsupplies.com</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="cf-label">Website</div>
+      <div class="cf-value sm">allprobuildingsupplies.com</div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 2: INSIDE -->
+<section class="page content-page">
+  <div class="content-header">
+    <img src="../images/logo.png" alt="All Pro"/>
+    <div class="content-header-right">
+      <strong>ALL PRO BUILDING SUPPLIES LLC</strong><br/>
+      732-734-1123 · info@allprobuildingsupplies.com
+    </div>
+  </div>
+
+  <div class="lbl">What We Carry</div>
+  <h2 class="section-title">Essentials <span>Contractors Rely On</span></h2>
+
+  <div class="cat-grid">
+    <div class="cat-card">
+      <div class="cat-name">Building Materials</div>
+      <div class="cat-desc">Jobsite-ready materials for framing, finishing, structural work, and maintenance.</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-name">Plumbing</div>
+      <div class="cat-desc">PVC pipe, fittings, valves, and DWV essentials for residential and commercial jobs.</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-name">Hardware</div>
+      <div class="cat-desc">Fasteners, adhesives, tools, anchors, and contractor-grade hardware for every application.</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-name">Contractor Supplies</div>
+      <div class="cat-desc">Jobsite essentials, safety gear, sealants, and specialty supplies built for the trades.</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="lbl">Why All Pro</div>
+      <h2 class="section-title">We Understand <span>Real Jobsites</span></h2>
+      <ul class="feat-list">
+        <li>
+          <span class="ico">⚡</span>
+          <div><strong>Fast Communication</strong>Call or email and get a real response — no tickets, no hold music.</div>
+        </li>
+        <li>
+          <span class="ico">🏗</span>
+          <div><strong>Contractor Mindset</strong>We stock what contractors actually need and respect your timeline.</div>
+        </li>
+        <li>
+          <span class="ico">🔍</span>
+          <div><strong>Special Orders</strong>Hard-to-find items and custom quantities — just ask.</div>
+        </li>
+        <li>
+          <span class="ico">💰</span>
+          <div><strong>Volume &amp; Trade Pricing</strong>Competitive numbers to keep your bid sharp.</div>
+        </li>
+      </ul>
+    </div>
+    <div class="quote-box">
+      <p class="quote-main">Quality materials, <strong>dependable service</strong>, and a team that actually gets back to you.</p>
+      <p class="quote-sub">We know a delayed delivery or wrong part can cost you a day on the job — so we keep things simple, stocked, and responsive.</p>
+    </div>
+  </div>
+
+  <div class="lbl">Featured Products</div>
+  <div class="product-strip-label">PVC Pipe &amp; DWV Fittings · Sch 40 · Specialty Items</div>
+  <div class="product-strip">
+    <img src="../images/Sch40Solid.png" alt="PVC Pipe"/>
+    <img src="../images/90Elbow.png" alt="90 Elbow"/>
+    <img src="../images/SanTee.png" alt="San Tee"/>
+    <img src="../images/Coupling.png" alt="Coupling"/>
+    <img src="../images/Ptrap.png" alt="P-Trap"/>
+    <img src="../images/RedWye.png" alt="Reducing Wye"/>
+  </div>
+
+  <div class="lbl">How It Works</div>
+  <h2 class="section-title" style="margin-bottom:10px;">Getting Supplies Is <span>Simple</span></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">01</div>
+      <div class="step-ttl">Call or Email</div>
+      <div class="step-body">Send item codes, sizes, quantities, and delivery ZIP.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">02</div>
+      <div class="step-ttl">Get Pricing</div>
+      <div class="step-body">Fast competitive pricing and availability.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">03</div>
+      <div class="step-ttl">Confirm Order</div>
+      <div class="step-body">Lock in quantities, timeline, and requirements.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">04</div>
+      <div class="step-ttl">Delivered</div>
+      <div class="step-body">Materials sourced and on the way to your jobsite.</div>
+    </div>
+  </div>
+
+  <div class="cta-bar">
+    <div>
+      <div class="cta-h">Ready to Get Your Supplies?</div>
+      <div class="cta-s">Call or email with your list — we respond fast with pricing and availability.</div>
+    </div>
+    <div class="cta-contact">
+      <span>Direct Line</span>
+      732-734-1123
+      <span style="margin-top:4px;">Email</span>
+      info@allprobuildingsupplies.com
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-// ══════════════════════════════════════════
+﻿// ══════════════════════════════════════════
 // GLOBAL LAYOUT INJECTION
 // ══════════════════════════════════════════
 
@@ -97,7 +97,7 @@ function loadGlobalLayout() {
   const headerHTML = `
     <div class="topbar">
       <div class="topbar-links">
-        <a href="tel:17328291940" style="cursor:none;"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.22 1.12.45 2.32.68 3.58.68.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H8c.55 0 1 .45 1 1 0 1.27.2 2.48.57 3.62.1.32.03.68-.22.96L6.6 10.8z"/></svg>732-829-1940</a>
+        <a href="tel:17327341123" style="cursor:none;"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.22 1.12.45 2.32.68 3.58.68.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H8c.55 0 1 .45 1 1 0 1.27.2 2.48.57 3.62.1.32.03.68-.22.96L6.6 10.8z"/></svg>732-734-1123</a>
         <a href="mailto:info@allprobuildingsupplies.com" style="cursor:none;"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>info@allprobuildingsupplies.com</a>
       </div>
       <div class="topbar-badge">Contractor-Grade · Fast Response · NJ &amp; Surrounding Areas</div>
@@ -115,7 +115,7 @@ function loadGlobalLayout() {
         <li><a href="contact.html" style="cursor:none;">Contact</a></li>
       </ul>
       <div class="nav-actions" id="nav-auth-container">
-        <a href="tel:17328291940" class="nav-tel" style="cursor:none;"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--gold)"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.22 1.12.45 2.32.68 3.58.68.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H8c.55 0 1 .45 1 1 0 1.27.2 2.48.57 3.62.1.32.03.68-.22.96L6.6 10.8z"/></svg>732-829-1940</a>
+        <a href="tel:17327341123" class="nav-tel" style="cursor:none;"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--gold)"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.22 1.12.45 2.32.68 3.58.68.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H8c.55 0 1 .45 1 1 0 1.27.2 2.48.57 3.62.1.32.03.68-.22.96L6.6 10.8z"/></svg>732-734-1123</a>
         <span id="auth-buttons" style="display:inline-flex; align-items:center; gap:8px;">
           <a href="login.html" class="nav-cta" id="nav-login-btn" style="background:transparent;border:1px solid var(--gold);color:var(--gold);cursor:none;">Login</a>
           <a href="account.html" class="nav-cta" id="nav-account-btn" style="display:none;background:var(--ink3);border:1px solid rgba(200,152,31,.3);flex-direction:column;align-items:flex-start;padding:6px 12px;line-height:1.3;gap:2px;cursor:none;"><span style="font-size:9px;color:var(--silver);letter-spacing:1px;font-family:'DM Mono',monospace;">LOGGED IN AS</span><span id="nav-logged-in-name" style="font-size:12px;color:var(--white);">My Account</span></a>
@@ -133,7 +133,7 @@ function loadGlobalLayout() {
       <a href="products.html" style="cursor:none;">Products</a>
       <a href="about.html" style="cursor:none;">About</a>
       <a href="contact.html" style="cursor:none;">Contact</a>
-      <a href="tel:17328291940" class="mob-tel" style="cursor:none;">📞 732-829-1940</a>
+      <a href="tel:17327341123" class="mob-tel" style="cursor:none;">📞 732-734-1123</a>
       <a href="cart.html" class="mob-cta" style="cursor:none;">🛒 Cart →</a>
       <a href="login.html" class="mob-cta" style="margin-top:10px;background:transparent;border:1px solid var(--gold);color:var(--gold);cursor:none;">Login / Register</a>
     </div>
@@ -147,7 +147,7 @@ function loadGlobalLayout() {
           <p class="ft-txt">Contractor-grade building materials, plumbing, hardware, and contractor supplies. Fast response, real people, reliable service.</p>
           <div class="ft-socials">
             <a href="mailto:info@allprobuildingsupplies.com" class="soc">✉</a>
-            <a href="tel:17328291940" class="soc">📞</a>
+            <a href="tel:17327341123" class="soc">📞</a>
           </div>
         </div>
         <div class="ft-col">
@@ -345,7 +345,7 @@ async function submitContactForm(btn) {
     btn.style.color = 'var(--gold)';
     form.querySelectorAll('input, textarea, select').forEach(function (el) { el.value = ''; });
   } catch (e) {
-    alert(e.message || 'Could not send. Please call 732-829-1940.');
+    alert(e.message || 'Could not send. Please call 732-734-1123.');
     btn.innerHTML = orig;
     btn.disabled = false;
   }

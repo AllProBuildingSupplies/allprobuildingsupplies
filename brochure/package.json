@@ -1,0 +1,11 @@
+{
+  "name": "allpro-brochure",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node generate-pdf.mjs"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.0.0"
+  }
+}
