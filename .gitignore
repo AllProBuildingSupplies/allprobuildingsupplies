@@ -1,0 +1,14 @@
+# Dependencies (never commit — run npm install locally to regenerate)
+node_modules/
+
+# Brochure PDF build artifacts
+brochure/node_modules/
+brochure/All-Pro-Building-Supplies-Brochure-temp.pdf
+
+# Cloudflare Worker local cache
+backend/.wrangler/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
