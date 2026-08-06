@@ -248,6 +248,35 @@ async function ensureAddressesTable(env) {
   ).run();
 }
 
+/** Admin-only factory SKUs on products (Tommur / Lesso). Safe to call repeatedly. */
+async function ensureProductFactoryColumns(env) {
+  try {
+    await env.DB.prepare(`ALTER TABLE products ADD COLUMN tommur_code TEXT DEFAULT ''`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE products ADD COLUMN lesso_code TEXT DEFAULT ''`).run();
+  } catch (_) {}
+}
+
+function factoryCode(value) {
+  return value != null ? String(value).trim() : '';
+}
+
+/** Trade catalog: pricing/stock yes, factory codes no. */
+function toTradeProduct(p) {
+  return {
+    code: p.code,
+    description: p.description,
+    size: p.size,
+    pack: p.pack,
+    qty: p.qty,
+    price: p.price,
+    image: p.image,
+    main_category: p.main_category,
+    sub_category: p.sub_category,
+  };
+}
+
 function newAddressId() {
   return 'ADDR-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
 }
@@ -572,6 +601,7 @@ export default {
     try {
       const auth = await authFromRequest(request, env);
       await ensureAddressesTable(env);
+      await ensureProductFactoryColumns(env);
 
       // ---------------------------------------------------------
       // PUBLIC ROUTES
@@ -602,9 +632,13 @@ export default {
 
       if (path === '/api/products' && request.method === 'GET') {
         const { results } = await env.DB.prepare('SELECT * FROM products').all();
-        const trade = auth.admin || (auth.user && auth.user.status === 'approved');
-        const payload = trade ? results : results.map(toPublicProduct);
-        return jsonResponse(payload);
+        if (auth.admin) {
+          return jsonResponse(results);
+        }
+        if (auth.user && auth.user.status === 'approved') {
+          return jsonResponse(results.map(toTradeProduct));
+        }
+        return jsonResponse(results.map(toPublicProduct));
       }
 
       if (path === '/api/login' && request.method === 'POST') {
@@ -1108,8 +1142,21 @@ export default {
           const size = normalizeSize(p.size);
           stmts.push(
             env.DB.prepare(
-              'INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-            ).bind(String(p.code || '').trim(), p.description, size, p.pack, p.qty, p.price, p.image, mainCat, subCat)
+              `INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            ).bind(
+              String(p.code || '').trim(),
+              p.description,
+              size,
+              p.pack,
+              p.qty,
+              p.price,
+              p.image,
+              mainCat,
+              subCat,
+              factoryCode(p.tommur_code ?? p.tommurCode),
+              factoryCode(p.lesso_code ?? p.lessoCode)
+            )
           );
         }
         await env.DB.batch(stmts);
@@ -1124,12 +1171,13 @@ export default {
           const subCat = p.sub_category != null ? String(p.sub_category) : '';
           stmts.push(
             env.DB.prepare(`
-            INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(code, size) DO UPDATE SET 
-              description=excluded.description, pack=excluded.pack, 
+            INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(code, size) DO UPDATE SET
+              description=excluded.description, pack=excluded.pack,
               qty=excluded.qty, price=excluded.price, image=excluded.image,
-              main_category=excluded.main_category, sub_category=excluded.sub_category
+              main_category=excluded.main_category, sub_category=excluded.sub_category,
+              tommur_code=excluded.tommur_code, lesso_code=excluded.lesso_code
           `).bind(
               String(p.code || '').trim(),
               p.description,
@@ -1139,7 +1187,9 @@ export default {
               p.price,
               p.image,
               mainCat,
-              subCat
+              subCat,
+              factoryCode(p.tommur_code ?? p.tommurCode),
+              factoryCode(p.lesso_code ?? p.lessoCode)
             )
           );
         }
