@@ -60,11 +60,13 @@
   </div>
 
   <div id="tab-products" class="admin-panel">
-    <p style="color:var(--silver);font-size:14px;margin-bottom:20px;">Edit your master inventory. This data feeds directly into the live Products and Checkout pages.</p>
+    <p style="color:var(--silver);font-size:14px;margin-bottom:20px;">Edit your master inventory. This data feeds directly into the live Products and Checkout pages. <span style="color:var(--gold);">Tommur / Lesso codes are admin-only</span> and never shown to customers.</p>
     <table class="data-table" id="prod-table">
       <thead>
         <tr>
           <th>Category Code</th>
+          <th>Tommur Code</th>
+          <th>Lesso Code</th>
           <th>Main category</th>
           <th>Sub category</th>
           <th>Description</th>
@@ -531,6 +533,8 @@ async function loadProducts() {
 
     masterProducts = data.map(p => ({
         code: (p.code || '').trim(),
+        tommur_code: p.tommur_code || '',
+        lesso_code: p.lesso_code || '',
         main_category: p.main_category || '',
         sub_category: p.sub_category || '',
         description: p.description || '',
@@ -544,23 +548,25 @@ async function loadProducts() {
     let html = '';
     masterProducts.forEach(p => {
       html += `<tr>
-        <td data-label="Category Code"><input class="data-input" value="${escAttr(p.code)}"></td>
-        <td data-label="Main category"><input class="data-input" value="${escAttr(p.main_category)}"></td>
-        <td data-label="Sub category"><input class="data-input" value="${escAttr(p.sub_category)}"></td>
-        <td data-label="Description"><input class="data-input" value="${escAttr(p.description)}"></td>
-        <td data-label="Size"><input class="data-input" value="${escAttr(p.size)}"></td>
-        <td data-label="Pcs / Ctn"><input type="number" class="data-input" value="${escAttr(p.pack)}"></td>
-        <td data-label="Inventory Qty"><input type="number" class="data-input" value="${escAttr(p.stock)}"></td>
-        <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" value="${escAttr(p.price)}"></td>
-        <td data-label="Image URL"><input class="data-input" value="${escAttr(p.image)}"></td>
+        <td data-label="Category Code"><input class="data-input" data-field="code" value="${escAttr(p.code)}"></td>
+        <td data-label="Tommur Code"><input class="data-input" data-field="tommur_code" value="${escAttr(p.tommur_code)}" placeholder="e.g. D057"></td>
+        <td data-label="Lesso Code"><input class="data-input" data-field="lesso_code" value="${escAttr(p.lesso_code)}" placeholder="e.g. LP324-015"></td>
+        <td data-label="Main category"><input class="data-input" data-field="main_category" value="${escAttr(p.main_category)}"></td>
+        <td data-label="Sub category"><input class="data-input" data-field="sub_category" value="${escAttr(p.sub_category)}"></td>
+        <td data-label="Description"><input class="data-input" data-field="description" value="${escAttr(p.description)}"></td>
+        <td data-label="Size"><input class="data-input" data-field="size" value="${escAttr(p.size)}"></td>
+        <td data-label="Pcs / Ctn"><input type="number" class="data-input" data-field="pack" value="${escAttr(p.pack)}"></td>
+        <td data-label="Inventory Qty"><input type="number" class="data-input" data-field="qty" value="${escAttr(p.stock)}"></td>
+        <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" data-field="price" value="${escAttr(p.price)}"></td>
+        <td data-label="Image URL"><input class="data-input" data-field="image" value="${escAttr(p.image)}"></td>
         <td data-label="Action"><button class="btn-del" onclick="this.closest('tr').remove()">Delete Row</button></td>
       </tr>`;
     });
-    tbody.innerHTML = html || '<tr><td colspan="10" style="text-align:center;color:var(--silver);padding:24px;">No products in database. Add rows or upload a CSV.</td></tr>';
+    tbody.innerHTML = html || '<tr><td colspan="12" style="text-align:center;color:var(--silver);padding:24px;">No products in database. Add rows or upload a CSV.</td></tr>';
     populateProductDropdown();
   } catch(e) {
     console.error(e);
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load products. Check API connection.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load products. Check API connection.</td></tr>';
     showStatus('Products load failed: ' + e.message, true);
   }
 }
@@ -568,15 +574,17 @@ async function loadProducts() {
 function addProductRow() {
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td data-label="Category Code"><input class="data-input" value=""></td>
-    <td data-label="Main category"><input class="data-input" value=""></td>
-    <td data-label="Sub category"><input class="data-input" value=""></td>
-    <td data-label="Description"><input class="data-input" value=""></td>
-    <td data-label="Size"><input class="data-input" value=""></td>
-    <td data-label="Pcs / Ctn"><input type="number" class="data-input" value=""></td>
-    <td data-label="Inventory Qty"><input type="number" class="data-input" value=""></td>
-    <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" value=""></td>
-    <td data-label="Image URL"><input class="data-input" value=""></td>
+    <td data-label="Category Code"><input class="data-input" data-field="code" value=""></td>
+    <td data-label="Tommur Code"><input class="data-input" data-field="tommur_code" value="" placeholder="e.g. D057"></td>
+    <td data-label="Lesso Code"><input class="data-input" data-field="lesso_code" value="" placeholder="e.g. LP324-015"></td>
+    <td data-label="Main category"><input class="data-input" data-field="main_category" value=""></td>
+    <td data-label="Sub category"><input class="data-input" data-field="sub_category" value=""></td>
+    <td data-label="Description"><input class="data-input" data-field="description" value=""></td>
+    <td data-label="Size"><input class="data-input" data-field="size" value=""></td>
+    <td data-label="Pcs / Ctn"><input type="number" class="data-input" data-field="pack" value=""></td>
+    <td data-label="Inventory Qty"><input type="number" class="data-input" data-field="qty" value=""></td>
+    <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" data-field="price" value=""></td>
+    <td data-label="Image URL"><input class="data-input" data-field="image" value=""></td>
     <td data-label="Action"><button class="btn-del" onclick="this.closest('tr').remove()">Delete Row</button></td>
   `;
   document.getElementById('prod-tbody').insertBefore(tr, document.getElementById('prod-tbody').firstChild);
@@ -597,21 +605,27 @@ function populateProductDropdown() {
 async function saveProducts() {
   const btn = event.target; btn.textContent = 'Saving...'; btn.disabled = true;
   const payload = [];
+  const norm = window.normalizeProductSize || function(s){ return String(s||'').trim(); };
   
   document.querySelectorAll('#prod-tbody tr').forEach(tr => {
-    const inputs = tr.querySelectorAll('input');
-    const code = inputs[0].value.trim();
+    const field = (name) => {
+      const el = tr.querySelector(`[data-field="${name}"]`);
+      return el ? el.value.trim() : '';
+    };
+    const code = field('code');
     if(code !== '') {
         payload.push({
             code: code,
-            main_category: inputs[1].value.trim(),
-            sub_category: inputs[2].value.trim(),
-            description: inputs[3].value.trim(),
-            size: (window.normalizeProductSize || function(s){ return String(s||'').trim(); })(inputs[4].value.trim()),
-            pack: parseInt(inputs[5].value) || 1,
-            qty: parseInt(inputs[6].value) || 0,
-            price: parseFloat(inputs[7].value) || 0,
-            image: inputs[8].value.trim()
+            tommur_code: field('tommur_code'),
+            lesso_code: field('lesso_code'),
+            main_category: field('main_category'),
+            sub_category: field('sub_category'),
+            description: field('description'),
+            size: norm(field('size')),
+            pack: parseInt(field('pack'), 10) || 1,
+            qty: parseInt(field('qty'), 10) || 0,
+            price: parseFloat(field('price')) || 0,
+            image: field('image')
         });
     }
   });
@@ -627,40 +641,83 @@ async function saveProducts() {
 }
 
 // --- MAGIC CSV UPLOAD LOGIC ---
+function productsCsvHeaderMap(headerRow) {
+  const map = {};
+  (headerRow || []).forEach(function (h, i) {
+    const key = String(h || '').trim().toLowerCase().replace(/[\s_\-]+/g, '');
+    if (!key) return;
+    if (key === 'code' || key === 'sku' || key === 'categorycode' || key === 'productcode' || key === 'itemcode') map.code = i;
+    else if (key === 'tommur' || key === 'tommurcode' || key === 'tommurscode') map.tommur_code = i;
+    else if (key === 'lesso' || key === 'lessocode' || key === 'lessoscode') map.lesso_code = i;
+    else if (key === 'description' || key === 'desc' || key === 'name') map.description = i;
+    else if (key === 'size') map.size = i;
+    else if (key === 'pack' || key === 'pcsperctn' || key === 'pcspctn') map.pack = i;
+    else if (key === 'qty' || key === 'quantity' || key === 'stock' || key === 'inventory' || key === 'inventoryqty') map.qty = i;
+    else if (key === 'price' || key === 'unitprice') map.price = i;
+    else if (key === 'image' || key === 'imageurl') map.image = i;
+    else if (key === 'maincategory' || key === 'main') map.main_category = i;
+    else if (key === 'subcategory' || key === 'sub') map.sub_category = i;
+  });
+  return map;
+}
+
 function processCSVUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = async function(e) {
-    const text = e.target.result;
+  readCsvFileAsText(file).then(async function (text) {
     const rows = parseCSV(text);
+    if (!rows.length) {
+      showStatus('CSV appears empty.', true);
+      document.getElementById('csv-file').value = '';
+      return;
+    }
     const payload = [];
 
     function cleanText(str) {
       if (!str) return '';
       return str.trim()
-        .replace(/×/g, 'x')      
-        .replace(/[“”]/g, '"')   
-        .replace(/[‘’]/g, "'")   
-        .replace(/\uFFFD/g, 'x'); 
+        .replace(/×/g, 'x')
+        .replace(/[“”]/g, '"')
+        .replace(/[‘’]/g, "'")
+        .replace(/\uFFFD/g, 'x');
+    }
+    function cell(cols, idx) {
+      if (idx == null || idx < 0) return '';
+      return cols[idx] != null ? String(cols[idx]) : '';
     }
 
-    let startIdx = (rows.length > 0 && rows[0][0].toLowerCase().includes('code')) ? 1 : 0;
+    const first = rows[0] || [];
+    const headerJoined = first.map(function (c) { return String(c || ''); }).join(',').toLowerCase();
+    const looksLikeHeader = /code|sku|tommur|lesso|description|size/.test(headerJoined);
+    const map = looksLikeHeader
+      ? productsCsvHeaderMap(first)
+      : { code: 0, description: 1, size: 2, pack: 3, qty: 4, price: 5, image: 6, main_category: 7, sub_category: 8, tommur_code: 9, lesso_code: 10 };
+    const startIdx = looksLikeHeader ? 1 : 0;
+    if (map.code == null) {
+      // Legacy positional layout
+      map.code = 0; map.description = 1; map.size = 2; map.pack = 3; map.qty = 4;
+      map.price = 5; map.image = 6; map.main_category = 7; map.sub_category = 8;
+      if (map.tommur_code == null) map.tommur_code = 9;
+      if (map.lesso_code == null) map.lesso_code = 10;
+    }
 
     for (let i = startIdx; i < rows.length; i++) {
       const cols = rows[i];
-      if (!cols[0]) continue;
+      const code = cleanText(cell(cols, map.code));
+      if (!code) continue;
       payload.push({
-        code: cleanText(cols[0]),
-        description: cleanText(cols[1]),
-        size: cleanCsvSize(cols[2]),
-        pack: parseInt(cols[3]) || 1,
-        qty: parseInt(cols[4]) || 0,
-        price: parseFloat(cols[5]) || 0,
-        image: cols[6] ? cols[6].trim() : 'images/logo.png',
-        main_category: cols[7] ? cleanText(cols[7]) : '',
-        sub_category: cols[8] ? cleanText(cols[8]) : ''
+        code: code,
+        description: cleanText(cell(cols, map.description)),
+        size: cleanCsvSize(cell(cols, map.size)),
+        pack: parseInt(cell(cols, map.pack), 10) || 1,
+        qty: parseInt(cell(cols, map.qty), 10) || 0,
+        price: parseFloat(cell(cols, map.price)) || 0,
+        image: cleanText(cell(cols, map.image)) || 'images/logo.png',
+        main_category: cleanText(cell(cols, map.main_category)),
+        sub_category: cleanText(cell(cols, map.sub_category)),
+        tommur_code: cleanText(cell(cols, map.tommur_code)),
+        lesso_code: cleanText(cell(cols, map.lesso_code))
       });
     }
 
@@ -677,10 +734,11 @@ function processCSVUpload(event) {
         showStatus('Upload Failed: ' + err.message, true);
       }
     }
-    document.getElementById('csv-file').value = ''; 
-  };
-  
-  reader.readAsText(file, 'windows-1252'); 
+    document.getElementById('csv-file').value = '';
+  }).catch(function (err) {
+    showStatus('Could not read CSV: ' + (err && err.message ? err.message : err), true);
+    document.getElementById('csv-file').value = '';
+  });
 }
 
 function parseCSV(str) {

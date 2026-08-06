@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS products (
   image         TEXT,
   main_category TEXT DEFAULT '',
   sub_category  TEXT DEFAULT '',
+  tommur_code   TEXT DEFAULT '',
+  lesso_code    TEXT DEFAULT '',
   PRIMARY KEY (code, size)
 );
 
