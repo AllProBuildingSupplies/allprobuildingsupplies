@@ -14,6 +14,95 @@ window.normalizeProductSize = function normalizeProductSize(size) {
     .replace(/\s+/g, ' ');
 };
 
+/** Convert one size segment for Excel-safe decimals / spaced fractions → catalog form. */
+window.apbsSizeSegmentToCatalog = function apbsSizeSegmentToCatalog(seg) {
+  var s = String(seg == null ? '' : seg).trim();
+  if (!s) return '';
+  s = s.replace(/_/g, ' ');
+
+  // Already catalog-like: 2, 1/2, 1-1/2
+  if (/^\d+$/.test(s) || /^\d+\/\d+$/.test(s) || /^\d+-\d+\/\d+$/.test(s)) return s;
+
+  // Spaced fraction: 1 1/2 → 1-1/2
+  var spaced = s.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (spaced) return spaced[1] + '-' + spaced[2] + '/' + spaced[3];
+
+  // Decimal inches: 1.5 → 1-1/2 (Excel-friendly; avoids date coercion on 1-1/2)
+  if (/^\d*\.\d+$/.test(s)) {
+    var n = parseFloat(s);
+    if (!Number.isFinite(n) || n < 0) return s;
+    var whole = Math.floor(n + 1e-9);
+    var frac = Math.round((n - whole) * 1000) / 1000;
+    var fracMap = {
+      0: '',
+      0.125: '1/8',
+      0.25: '1/4',
+      0.375: '3/8',
+      0.5: '1/2',
+      0.625: '5/8',
+      0.75: '3/4',
+      0.875: '7/8'
+    };
+    var nearest = null;
+    var best = 1;
+    Object.keys(fracMap).forEach(function (k) {
+      var d = Math.abs(frac - parseFloat(k));
+      if (d < best) { best = d; nearest = k; }
+    });
+    if (nearest == null || best > 0.02) return s;
+    var fr = fracMap[nearest];
+    if (!fr) return String(whole);
+    if (!whole) return fr;
+    return whole + '-' + fr;
+  }
+
+  return s;
+};
+
+/** Expand a Size cell into catalog candidates (supports 1.5, 2x1.5, 1 1/2, etc.). */
+window.apbsSizeMatchCandidates = function apbsSizeMatchCandidates(size) {
+  var raw = window.normalizeProductSize(size);
+  var out = [];
+  var seen = {};
+  function add(v) {
+    var n = window.normalizeProductSize(v);
+    if (!n || seen[n]) return;
+    seen[n] = true;
+    out.push(n);
+  }
+  add(raw);
+  add(raw.replace(/\s*[x×]\s*/gi, 'x'));
+  add(raw.replace(/(\d+)\s+(\d+\/\d+)/g, '$1-$2'));
+
+  var parts = raw.split(/\s*[x×]\s*/i);
+  if (parts.length) {
+    var converted = parts.map(window.apbsSizeSegmentToCatalog);
+    add(converted.join('x'));
+    add(converted.join(' x '));
+  }
+  return out;
+};
+
+/** Catalog size → Excel-safe form (1-1/2 → 1.5) so CSV opens without becoming a date. */
+window.apbsSizeToExcelSafe = function apbsSizeToExcelSafe(size) {
+  var raw = window.normalizeProductSize(size);
+  if (!raw) return '';
+  return raw.split(/\s*[x×]\s*/i).map(function (seg) {
+    var s = String(seg).trim();
+    var m = s.match(/^(\d+)-(\d+)\/(\d+)$/);
+    if (m) {
+      var dec = parseInt(m[1], 10) + (parseInt(m[2], 10) / parseInt(m[3], 10));
+      return String(Math.round(dec * 1000) / 1000);
+    }
+    var onlyFrac = s.match(/^(\d+)\/(\d+)$/);
+    if (onlyFrac) {
+      var d = parseInt(onlyFrac[1], 10) / parseInt(onlyFrac[2], 10);
+      return String(Math.round(d * 1000) / 1000);
+    }
+    return s;
+  }).join('x');
+};
+
 window.apbsProductKey = function apbsProductKey(code, size) {
   return String(code || '').trim() + '|' + window.normalizeProductSize(size);
 };
@@ -21,9 +110,13 @@ window.apbsProductKey = function apbsProductKey(code, size) {
 window.apbsFindProduct = function apbsFindProduct(products, code, size) {
   if (!Array.isArray(products)) return null;
   const c = String(code || '').trim();
-  const n = window.normalizeProductSize(size);
+  const candidates = window.apbsSizeMatchCandidates
+    ? window.apbsSizeMatchCandidates(size)
+    : [window.normalizeProductSize(size)];
   return products.find(function (p) {
-    return String(p.code || '').trim() === c && window.normalizeProductSize(p.size) === n;
+    if (String(p.code || '').trim() !== c) return false;
+    const ps = window.normalizeProductSize(p.size);
+    return candidates.indexOf(ps) !== -1;
   }) || null;
 };
 
