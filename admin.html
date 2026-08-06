@@ -403,12 +403,16 @@ function getAdminHeaders(extra) {
 }
 
 function forceAdminRelogin(msg) {
+  const hadToken = !!(sessionStorage.getItem('apbs_admin_token') || sessionStorage.getItem('apbs_admin_auth'));
   sessionStorage.removeItem('apbs_admin_token');
   sessionStorage.removeItem('apbs_admin_auth');
   const main = document.getElementById('main-admin-content');
   const gate = document.getElementById('admin-auth-gate');
   if (main) main.style.display = 'none';
   if (gate) gate.style.display = 'flex';
+  // Only show "session expired" when a prior session actually existed.
+  // Bare page loads without a token used to trigger a false alarm via loadOrders().
+  if (!hadToken) return;
   const err = document.getElementById('admin-auth-err');
   if (err) {
     err.style.display = 'block';
@@ -475,8 +479,18 @@ document.getElementById('admin-pin').addEventListener('keypress', function (e) {
 function unlockAdmin() {
   document.getElementById('admin-auth-gate').style.display = 'none';
   document.getElementById('main-admin-content').style.display = 'block';
+  const err = document.getElementById('admin-auth-err');
+  if (err) {
+    err.style.display = 'none';
+    err.textContent = 'Incorrect password.';
+  }
   switchTab('orders');
+  loadOrders();
+  loadProducts();
+  loadUsers();
 }
+
+if (sessionStorage.getItem('apbs_admin_token')) unlockAdmin();
 
 if (sessionStorage.getItem('apbs_admin_token')) unlockAdmin();
 
@@ -1870,10 +1884,15 @@ async function executeSendEmail() {
   }
 }
 
-// Init
-document.addEventListener('DOMContentLoaded', () => { 
+// Init — do not hit admin APIs until logged in (avoids fake "session expired" on fresh visits)
+document.addEventListener('DOMContentLoaded', () => {
   initOrdersTableActions();
-  switchTab('orders'); loadOrders(); loadProducts(); loadUsers(); 
+  if (sessionStorage.getItem('apbs_admin_token')) {
+    // Already unlocked above; refresh data once DOM is ready
+    loadOrders();
+    loadProducts();
+    loadUsers();
+  }
 });
 </script>
 </body>

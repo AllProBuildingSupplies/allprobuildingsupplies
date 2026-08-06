@@ -561,15 +561,22 @@ export default {
       }
 
       if (path === '/api/admin/login' && request.method === 'POST') {
-        const adminToken = env.ADMIN_TOKEN;
-        if (!adminToken) {
+        const candidates = [env.ADMIN_TOKEN, env.ADMIN_PIN, env.ADMIN_KEY].filter(
+          (v) => typeof v === 'string' && v.length > 0
+        );
+        if (candidates.length === 0) {
           return jsonResponse({ error: 'Admin login not configured. Set ADMIN_TOKEN secret.' }, 503);
         }
-        const { password } = await request.json();
-        if (password !== adminToken) {
+        const body = await request.json().catch(() => ({}));
+        const password = body && body.password != null ? String(body.password) : '';
+        if (!password || !candidates.includes(password)) {
           return jsonResponse({ error: 'Incorrect password' }, 401);
         }
-        const token = await signToken({ role: 'admin' }, jwtSecret(env), 24);
+        const secret = jwtSecret(env);
+        if (!secret) {
+          return jsonResponse({ error: 'Auth not configured. Set JWT_SECRET or ADMIN_TOKEN.' }, 503);
+        }
+        const token = await signToken({ role: 'admin' }, secret, 24);
         return jsonResponse({ success: true, token });
       }
 
