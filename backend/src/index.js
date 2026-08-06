@@ -207,6 +207,220 @@ function jwtSecret(env) {
   return env.JWT_SECRET || env.ADMIN_TOKEN;
 }
 
+async function ensureAddressesTable(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS user_addresses (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      user_email TEXT NOT NULL,
+      label TEXT DEFAULT '',
+      phone TEXT DEFAULT '',
+      line1 TEXT DEFAULT '',
+      city TEXT DEFAULT '',
+      state_zip TEXT DEFAULT '',
+      full_address TEXT NOT NULL,
+      is_default INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    )
+  `).run();
+  await env.DB.prepare(
+    `CREATE INDEX IF NOT EXISTS idx_user_addresses_email ON user_addresses(user_email)`
+  ).run();
+}
+
+function newAddressId() {
+  return 'ADDR-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
+}
+
+function normalizeAddressPayload(body) {
+  const line1 = String(body.line1 || body.address || '').trim();
+  const city = String(body.city || '').trim();
+  const stateZip = String(body.stateZip || body.state_zip || '').trim();
+  let fullAddress = String(body.fullAddress || body.full_address || '').trim();
+  if (!fullAddress) {
+    fullAddress = [line1, city, stateZip].filter(Boolean).join(', ');
+  }
+  return {
+    label: String(body.label || '').trim(),
+    phone: String(body.phone || '').trim(),
+    line1,
+    city,
+    stateZip,
+    fullAddress,
+    isDefault: body.isDefault === true || body.is_default === 1 || body.isDefault === 1,
+  };
+}
+
+function mapAddressRow(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    userEmail: row.user_email,
+    label: row.label || '',
+    phone: row.phone || '',
+    line1: row.line1 || '',
+    city: row.city || '',
+    stateZip: row.state_zip || '',
+    fullAddress: row.full_address || '',
+    isDefault: row.is_default === 1,
+    createdAt: row.created_at,
+  };
+}
+
+async function findUserByEmailOrId(env, emailOrId) {
+  const key = String(emailOrId || '').trim();
+  if (!key) return null;
+  if (key.includes('@')) {
+    return env.DB.prepare('SELECT * FROM users WHERE LOWER(email) = ? LIMIT 1')
+      .bind(key.toLowerCase())
+      .first();
+  }
+  return (
+    (await env.DB.prepare('SELECT * FROM users WHERE id = ? LIMIT 1').bind(key).first()) ||
+    (await env.DB.prepare('SELECT * FROM users WHERE LOWER(email) = ? LIMIT 1')
+      .bind(key.toLowerCase())
+      .first())
+  );
+}
+
+async function listAddressesForUser(env, user) {
+  const email = String(user.email || '').trim().toLowerCase();
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM user_addresses WHERE LOWER(user_email) = ? OR user_id = ? ORDER BY is_default DESC, created_at DESC`
+  )
+    .bind(email, user.id)
+    .all();
+  return (results || []).map(mapAddressRow);
+}
+
+async function upsertSavedAddress(env, user, payload) {
+  const addr = normalizeAddressPayload(payload);
+  if (!addr.fullAddress || addr.fullAddress === 'PICKUP') return null;
+
+  const email = String(user.email || '').trim().toLowerCase();
+  const existing = await env.DB.prepare(
+    `SELECT * FROM user_addresses WHERE (LOWER(user_email) = ? OR user_id = ?) AND LOWER(full_address) = ? LIMIT 1`
+  )
+    .bind(email, user.id, addr.fullAddress.toLowerCase())
+    .first();
+
+  if (existing) {
+    const phone = addr.phone || existing.phone || '';
+    const label = addr.label || existing.label || '';
+    await env.DB.prepare(
+      `UPDATE user_addresses SET phone = ?, label = ?, line1 = ?, city = ?, state_zip = ? WHERE id = ?`
+    )
+      .bind(
+        phone,
+        label,
+        addr.line1 || existing.line1 || '',
+        addr.city || existing.city || '',
+        addr.stateZip || existing.state_zip || '',
+        existing.id
+      )
+      .run();
+    if (addr.isDefault) {
+      await env.DB.batch([
+        env.DB.prepare(`UPDATE user_addresses SET is_default = 0 WHERE LOWER(user_email) = ? OR user_id = ?`).bind(
+          email,
+          user.id
+        ),
+        env.DB.prepare(`UPDATE user_addresses SET is_default = 1 WHERE id = ?`).bind(existing.id),
+      ]);
+    }
+    return mapAddressRow({
+      ...existing,
+      phone,
+      label,
+      line1: addr.line1 || existing.line1,
+      city: addr.city || existing.city,
+      state_zip: addr.stateZip || existing.state_zip,
+      is_default: addr.isDefault ? 1 : existing.is_default,
+    });
+  }
+
+  const id = newAddressId();
+  const createdAt = new Date().toISOString();
+  if (addr.isDefault) {
+    await env.DB.prepare(`UPDATE user_addresses SET is_default = 0 WHERE LOWER(user_email) = ? OR user_id = ?`)
+      .bind(email, user.id)
+      .run();
+  }
+  await env.DB.prepare(
+    `INSERT INTO user_addresses (id, user_id, user_email, label, phone, line1, city, state_zip, full_address, is_default, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(
+      id,
+      user.id,
+      email,
+      addr.label,
+      addr.phone,
+      addr.line1,
+      addr.city,
+      addr.stateZip,
+      addr.fullAddress,
+      addr.isDefault ? 1 : 0,
+      createdAt
+    )
+    .run();
+
+  // Keep users.phone in sync when we learn a phone from an address.
+  if (addr.phone) {
+    try {
+      await env.DB.prepare(`UPDATE users SET phone = ? WHERE id = ? AND (phone IS NULL OR phone = '')`)
+        .bind(addr.phone, user.id)
+        .run();
+    } catch (_) {}
+  }
+
+  return {
+    id,
+    userId: user.id,
+    userEmail: email,
+    label: addr.label,
+    phone: addr.phone,
+    line1: addr.line1,
+    city: addr.city,
+    stateZip: addr.stateZip,
+    fullAddress: addr.fullAddress,
+    isDefault: !!addr.isDefault,
+    createdAt,
+  };
+}
+
+/** Pull unique past order delivery addresses into the address book (deduped). */
+async function importPastOrderAddresses(env, user) {
+  const email = String(user.email || '').trim().toLowerCase();
+  const orders = await env.DB.prepare(
+    `SELECT delivery_address, customer_snapshot, created_at FROM orders
+     WHERE LOWER(TRIM(user_id)) = ? OR user_id = ?
+     ORDER BY created_at DESC`
+  )
+    .bind(email, user.id)
+    .all();
+
+  const imported = [];
+  for (const o of orders.results || []) {
+    const full = String(o.delivery_address || '').trim();
+    if (!full || full.toUpperCase() === 'PICKUP') continue;
+    let phone = '';
+    try {
+      if (o.customer_snapshot) {
+        const snap = JSON.parse(o.customer_snapshot);
+        phone = (snap && snap.phone) || '';
+      }
+    } catch (_) {}
+    const saved = await upsertSavedAddress(env, user, {
+      fullAddress: full,
+      phone,
+      label: '',
+    });
+    if (saved) imported.push(saved);
+  }
+  return imported;
+}
+
 async function authFromRequest(request, env) {
   const token = getBearer(request);
   const secret = jwtSecret(env);
@@ -337,6 +551,7 @@ export default {
 
     try {
       const auth = await authFromRequest(request, env);
+      await ensureAddressesTable(env);
 
       // ---------------------------------------------------------
       // PUBLIC ROUTES
@@ -535,7 +750,106 @@ export default {
         }
         if (lastErr) throw lastErr;
 
+        // Save delivery address + phone to the customer's address book (default on).
+        const delMethod = o.delivery?.method || 'delivery';
+        const delAddr = String(o.delivery?.address || '').trim();
+        const shouldSaveAddr = o.saveAddress !== false;
+        if (shouldSaveAddr && delMethod !== 'pickup' && delAddr && delAddr.toUpperCase() !== 'PICKUP') {
+          const dbUser = await findUserByEmailOrId(env, customerEmail);
+          if (dbUser) {
+            try {
+              await upsertSavedAddress(env, dbUser, {
+                fullAddress: delAddr,
+                line1: o.delivery?.line1 || '',
+                city: o.delivery?.city || '',
+                stateZip: o.delivery?.stateZip || '',
+                phone: o.customer?.phone || dbUser.phone || '',
+                label: o.delivery?.label || '',
+                isDefault: o.saveAddressAsDefault === true,
+              });
+            } catch (_) {}
+          }
+        }
+
         return jsonResponse({ success: true, orderId, total: priced.total, items: priced.validated });
+      }
+
+      // Customer address book
+      if (path === '/api/addresses' && request.method === 'GET') {
+        if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const dbUser = await findUserByEmailOrId(env, auth.user.email);
+        if (!dbUser) return jsonResponse({ error: 'User not found' }, 404);
+        if (url.searchParams.get('import') === '1') {
+          try {
+            await importPastOrderAddresses(env, dbUser);
+          } catch (_) {}
+        }
+        const addresses = await listAddressesForUser(env, dbUser);
+        return jsonResponse({
+          addresses,
+          phone: dbUser.phone || '',
+        });
+      }
+
+      if (path === '/api/addresses' && request.method === 'POST') {
+        if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const dbUser = await findUserByEmailOrId(env, auth.user.email);
+        if (!dbUser) return jsonResponse({ error: 'User not found' }, 404);
+        const body = await request.json();
+        const saved = await upsertSavedAddress(env, dbUser, body);
+        if (!saved) return jsonResponse({ error: 'Address is required' }, 400);
+        return jsonResponse({ success: true, address: saved });
+      }
+
+      if (path === '/api/addresses' && request.method === 'PUT') {
+        if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const dbUser = await findUserByEmailOrId(env, auth.user.email);
+        if (!dbUser) return jsonResponse({ error: 'User not found' }, 404);
+        const body = await request.json();
+        if (!body.id) return jsonResponse({ error: 'Address id required' }, 400);
+        const existing = await env.DB.prepare(
+          `SELECT * FROM user_addresses WHERE id = ? AND (LOWER(user_email) = ? OR user_id = ?) LIMIT 1`
+        )
+          .bind(body.id, auth.user.email.toLowerCase(), dbUser.id)
+          .first();
+        if (!existing) return jsonResponse({ error: 'Address not found' }, 404);
+        const addr = normalizeAddressPayload({ ...existing, ...body, fullAddress: body.fullAddress || body.full_address || existing.full_address });
+        if (!addr.fullAddress) return jsonResponse({ error: 'Address is required' }, 400);
+        const email = auth.user.email.toLowerCase();
+        if (addr.isDefault) {
+          await env.DB.prepare(`UPDATE user_addresses SET is_default = 0 WHERE LOWER(user_email) = ? OR user_id = ?`)
+            .bind(email, dbUser.id)
+            .run();
+        }
+        await env.DB.prepare(
+          `UPDATE user_addresses SET label=?, phone=?, line1=?, city=?, state_zip=?, full_address=?, is_default=? WHERE id=?`
+        )
+          .bind(
+            addr.label,
+            addr.phone,
+            addr.line1,
+            addr.city,
+            addr.stateZip,
+            addr.fullAddress,
+            addr.isDefault ? 1 : 0,
+            body.id
+          )
+          .run();
+        return jsonResponse({ success: true });
+      }
+
+      if (path === '/api/addresses' && request.method === 'DELETE') {
+        if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const id = url.searchParams.get('id');
+        if (!id) return jsonResponse({ error: 'Address id required' }, 400);
+        const dbUser = await findUserByEmailOrId(env, auth.user.email);
+        if (!dbUser) return jsonResponse({ error: 'User not found' }, 404);
+        await env.DB.prepare(
+          `DELETE FROM user_addresses WHERE id = ? AND (LOWER(user_email) = ? OR user_id = ?)`
+        )
+          .bind(id, auth.user.email.toLowerCase(), dbUser.id)
+          .run();
+        return jsonResponse({ success: true });
       }
 
       if (path === '/api/orders/notify' && request.method === 'POST') {
@@ -631,7 +945,101 @@ export default {
 
       if (path === '/api/admin/users' && request.method === 'DELETE') {
         const id = url.searchParams.get('id');
-        await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+        const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+        if (user) {
+          await env.DB.batch([
+            env.DB.prepare('DELETE FROM user_addresses WHERE user_id = ? OR LOWER(user_email) = ?').bind(
+              user.id,
+              String(user.email || '').toLowerCase()
+            ),
+            env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id),
+          ]);
+        }
+        return jsonResponse({ success: true });
+      }
+
+      // Admin: list / manage customer addresses
+      if (path === '/api/admin/addresses' && request.method === 'GET') {
+        const email = url.searchParams.get('email') || '';
+        const userId = url.searchParams.get('userId') || url.searchParams.get('user_id') || '';
+        const key = email || userId;
+        if (!key) return jsonResponse({ error: 'email or userId required' }, 400);
+        const dbUser = await findUserByEmailOrId(env, key);
+        if (!dbUser) return jsonResponse({ error: 'User not found' }, 404);
+        if (url.searchParams.get('import') === '1') {
+          try {
+            await importPastOrderAddresses(env, dbUser);
+          } catch (_) {}
+        }
+        const addresses = await listAddressesForUser(env, dbUser);
+        return jsonResponse({
+          user: {
+            id: dbUser.id,
+            email: dbUser.email,
+            fname: dbUser.fname,
+            lname: dbUser.lname,
+            company: dbUser.company,
+            phone: dbUser.phone || '',
+          },
+          addresses,
+        });
+      }
+
+      if (path === '/api/admin/addresses' && request.method === 'POST') {
+        const body = await request.json();
+        const key = body.email || body.userId || body.user_id || body.userEmail;
+        if (!key) return jsonResponse({ error: 'email or userId required' }, 400);
+        const dbUser = await findUserByEmailOrId(env, key);
+        if (!dbUser) return jsonResponse({ error: 'User not found' }, 404);
+        const saved = await upsertSavedAddress(env, dbUser, body);
+        if (!saved) return jsonResponse({ error: 'Address is required' }, 400);
+        return jsonResponse({ success: true, address: saved });
+      }
+
+      if (path === '/api/admin/addresses' && request.method === 'PUT') {
+        const body = await request.json();
+        if (!body.id) return jsonResponse({ error: 'Address id required' }, 400);
+        const existing = await env.DB.prepare('SELECT * FROM user_addresses WHERE id = ?').bind(body.id).first();
+        if (!existing) return jsonResponse({ error: 'Address not found' }, 404);
+        const addr = normalizeAddressPayload({
+          ...existing,
+          ...body,
+          fullAddress: body.fullAddress || body.full_address || existing.full_address,
+          line1: body.line1 != null ? body.line1 : existing.line1,
+          city: body.city != null ? body.city : existing.city,
+          stateZip: body.stateZip != null || body.state_zip != null ? body.stateZip || body.state_zip : existing.state_zip,
+          phone: body.phone != null ? body.phone : existing.phone,
+          label: body.label != null ? body.label : existing.label,
+        });
+        if (!addr.fullAddress) return jsonResponse({ error: 'Address is required' }, 400);
+        if (addr.isDefault) {
+          await env.DB.prepare(
+            `UPDATE user_addresses SET is_default = 0 WHERE LOWER(user_email) = ? OR user_id = ?`
+          )
+            .bind(existing.user_email, existing.user_id)
+            .run();
+        }
+        await env.DB.prepare(
+          `UPDATE user_addresses SET label=?, phone=?, line1=?, city=?, state_zip=?, full_address=?, is_default=? WHERE id=?`
+        )
+          .bind(
+            addr.label,
+            addr.phone,
+            addr.line1,
+            addr.city,
+            addr.stateZip,
+            addr.fullAddress,
+            addr.isDefault ? 1 : 0,
+            body.id
+          )
+          .run();
+        return jsonResponse({ success: true });
+      }
+
+      if (path === '/api/admin/addresses' && request.method === 'DELETE') {
+        const id = url.searchParams.get('id');
+        if (!id) return jsonResponse({ error: 'Address id required' }, 400);
+        await env.DB.prepare('DELETE FROM user_addresses WHERE id = ?').bind(id).run();
         return jsonResponse({ success: true });
       }
 
@@ -793,6 +1201,23 @@ export default {
 
         if (o.status !== 'cancelled' && itemsToSave.length > 0) {
           await applyOrderItemsStock(env, itemsToSave);
+        }
+
+        // Persist address + phone on the customer's address book when possible.
+        const custEmail = String(o.customer?.email || '').trim().toLowerCase();
+        const delAddr = String(o.delivery?.address || '').trim();
+        if (custEmail && delAddr && delAddr.toUpperCase() !== 'PICKUP') {
+          const dbUser = await findUserByEmailOrId(env, custEmail);
+          if (dbUser) {
+            try {
+              await upsertSavedAddress(env, dbUser, {
+                fullAddress: delAddr,
+                phone: o.customer?.phone || '',
+                label: o.delivery?.label || '',
+                isDefault: o.saveAddressAsDefault === true,
+              });
+            } catch (_) {}
+          }
         }
 
         return jsonResponse({ success: true, orderId: o.id, total: priced.total || 0 });
