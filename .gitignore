@@ -8,6 +8,9 @@ brochure/All-Pro-Building-Supplies-Brochure-temp.pdf
 # Cloudflare Worker local cache
 backend/.wrangler/
 
+# Cloudflare Worker local dev secrets (never commit)
+backend/.dev.vars
+
 # OS / editor
 .DS_Store
 Thumbs.db
