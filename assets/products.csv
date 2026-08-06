@@ -1,80 +1,53 @@
-Code,Description,Size,Pack,Qty,Price,Image,main_category,sub_category
-PVC-1/16HH,1/16 BEND (H x H),2,100,,,images/225Elbow.png,Plumbing,Fittings
-PVC-1/16HH,1/16 BEND (H x H),3,25,,,images/225Elbow.png,Plumbing,Fittings
-PVC-1/16HH,1/16 BEND (H x H),1-1/2,200,,,images/225Elbow.png,Plumbing,Fittings
-PVC-1/16HS,"1/16 BEND, STREET (H x S) ",2,100,,,images/225Elbow.png,Plumbing,Fittings
-PVC-1/16HS,"1/16 BEND, STREET (H x S) ",3,25,,,images/225Elbow.png,Plumbing,Fittings
-PVC-1/16HS,"1/16 BEND, STREET (H x S) ",1-1/2,200,,,images/225Elbow.png,Plumbing,Fittings
-PVC-1/4HH,1/4 BEND (H x H),2,50,2700,0.9,images/90Elbow.png,Plumbing,Fittings
-PVC-1/4HH,1/4 BEND (H x H),3,25,1975,2.4,images/90Elbow.png,Plumbing,Fittings
-PVC-1/4HH,1/4 BEND (H x H),4,10,220,4.1,images/90Elbow.png,Plumbing,Fittings
-PVC-1/4HH,1/4 BEND (H x H),1-1/2,100,3300,0.6,images/90Elbow.png,Plumbing,Fittings
-PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),2,60,,,images/90ElbowLong.png,Plumbing,Fittings
-PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),3,10,,,images/90ElbowLong.png,Plumbing,Fittings
-PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),4,5,,,images/90ElbowLong.png,Plumbing,Fittings
-PVC-1/4HS,"1/4 BEND, STREET (H x S)",2,50,,,images/90Elbow.png,Plumbing,Fittings
-PVC-1/4HS,"1/4 BEND, STREET (H x S)",3,20,,,images/90Elbow.png,Plumbing,Fittings
-PVC-1/4HS,"1/4 BEND, STREET (H x S)",4,10,,,images/90Elbow.png,Plumbing,Fittings
-PVC-1/4HS,"1/4 BEND, STREET (H x S)",1-1/2,180,,,images/90Elbow.png,Plumbing,Fittings
-PVC-1/4LOWHEEL,1/4 BEND W/ LOW HEEL INLET (H x H x H) ,3x3x2,25,,,images/90Elbow.png,Plumbing,Fittings
-PVC-1/8HH,1/8 BEND (H x H),2,50,1400,0.8,images/90Elbow.png,Plumbing,Fittings
-PVC-1/8HH,1/8 BEND (H x H),3,25,1350,2.3,images/90Elbow.png,Plumbing,Fittings
-PVC-1/8HH,1/8 BEND (H x H),4,15,75,4.1,images/90Elbow.png,Plumbing,Fittings
-PVC-1/8HH,1/8 BEND (H x H),1-1/2,100,600,0.6,images/90Elbow.png,Plumbing,Fittings
-PVC-1/8HS,1/8 BEND STREET (H x S),2,50,1900,0.8,images/90Elbow.png,Plumbing,Fittings
-PVC-1/8HS,1/8 BEND STREET (H x S),3,25,1375,2.1,images/90Elbow.png,Plumbing,Fittings
-PVC-1/8HS,1/8 BEND STREET (H x S),4,9,144,3.5,images/90Elbow.png,Plumbing,Fittings
-PVC-1/8HS,1/8 BEND STREET (H x S),1-1/2,100,0,0.5,images/90Elbow.png,Plumbing,Fittings
-PVC-BUSHINGHS,FLUSH BUSHING (H x S),2x1-1/2,200,,,images/Bushing.png,Plumbing,Fittings
-PVC-BUSHINGHS,FLUSH BUSHING (H x S),3x2,120,,,images/Bushing.png,Plumbing,Fittings
-PVC-BUSHINGHS,FLUSH BUSHING (H x S),4x3,30,,,images/Bushing.png,Plumbing,Fittings
-PVC-CAPSOC,CAP (SOC) ,2,180,,,images/CapSOC.png,Plumbing,Fittings
-PVC-CAPSOC,CAP (SOC) ,3,60,,,images/CapSOC.png,Plumbing,Fittings
-PVC-CAPSOC,CAP (SOC) ,4,20,,,images/CapSOC.png,Plumbing,Fittings
-PVC-CAPSOC,CAP (SOC) ,1-1/2,240,,,images/CapSOC.png,Plumbing,Fittings
-PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H) ,2,60,,,images/CleanoutTeewPlug.png,Plumbing,Fittings
-PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H) ,3,20,,,images/CleanoutTeewPlug.png,Plumbing,Fittings
-PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H) ,4,10,,,images/CleanoutTeewPlug.png,Plumbing,Fittings
-PVC-CLSTFLNGH,CLOSET FLANGE W/TEST PLATE (H),4x3,20,1620,3.1,images/CapSOC.png,Plumbing,Fittings
-PVC-CPLNG,COUPLING (H x H),2,100,,,images/Coupling.png,Plumbing,Fittings
-PVC-CPLNG,COUPLING (H x H),3,60,,,images/Coupling.png,Plumbing,Fittings
-PVC-CPLNG,COUPLING (H x H),4,25,,,images/Coupling.png,Plumbing,Fittings
-PVC-CPLNG,COUPLING (H x H),1-1/2,400,,,images/Coupling.png,Plumbing,Fittings
-PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),2x1-1/2,100,,,images/IncreaserReducer.png,Plumbing,Fittings
-PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),3x2,80,,,images/IncreaserReducer.png,Plumbing,Fittings
-PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),4x3,20,,,images/IncreaserReducer.png,Plumbing,Fittings
-PVC-MADPTR,MALE ADAPTER (MPT x H) ,2,200,,,images/MaleAdapter.png,Plumbing,Fittings
-PVC-MADPTR,MALE ADAPTER (MPT x H) ,1-1/2,300,,,images/MaleAdapter.png,Plumbing,Fittings
-PVC-PTRAP,P-TRAP (H x H) ,2,15,,,images/Ptrap.png,Plumbing,Fittings
-PVC-PTRAP,P-TRAP (H x H) ,3,10,,,images/Ptrap.png,Plumbing,Fittings
-PVC-PTRAP,P-TRAP (H x H) ,4,4,,,images/Ptrap.png,Plumbing,Fittings
-PVC-PTRAP,P-TRAP (H x H) ,1-1/2,25,,,images/Ptrap.png,Plumbing,Fittings
-PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)",2,15,,,images/Ptrap.png,Plumbing,Fittings
-PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)",3,10,,,images/Ptrap.png,Plumbing,Fittings
-PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)",4,4,,,images/Ptrap.png,Plumbing,Fittings
-PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)",1-1/2,25,,,images/Ptrap.png,Plumbing,Fittings
-PVC-SANTEE,SANITARY TEE (ALL HUB),2,35,0,1.4,images/SanTee.png,Plumbing,Fittings
-PVC-SANTEE,SANITARY TEE (ALL HUB),3,15,105,3.5,images/SanTee.png,Plumbing,Fittings
-PVC-SANTEE,SANITARY TEE (ALL HUB),4,5,100,8.6,images/SanTee.png,Plumbing,Fittings
-PVC-SANTEE,SANITARY TEE (ALL HUB),1-1/2,60,120,1,images/SanTee.png,Plumbing,Fittings
-PVC-SANTEEDBL,"DOUBLE SANITARY TEE, REDUCING(ALL HUB)",2x2x1-1/2x1-1/2,25,,,images/DoubleSanTee.png,Plumbing,Fittings
-PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB) ,2x1-1/2x1-1/2,60,,,images/RedSanTee.png,Plumbing,Fittings
-PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB) ,2x1-1/2x2,60,,,images/RedSanTee.png,Plumbing,Fittings
-PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB) ,2x2x1-1/2,50,,,images/RedSanTee.png,Plumbing,Fittings
-PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),3x3x2,15,345,3.4,images/RedSanTee.png,Plumbing,Fittings
-PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB) ,4x4x3,10,,,images/RedSanTee.png,Plumbing,Fittings
-PVC-WYEDBL,REDUCING DOUBLE WYE(ALL HUB),3x3x2x2,15,,,images/RedDoubleWye.png,Plumbing,Fittings
-PVC-WYEHUB,WYE (ALL HUB),2,25,450,1.7,images/RedWye.png,Plumbing,Fittings
-PVC-WYEHUB,WYE (ALL HUB),3,15,0,4.5,images/RedWye.png,Plumbing,Fittings
-PVC-WYEHUB,WYE (ALL HUB),4,8,104,7.9,images/RedWye.png,Plumbing,Fittings
-PVC-WYEHUB,WYE (ALL HUB),1-1/2,50,100,1.1,images/RedWye.png,Plumbing,Fittings
-PVC-WYERED, REDUCING WYE(ALL HUB),3x3x2,12,,,images/RedWye.png,Plumbing,Fittings
-PVC-WYERED, REDUCING WYE(ALL HUB),4x4x2,10,,,images/RedWye.png,Plumbing,Fittings
-PVC-WYERED, REDUCING WYE(ALL HUB),4x4x3,10,,,images/RedWye.png,Plumbing,Fittings
-PIPE-FOAM,ASTM F891 PVC Foam Core DWV Pipe,2,1,,9.8,images/Sch40Foam.png,Plumbing,Pipes
-PIPE-FOAM,ASTM F891 PVC Foam Core DWV Pipe,3,1,,18.6,images/Sch40Foam.png,Plumbing,Pipes
-PIPE-FOAM,ASTM F891 PVC Foam Core DWV Pipe,4,1,,27.6,images/Sch40Foam.png,Plumbing,Pipes
-PIPE-FOAM,ASTM F891 PVC Foam Core DWV Pipe,1-1/2,1,,7.7,images/Sch40Foam.png,Plumbing,Pipes
-PIPE-SOLID,ASTM D1785 SCH40 PVC,2,1,2806,14,images/Sch40Solid.png,Plumbing,Pipes
-PIPE-SOLID,ASTM D1785 SCH40 PVC,3,1,2806,27,images/Sch40Solid.png,Plumbing,Pipes
-PIPE-SOLID,ASTM D1785 SCH40 PVC,4,1,2800,50,images/Sch40Solid.png,Plumbing,Pipes
+Code,Description,Size,Pack,Qty,Price,Image,main_category,sub_category,Tommur-Code,Lesso-Code
+PIPE-FOAM,ASTM F891 PVC Foam Core DWV Pipe,4,1,1535,27.6,images/Sch40Foam.png,Plumbing,Pipes,A100P01-,PIPE-FOAM
+PIPE-SOLID,ASTM D1785 SCH40 PVC,2,1,1132,14.75,images/Sch40Solid.png,Plumbing,Pipes,A01P01-SCH40,PIPE-SOLID
+PIPE-SOLID,ASTM D1785 SCH40 PVC,3,1,1132,27.5,images/Sch40Solid.png,Plumbing,Pipes,A01P01-SCH40,PIPE-SOLID
+PIPE-SOLID,ASTM D1785 SCH40 PVC,4,1,433,50.0,images/Sch40Solid.png,Plumbing,Pipes,A01P01-SCH40,PIPE-SOLID
+PVC-1/16HH,1/16 BEND (H x H),1.5,200,200,0.0,images/225Elbow.png,Plumbing,Fittings,D057,LP324-015
+PVC-1/16HH,1/16 BEND (H x H),3,25,100,0.0,images/225Elbow.png,Plumbing,Fittings,D057,LP324-030
+PVC-1/16HS,"1/16 BEND, STREET (H x S)",1.5,200,200,0.0,images/225Elbow.png,Plumbing,Fittings,D059,LP326-015
+PVC-1/16HS,"1/16 BEND, STREET (H x S)",2,100,200,0.0,images/225Elbow.png,Plumbing,Fittings,D059,LP326-020
+PVC-1/16HS,"1/16 BEND, STREET (H x S)",3,25,100,0.0,images/225Elbow.png,Plumbing,Fittings,D059,LP326-030
+PVC-1/4HH,1/4 BEND (H x H),1.5,100,3400,0.6,images/90Elbow.png,Plumbing,Fittings,D035,LP300-015
+PVC-1/4HH,1/4 BEND (H x H),3,25,2775,2.4,images/90Elbow.png,Plumbing,Fittings,D035,LP300-030
+PVC-1/4HH,1/4 BEND (H x H),4,10,320,4.1,images/90Elbow.png,Plumbing,Fittings,D035,LP300-040
+PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),3,10,600,0.0,images/90ElbowLong.png,Plumbing,Fittings,D043,LP304-030
+PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),4,5,20,0.0,images/90ElbowLong.png,Plumbing,Fittings,D043,LP304-040
+PVC-1/4HS,"1/4 BEND, STREET (H x S)",1.5,180,180,0.0,images/90Elbow.png,Plumbing,Fittings,D040,LP302-015
+PVC-1/4HS,"1/4 BEND, STREET (H x S)",2,50,200,0.0,images/90Elbow.png,Plumbing,Fittings,D040,LP302-020
+PVC-1/4HS,"1/4 BEND, STREET (H x S)",3,20,100,0.0,images/90Elbow.png,Plumbing,Fittings,D040,LP302-030
+PVC-1/4HS,"1/4 BEND, STREET (H x S)",4,10,20,0.0,images/90Elbow.png,Plumbing,Fittings,D040,LP302-040
+PVC-1/8HH,1/8 BEND (H x H),1.5,100,599,0.6,images/90Elbow.png,Plumbing,Fittings,D053,LP321-015
+PVC-1/8HH,1/8 BEND (H x H),2,50,2200,0.8,images/90Elbow.png,Plumbing,Fittings,D053,LP321-020
+PVC-1/8HH,1/8 BEND (H x H),3,25,2150,2.3,images/90Elbow.png,Plumbing,Fittings,D053,LP321-030
+PVC-1/8HS,1/8 BEND STREET (H x S),1.5,100,800,0.5,images/90Elbow.png,Plumbing,Fittings,D055,LP323-015
+PVC-1/8HS,1/8 BEND STREET (H x S),2,50,2700,0.8,images/90Elbow.png,Plumbing,Fittings,D055,LP323-020
+PVC-1/8HS,1/8 BEND STREET (H x S),3,25,2175,2.1,images/90Elbow.png,Plumbing,Fittings,D055,LP323-030
+PVC-1/8HS,1/8 BEND STREET (H x S),4,9,54,3.5,images/90Elbow.png,Plumbing,Fittings,D055,LP323-040
+PVC-BUSHINGHS,FLUSH BUSHING (H x S),2x1.5,200,200,0.0,images/Bushing.png,Plumbing,Fittings,D019,LP107-251
+PVC-BUSHINGHS,FLUSH BUSHING (H x S),4x3,30,90,0.0,images/Bushing.png,Plumbing,Fittings,D019,LP107-422
+PVC-CAPSOC,CAP (SOC),1.5,240,240,0.0,images/CapSOC.png,Plumbing,Fittings,D025,LP116-015
+PVC-CAPSOC,CAP (SOC),3,60,60,0.0,images/CapSOC.png,Plumbing,Fittings,D025,LP116-030
+PVC-CAPSOC,CAP (SOC),4,20,20,0.0,images/CapSOC.png,Plumbing,Fittings,D025,LP116-040
+PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),3,20,120,0.0,images/CleanoutTeewPlug.png,Plumbing,Fittings,D078,LP444X-030
+PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),4,10,20,0.0,images/CleanoutTeewPlug.png,Plumbing,Fittings,D078,LP444X-040
+PVC-CLSTFLNGH,CLOSET FLANGE W/TEST PLATE (H),4x3,20,1820,3.1,images/CapSOC.png,Plumbing,Fittings,D121,LP800T-422
+PVC-CPLNG,COUPLING (H x H),1.5,400,400,0.0,images/Coupling.png,Plumbing,Fittings,D004,LP100-015
+PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),2x1.5,100,400,0.0,images/IncreaserReducer.png,Plumbing,Fittings,D007,LP102-251
+PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),3x2,80,240,0.0,images/IncreaserReducer.png,Plumbing,Fittings,D007,LP102-338
+PVC-MADPTR,MALE ADAPTER (MPT x H),2,200,200,0.0,images/MaleAdapter.png,Plumbing,Fittings,D021,LP109-020
+PVC-PTRAP,P-TRAP (H x H),1.5,25,150,0.0,images/Ptrap.png,Plumbing,Fittings,D103,LP706X-015
+PVC-PTRAP,P-TRAP (H x H),4,4,4,0.0,images/Ptrap.png,Plumbing,Fittings,D103,LP706X-040
+PVC-SANTEE,SANITARY TEE (ALL HUB),1.5,60,420,1.0,images/SanTee.png,Plumbing,Fittings,D065,LP400-015
+PVC-SANTEE,SANITARY TEE (ALL HUB),2,35,280,1.4,images/SanTee.png,Plumbing,Fittings,D065,LP400-020
+PVC-SANTEE,SANITARY TEE (ALL HUB),3,15,165,3.5,images/SanTee.png,Plumbing,Fittings,D065,LP400-030
+PVC-SANTEEDBL,"DOUBLE SANITARY TEE, REDUCING(ALL HUB)",2x2x1.5x1.5,25,100,0.0,images/DoubleSanTee.png,Plumbing,Fittings,D073,LP429-251
+PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB),2x1.5x1.5,60,600,0.0,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-241
+PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB),2x1.5x2,60,600,0.0,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-257
+PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB),2x2x1.5,50,600,0.0,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-251
+PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),3x3x2,15,435,3.4,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-338
+PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB),4x4x3,10,20,0.0,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-422
+PVC-WYEHUB,WYE (ALL HUB),1.5,50,100,1.1,images/RedWye.png,Plumbing,Fittings,D090,LP600-015
+PVC-WYEHUB,WYE (ALL HUB),3,15,150,4.5,images/RedWye.png,Plumbing,Fittings,D090,LP600-030
+PVC-WYEHUB,WYE (ALL HUB),4,8,144,7.9,images/RedWye.png,Plumbing,Fittings,D090,LP600-040
+PVC-WYERED,REDUCING WYE(ALL HUB),4x4x3,10,40,0.0,images/RedWye.png,Plumbing,Fittings,D092,LP601-422

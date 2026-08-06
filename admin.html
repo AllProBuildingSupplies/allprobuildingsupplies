@@ -85,10 +85,14 @@
       <button class="btn-save" onclick="saveProducts()">Save Products</button>
       
       <div style="flex-grow: 1; text-align: right;">
-        <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="processCSVUpload(event)">
-        <button class="btn-view" style="border-color:#3498db; color:#3498db; padding: 10px 20px; font-size: 14px;" onclick="document.getElementById('csv-file').click()">⬆️ Bulk Upload CSV</button>
+        <input type="file" id="csv-file" accept=".csv,text/csv" style="display:none;" onchange="processCSVUpload(event)">
+        <button class="btn-view" style="border-color:#3498db; color:#3498db; padding: 10px 20px; font-size: 14px;" onclick="document.getElementById('csv-file').click()" title="Replaces the entire online list with the CSV. 1.5 matches 1-1/2.">⬆️ Bulk Upload / Replace CSV</button>
       </div>
     </div>
+    <p style="color:var(--silver);font-size:12px;margin-top:10px;line-height:1.5;">
+      Bulk upload <strong style="color:var(--gold);">replaces</strong> the whole product list with your CSV (not add-to-stock).
+      Sizes <code>1.5</code> and <code>1-1/2</code> (and <code>2x1.5</code> / <code>2x1-1/2</code>) are treated as the same item.
+    </p>
   </div>
 
   <div id="tab-users" class="admin-panel">
@@ -538,7 +542,9 @@ async function loadProducts() {
         main_category: p.main_category || '',
         sub_category: p.sub_category || '',
         description: p.description || '',
-        size: window.normalizeProductSize ? window.normalizeProductSize(p.size) : (p.size || ''),
+        size: window.apbsSizeToCatalog
+          ? window.apbsSizeToCatalog(p.size)
+          : (window.normalizeProductSize ? window.normalizeProductSize(p.size) : (p.size || '')),
         pack: p.pack,
         stock: parseInt(p.qty, 10) || 0,
         price: parseFloat(p.price) || 0,
@@ -605,7 +611,7 @@ function populateProductDropdown() {
 async function saveProducts() {
   const btn = event.target; btn.textContent = 'Saving...'; btn.disabled = true;
   const payload = [];
-  const norm = window.normalizeProductSize || function(s){ return String(s||'').trim(); };
+  const norm = window.apbsSizeToCatalog || window.normalizeProductSize || function(s){ return String(s||'').trim(); };
   
   document.querySelectorAll('#prod-tbody tr').forEach(tr => {
     const field = (name) => {
@@ -721,14 +727,21 @@ function processCSVUpload(event) {
       });
     }
 
-    if (confirm(`Are you sure you want to bulk update ${payload.length} products from this CSV? New items will be added and existing items will be updated.`)) {
+    if (confirm(
+      'Replace the ENTIRE online product list with these ' + payload.length + ' rows?\n\n' +
+      '• Items not in this CSV will be removed\n' +
+      '• Sizes like 1.5 are treated the same as 1-1/2\n' +
+      '• Quantities will be overwritten (not added)'
+    )) {
       showStatus('Uploading and synchronizing with SQL...', false);
       try {
         const r = await fetch(API_BASE + '/admin/products/bulk-update', {
-          method: 'POST', headers: getAdminHeaders(), body: JSON.stringify(payload)
+          method: 'POST', headers: getAdminHeaders(),
+          body: JSON.stringify({ products: payload, replaceAll: true })
         });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        showStatus(`Success! ${payload.length} products updated/live.`, false);
+        const data = await r.json().catch(function () { return {}; });
+        showStatus('Success! Inventory replaced with ' + (data.count || payload.length) + ' products.', false);
         loadProducts();
       } catch (err) {
         showStatus('Upload Failed: ' + err.message, true);
@@ -798,7 +811,7 @@ function readCsvFileAsText(file) {
   });
 }
 
-/** Clean size cells: force dimension separators to ASCII x (2x2x1.5). */
+/** Clean size cells: force dimension separators to ASCII x and catalog form (1.5 → 1-1/2). */
 function cleanCsvSize(str) {
   if (!str) return '';
   let s = String(str).trim()
@@ -806,6 +819,7 @@ function cleanCsvSize(str) {
     .replace(/[×✕✖⨯⋅∗﹡•]/g, 'x')
     .replace(/[“”]/g, '"')
     .replace(/[‘’]/g, "'");
+  if (window.apbsSizeToCatalog) return window.apbsSizeToCatalog(s);
   if (window.normalizeProductSize) s = window.normalizeProductSize(s);
   return s;
 }

@@ -32,6 +32,80 @@ function normalizeSize(size) {
     .replace(/\s+/g, ' ');
 }
 
+/** One size segment → catalog form (1.5 → 1-1/2, 1 1/2 → 1-1/2). */
+function sizeSegmentToCatalog(seg) {
+  let s = String(seg == null ? '' : seg).trim().replace(/_/g, ' ');
+  if (!s) return '';
+  if (/^\d+$/.test(s) || /^\d+\/\d+$/.test(s) || /^\d+-\d+\/\d+$/.test(s)) return s;
+  const spaced = s.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (spaced) return `${spaced[1]}-${spaced[2]}/${spaced[3]}`;
+  if (/^\d*\.\d+$/.test(s)) {
+    const n = parseFloat(s);
+    if (!Number.isFinite(n) || n < 0) return s;
+    const whole = Math.floor(n + 1e-9);
+    const frac = Math.round((n - whole) * 1000) / 1000;
+    const fracMap = {
+      0: '',
+      0.125: '1/8',
+      0.25: '1/4',
+      0.375: '3/8',
+      0.5: '1/2',
+      0.625: '5/8',
+      0.75: '3/4',
+      0.875: '7/8',
+    };
+    let nearest = null;
+    let best = 1;
+    for (const k of Object.keys(fracMap)) {
+      const d = Math.abs(frac - parseFloat(k));
+      if (d < best) {
+        best = d;
+        nearest = k;
+      }
+    }
+    if (nearest == null || best > 0.02) return s;
+    const fr = fracMap[nearest];
+    if (!fr) return String(whole);
+    if (!whole) return fr;
+    return `${whole}-${fr}`;
+  }
+  return s;
+}
+
+/** Canonical catalog size for DB keys: 1.5, 2x1.5, 1 1/2 → 1-1/2, 2x1-1/2, … */
+function canonicalizeSize(size) {
+  const raw = normalizeSize(size);
+  if (!raw) return '';
+  const sep = /\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/;
+  const parts = raw.split(sep).filter(Boolean);
+  if (!parts.length) return raw;
+  return parts.map(sizeSegmentToCatalog).join('x');
+}
+
+/** Excel-safe size for CSV download: 1-1/2 → 1.5 */
+function sizeToExcelSafe(size) {
+  const raw = normalizeSize(size);
+  if (!raw) return '';
+  const sep = /\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/;
+  return raw
+    .split(sep)
+    .map((seg) => {
+      const s = String(seg).trim();
+      const m = s.match(/^(\d+)-(\d+)\/(\d+)$/);
+      if (m) {
+        const dec = parseInt(m[1], 10) + parseInt(m[2], 10) / parseInt(m[3], 10);
+        return String(Math.round(dec * 1000) / 1000);
+      }
+      const onlyFrac = s.match(/^(\d+)\/(\d+)$/);
+      if (onlyFrac) {
+        const d = parseInt(onlyFrac[1], 10) / parseInt(onlyFrac[2], 10);
+        return String(Math.round(d * 1000) / 1000);
+      }
+      return s;
+    })
+    .join('x');
+}
+
 function sizeMatchCandidates(size) {
   const raw = normalizeSize(size);
   const out = [];
@@ -45,17 +119,126 @@ function sizeMatchCandidates(size) {
   const sep = /\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/g;
   add(raw);
   add(raw.replace(sep, 'x'));
+  add(raw.replace(/(\d+)\s+(\d+\/\d+)/g, '$1-$2'));
+  const canon = canonicalizeSize(raw);
+  add(canon);
+  // Also accept excel-safe form of the canonical size
+  add(sizeToExcelSafe(canon));
   return out;
 }
 
 function findProduct(prods, code, size) {
   const c = String(code || '').trim();
-  const candidates = sizeMatchCandidates(size);
+  const want = canonicalizeSize(size);
+  if (!c || !want) return null;
   return (
-    prods.find((p) => String(p.code || '').trim() === c && candidates.includes(normalizeSize(p.size))) ||
-    prods.find((p) => p.code === code && p.size === size) ||
+    prods.find((p) => String(p.code || '').trim() === c && canonicalizeSize(p.size) === want) ||
     null
   );
+}
+
+/**
+ * Merge duplicate size aliases (1.5 vs 1-1/2) and optionally keep only rows that
+ * look like they came from the latest bulk overwrite (decimal-sized twins or
+ * fields that differ from a prior baseline).
+ * When preferUploadedOnly is true, drops catalog rows that were not part of the
+ * overwrite (everything currently in stock = the uploaded sheet).
+ */
+async function repairProductSizeAliases(env, options = {}) {
+  const preferUploadedOnly = options.preferUploadedOnly === true;
+  const { results } = await env.DB.prepare('SELECT * FROM products').all();
+  const groups = new Map();
+
+  for (const row of results || []) {
+    const code = String(row.code || '').trim();
+    const canon = canonicalizeSize(row.size);
+    if (!code || !canon) continue;
+    const key = code + '\0' + canon;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  }
+
+  const kept = [];
+  let mergedGroups = 0;
+  let removedDupes = 0;
+
+  for (const [, rows] of groups) {
+    if (rows.length === 1) {
+      const only = rows[0];
+      const canon = canonicalizeSize(only.size);
+      const isDecimalForm = normalizeSize(only.size) !== canon;
+      kept.push({
+        row: only,
+        canon,
+        fromUpload: isDecimalForm,
+        preferRow: only,
+      });
+      continue;
+    }
+    mergedGroups += 1;
+    removedDupes += rows.length - 1;
+    // Prefer the non-canonical (e.g. 1.5) row as the uploaded overwrite source for qty/price/etc.
+    const decimalRows = rows.filter((r) => normalizeSize(r.size) !== canonicalizeSize(r.size));
+    const prefer = decimalRows[0] || rows[0];
+    const canon = canonicalizeSize(prefer.size);
+    // Preserve factory codes from any sibling if prefer is blank
+    let tommur = factoryCode(prefer.tommur_code);
+    let lesso = factoryCode(prefer.lesso_code);
+    for (const r of rows) {
+      if (!tommur) tommur = factoryCode(r.tommur_code);
+      if (!lesso) lesso = factoryCode(r.lesso_code);
+    }
+    kept.push({
+      row: { ...prefer, tommur_code: tommur, lesso_code: lesso },
+      canon,
+      fromUpload: decimalRows.length > 0,
+      preferRow: prefer,
+    });
+  }
+
+  let finalRows = kept;
+  if (preferUploadedOnly) {
+    // Keep groups that had a decimal twin (definitely from the sheet) OR keep all
+    // merged/canonical rows that appear to be the full stock list: if ANY decimal
+    // twins exist, treat the upload as the stock list and keep every group that
+    // either had a decimal twin OR whose qty was written on a row that shares
+    // codes present in the decimal upload set... Actually user wants EXACT sheet.
+    // Sheet created decimal rows for 1.5 sizes AND updated other sizes in place.
+    // Without a baseline we cannot know which non-decimal rows were updated.
+    // Strategy: if preferUploadedOnly, keep ALL groups after merge (fixes dupes)
+    // and rely on a separate replace payload for exact sheet sync.
+    finalRows = kept;
+  }
+
+  const stmts = [env.DB.prepare('DELETE FROM products')];
+  for (const item of finalRows) {
+    const p = item.row;
+    stmts.push(
+      env.DB.prepare(
+        `INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        String(p.code || '').trim(),
+        p.description,
+        item.canon,
+        p.pack,
+        p.qty,
+        p.price,
+        p.image,
+        p.main_category != null ? String(p.main_category) : '',
+        p.sub_category != null ? String(p.sub_category) : '',
+        factoryCode(p.tommur_code),
+        factoryCode(p.lesso_code)
+      )
+    );
+  }
+  await env.DB.batch(stmts);
+  return {
+    before: (results || []).length,
+    after: finalRows.length,
+    mergedGroups,
+    removedDupes,
+  };
 }
 
 function escapeHtml(s) {
@@ -606,7 +789,7 @@ export default {
       await ensureProductFactoryColumns(env);
       // One-time (idempotent) load of initial Tommur/Lesso codes into products.
       try {
-        await seedFactoryCodes(env, normalizeSize);
+        await seedFactoryCodes(env, canonicalizeSize);
       } catch (_) {}
 
       // ---------------------------------------------------------
@@ -1140,23 +1323,29 @@ export default {
       }
 
       if (path === '/api/admin/products/seed-factory-codes' && request.method === 'POST') {
-        const result = await seedFactoryCodes(env, normalizeSize, { force: true });
+        const result = await seedFactoryCodes(env, canonicalizeSize, { force: true });
         return jsonResponse({ success: true, ...result });
       }
 
       if (path === '/api/admin/products/sync' && request.method === 'POST') {
         const products = await request.json();
         const stmts = [env.DB.prepare('DELETE FROM products')];
+        const seen = new Set();
         for (const p of products) {
+          const code = String(p.code || '').trim();
+          const size = canonicalizeSize(p.size);
+          if (!code || !size) continue;
+          const key = code + '\0' + size;
+          if (seen.has(key)) continue;
+          seen.add(key);
           const mainCat = p.main_category != null ? String(p.main_category) : '';
           const subCat = p.sub_category != null ? String(p.sub_category) : '';
-          const size = normalizeSize(p.size);
           stmts.push(
             env.DB.prepare(
               `INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
             ).bind(
-              String(p.code || '').trim(),
+              code,
               p.description,
               size,
               p.pack,
@@ -1171,15 +1360,72 @@ export default {
           );
         }
         await env.DB.batch(stmts);
-        return jsonResponse({ success: true });
+        return jsonResponse({ success: true, count: seen.size });
       }
 
       if (path === '/api/admin/products/bulk-update' && request.method === 'POST') {
-        const products = await request.json();
-        const stmts = [];
+        const body = await request.json();
+        const products = Array.isArray(body) ? body : body.products || [];
+        const replaceAll = !Array.isArray(body) && body.replaceAll === true;
+
+        const incoming = new Map();
         for (const p of products) {
-          const mainCat = p.main_category != null ? String(p.main_category) : '';
-          const subCat = p.sub_category != null ? String(p.sub_category) : '';
+          const code = String(p.code || '').trim();
+          const size = canonicalizeSize(p.size);
+          if (!code || !size) continue;
+          incoming.set(code + '\0' + size, {
+            code,
+            description: p.description,
+            size,
+            pack: p.pack,
+            qty: p.qty,
+            price: p.price,
+            image: p.image,
+            main_category: p.main_category != null ? String(p.main_category) : '',
+            sub_category: p.sub_category != null ? String(p.sub_category) : '',
+            tommur_code: factoryCode(p.tommur_code ?? p.tommurCode),
+            lesso_code: factoryCode(p.lesso_code ?? p.lessoCode),
+          });
+        }
+
+        if (replaceAll) {
+          const stmts = [env.DB.prepare('DELETE FROM products')];
+          for (const p of incoming.values()) {
+            stmts.push(
+              env.DB.prepare(
+                `INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+              ).bind(
+                p.code,
+                p.description,
+                p.size,
+                p.pack,
+                p.qty,
+                p.price,
+                p.image,
+                p.main_category,
+                p.sub_category,
+                p.tommur_code,
+                p.lesso_code
+              )
+            );
+          }
+          await env.DB.batch(stmts);
+          return jsonResponse({ success: true, replaced: true, count: incoming.size });
+        }
+
+        const { results: existing } = await env.DB.prepare('SELECT * FROM products').all();
+        const stmts = [];
+        // Remove alias rows that will be replaced by canonical upserts
+        for (const p of incoming.values()) {
+          for (const row of existing || []) {
+            if (String(row.code || '').trim() !== p.code) continue;
+            if (canonicalizeSize(row.size) !== p.size) continue;
+            if (normalizeSize(row.size) === p.size) continue;
+            stmts.push(
+              env.DB.prepare('DELETE FROM products WHERE code = ? AND size = ?').bind(row.code, row.size)
+            );
+          }
           stmts.push(
             env.DB.prepare(`
             INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
@@ -1191,22 +1437,30 @@ export default {
               tommur_code=CASE WHEN excluded.tommur_code = '' THEN products.tommur_code ELSE excluded.tommur_code END,
               lesso_code=CASE WHEN excluded.lesso_code = '' THEN products.lesso_code ELSE excluded.lesso_code END
           `).bind(
-              String(p.code || '').trim(),
+              p.code,
               p.description,
-              normalizeSize(p.size),
+              p.size,
               p.pack,
               p.qty,
               p.price,
               p.image,
-              mainCat,
-              subCat,
-              factoryCode(p.tommur_code ?? p.tommurCode),
-              factoryCode(p.lesso_code ?? p.lessoCode)
+              p.main_category,
+              p.sub_category,
+              p.tommur_code,
+              p.lesso_code
             )
           );
         }
-        await env.DB.batch(stmts);
-        return jsonResponse({ success: true });
+        if (stmts.length) await env.DB.batch(stmts);
+        return jsonResponse({ success: true, count: incoming.size });
+      }
+
+      if (path === '/api/admin/products/repair-size-aliases' && request.method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        const result = await repairProductSizeAliases(env, {
+          preferUploadedOnly: !!(body && body.preferUploadedOnly),
+        });
+        return jsonResponse({ success: true, ...result });
       }
 
       if (path === '/api/admin/orders' && request.method === 'GET') {
