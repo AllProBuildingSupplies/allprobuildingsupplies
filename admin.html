@@ -1980,9 +1980,9 @@ async function executeSendEmail() {
   }
 
   let htmlBody = '', subject = '';
-  if(type === 'confirm') { htmlBody = buildConfirmEmail(activeOrderObj, customNote); subject = 'Order Update / Confirmation — ' + activeOrderObj.id; } 
-  else if(type === 'deliver') { htmlBody = buildDeliveredEmail(activeOrderObj, customNote); subject = 'Order Delivered — Thank You! | All Pro Building Supplies'; } 
-  else if(type === 'invoice') { htmlBody = buildInvoiceEmail(activeOrderObj, customNote); subject = 'Invoice — Order ' + activeOrderObj.id + ' | All Pro Building Supplies'; }
+  if(type === 'confirm') { htmlBody = buildConfirmEmail(activeOrderObj, customNote); subject = 'Order Update — Confirmation — ' + activeOrderObj.id; } 
+  else if(type === 'deliver') { htmlBody = buildDeliveredEmail(activeOrderObj, customNote); subject = 'Order Delivered — Thank You! — All Pro Building Supplies'; } 
+  else if(type === 'invoice') { htmlBody = buildInvoiceEmail(activeOrderObj, customNote); subject = 'Invoice — Order ' + activeOrderObj.id + ' — All Pro Building Supplies'; }
 
   const btn = document.getElementById('btn-execute-send');
   btn.disabled = true; btn.innerHTML = 'Sending...';

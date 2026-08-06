@@ -748,6 +748,26 @@ async function applyOrderItemsStock(env, items) {
   if (stmts.length) await env.DB.batch(stmts);
 }
 
+/**
+ * EmailJS {{email_subject}} HTML-escapes characters like "/" → "&#x2F;" which
+ * then show literally in the Outlook/Gmail subject line. Keep subjects plain.
+ */
+function sanitizeEmailSubject(subject) {
+  let s = String(subject == null ? '' : subject);
+  s = s
+    .replace(/&#x2[fF];/g, '/')
+    .replace(/&#47;/g, '/')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'");
+  // Avoid "/" entirely — EmailJS re-escapes it on send
+  s = s.replace(/\s*\/\s*/g, ' — ');
+  return s.replace(/\s+/g, ' ').trim();
+}
+
 async function sendEmailJs(env, templateParams, toEmail) {
   const serviceId = env.EMAILJS_SERVICE_ID;
   const templateId = env.EMAILJS_TEMPLATE_ID;
@@ -755,11 +775,15 @@ async function sendEmailJs(env, templateParams, toEmail) {
   if (!serviceId || !templateId || !publicKey) {
     return { skipped: true, reason: 'Email not configured' };
   }
+  const params = { ...templateParams };
+  if (params.email_subject != null) {
+    params.email_subject = sanitizeEmailSubject(params.email_subject);
+  }
   const body = {
     service_id: serviceId,
     template_id: templateId,
     user_id: publicKey,
-    template_params: { ...templateParams, to_email: toEmail, cust_email: toEmail },
+    template_params: { ...params, to_email: toEmail, cust_email: toEmail },
   };
   if (env.EMAILJS_PRIVATE_KEY) body.accessToken = env.EMAILJS_PRIVATE_KEY;
   const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -1113,7 +1137,7 @@ export default {
         const custEmail = (order.customer.email || auth.user.email).trim();
         const company = order.customer.company ? ` (${order.customer.company})` : '';
         const adminSubject = `New Order ${order.id} — ${order.customer.name || 'Customer'}${company}`;
-        const custSubject = `Order Received — ${order.id} | All Pro Building Supplies`;
+        const custSubject = `Order Received — ${order.id} — All Pro Building Supplies`;
         const results = { admin: false, customer: false };
         try {
           await sendEmailJs(env, { email_subject: adminSubject, email_body: htmlBody }, notify);
