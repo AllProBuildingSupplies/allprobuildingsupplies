@@ -2,6 +2,8 @@
 // ALL PRO BUILDING SUPPLIES - SECURE API WORKER (v3.0)
 // =====================================================================
 
+import { seedFactoryCodes } from './factoryCodes.js';
+
 const encoder = new TextEncoder();
 
 const corsHeaders = {
@@ -602,6 +604,10 @@ export default {
       const auth = await authFromRequest(request, env);
       await ensureAddressesTable(env);
       await ensureProductFactoryColumns(env);
+      // One-time (idempotent) load of initial Tommur/Lesso codes into products.
+      try {
+        await seedFactoryCodes(env, normalizeSize);
+      } catch (_) {}
 
       // ---------------------------------------------------------
       // PUBLIC ROUTES
@@ -1131,6 +1137,11 @@ export default {
         }
         await env.DB.batch(stmts);
         return jsonResponse({ success: true });
+      }
+
+      if (path === '/api/admin/products/seed-factory-codes' && request.method === 'POST') {
+        const result = await seedFactoryCodes(env, normalizeSize, { force: true });
+        return jsonResponse({ success: true, ...result });
       }
 
       if (path === '/api/admin/products/sync' && request.method === 'POST') {
