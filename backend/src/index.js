@@ -1177,7 +1177,8 @@ export default {
               description=excluded.description, pack=excluded.pack,
               qty=excluded.qty, price=excluded.price, image=excluded.image,
               main_category=excluded.main_category, sub_category=excluded.sub_category,
-              tommur_code=excluded.tommur_code, lesso_code=excluded.lesso_code
+              tommur_code=CASE WHEN excluded.tommur_code = '' THEN products.tommur_code ELSE excluded.tommur_code END,
+              lesso_code=CASE WHEN excluded.lesso_code = '' THEN products.lesso_code ELSE excluded.lesso_code END
           `).bind(
               String(p.code || '').trim(),
               p.description,
