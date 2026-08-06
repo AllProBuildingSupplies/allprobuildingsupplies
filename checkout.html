@@ -57,6 +57,14 @@
               <div class="del-opt" id="opt-pickup" onclick="setDelivery('pickup')">🏭 Pickup</div>
             </div>
             <div id="delivery-fields">
+              <div class="form-row full" id="saved-address-row" style="display:none;">
+                <div class="form-group">
+                  <label class="form-label">Saved Address</label>
+                  <select class="form-input" id="f-saved-address" onchange="applyCheckoutAddress()">
+                    <option value="">— Enter a new address —</option>
+                  </select>
+                </div>
+              </div>
               <div class="form-row full"><div class="form-group">
                 <label class="form-label">Delivery Address *</label>
                 <input class="form-input" id="f-address" placeholder="Street address" type="text"/>
@@ -74,6 +82,10 @@
                   <span class="err-msg" id="e-statzip">Required</span>
                 </div>
               </div>
+              <label style="display:flex;align-items:center;gap:8px;color:var(--silver);font-size:12px;margin-top:8px;cursor:pointer;">
+                <input type="checkbox" id="f-save-address" checked>
+                Save this address to my account for future orders
+              </label>
             </div>
             <div id="pickup-note" style="display:none;background:rgba(200,152,31,.06);border:1px solid rgba(200,152,31,.2);padding:14px 16px;font-size:13px;color:var(--silver);">
               📍 Pickup at our warehouse. We'll contact you to confirm a pickup time.
@@ -144,10 +156,68 @@
 <script>
 // ── AUTH & CART ───────────────────────────────────────────────────
 var currentUser = null;
+var savedAddresses = [];
 try{ currentUser = JSON.parse(sessionStorage.getItem('apbs_user')); }catch(e){}
 
 function getCart(){ try{ return JSON.parse(localStorage.getItem('apbs_cart')||'[]'); }catch(e){return [];} }
 function saveCart(c){ localStorage.setItem('apbs_cart', JSON.stringify(c)); }
+
+function apiBase(){ return window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api'; }
+
+async function loadSavedAddresses(){
+  try{
+    var r = await fetch(apiBase() + '/addresses?import=1', {
+      headers: window.apbsAuthHeaders({ 'Content-Type': 'application/json' })
+    });
+    if(!r.ok) return;
+    var data = await r.json();
+    savedAddresses = data.addresses || [];
+    if(data.phone && !document.getElementById('f-phone').value){
+      document.getElementById('f-phone').value = data.phone;
+    }
+    var row = document.getElementById('saved-address-row');
+    var sel = document.getElementById('f-saved-address');
+    if(!savedAddresses.length){
+      if(row) row.style.display = 'none';
+      return;
+    }
+    if(row) row.style.display = 'block';
+    var html = '<option value="">— Enter a new address —</option>';
+    savedAddresses.forEach(function(a){
+      var label = (a.label ? a.label + ' — ' : '') + (a.fullAddress || '');
+      html += '<option value="' + String(a.id).replace(/"/g,'&quot;') + '">' + label.replace(/</g,'&lt;') + '</option>';
+    });
+    sel.innerHTML = html;
+    var def = savedAddresses.find(function(a){ return a.isDefault; }) || savedAddresses[0];
+    if(def){
+      sel.value = def.id;
+      applyCheckoutAddress();
+    }
+  }catch(e){ console.warn('Could not load saved addresses', e); }
+}
+
+function applyCheckoutAddress(){
+  var id = document.getElementById('f-saved-address').value;
+  if(!id){
+    document.getElementById('f-save-address').checked = true;
+    return;
+  }
+  var a = savedAddresses.find(function(x){ return x.id === id; });
+  if(!a) return;
+  if(a.line1){
+    document.getElementById('f-address').value = a.line1;
+    document.getElementById('f-city').value = a.city || '';
+    document.getElementById('f-statzip').value = a.stateZip || '';
+  } else {
+    // Past free-text addresses: put full string in street, leave city/zip blank-friendly
+    var parts = String(a.fullAddress || '').split(',').map(function(s){ return s.trim(); });
+    document.getElementById('f-address').value = parts[0] || a.fullAddress || '';
+    document.getElementById('f-city').value = parts[1] || '';
+    document.getElementById('f-statzip').value = parts.slice(2).join(', ') || '';
+  }
+  if(a.phone) document.getElementById('f-phone').value = a.phone;
+  document.getElementById('f-save-address').checked = false;
+}
 
 (function init(){
   var acctBtn = document.getElementById('nav-account-btn');
@@ -178,7 +248,9 @@ function saveCart(c){ localStorage.setItem('apbs_cart', JSON.stringify(c)); }
   document.getElementById('f-name').value    = (currentUser.fname||'')+' '+(currentUser.lname||'');
   document.getElementById('f-email').value   = currentUser.email||'';
   document.getElementById('f-company').value = currentUser.company||'';
+  document.getElementById('f-phone').value   = currentUser.phone||'';
 
+  loadSavedAddresses();
   renderSummary(cart);
 })();
 
@@ -256,7 +328,9 @@ async function placeOrder(){
   var deliveryAddr = deliveryMethod==='pickup' ? 'PICKUP'
     : [document.getElementById('f-address').value.trim(),
        document.getElementById('f-city').value.trim(),
-       document.getElementById('f-statzip').value.trim()].join(', ');
+       document.getElementById('f-statzip').value.trim()].filter(Boolean).join(', ');
+
+  var saveAddress = deliveryMethod === 'delivery' && document.getElementById('f-save-address').checked;
 
   var order = {
     id: orderId,
@@ -271,8 +345,13 @@ async function placeOrder(){
     },
     delivery: {
       method: deliveryMethod,
-      address: deliveryAddr
+      address: deliveryAddr,
+      line1: document.getElementById('f-address').value.trim(),
+      city: document.getElementById('f-city').value.trim(),
+      stateZip: document.getElementById('f-statzip').value.trim()
     },
+    saveAddress: saveAddress,
+    saveAddressAsDefault: false,
     po: document.getElementById('f-po').value.trim(),
     notes: document.getElementById('f-notes').value.trim(),
     items: cart.map(function(item){
@@ -315,6 +394,24 @@ async function placeOrder(){
     }
     if(saved.total!=null) order.total=saved.total;
     if(saved.items) order.items=saved.items;
+
+    // Explicitly save address when checkbox is on (also auto-saved server-side on order).
+    if(saveAddress && deliveryMethod === 'delivery'){
+      try{
+        await fetch(api+'/addresses',{
+          method:'POST',
+          headers:window.apbsAuthHeaders({'Content-Type':'application/json'}),
+          body:JSON.stringify({
+            line1: order.delivery.line1,
+            city: order.delivery.city,
+            stateZip: order.delivery.stateZip,
+            fullAddress: deliveryAddr,
+            phone: order.customer.phone
+          })
+        });
+      }catch(e){}
+    }
+
     await sendNotification(order);
     saveCart([]);
     document.getElementById('checkout-wrap').style.display = 'none';

@@ -45,6 +45,56 @@
       </div>
 
       <div class="acct-main">
+        <h2 class="acct-section-title">Saved Addresses</h2>
+        <p style="color:var(--silver);font-size:13px;margin-bottom:16px;">Choose these at checkout. Past order addresses are imported automatically.</p>
+        <div id="acct-address-list" style="margin-bottom:20px;">
+          <p style="color:var(--silver);">Loading addresses…</p>
+        </div>
+        <div style="background:var(--ink2);border:1px solid rgba(200,152,31,.2);padding:20px;margin-bottom:40px;">
+          <div style="color:var(--gold);font-family:Oswald,sans-serif;letter-spacing:1px;margin-bottom:14px;font-size:15px;" id="acct-addr-form-title">Add Address</div>
+          <input type="hidden" id="acct-addr-id" value="">
+          <div class="form-row full" style="margin-bottom:10px;">
+            <div class="form-group">
+              <label class="form-label">Label (optional)</label>
+              <input class="form-input" id="acct-addr-label" type="text" placeholder="Warehouse, Jobsite…"/>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input class="form-input" id="acct-addr-phone" type="tel" placeholder="(732) 000-0000"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Street</label>
+              <input class="form-input" id="acct-addr-line1" type="text" placeholder="123 Main St"/>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input class="form-input" id="acct-addr-city" type="text"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">State / ZIP</label>
+              <input class="form-input" id="acct-addr-statezip" type="text" placeholder="NJ 07001"/>
+            </div>
+          </div>
+          <div class="form-row full" style="margin-bottom:12px;">
+            <div class="form-group">
+              <label class="form-label">Or paste full address</label>
+              <input class="form-input" id="acct-addr-full" type="text" placeholder="Optional if street/city filled"/>
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;color:var(--silver);font-size:12px;margin-bottom:14px;cursor:pointer;">
+            <input type="checkbox" id="acct-addr-default"> Default address
+          </label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn-gold" style="background:var(--gold);color:var(--ink);border:none;font-family:Oswald,sans-serif;letter-spacing:1px;padding:10px 20px;cursor:pointer;" onclick="saveAcctAddress()">Save Address</button>
+            <button type="button" style="background:transparent;border:1px solid var(--silver);color:var(--silver);font-family:Oswald,sans-serif;letter-spacing:1px;padding:10px 16px;cursor:pointer;" onclick="resetAcctAddressForm()">Clear</button>
+          </div>
+          <p id="acct-addr-msg" style="display:none;margin-top:12px;font-size:13px;"></p>
+        </div>
+
         <h2 class="acct-section-title">Order History</h2>
         <table class="orders-table">
           <thead>
@@ -105,8 +155,135 @@ var currentUser = null;
       navNameEl.textContent = (currentUser.fname || '') + ' ' + (currentUser.lname || '');
   }
 
+  document.getElementById('acct-addr-phone').value = currentUser.phone || '';
+  loadAddresses();
   loadOrders();
 })();
+
+var acctAddresses = [];
+
+function apiBase() {
+  return (window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api');
+}
+
+function showAcctAddrMsg(text, isErr) {
+  const el = document.getElementById('acct-addr-msg');
+  el.style.display = 'block';
+  el.style.color = isErr ? '#ff6b6b' : '#2ecc71';
+  el.textContent = text;
+}
+
+async function loadAddresses() {
+  const list = document.getElementById('acct-address-list');
+  try {
+    const r = await fetch(apiBase() + '/addresses?import=1', {
+      headers: window.apbsAuthHeaders({ 'Content-Type': 'application/json' })
+    });
+    if (!r.ok) throw new Error('Failed');
+    const data = await r.json();
+    acctAddresses = data.addresses || [];
+    if (data.phone && !document.getElementById('acct-addr-phone').value) {
+      document.getElementById('acct-addr-phone').value = data.phone;
+    }
+    if (!acctAddresses.length) {
+      list.innerHTML = '<p style="color:var(--silver);font-size:13px;">No saved addresses yet. Add one below.</p>';
+      return;
+    }
+    list.innerHTML = acctAddresses.map(a => `
+      <div style="border:1px solid rgba(255,255,255,.08);padding:14px 16px;margin-bottom:10px;background:var(--ink2);">
+        <div style="color:var(--white);margin-bottom:4px;">
+          ${a.label ? '<strong style="color:var(--gold)">' + esc(a.label) + '</strong> · ' : ''}${esc(a.fullAddress)}
+          ${a.isDefault ? ' <span style="color:#2ecc71;font-size:11px;">(default)</span>' : ''}
+        </div>
+        <div style="color:var(--silver);font-size:12px;margin-bottom:8px;">${a.phone ? esc(a.phone) : 'No phone'}</div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" style="background:transparent;border:1px solid var(--gold);color:var(--gold);padding:4px 10px;font-size:11px;cursor:pointer;" onclick="editAcctAddress('${esc(a.id)}')">Edit</button>
+          <button type="button" style="background:transparent;border:1px solid #ff6b6b;color:#ff6b6b;padding:4px 10px;font-size:11px;cursor:pointer;" onclick="deleteAcctAddress('${esc(a.id)}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = '<p style="color:#ff6b6b;">Could not load addresses.</p>';
+  }
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+}
+
+function resetAcctAddressForm() {
+  document.getElementById('acct-addr-id').value = '';
+  document.getElementById('acct-addr-label').value = '';
+  document.getElementById('acct-addr-phone').value = currentUser.phone || '';
+  document.getElementById('acct-addr-line1').value = '';
+  document.getElementById('acct-addr-city').value = '';
+  document.getElementById('acct-addr-statezip').value = '';
+  document.getElementById('acct-addr-full').value = '';
+  document.getElementById('acct-addr-default').checked = false;
+  document.getElementById('acct-addr-form-title').textContent = 'Add Address';
+  document.getElementById('acct-addr-msg').style.display = 'none';
+}
+
+function editAcctAddress(id) {
+  const a = acctAddresses.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('acct-addr-id').value = a.id;
+  document.getElementById('acct-addr-label').value = a.label || '';
+  document.getElementById('acct-addr-phone').value = a.phone || '';
+  document.getElementById('acct-addr-line1').value = a.line1 || '';
+  document.getElementById('acct-addr-city').value = a.city || '';
+  document.getElementById('acct-addr-statezip').value = a.stateZip || '';
+  document.getElementById('acct-addr-full').value = a.fullAddress || '';
+  document.getElementById('acct-addr-default').checked = !!a.isDefault;
+  document.getElementById('acct-addr-form-title').textContent = 'Edit Address';
+}
+
+async function saveAcctAddress() {
+  const line1 = document.getElementById('acct-addr-line1').value.trim();
+  const city = document.getElementById('acct-addr-city').value.trim();
+  const stateZip = document.getElementById('acct-addr-statezip').value.trim();
+  let full = document.getElementById('acct-addr-full').value.trim();
+  if (!full) full = [line1, city, stateZip].filter(Boolean).join(', ');
+  if (!full) return showAcctAddrMsg('Enter an address.', true);
+  const id = document.getElementById('acct-addr-id').value;
+  const payload = {
+    id: id || undefined,
+    label: document.getElementById('acct-addr-label').value.trim(),
+    phone: document.getElementById('acct-addr-phone').value.trim(),
+    line1, city, stateZip, fullAddress: full,
+    isDefault: document.getElementById('acct-addr-default').checked
+  };
+  try {
+    const r = await fetch(apiBase() + '/addresses', {
+      method: id ? 'PUT' : 'POST',
+      headers: window.apbsAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.error || 'Save failed');
+    }
+    showAcctAddrMsg('Address saved.', false);
+    resetAcctAddressForm();
+    loadAddresses();
+  } catch (e) {
+    showAcctAddrMsg(e.message || 'Save failed', true);
+  }
+}
+
+async function deleteAcctAddress(id) {
+  if (!confirm('Delete this address?')) return;
+  try {
+    const r = await fetch(apiBase() + '/addresses?id=' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: window.apbsAuthHeaders({ 'Content-Type': 'application/json' })
+    });
+    if (!r.ok) throw new Error('Delete failed');
+    loadAddresses();
+  } catch (e) {
+    showAcctAddrMsg(e.message || 'Delete failed', true);
+  }
+}
 
 async function loadOrders() {
   try {
