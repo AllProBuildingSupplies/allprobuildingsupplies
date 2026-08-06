@@ -239,7 +239,17 @@ async function placeOrder(){
   document.getElementById('global-err').style.display = 'none';
 
   var cart = getCart();
-  var orderId = 'APB-'+Date.now().toString(36).toUpperCase();
+  // Provisional APBS id for older API builds; new API assigns the real next id server-side.
+  var orderId = (function(){
+    var max = 3;
+    try {
+      var stored = parseInt(localStorage.getItem('apbs_last_order_num') || '3', 10);
+      if (Number.isFinite(stored)) max = Math.max(max, stored);
+    } catch (e) {}
+    var next = max + 1;
+    try { localStorage.setItem('apbs_last_order_num', String(next)); } catch (e) {}
+    return 'APBS-' + String(next).padStart(6, '0');
+  })();
   var now = new Date().toISOString();
   var total = cart.reduce(function(s,i){return s+parseFloat(i.unitPrice)*i.qty;},0);
 
@@ -295,6 +305,14 @@ async function placeOrder(){
       throw new Error(errBody.error||'Order could not be saved');
     }
     var saved=await saveRes.json();
+    if(saved.orderId) {
+      orderId = saved.orderId;
+      order.id = saved.orderId;
+      var m = String(orderId).match(/^APBS-(\d+)$/i);
+      if (m) {
+        try { localStorage.setItem('apbs_last_order_num', String(parseInt(m[1], 10))); } catch (e) {}
+      }
+    }
     if(saved.total!=null) order.total=saved.total;
     if(saved.items) order.items=saved.items;
     await sendNotification(order);

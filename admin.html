@@ -903,7 +903,29 @@ function toggleEditLock(status) {
   document.getElementById('edit-lock-banner').style.display = isLocked ? 'block' : 'none';
 }
 
-function openOrderModal(orderId) {
+function nextLocalApbsOrderId() {
+  let max = 3; // next unused starts at APBS-000004
+  (masterOrders || []).forEach(function (o) {
+    const m = String(o.id || '').trim().match(/^APBS-(\d+)$/i);
+    if (m) max = Math.max(max, parseInt(m[1], 10));
+  });
+  return 'APBS-' + String(max + 1).padStart(6, '0');
+}
+
+async function allocateApbsOrderId() {
+  try {
+    const r = await adminFetch('/admin/orders/next-id');
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.id) return data.id;
+    }
+  } catch (e) {
+    console.warn('next-id API unavailable, using local sequence', e);
+  }
+  return nextLocalApbsOrderId();
+}
+
+async function openOrderModal(orderId) {
   document.getElementById('modal-cust-dropdown').value = '';
   document.getElementById('new-item-sel').value = '';
   document.getElementById('new-item-cases').value = '';
@@ -918,15 +940,16 @@ function openOrderModal(orderId) {
     if (delBtn) delBtn.style.display = 'block';
   } else {
     if (delBtn) delBtn.style.display = 'none';
+    const newId = await allocateApbsOrderId();
     activeOrderObj = {
-      id: 'APB-' + Date.now().toString(36).toUpperCase(),
+      id: newId,
       placedAt: new Date().toISOString(),
       status: 'pending',
       customer: { name: '', company: '', email: '', phone: '' },
       delivery: { method: 'delivery', address: '' },
       po: '', notes: '', total: 0, items: []
     };
-    document.getElementById('modal-main-title').textContent = 'Create New Order';
+    document.getElementById('modal-main-title').textContent = 'Create New Order: ' + newId;
   }
 
   if(!activeOrderObj) return;
@@ -1414,8 +1437,13 @@ async function saveOrderChanges() {
   
   try {
     const r = await adminFetch('/admin/orders', { method:'POST', body: JSON.stringify(activeOrderObj) });
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
-    showStatus('Order saved directly to SQL!', false); 
+    if(!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.error || (`HTTP ${r.status}`));
+    }
+    const saved = await r.json().catch(() => ({}));
+    if (saved && saved.orderId) activeOrderObj.id = saved.orderId;
+    showStatus('Order ' + activeOrderObj.id + ' saved.', false); 
     closeOrderModal({target: {id: 'order-modal-overlay'}}); 
     loadOrders(); 
   } catch(e) { showStatus('Save Failed: ' + e.message, true); }

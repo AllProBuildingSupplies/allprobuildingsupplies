@@ -114,6 +114,21 @@ function mapOrderItem(it, prods) {
   };
 }
 
+/** Next APBS-000001 style id. Floor at 3 so the next unused id is at least APBS-000004. */
+async function nextApbsOrderId(env) {
+  const { results } = await env.DB.prepare(`SELECT id FROM orders WHERE id LIKE 'APBS-%'`).all();
+  let max = 3;
+  for (const row of results || []) {
+    const m = String(row.id || '').trim().match(/^APBS-(\d+)$/i);
+    if (m) max = Math.max(max, parseInt(m[1], 10));
+  }
+  return 'APBS-' + String(max + 1).padStart(6, '0');
+}
+
+function isApbsOrderId(id) {
+  return /^APBS-\d{6,}$/i.test(String(id || '').trim());
+}
+
 function toPublicProduct(p) {
   const qty = parseInt(p.qty, 10) || 0;
   return {
@@ -458,7 +473,7 @@ export default {
       if (path === '/api/orders' && request.method === 'POST') {
         if (!auth.user) return jsonResponse({ error: 'Unauthorized' }, 401);
         const o = await request.json();
-        if (!o.id || !o.customer || !o.customer.email) {
+        if (!o.customer || !o.customer.email) {
           return jsonResponse({ error: 'Missing required order data' }, 400);
         }
         const customerEmail = String(o.customer.email).trim().toLowerCase();
@@ -478,35 +493,49 @@ export default {
         const priced = validateAndPriceItems(allProds, o.items);
         if (priced.error) return jsonResponse({ error: priced.error }, 400);
 
-        const stmts = [
-          env.DB.prepare(
-            `INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-          ).bind(
-            o.id,
-            customerEmail,
-            'pending',
-            priced.total,
-            o.delivery?.method || 'delivery',
-            o.delivery?.address || '',
-            o.po || '',
-            o.notes || '',
-            JSON.stringify(o.customer),
-            o.placedAt || new Date().toISOString()
-          ),
-        ];
+        let orderId = null;
+        let lastErr = null;
+        for (let attempt = 0; attempt < 5; attempt++) {
+          orderId = await nextApbsOrderId(env);
+          try {
+            const stmts = [
+              env.DB.prepare(
+                `INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+              ).bind(
+                orderId,
+                customerEmail,
+                'pending',
+                priced.total,
+                o.delivery?.method || 'delivery',
+                o.delivery?.address || '',
+                o.po || '',
+                o.notes || '',
+                JSON.stringify(o.customer),
+                o.placedAt || new Date().toISOString()
+              ),
+            ];
 
-        for (const i of priced.validated) {
-          stmts.push(
-            env.DB.prepare(
-              'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)'
-            ).bind(o.id, i.code, i.size, i.qty, i.unitPrice)
-          );
+            for (const i of priced.validated) {
+              stmts.push(
+                env.DB.prepare(
+                  'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)'
+                ).bind(orderId, i.code, i.size, i.qty, i.unitPrice)
+              );
+            }
+            await env.DB.batch(stmts);
+            await applyOrderItemsStock(env, priced.validated);
+            lastErr = null;
+            break;
+          } catch (e) {
+            lastErr = e;
+            const msg = e && e.message ? String(e.message) : '';
+            if (!msg.includes('UNIQUE') && !msg.includes('constraint')) throw e;
+          }
         }
-        await env.DB.batch(stmts);
-        await applyOrderItemsStock(env, priced.validated);
+        if (lastErr) throw lastErr;
 
-        return jsonResponse({ success: true, orderId: o.id, total: priced.total, items: priced.validated });
+        return jsonResponse({ success: true, orderId, total: priced.total, items: priced.validated });
       }
 
       if (path === '/api/orders/notify' && request.method === 'POST') {
@@ -709,9 +738,23 @@ export default {
         return jsonResponse(formattedOrders);
       }
 
+      if (path === '/api/admin/orders/next-id' && request.method === 'GET') {
+        const id = await nextApbsOrderId(env);
+        return jsonResponse({ id });
+      }
+
       if (path === '/api/admin/orders' && request.method === 'POST') {
         const o = await request.json();
         const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
+
+        // New orders without a proper APBS-###### id get the next sequential number.
+        const existing = o.id
+          ? await env.DB.prepare('SELECT id FROM orders WHERE id = ?').bind(o.id).first()
+          : null;
+        if (!existing && !isApbsOrderId(o.id)) {
+          o.id = await nextApbsOrderId(env);
+        }
+
         await restoreOrderItemsStock(env, o.id);
         const priced = validateAdminOrderItems(allProds, o.items || [], {
           checkStock: o.status !== 'cancelled',
@@ -752,7 +795,7 @@ export default {
           await applyOrderItemsStock(env, itemsToSave);
         }
 
-        return jsonResponse({ success: true, total: priced.total || 0 });
+        return jsonResponse({ success: true, orderId: o.id, total: priced.total || 0 });
       }
 
       if (path === '/api/admin/orders' && request.method === 'DELETE') {
