@@ -1209,6 +1209,51 @@ export default {
         return jsonResponse({ success: true });
       }
 
+      // Receive shipment: ADD qty to existing stock (does not replace).
+      // Body: { items: [{ code, size, qty }, ...] } where qty is pieces to add.
+      if (path === '/api/admin/products/receive' && request.method === 'POST') {
+        const body = await request.json();
+        const items = Array.isArray(body) ? body : (body && body.items) || [];
+        if (!items.length) {
+          return jsonResponse({ error: 'No items to receive' }, 400);
+        }
+
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const stmts = [];
+        const missing = [];
+        let updated = 0;
+
+        for (const raw of items) {
+          const code = String(raw.code || raw.sku || '').trim();
+          const size = normalizeSize(raw.size);
+          const addQty = parseInt(raw.qty ?? raw.addQty ?? raw.add_qty, 10);
+          if (!code || !size) {
+            missing.push({ code, size, qty: addQty, error: 'Missing code or size' });
+            continue;
+          }
+          if (!Number.isFinite(addQty) || addQty <= 0) {
+            missing.push({ code, size, qty: addQty, error: 'Invalid qty (must be positive)' });
+            continue;
+          }
+          const match = findProduct(allProds, code, size);
+          if (!match) {
+            missing.push({ code, size, qty: addQty, error: 'Product not found' });
+            continue;
+          }
+          stmts.push(
+            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(
+              addQty,
+              match.code,
+              match.size
+            )
+          );
+          updated += 1;
+        }
+
+        if (stmts.length) await env.DB.batch(stmts);
+        return jsonResponse({ success: true, updated, missing });
+      }
+
       if (path === '/api/admin/orders' && request.method === 'GET') {
         const orders = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
         const items = await env.DB.prepare('SELECT * FROM order_items').all();

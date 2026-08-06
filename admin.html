@@ -80,15 +80,22 @@
       </thead>
       <tbody id="prod-tbody"></tbody>
     </table>
-    <div class="action-bar">
+    <div class="action-bar" style="flex-wrap:wrap;gap:12px;">
       <button class="btn-add" onclick="addProductRow()">+ Add New Product Row</button>
       <button class="btn-save" onclick="saveProducts()">Save Products</button>
+      <button class="btn-view" style="border-color:var(--gold);color:var(--gold);" onclick="exportProductsCsv()">⬇ Export Inventory CSV</button>
       
-      <div style="flex-grow: 1; text-align: right;">
-        <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="processCSVUpload(event)">
-        <button class="btn-view" style="border-color:#3498db; color:#3498db; padding: 10px 20px; font-size: 14px;" onclick="document.getElementById('csv-file').click()">⬆️ Bulk Upload CSV</button>
+      <div style="flex-grow: 1; text-align: right; display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; align-items:center;">
+        <input type="file" id="csv-file" accept=".csv,text/csv" style="display:none;" onchange="processCSVUpload(event)">
+        <input type="file" id="receive-csv-file" accept=".csv,text/csv" style="display:none;" onchange="processReceiveShipmentCsv(event)">
+        <button class="btn-view" style="border-color:#2ecc71; color:#2ecc71; padding: 10px 16px; font-size: 14px;" onclick="document.getElementById('receive-csv-file').click()" title="CSV with Code, Size, Qty — adds to current stock">📦 Receive Shipment CSV</button>
+        <button class="btn-view" style="border-color:#3498db; color:#3498db; padding: 10px 16px; font-size: 14px;" onclick="document.getElementById('csv-file').click()" title="Full product upsert (replaces fields including qty)">⬆️ Bulk Upload / Replace CSV</button>
       </div>
     </div>
+    <p style="color:var(--silver);font-size:12px;margin-top:10px;line-height:1.5;">
+      <strong style="color:var(--gold);">Shipment tip:</strong> Export Inventory → fill the empty <code>AddQty</code> column with pieces received (leave <code>Qty</code> as-is for reference) → upload with <em>Receive Shipment CSV</em> to <strong>add</strong> to existing stock.
+      Or upload a simple CSV with Code, Size, and Qty/AddQty. Use Bulk Upload / Replace only when you intend to overwrite product fields.
+    </p>
   </div>
 
   <div id="tab-users" class="admin-panel">
@@ -653,12 +660,197 @@ function productsCsvHeaderMap(headerRow) {
     else if (key === 'size') map.size = i;
     else if (key === 'pack' || key === 'pcsperctn' || key === 'pcspctn') map.pack = i;
     else if (key === 'qty' || key === 'quantity' || key === 'stock' || key === 'inventory' || key === 'inventoryqty') map.qty = i;
+    else if (key === 'addqty' || key === 'qtyadd' || key === 'received' || key === 'receive' || key === 'shipment' || key === 'shipmentqty' || key === 'delta') map.addQty = i;
+    else if (key === 'cases' || key === 'case' || key === 'ctn' || key === 'cartons') map.cases = i;
     else if (key === 'price' || key === 'unitprice') map.price = i;
     else if (key === 'image' || key === 'imageurl') map.image = i;
     else if (key === 'maincategory' || key === 'main') map.main_category = i;
     else if (key === 'subcategory' || key === 'sub') map.sub_category = i;
   });
   return map;
+}
+
+function csvEscape(val) {
+  const s = String(val == null ? '' : val);
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function exportProductsCsv() {
+  if (!masterProducts || !masterProducts.length) {
+    showStatus('Load products first (open the Products tab).', true);
+    return;
+  }
+  const headers = [
+    'Code', 'Tommur-Code', 'Lesso-Code', 'Description', 'Size', 'Pack', 'Qty', 'AddQty',
+    'Price', 'Image', 'Main category', 'Sub category'
+  ];
+  const lines = [headers.join(',')];
+  masterProducts.forEach(function (p) {
+    lines.push([
+      csvEscape(p.code),
+      csvEscape(p.tommur_code || ''),
+      csvEscape(p.lesso_code || ''),
+      csvEscape(p.description || ''),
+      csvEscape(p.size || ''),
+      csvEscape(p.pack != null ? p.pack : ''),
+      csvEscape(p.stock != null ? p.stock : 0),
+      '', // AddQty — fill with pieces received, then use Receive Shipment CSV
+      csvEscape(p.price != null ? p.price : ''),
+      csvEscape(p.image || ''),
+      csvEscape(p.main_category || ''),
+      csvEscape(p.sub_category || '')
+    ].join(','));
+  });
+  const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = 'apbs-inventory-' + stamp + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showStatus('Exported ' + masterProducts.length + ' products. Fill AddQty with pieces received, then use Receive Shipment CSV.', false);
+}
+
+function processReceiveShipmentCsv(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  readCsvFileAsText(file).then(async function (text) {
+    const rows = parseCSV(text);
+    if (!rows.length) {
+      showStatus('CSV appears empty.', true);
+      event.target.value = '';
+      return;
+    }
+
+    function cleanText(str) {
+      if (!str) return '';
+      return str.trim()
+        .replace(/×/g, 'x')
+        .replace(/[“”]/g, '"')
+        .replace(/[‘’]/g, "'")
+        .replace(/\uFFFD/g, 'x');
+    }
+    function cell(cols, idx) {
+      if (idx == null || idx < 0) return '';
+      return cols[idx] != null ? String(cols[idx]) : '';
+    }
+
+    const first = rows[0] || [];
+    const headerJoined = first.map(function (c) { return String(c || ''); }).join(',').toLowerCase();
+    const looksLikeHeader = /code|sku|size|qty|addqty|received|cases/.test(headerJoined);
+    const map = looksLikeHeader
+      ? productsCsvHeaderMap(first)
+      : { code: 0, size: 1, qty: 2, cases: 3 };
+    const startIdx = looksLikeHeader ? 1 : 0;
+    if (map.code == null || map.size == null) {
+      showStatus('Shipment CSV needs Code and Size columns.', true);
+      event.target.value = '';
+      return;
+    }
+    if (map.addQty == null && map.qty == null && map.cases == null) {
+      showStatus('Shipment CSV needs Qty, AddQty, or Cases column (pieces/cases to add).', true);
+      event.target.value = '';
+      return;
+    }
+
+    const payload = [];
+    const preview = [];
+    for (let i = startIdx; i < rows.length; i++) {
+      const cols = rows[i] || [];
+      const code = cleanText(cell(cols, map.code));
+      const size = cleanCsvSize(cell(cols, map.size));
+      if (!code && !size) continue;
+
+      let addQty = null;
+      const addRaw = map.addQty != null ? cell(cols, map.addQty).trim() : '';
+      const qtyRaw = map.qty != null ? cell(cols, map.qty).trim() : '';
+      const casesRaw = map.cases != null ? cell(cols, map.cases).trim() : '';
+      // If AddQty column exists (e.g. from Export), only use AddQty/Cases —
+      // never fall back to Qty, which is current stock and would double inventory.
+      const hasAddQtyCol = map.addQty != null;
+
+      if (addRaw !== '') {
+        addQty = parseInt(addRaw, 10);
+      } else if (casesRaw !== '') {
+        const cases = parseFloat(casesRaw);
+        const prod = window.apbsFindProduct
+          ? window.apbsFindProduct(masterProducts, code, size)
+          : null;
+        const pack = prod ? (parseInt(String(prod.pack).replace(/[^0-9]/g, ''), 10) || 1) : 1;
+        addQty = Number.isFinite(cases) ? Math.ceil(cases * pack) : NaN;
+      } else if (!hasAddQtyCol && qtyRaw !== '') {
+        // Simple shipment CSV without AddQty: Qty = pieces to add.
+        addQty = parseInt(qtyRaw, 10);
+      }
+
+      if (!Number.isFinite(addQty) || addQty === 0) continue;
+      if (addQty < 0) {
+        showStatus('Row ' + (i + 1) + ': negative qty not allowed in receive upload.', true);
+        event.target.value = '';
+        return;
+      }
+
+      payload.push({ code: code, size: size, qty: addQty });
+      preview.push(code + ' / ' + size + ' +' + addQty);
+    }
+
+    if (!payload.length) {
+      showStatus('No receivable lines found (need Code, Size, and Qty/AddQty/Cases).', true);
+      event.target.value = '';
+      return;
+    }
+
+    const sample = preview.slice(0, 8).join('\n');
+    const more = preview.length > 8 ? '\n… +' + (preview.length - 8) + ' more' : '';
+    if (!confirm(
+      'Receive shipment for ' + payload.length + ' line(s)?\n\n' +
+      'This ADDS to current inventory (does not replace).\n\n' +
+      sample + more
+    )) {
+      event.target.value = '';
+      return;
+    }
+
+    showStatus('Receiving shipment into inventory...', false);
+    try {
+      const r = await adminFetch('/admin/products/receive', {
+        method: 'POST',
+        body: JSON.stringify({ items: payload })
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(function () { return {}; });
+        throw new Error(err.error || ('HTTP ' + r.status));
+      }
+      const data = await r.json();
+      showStatus(
+        'Shipment received: updated ' + (data.updated || 0) +
+        (data.missing && data.missing.length ? '; ' + data.missing.length + ' not found' : '') + '.',
+        !!(data.missing && data.missing.length)
+      );
+      if (data.missing && data.missing.length) {
+        console.warn('Receive missing products', data.missing);
+        alert(
+          'Some rows were not found (check Code/Size):\n' +
+          data.missing.slice(0, 12).map(function (m) {
+            return m.code + ' / ' + m.size + ' (+' + m.qty + ')';
+          }).join('\n') +
+          (data.missing.length > 12 ? '\n…' : '')
+        );
+      }
+      loadProducts();
+    } catch (err) {
+      showStatus('Receive failed: ' + err.message, true);
+    }
+    event.target.value = '';
+  }).catch(function (err) {
+    showStatus('Could not read CSV: ' + (err && err.message ? err.message : err), true);
+    event.target.value = '';
+  });
 }
 
 function processCSVUpload(event) {
