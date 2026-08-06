@@ -654,7 +654,7 @@ function processCSVUpload(event) {
       payload.push({
         code: cleanText(cols[0]),
         description: cleanText(cols[1]),
-        size: (window.normalizeProductSize || cleanText)(cleanText(cols[2])),
+        size: cleanCsvSize(cols[2]),
         pack: parseInt(cols[3]) || 1,
         qty: parseInt(cols[4]) || 0,
         price: parseFloat(cols[5]) || 0,
@@ -698,6 +698,58 @@ function parseCSV(str) {
   }
   if(curStr !== '' || curLine.length > 0) { curLine.push(curStr); lines.push(curLine); }
   return lines;
+}
+
+/** Decode CSV bytes the way Excel exports them (often Windows-1252 with × between sizes). */
+function decodeCsvBuffer(buf) {
+  const bytes = new Uint8Array(buf);
+  if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+    return new TextDecoder('utf-16le').decode(bytes);
+  }
+  if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+    return new TextDecoder('utf-16be').decode(bytes);
+  }
+  if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  const utf8 = new TextDecoder('utf-8').decode(bytes);
+  let win = utf8;
+  try {
+    win = new TextDecoder('windows-1252').decode(bytes);
+  } catch (_) {}
+  const fffdUtf8 = (utf8.match(/\uFFFD/g) || []).length;
+  // Prefer Windows-1252 when UTF-8 produced replacement chars (classic Excel ANSI × → )
+  if (fffdUtf8 > 0) return win;
+  return utf8;
+}
+
+function readCsvFileAsText(file) {
+  return new Promise(function (resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        resolve(decodeCsvBuffer(e.target.result));
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = function () {
+      reject(reader.error || new Error('Could not read file'));
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+/** Clean size cells: force dimension separators to ASCII x (2x2x1.5). */
+function cleanCsvSize(str) {
+  if (!str) return '';
+  let s = String(str).trim()
+    .replace(/\uFFFD/g, 'x')
+    .replace(/[×✕✖⨯⋅∗﹡•]/g, 'x')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'");
+  if (window.normalizeProductSize) s = window.normalizeProductSize(s);
+  return s;
 }
 
 // --- USERS LOGIC (D1 SQL) ---
@@ -1361,9 +1413,8 @@ function processOrderLinesUpload(event) {
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const rows = parseCSV(String(e.target.result || ''));
+  readCsvFileAsText(file).then(function (text) {
+    const rows = parseCSV(String(text || ''));
     if (!rows.length) {
       alert('CSV appears empty.');
       event.target.value = '';
@@ -1395,7 +1446,7 @@ function processOrderLinesUpload(event) {
     for (let i = startIdx; i < rows.length; i++) {
       const cols = rows[i] || [];
       const code = String(cols[map.code] != null ? cols[map.code] : '').trim();
-      const sizeRaw = String(cols[map.size] != null ? cols[map.size] : '').trim();
+      const sizeRaw = cleanCsvSize(cols[map.size] != null ? cols[map.size] : '');
       if (!code && !sizeRaw) continue;
 
       const casesRaw = map.cases != null ? String(cols[map.cases] != null ? cols[map.cases] : '').trim() : '';
@@ -1511,8 +1562,10 @@ function processOrderLinesUpload(event) {
 
     pendingOrderLinesUpload = parsed;
     renderOrderLinesPreview();
-  };
-  reader.readAsText(file);
+  }).catch(function (err) {
+    alert('Could not read CSV: ' + (err && err.message ? err.message : err));
+    event.target.value = '';
+  });
 }
 
 function renderOrderLinesPreview() {

@@ -4,6 +4,12 @@
 
 window.APBS_API_BASE = "https://allpro-api.baruch-6d5.workers.dev/api";
 
+/**
+ * Characters Excel/CSV often use (or corrupt into) instead of ASCII "x"
+ * between dimension parts like 2x2x1.5.
+ */
+window.APBS_SIZE_X_CHARS = /[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]/g;
+
 /** Canonical size for DB keys (strips inch marks, trims, collapses spaces). */
 window.normalizeProductSize = function normalizeProductSize(size) {
   if (size == null) return '';
@@ -11,6 +17,11 @@ window.normalizeProductSize = function normalizeProductSize(size) {
     .trim()
     .replace(/[\u201C\u201D\u2033\u2036]/g, '"')
     .replace(/"/g, '')
+    // Excel ANSI CSVs: × (0xD7) misread as UTF-8 → ; also real × / bullets
+    .replace(/\uFFFD/g, 'x')
+    .replace(/[\u00D7\u2715\u2716\u2A2F\u22C5\u2217\u2022]/g, 'x')
+    // Digits separated by odd junk (or capital X) → standard 2x2x1.5
+    .replace(/(\d)\s*[xX]\s*(?=\d)/g, '$1x')
     .replace(/\s+/g, ' ');
 };
 
@@ -70,11 +81,12 @@ window.apbsSizeMatchCandidates = function apbsSizeMatchCandidates(size) {
     seen[n] = true;
     out.push(n);
   }
+  var sep = /\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/g;
   add(raw);
-  add(raw.replace(/\s*[x×]\s*/gi, 'x'));
+  add(raw.replace(sep, 'x'));
   add(raw.replace(/(\d+)\s+(\d+\/\d+)/g, '$1-$2'));
 
-  var parts = raw.split(/\s*[x×]\s*/i);
+  var parts = raw.split(/\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/);
   if (parts.length) {
     var converted = parts.map(window.apbsSizeSegmentToCatalog);
     add(converted.join('x'));
@@ -87,7 +99,7 @@ window.apbsSizeMatchCandidates = function apbsSizeMatchCandidates(size) {
 window.apbsSizeToExcelSafe = function apbsSizeToExcelSafe(size) {
   var raw = window.normalizeProductSize(size);
   if (!raw) return '';
-  return raw.split(/\s*[x×]\s*/i).map(function (seg) {
+  return raw.split(/\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/).map(function (seg) {
     var s = String(seg).trim();
     var m = s.match(/^(\d+)-(\d+)\/(\d+)$/);
     if (m) {

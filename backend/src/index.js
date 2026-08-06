@@ -23,14 +23,34 @@ function normalizeSize(size) {
     .trim()
     .replace(/[\u201C\u201D\u2033\u2036]/g, '"')
     .replace(/"/g, '')
+    // Excel ANSI CSVs often turn "x" / × into  when mis-decoded as UTF-8
+    .replace(/\uFFFD/g, 'x')
+    .replace(/[\u00D7\u2715\u2716\u2A2F\u22C5\u2217\u2022]/g, 'x')
+    .replace(/(\d)\s*[xX]\s*(?=\d)/g, '$1x')
     .replace(/\s+/g, ' ');
+}
+
+function sizeMatchCandidates(size) {
+  const raw = normalizeSize(size);
+  const out = [];
+  const seen = new Set();
+  const add = (v) => {
+    const n = normalizeSize(v);
+    if (!n || seen.has(n)) return;
+    seen.add(n);
+    out.push(n);
+  };
+  const sep = /\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/g;
+  add(raw);
+  add(raw.replace(sep, 'x'));
+  return out;
 }
 
 function findProduct(prods, code, size) {
   const c = String(code || '').trim();
-  const n = normalizeSize(size);
+  const candidates = sizeMatchCandidates(size);
   return (
-    prods.find((p) => String(p.code || '').trim() === c && normalizeSize(p.size) === n) ||
+    prods.find((p) => String(p.code || '').trim() === c && candidates.includes(normalizeSize(p.size))) ||
     prods.find((p) => p.code === code && p.size === size) ||
     null
   );
