@@ -352,6 +352,32 @@ function getAdminHeaders(extra) {
   return window.apbsAdminHeaders ? window.apbsAdminHeaders(extra || { 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' };
 }
 
+function forceAdminRelogin(msg) {
+  sessionStorage.removeItem('apbs_admin_token');
+  sessionStorage.removeItem('apbs_admin_auth');
+  const main = document.getElementById('main-admin-content');
+  const gate = document.getElementById('admin-auth-gate');
+  if (main) main.style.display = 'none';
+  if (gate) gate.style.display = 'flex';
+  const err = document.getElementById('admin-auth-err');
+  if (err) {
+    err.style.display = 'block';
+    err.textContent = msg || 'Admin session expired. Please log in again.';
+  }
+  showStatus(msg || 'Admin session expired. Please log in again.', true);
+}
+
+async function adminFetch(path, options) {
+  const opts = options || {};
+  const headers = getAdminHeaders(opts.headers || { 'Content-Type': 'application/json' });
+  const r = await fetch(API_BASE + path, { ...opts, headers });
+  if (r.status === 401) {
+    forceAdminRelogin('Admin session expired or invalid. Enter your admin password again.');
+    throw new Error('Unauthorized — please log in again');
+  }
+  return r;
+}
+
 function escAttr(val) {
   return String(val == null ? '' : val)
     .replace(/&/g, '&amp;')
@@ -611,8 +637,10 @@ function parseCSV(str) {
 // --- USERS LOGIC (D1 SQL) ---
 async function loadUsers() {
   try {
-    const r = await fetch(API_BASE + '/admin/users', { headers: getAdminHeaders() }); 
+    const r = await adminFetch('/admin/users');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     masterUsers = await r.json();
+    if (!Array.isArray(masterUsers)) throw new Error(masterUsers.error || 'Invalid users response');
     
     let html = '';
     masterUsers.forEach(u => {
@@ -641,7 +669,12 @@ async function loadUsers() {
     });
     document.getElementById('users-tbody').innerHTML = html;
     populateModalCustomerDropdown();
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    console.error(e);
+    if (!String(e.message || '').includes('Unauthorized')) {
+      showStatus('Users load failed: ' + e.message, true);
+    }
+  }
 }
 
 function openUserModal() {
@@ -812,7 +845,7 @@ function initOrdersTableActions() {
 async function loadOrders() {
   const tbody = document.getElementById('orders-tbody');
   try {
-    const r = await fetch(API_BASE + '/admin/orders', { headers: getAdminHeaders() });
+    const r = await adminFetch('/admin/orders');
     if (!r.ok) throw new Error('HTTP ' + r.status);
     masterOrders = await r.json();
     if (!Array.isArray(masterOrders)) throw new Error(masterOrders.error || 'Invalid orders response');
@@ -835,6 +868,10 @@ async function loadOrders() {
     tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:var(--silver);padding:24px;">No orders yet.</td></tr>';
   } catch(e) {
     console.error(e);
+    if (String(e.message || '').includes('Unauthorized')) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ff6b6b;padding:24px;">Please log in again.</td></tr>';
+      return;
+    }
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load orders.</td></tr>';
     showStatus('Orders load failed: ' + e.message, true);
   }
@@ -1319,9 +1356,8 @@ async function deleteOrder(orderId) {
   if (!orderId) return;
   if (!confirm('Permanently delete order ' + orderId + '?\n\nAll line items will be removed. This cannot be undone.')) return;
   try {
-    const r = await fetch(API_BASE + '/admin/orders?id=' + encodeURIComponent(orderId), {
-      method: 'DELETE',
-      headers: getAdminHeaders()
+    const r = await adminFetch('/admin/orders?id=' + encodeURIComponent(orderId), {
+      method: 'DELETE'
     });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
@@ -1376,7 +1412,7 @@ async function saveOrderChanges() {
   activeOrderObj.total = newTotal;
   
   try {
-    const r = await fetch(API_BASE + '/admin/orders', { method:'POST', headers: getAdminHeaders(), body: JSON.stringify(activeOrderObj) });
+    const r = await adminFetch('/admin/orders', { method:'POST', body: JSON.stringify(activeOrderObj) });
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     showStatus('Order saved directly to SQL!', false); 
     closeOrderModal({target: {id: 'order-modal-overlay'}}); 
