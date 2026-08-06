@@ -223,6 +223,47 @@
         <button class="btn-view" style="height:38px; padding:0 20px; font-size:13px;" onclick="addItemToOrder()">+ Add to Order</button>
       </div>
 
+      <div class="locked-input" id="order-lines-upload-bar" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 16px;border-top:1px dashed rgba(200,152,31,.25);background:rgba(12,17,23,.35);">
+        <div style="font-size:12px;color:var(--silver);line-height:1.5;max-width:420px;">
+          <strong style="color:var(--gold);">Or upload multiple lines</strong> — download the template, fill Code / Size / Cases or Pieces (UnitPrice optional), then confirm before lines are added.
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+          <a href="assets/order-lines-template.csv" download="order-lines-template.csv" class="btn-view" style="text-decoration:none;">⬇ Download Template</a>
+          <button type="button" class="btn-view" style="border-color:#3498db;color:#3498db;" onclick="document.getElementById('order-lines-csv').click()">⬆️ Upload Lines CSV</button>
+          <input type="file" id="order-lines-csv" accept=".csv,text/csv" style="display:none;" onchange="processOrderLinesUpload(event)">
+        </div>
+      </div>
+
+      <div id="order-lines-preview" style="display:none;padding:16px;border-top:1px solid rgba(200,152,31,.2);background:rgba(52,152,219,.06);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+          <div>
+            <div class="modal-lbl" style="color:#3498db;margin-bottom:4px;">Confirm uploaded lines</div>
+            <p id="order-lines-preview-summary" style="font-size:12px;color:var(--silver);margin:0;line-height:1.5;"></p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn-del" onclick="cancelOrderLinesPreview()">Cancel Upload</button>
+            <button type="button" class="btn-save" id="btn-confirm-order-lines" style="padding:10px 18px;" onclick="confirmOrderLinesUpload()">Add Lines to Order</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;max-height:280px;overflow-y:auto;border:1px solid rgba(139,160,178,.2);">
+          <table class="data-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Row</th>
+                <th>Code</th>
+                <th>Size</th>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Line Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="order-lines-preview-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div style="padding:16px; text-align:right; font-family:'Oswald',sans-serif; font-size:20px; color:var(--gold); border-top:1px solid rgba(255,255,255,.05);">
         Calculated Total: <span id="m-total" style="color:var(--white)"></span>
       </div>
@@ -818,6 +859,9 @@ function toggleEditLock(status) {
   });
   
   document.getElementById('add-item-container').style.display = isLocked ? 'none' : 'flex';
+  const uploadBar = document.getElementById('order-lines-upload-bar');
+  if (uploadBar) uploadBar.style.display = isLocked ? 'none' : 'flex';
+  if (isLocked) cancelOrderLinesPreview();
   document.getElementById('edit-lock-banner').style.display = isLocked ? 'block' : 'none';
 }
 
@@ -827,6 +871,7 @@ function openOrderModal(orderId) {
   document.getElementById('new-item-cases').value = '';
   document.getElementById('new-item-pcs').value = '1';
   document.getElementById('new-item-pack').value = '';
+  cancelOrderLinesPreview();
 
   const delBtn = document.getElementById('btn-delete-order');
   if (orderId) {
@@ -891,6 +936,286 @@ function addItemToOrder() {
   sel.value = '';
   document.getElementById('new-item-pack').value = '';
   renderEditableItems();
+}
+
+let pendingOrderLinesUpload = null;
+
+function orderLinesHeaderMap(headerRow) {
+  const map = {};
+  (headerRow || []).forEach(function (h, i) {
+    const key = String(h || '').trim().toLowerCase().replace(/[\s_]+/g, '');
+    if (!key) return;
+    if (key === 'code' || key === 'sku' || key === 'productcode' || key === 'itemcode') map.code = i;
+    else if (key === 'size') map.size = i;
+    else if (key === 'cases' || key === 'case' || key === 'ctn' || key === 'cartons') map.cases = i;
+    else if (key === 'pieces' || key === 'pcs' || key === 'qty' || key === 'quantity') map.pieces = i;
+    else if (key === 'unitprice' || key === 'price' || key === 'unit$') map.unitPrice = i;
+  });
+  return map;
+}
+
+function cancelOrderLinesPreview() {
+  pendingOrderLinesUpload = null;
+  const preview = document.getElementById('order-lines-preview');
+  if (preview) preview.style.display = 'none';
+  const tbody = document.getElementById('order-lines-preview-tbody');
+  if (tbody) tbody.innerHTML = '';
+  const fileInput = document.getElementById('order-lines-csv');
+  if (fileInput) fileInput.value = '';
+  const btn = document.getElementById('btn-confirm-order-lines');
+  if (btn) btn.disabled = false;
+}
+
+function processOrderLinesUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!activeOrderObj) {
+    alert('Open an order first.');
+    event.target.value = '';
+    return;
+  }
+  if (!masterProducts || !masterProducts.length) {
+    alert('Products are still loading. Wait a moment and try again.');
+    event.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const rows = parseCSV(String(e.target.result || ''));
+    if (!rows.length) {
+      alert('CSV appears empty.');
+      event.target.value = '';
+      return;
+    }
+
+    const first = rows[0] || [];
+    const looksLikeHeader = /code|sku|size|pieces|pcs|qty|cases/i.test(String(first[0] || '') + ',' + String(first[1] || ''));
+    const map = looksLikeHeader
+      ? orderLinesHeaderMap(first)
+      : { code: 0, size: 1, cases: 2, pieces: 3, unitPrice: 4 };
+    const startIdx = looksLikeHeader ? 1 : 0;
+
+    if (map.code == null || map.size == null) {
+      alert('CSV must include Code and Size columns. Download the template and try again.');
+      event.target.value = '';
+      return;
+    }
+    if (map.pieces == null && map.cases == null) {
+      alert('CSV must include a Pieces (or Qty) and/or Cases column.');
+      event.target.value = '';
+      return;
+    }
+
+    const parsed = [];
+    let okCount = 0;
+    let errCount = 0;
+
+    for (let i = startIdx; i < rows.length; i++) {
+      const cols = rows[i] || [];
+      const code = String(cols[map.code] != null ? cols[map.code] : '').trim();
+      const sizeRaw = String(cols[map.size] != null ? cols[map.size] : '').trim();
+      if (!code && !sizeRaw) continue;
+
+      const casesRaw = map.cases != null ? String(cols[map.cases] != null ? cols[map.cases] : '').trim() : '';
+      const piecesRaw = map.pieces != null ? String(cols[map.pieces] != null ? cols[map.pieces] : '').trim() : '';
+      const priceRaw = map.unitPrice != null ? String(cols[map.unitPrice] != null ? cols[map.unitPrice] : '').trim() : '';
+
+      const rowNum = i + 1;
+      const prod = window.apbsFindProduct
+        ? window.apbsFindProduct(masterProducts, code, sizeRaw)
+        : masterProducts.find(function (p) {
+            return String(p.code || '').trim() === code &&
+              (window.normalizeProductSize || String)(p.size) === (window.normalizeProductSize || String)(sizeRaw);
+          });
+
+      if (!prod) {
+        errCount++;
+        parsed.push({
+          rowNum: rowNum,
+          ok: false,
+          error: 'Product not found: ' + code + ' / ' + sizeRaw,
+          code: code,
+          size: sizeRaw,
+          description: '',
+          qty: 0,
+          unitPrice: 0,
+          lineTotal: 0,
+          pcsPerCtn: 1
+        });
+        continue;
+      }
+
+      const pack = parseInt(String(prod.pack).replace(/[^0-9]/g, ''), 10) || 1;
+      let qty = 0;
+      if (piecesRaw !== '') {
+        qty = parseInt(piecesRaw, 10);
+      } else if (casesRaw !== '') {
+        const cases = parseFloat(casesRaw);
+        qty = Number.isFinite(cases) ? Math.ceil(cases * pack) : NaN;
+      }
+
+      if (!Number.isFinite(qty) || qty < 1) {
+        errCount++;
+        parsed.push({
+          rowNum: rowNum,
+          ok: false,
+          error: 'Invalid quantity (need Cases and/or Pieces ≥ 1)',
+          code: prod.code,
+          size: prod.size,
+          description: prod.description,
+          qty: 0,
+          unitPrice: parseFloat(prod.price) || 0,
+          lineTotal: 0,
+          pcsPerCtn: pack
+        });
+        continue;
+      }
+
+      let unitPrice = parseFloat(prod.price) || 0;
+      if (priceRaw !== '') {
+        const override = parseFloat(priceRaw);
+        if (!Number.isFinite(override) || override < 0) {
+          errCount++;
+          parsed.push({
+            rowNum: rowNum,
+            ok: false,
+            error: 'Invalid UnitPrice',
+            code: prod.code,
+            size: prod.size,
+            description: prod.description,
+            qty: qty,
+            unitPrice: unitPrice,
+            lineTotal: 0,
+            pcsPerCtn: pack
+          });
+          continue;
+        }
+        unitPrice = override;
+      }
+
+      let warn = '';
+      const norm = window.normalizeProductSize || function (s) { return String(s == null ? '' : s).trim(); };
+      const alreadyOnOrder = (activeOrderObj.items || []).reduce(function (sum, it) {
+        const same = String(it.code || '').trim() === String(prod.code || '').trim() &&
+          norm(it.size) === norm(prod.size);
+        return same ? sum + (parseInt(it.qty, 10) || 0) : sum;
+      }, 0);
+      const stock = parseInt(prod.stock, 10) || 0;
+      if (qty + alreadyOnOrder > stock) {
+        warn = 'Qty exceeds available stock (stock ' + stock + ', already on order ' + alreadyOnOrder + ')';
+      }
+
+      okCount++;
+      parsed.push({
+        rowNum: rowNum,
+        ok: true,
+        warn: warn,
+        error: '',
+        code: prod.code,
+        size: prod.size,
+        description: prod.description,
+        qty: qty,
+        unitPrice: unitPrice,
+        lineTotal: unitPrice * qty,
+        pcsPerCtn: pack
+      });
+    }
+
+    if (!parsed.length) {
+      alert('No order lines found in that CSV.');
+      event.target.value = '';
+      return;
+    }
+
+    pendingOrderLinesUpload = parsed;
+    renderOrderLinesPreview();
+  };
+  reader.readAsText(file);
+}
+
+function renderOrderLinesPreview() {
+  const preview = document.getElementById('order-lines-preview');
+  const tbody = document.getElementById('order-lines-preview-tbody');
+  const summary = document.getElementById('order-lines-preview-summary');
+  const btn = document.getElementById('btn-confirm-order-lines');
+  if (!preview || !tbody || !pendingOrderLinesUpload) return;
+
+  let html = '';
+  let okCount = 0;
+  let errCount = 0;
+  let warnCount = 0;
+  let previewTotal = 0;
+
+  pendingOrderLinesUpload.forEach(function (row) {
+    if (row.ok) {
+      okCount++;
+      previewTotal += row.lineTotal;
+      if (row.warn) warnCount++;
+    } else {
+      errCount++;
+    }
+    const statusColor = row.ok ? (row.warn ? '#E2AF34' : '#2ecc71') : '#ff6b6b';
+    const statusText = row.ok ? (row.warn ? 'OK — ' + row.warn : 'OK') : row.error;
+    html += '<tr style="' + (row.ok ? '' : 'background:rgba(255,107,107,.08);') + '">' +
+      '<td data-label="Row">' + row.rowNum + '</td>' +
+      '<td data-label="Code">' + escAttr(row.code) + '</td>' +
+      '<td data-label="Size">' + escAttr(row.size) + '</td>' +
+      '<td data-label="Product">' + escAttr(row.description || '—') + '</td>' +
+      '<td data-label="Qty">' + (row.ok ? row.qty : '—') + '</td>' +
+      '<td data-label="Unit Price">' + (row.ok ? '$' + Number(row.unitPrice).toFixed(2) : '—') + '</td>' +
+      '<td data-label="Line Total">' + (row.ok ? '$' + Number(row.lineTotal).toFixed(2) : '—') + '</td>' +
+      '<td data-label="Status" style="color:' + statusColor + ';font-size:11px;max-width:220px;">' + escAttr(statusText) + '</td>' +
+      '</tr>';
+  });
+
+  tbody.innerHTML = html;
+  summary.textContent = okCount + ' ready to add' +
+    (errCount ? ', ' + errCount + ' with errors' : '') +
+    (warnCount ? ', ' + warnCount + ' with stock warnings' : '') +
+    '. Preview subtotal: $' + previewTotal.toFixed(2) +
+    '. Review below, then confirm to add lines — the order is not saved until you click Save.';
+  btn.disabled = okCount === 0;
+  btn.textContent = okCount ? ('Add ' + okCount + ' Line' + (okCount === 1 ? '' : 's') + ' to Order') : 'No Valid Lines';
+  preview.style.display = 'block';
+  preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function confirmOrderLinesUpload() {
+  if (!activeOrderObj || !pendingOrderLinesUpload) return;
+  const status = document.getElementById('m-status-sel').value;
+  if (status === 'delivered' || status === 'cancelled') {
+    alert('Unlock the order (Pending or Confirmed) before adding lines.');
+    return;
+  }
+
+  const valid = pendingOrderLinesUpload.filter(function (r) { return r.ok; });
+  if (!valid.length) {
+    alert('No valid lines to add. Fix the CSV errors and upload again.');
+    return;
+  }
+
+  const errCount = pendingOrderLinesUpload.length - valid.length;
+  const msg = 'Add ' + valid.length + ' line' + (valid.length === 1 ? '' : 's') + ' to this order?' +
+    (errCount ? '\n\n' + errCount + ' invalid row(s) will be skipped.' : '') +
+    '\n\nLines will appear in the order for final review. Nothing is saved until you click Save All Changes.';
+  if (!confirm(msg)) return;
+
+  valid.forEach(function (row) {
+    activeOrderObj.items.push({
+      code: row.code,
+      description: row.description,
+      size: row.size,
+      pcsPerCtn: row.pcsPerCtn,
+      qty: row.qty,
+      unitPrice: row.unitPrice,
+      lineTotal: row.lineTotal
+    });
+  });
+
+  cancelOrderLinesPreview();
+  renderEditableItems();
+  showStatus(valid.length + ' line' + (valid.length === 1 ? '' : 's') + ' added from CSV. Review and Save when ready.', false);
 }
 
 function renderEditableItems() {
@@ -985,6 +1310,7 @@ function closeOrderModal(e) {
   if(e && (e.target.id === 'order-modal-overlay' || e.target.classList.contains('modal-close'))) { 
     document.getElementById('order-modal-overlay').style.display = 'none'; 
     document.body.style.overflow = ''; 
+    cancelOrderLinesPreview();
     activeOrderObj = null; 
   } 
 }
