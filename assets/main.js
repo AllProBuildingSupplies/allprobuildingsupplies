@@ -70,6 +70,15 @@ window.apbsSizeSegmentToCatalog = function apbsSizeSegmentToCatalog(seg) {
   return s;
 };
 
+/** Catalog size key: 1.5 / 2x1.5 / 1 1/2 → 1-1/2 / 2x1-1/2 / 1-1/2 */
+window.apbsSizeToCatalog = function apbsSizeToCatalog(size) {
+  var raw = window.normalizeProductSize(size);
+  if (!raw) return '';
+  var parts = raw.split(/\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/).filter(Boolean);
+  if (!parts.length) return raw;
+  return parts.map(window.apbsSizeSegmentToCatalog).join('x');
+};
+
 /** Expand a Size cell into catalog candidates (supports 1.5, 2x1.5, 1 1/2, etc.). */
 window.apbsSizeMatchCandidates = function apbsSizeMatchCandidates(size) {
   var raw = window.normalizeProductSize(size);
@@ -92,6 +101,9 @@ window.apbsSizeMatchCandidates = function apbsSizeMatchCandidates(size) {
     add(converted.join('x'));
     add(converted.join(' x '));
   }
+  var catalog = window.apbsSizeToCatalog(raw);
+  add(catalog);
+  if (window.apbsSizeToExcelSafe) add(window.apbsSizeToExcelSafe(catalog));
   return out;
 };
 
@@ -116,19 +128,23 @@ window.apbsSizeToExcelSafe = function apbsSizeToExcelSafe(size) {
 };
 
 window.apbsProductKey = function apbsProductKey(code, size) {
-  return String(code || '').trim() + '|' + window.normalizeProductSize(size);
+  var sz = window.apbsSizeToCatalog ? window.apbsSizeToCatalog(size) : window.normalizeProductSize(size);
+  return String(code || '').trim() + '|' + sz;
 };
 
 window.apbsFindProduct = function apbsFindProduct(products, code, size) {
   if (!Array.isArray(products)) return null;
   const c = String(code || '').trim();
-  const candidates = window.apbsSizeMatchCandidates
-    ? window.apbsSizeMatchCandidates(size)
-    : [window.normalizeProductSize(size)];
+  const want = window.apbsSizeToCatalog
+    ? window.apbsSizeToCatalog(size)
+    : window.normalizeProductSize(size);
+  if (!c || !want) return null;
   return products.find(function (p) {
     if (String(p.code || '').trim() !== c) return false;
-    const ps = window.normalizeProductSize(p.size);
-    return candidates.indexOf(ps) !== -1;
+    const ps = window.apbsSizeToCatalog
+      ? window.apbsSizeToCatalog(p.size)
+      : window.normalizeProductSize(p.size);
+    return ps === want;
   }) || null;
 };
 
