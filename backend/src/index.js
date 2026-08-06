@@ -70,6 +70,28 @@ function userCanOrderPieces(user) {
   return user && user.canOrderPieces !== false && user.canOrderPieces !== 0;
 }
 
+/**
+ * EmailJS templates often use {{email_subject}} (HTML-escaped). That turns "/" into
+ * "&#x2F;" which shows literally in the subject line. Keep subjects slash-free.
+ */
+function sanitizeEmailSubject(subject) {
+  let s = String(subject == null ? '' : subject);
+  s = s
+    .replace(/&#x2[fF];/g, '/')
+    .replace(/&#47;/g, '/')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  s = s.replace(/\s*\/\s*/g, ' — ');
+  return s.replace(/\s+/g, ' ').trim();
+}
+
+function emailShell(bodyRowsHtml) {
+  return `<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>All Pro Building Supplies</title><!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>table{border-collapse:collapse;}td{font-family:Arial,sans-serif;}</style><![endif]--><style type="text/css">html,body{margin:0!important;padding:0!important;width:100%!important;}body{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}@media only screen and (max-width:640px){.email-shell{width:100%!important;max-width:100%!important;}.email-pad{padding-left:16px!important;padding-right:16px!important;}.email-stack{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;border-right:0!important;}.email-stack+.email-stack{border-top:1px solid #e8e8e8!important;}}</style></head><body style="margin:0;padding:0;background:#f4f4f4;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f4;width:100%;border-collapse:collapse;"><tr><td align="center" style="padding:24px 12px;"><!--[if mso]><table role="presentation" width="720" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]--><table role="presentation" class="email-shell" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:720px;width:100%;background:#ffffff;border-radius:4px;overflow:hidden;border-collapse:collapse;"><tr><td class="email-pad" style="background:#0C1117;padding:28px 36px;border-bottom:4px solid #C8981F;"><div style="font-family:Arial Black,Arial,sans-serif;font-size:20px;font-weight:900;color:#FFFFFF;letter-spacing:2px;">ALL PRO BUILDING SUPPLIES</div><div style="font-size:11px;color:#C8981F;letter-spacing:3px;margin-top:3px;">LLC</div></td></tr>${bodyRowsHtml}<tr><td class="email-pad" style="background:#0C1117;padding:20px 36px;text-align:center;"><div style="font-size:12px;color:#888;">&copy; 2026 All Pro Building Supplies LLC</div></td></tr></table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>`;
+}
+
 function buildOrderReceivedEmailHtml(order, items) {
   const cust = order.customer || {};
   const name = escapeHtml(cust.name || 'Customer');
@@ -84,14 +106,15 @@ function buildOrderReceivedEmailHtml(order, items) {
       const desc = escapeHtml((i.description || '') + ' ' + (i.size || ''));
       const line = escapeHtml('$' + (Number(i.lineTotal) || 0).toFixed(2));
       const sub = escapeHtml(String(i.qty) + ' pcs @ $' + (Number(i.unitPrice) || 0).toFixed(2));
-      return `<tr><td style="padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #f0f0f0;">${desc}<br/><span style="font-size:11px;color:#888">${sub}</span></td><td style="padding:10px 14px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #f0f0f0;">${line}</td></tr>`;
+      return `<tr><td style="padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #f0f0f0;">${desc}<br/><span style="font-size:11px;color:#888">${sub}</span></td><td style="padding:10px 14px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #f0f0f0;white-space:nowrap;">${line}</td></tr>`;
     })
     .join('');
   const poBlock =
     order.po || order.notes
-      ? `<tr><td style="padding:0 36px 24px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf0;border:1px solid #f0e0a0;border-radius:4px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ${po}</div><div style="font-size:12px;color:#666;"><strong style="color:#333">Notes:</strong> ${notes}</div></td></tr></table></td></tr>`
+      ? `<tr><td class="email-pad" style="padding:0 36px 24px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;border-radius:4px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ${po}</div><div style="font-size:12px;color:#666;"><strong style="color:#333">Notes:</strong> ${notes}</div></td></tr></table></td></tr>`
       : '';
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body style="margin:0;padding:0;background:#f4f4f4;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:4px;overflow:hidden;"><tr><td style="background:#0C1117;padding:28px 36px;border-bottom:4px solid #C8981F;"><div style="font-family:Arial Black,Arial,sans-serif;font-size:20px;font-weight:900;color:#FFFFFF;letter-spacing:2px;">ALL PRO BUILDING SUPPLIES</div><div style="font-size:11px;color:#C8981F;letter-spacing:3px;margin-top:3px;">LLC</div></td></tr><tr><td style="padding:32px 36px 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>${name}</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;">Thank you for your order! We have received it and will be in touch shortly.</p></td></tr><tr><td style="padding:24px 36px 0;"><table width="100%" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td style="padding:16px 20px;"><div style="font-size:10px;color:#888;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;">${orderId}</div></td><td style="padding:16px 20px;"><div style="font-size:10px;color:#888;">Date</div><div>${dateStr}</div></td><td style="padding:16px 20px;"><div style="font-size:10px;color:#888;">Delivery</div><div>${addr}</div></td></tr></table></td></tr><tr><td style="padding:24px 36px 0;"><table width="100%" style="border:1px solid #e8e8e8;">${rows}</table></td></tr><tr><td style="padding:0 36px;text-align:right;"><span style="font-size:22px;font-weight:700;">${total}</span></td></tr>${poBlock}<tr><td style="padding:24px 36px;"><p style="font-size:14px;color:#444;">Questions? Call <a href="tel:17327341123" style="color:#C8981F;">732-734-1123</a></p></td></tr></table></td></tr></table></body></html>`;
+  const body = `<tr><td class="email-pad" style="padding:32px 36px 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>${name}</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Thank you for your order! We have received it and will be in touch shortly.</p></td></tr><tr><td class="email-pad" style="padding:24px 36px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border:1px solid #e8e8e8;border-radius:4px;"><tr><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">${orderId}</div></td><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">${dateStr}</div></td><td class="email-stack" style="padding:16px 20px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Delivery</div><div style="font-size:13px;color:#222;">${addr}</div></td></tr></table></td></tr><tr><td class="email-pad" style="padding:24px 36px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e8e8e8;border-radius:4px;overflow:hidden;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:right;">Total</td></tr>${rows}</table></td></tr><tr><td class="email-pad" style="padding:16px 36px 0;text-align:right;"><span style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Order Total&nbsp;&nbsp;</span><span style="font-size:22px;font-weight:700;color:#0C1117;">${total}</span></td></tr>${poBlock}<tr><td class="email-pad" style="padding:24px 36px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions? Call <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p></td></tr>`;
+  return emailShell(body);
 }
 
 async function loadOwnedOrder(env, orderId, userEmail) {
@@ -572,11 +595,15 @@ async function sendEmailJs(env, templateParams, toEmail) {
   if (!serviceId || !templateId || !publicKey) {
     return { skipped: true, reason: 'Email not configured' };
   }
+  const params = { ...templateParams };
+  if (params.email_subject != null) {
+    params.email_subject = sanitizeEmailSubject(params.email_subject);
+  }
   const body = {
     service_id: serviceId,
     template_id: templateId,
     user_id: publicKey,
-    template_params: { ...templateParams, to_email: toEmail, cust_email: toEmail },
+    template_params: { ...params, to_email: toEmail, cust_email: toEmail },
   };
   if (env.EMAILJS_PRIVATE_KEY) body.accessToken = env.EMAILJS_PRIVATE_KEY;
   const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
