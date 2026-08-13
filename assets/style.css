@@ -959,6 +959,7 @@ h1.htitle strong { color: var(--gold); }
 .badge{padding:4px 8px;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
 .badge.pending{background:rgba(255,159,67,.15);color:#ff9f43;border:1px solid rgba(255,159,67,.3);}
 .badge.confirmed{background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3);}
+.badge.partially_shipped{background:rgba(155,89,182,.15);color:#bb8fce;border:1px solid rgba(155,89,182,.35);}
 .badge.delivered{background:rgba(52,152,219,.15);color:#3498db;border:1px solid rgba(52,152,219,.3);}
 .badge.cancelled{background:rgba(255,107,107,.15);color:#ff6b6b;border:1px solid rgba(255,107,107,.3);}
 

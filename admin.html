@@ -245,7 +245,10 @@
           <tr>
             <th>Item</th>
             <th>Cases</th>
-            <th>Pieces</th>
+            <th>Ordered</th>
+            <th>Shipped</th>
+            <th>Backorder</th>
+            <th style="color:var(--gold);">Ship Now</th>
             <th>Unit Price ($)</th>
             <th style="text-align:right">Line Total</th>
             <th></th>
@@ -253,6 +256,20 @@
         </thead>
         <tbody id="m-items-tbody"></tbody>
       </table>
+
+      <div id="shipment-panel" style="padding:16px;border-top:1px solid rgba(200,152,31,.25);background:rgba(12,17,23,.45);">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+          <div style="max-width:640px;">
+            <div class="modal-lbl" style="color:var(--gold);margin-bottom:4px;">Partial shipments / backorders</div>
+            <p style="font-size:12px;color:var(--silver);margin:0;line-height:1.5;">Enter <strong style="color:var(--gold);">Ship Now</strong> qty per line (≤ backorder), then record the shipment. Packing slips and invoices can target a specific shipment so you only bill what went out.</p>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button type="button" class="btn-view" id="btn-fill-ship-remaining" onclick="fillShipNowRemaining()">Fill remaining</button>
+            <button type="button" class="btn-save" id="btn-record-shipment" style="padding:10px 16px;" onclick="recordShipment()">📦 Record Shipment</button>
+          </div>
+        </div>
+        <div id="shipments-history" style="font-size:12px;color:var(--silver);"></div>
+      </div>
       
       <div class="add-item-bar locked-input" id="add-item-container">
         <div class="add-item-col" style="flex:2; min-width:200px;">
@@ -337,6 +354,7 @@
           <select id="m-status-sel" class="data-input" style="margin-bottom:16px;" onchange="toggleEditLock(this.value)">
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
+            <option value="partially_shipped">Partially Shipped</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
@@ -362,13 +380,19 @@
     <div class="modal-title" style="color:#3498db; border-color:rgba(52,152,219,.3);">Email Command Center</div>
     
     <div class="modal-lbl" style="color:var(--white)">1. Select Email Format</div>
-    <select id="email-format-sel" class="data-input" style="margin-bottom:24px; border-color:#3498db;" onchange="onEmailFormatChange()">
+    <select id="email-format-sel" class="data-input" style="margin-bottom:16px; border-color:#3498db;" onchange="onEmailFormatChange()">
       <option value="confirm">Order Confirmation / Update</option>
       <option value="packing">Packing Slip (No Pricing)</option>
       <option value="deliver">Delivery Confirmation (Thank You)</option>
       <option value="invoice">Formal Invoice (With Payment Info)</option>
     </select>
-    <p id="email-format-hint" style="display:none;color:var(--silver);font-size:12px;margin:-12px 0 20px;line-height:1.5;"></p>
+    <p id="email-format-hint" style="display:none;color:var(--silver);font-size:12px;margin:-4px 0 16px;line-height:1.5;"></p>
+
+    <div id="email-shipment-wrap" style="display:none;margin-bottom:20px;">
+      <div class="modal-lbl" style="color:var(--white)">Shipment for this email</div>
+      <select id="email-shipment-sel" class="data-input" style="border-color:#2ecc71;"></select>
+      <p style="font-size:11px;color:var(--silver);margin:8px 0 0;line-height:1.4;">Packing slip / invoice / delivery emails use the selected shipment quantities and totals (not the full order).</p>
+    </div>
 
     <div class="modal-lbl" style="color:var(--white)">2. Select Recipients</div>
     <div style="background:var(--ink2); padding:16px; border:1px solid rgba(139,160,178,.2); margin-bottom:24px;">
@@ -1510,9 +1534,15 @@ function toggleEditLock(status) {
     el.style.opacity = isLocked ? '0.5' : '1';
   });
   
-  document.querySelectorAll('.edit-cases, .edit-pcs, .edit-price').forEach(inp => {
+  document.querySelectorAll('.edit-cases, .edit-pcs, .edit-price, .edit-ship-now').forEach(inp => {
     inp.disabled = isLocked;
     inp.style.opacity = isLocked ? '0.6' : '1';
+  });
+  ['btn-record-shipment', 'btn-fill-ship-remaining'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.disabled = isLocked;
+    el.style.opacity = isLocked ? '0.5' : '1';
   });
   document.querySelectorAll('#m-items-tbody .btn-del').forEach(btn => {
     btn.disabled = isLocked;
@@ -1573,12 +1603,16 @@ async function openOrderModal(orderId) {
       status: 'pending',
       customer: { name: '', company: '', email: '', phone: '' },
       delivery: { method: 'delivery', address: '' },
-      po: '', notes: '', total: 0, items: []
+      po: '', notes: '', total: 0, items: [], shipments: []
     };
     document.getElementById('modal-main-title').textContent = 'Create New Order: ' + newId;
   }
 
   if(!activeOrderObj) return;
+  if (!Array.isArray(activeOrderObj.shipments)) activeOrderObj.shipments = [];
+  (activeOrderObj.items || []).forEach(function (it) {
+    if (it.qtyShipped == null) it.qtyShipped = 0;
+  });
   
   document.getElementById('edit-cust-name').value = activeOrderObj.customer.name || '';
   document.getElementById('edit-cust-company').value = activeOrderObj.customer.company || '';
@@ -1623,6 +1657,7 @@ function addItemToOrder() {
     size: prod.size,
     pcsPerCtn: prod.pack,
     qty: qty,
+    qtyShipped: 0,
     unitPrice: prod.price,
     lineTotal: prod.price * qty
   });
@@ -1905,6 +1940,7 @@ function confirmOrderLinesUpload() {
       size: row.size,
       pcsPerCtn: row.pcsPerCtn,
       qty: row.qty,
+      qtyShipped: 0,
       unitPrice: row.unitPrice,
       lineTotal: row.lineTotal
     });
@@ -1913,6 +1949,35 @@ function confirmOrderLinesUpload() {
   cancelOrderLinesPreview();
   renderEditableItems();
   showStatus(valid.length + ' line' + (valid.length === 1 ? '' : 's') + ' added from CSV. Review and Save when ready.', false);
+}
+
+function itemBackorderQty(item) {
+  const ordered = parseInt(item.qty, 10) || 0;
+  let shipped = parseInt(item.qtyShipped, 10);
+  if (!Number.isFinite(shipped) || shipped < 0) shipped = 0;
+  return Math.max(0, ordered - shipped);
+}
+
+function renderShipmentsHistory() {
+  const el = document.getElementById('shipments-history');
+  if (!el || !activeOrderObj) return;
+  const ships = Array.isArray(activeOrderObj.shipments) ? activeOrderObj.shipments : [];
+  if (!ships.length) {
+    el.innerHTML = '<em style="color:var(--smoke);">No shipments recorded yet.</em>';
+    return;
+  }
+  el.innerHTML = ships.map(function (s, i) {
+    const when = s.shippedAt ? new Date(s.shippedAt).toLocaleString() : '';
+    const lines = (s.items || []).map(function (it) {
+      return escAttr(it.description || it.code || '') + (it.size ? ' ' + escAttr(it.size) : '') +
+        ' × <strong style="color:var(--white)">' + escAttr(String(it.qty)) + '</strong>';
+    }).join('<br>');
+    return '<div style="padding:10px 12px;margin-bottom:8px;border:1px solid rgba(139,160,178,.25);background:rgba(0,0,0,.2);">' +
+      '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px;">' +
+      '<strong style="color:var(--gold);font-family:monospace;">' + escAttr(s.id || ('SHIP-' + (i + 1))) + '</strong>' +
+      '<span>' + escAttr(when) + ' · $' + (Number(s.subtotal) || 0).toFixed(2) + '</span></div>' +
+      '<div style="line-height:1.55;">' + lines + '</div></div>';
+  }).join('');
 }
 
 function renderEditableItems() {
@@ -1934,11 +1999,17 @@ function renderEditableItems() {
     
     let currentCases = item.qty / packNum;
     let displayCases = Number.isInteger(currentCases) ? currentCases : currentCases.toFixed(2);
+    let shipped = parseInt(item.qtyShipped, 10);
+    if (!Number.isFinite(shipped) || shipped < 0) shipped = 0;
+    const backorder = Math.max(0, (parseInt(item.qty, 10) || 0) - shipped);
     
     html += `<tr>
       <td data-label="Item">${escAttr(displayDesc)} ${escAttr(item.size)}<br><span style="font-size:10px;color:var(--silver)">${escAttr(item.code)} (Pack: ${item.pcsPerCtn || '-'})</span></td>
       <td data-label="Cases"><input type="number" class="data-input edit-cases" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${displayCases}" min="0" step="any" style="width:70px;" oninput="rowCalcCases(${idx})"></td>
-      <td data-label="Pieces"><input type="number" class="data-input edit-pcs" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${item.qty}" min="1" style="width:70px;" oninput="rowCalcPieces(${idx})"></td>
+      <td data-label="Ordered"><input type="number" class="data-input edit-pcs" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${item.qty}" min="1" style="width:70px;" oninput="rowCalcPieces(${idx})"></td>
+      <td data-label="Shipped" class="shipped-cell" style="font-family:monospace;color:var(--white);">${shipped}</td>
+      <td data-label="Backorder" class="backorder-cell" style="font-family:monospace;color:${backorder ? '#bb8fce' : 'var(--silver)'};">${backorder}</td>
+      <td data-label="Ship Now"><input type="number" class="data-input edit-ship-now" data-idx="${idx}" data-backorder="${backorder}" value="" min="0" max="${backorder}" placeholder="0" style="width:70px;border-color:rgba(200,152,31,.45);" oninput="clampShipNow(${idx})"></td>
       <td data-label="Unit Price"><input type="number" step="0.01" class="data-input edit-price" data-idx="${idx}" value="${(item.unitPrice||0).toFixed(2)}" style="width:90px;" oninput="liveRecalc()"></td>
       <td data-label="Line Total" class="live-line-tot" style="text-align:right;font-family:monospace;color:var(--white)">$${lineTot.toFixed(2)}</td>
       <td data-label="Action"><button class="btn-del" onclick="removeOrderItem(${idx})">X</button></td>
@@ -1947,7 +2018,119 @@ function renderEditableItems() {
   
   document.getElementById('m-items-tbody').innerHTML = html;
   document.getElementById('m-total').textContent = '$' + calcTotal.toFixed(2);
+  renderShipmentsHistory();
   toggleEditLock(document.getElementById('m-status-sel').value);
+}
+
+function clampShipNow(idx) {
+  const inp = document.querySelectorAll('.edit-ship-now')[idx];
+  if (!inp) return;
+  const max = parseInt(inp.dataset.backorder, 10) || 0;
+  let v = parseInt(inp.value, 10);
+  if (!Number.isFinite(v) || v < 0) v = 0;
+  if (v > max) {
+    v = max;
+    inp.value = max ? String(max) : '';
+    showStatus('Ship Now cannot exceed backorder (' + max + ').', true);
+  }
+}
+
+function fillShipNowRemaining() {
+  if (!activeOrderObj) return;
+  document.querySelectorAll('.edit-ship-now').forEach(function (inp) {
+    const max = parseInt(inp.dataset.backorder, 10) || 0;
+    inp.value = max > 0 ? String(max) : '';
+  });
+}
+
+async function recordShipment() {
+  if (!activeOrderObj) return;
+  const status = document.getElementById('m-status-sel').value;
+  if (status === 'delivered' || status === 'cancelled') {
+    alert('Unlock the order (or set status to Confirmed / Partially Shipped) before recording a shipment.');
+    return;
+  }
+
+  // Sync ordered qty + prices from inputs first
+  const qtys = document.querySelectorAll('.edit-pcs');
+  const prices = document.querySelectorAll('.edit-price');
+  const shipIns = document.querySelectorAll('.edit-ship-now');
+  qtys.forEach(function (qInput, i) {
+    const q = parseInt(qInput.value, 10) || 0;
+    const p = parseFloat(prices[i].value) || 0;
+    activeOrderObj.items[i].qty = q;
+    activeOrderObj.items[i].unitPrice = p;
+    activeOrderObj.items[i].lineTotal = q * p;
+    let shipped = parseInt(activeOrderObj.items[i].qtyShipped, 10);
+    if (!Number.isFinite(shipped) || shipped < 0) shipped = 0;
+    if (shipped > q) shipped = q;
+    activeOrderObj.items[i].qtyShipped = shipped;
+  });
+
+  const shipItems = [];
+  let shipTotal = 0;
+  shipIns.forEach(function (inp, i) {
+    const item = activeOrderObj.items[i];
+    const backorder = itemBackorderQty(item);
+    let qty = parseInt(inp.value, 10) || 0;
+    if (qty < 1) return;
+    if (qty > backorder) qty = backorder;
+    const unitPrice = Number(item.unitPrice) || 0;
+    const lineTotal = qty * unitPrice;
+    shipTotal += lineTotal;
+    shipItems.push({
+      code: item.code,
+      size: item.size || '',
+      description: item.description || '',
+      qty: qty,
+      unitPrice: unitPrice,
+      lineTotal: lineTotal
+    });
+  });
+
+  if (!shipItems.length) {
+    alert('Enter a Ship Now quantity on at least one line.');
+    return;
+  }
+
+  if (!Array.isArray(activeOrderObj.shipments)) activeOrderObj.shipments = [];
+  const shipNum = activeOrderObj.shipments.length + 1;
+  const shipment = {
+    id: 'SHIP-' + shipNum,
+    shippedAt: new Date().toISOString(),
+    note: '',
+    items: shipItems,
+    subtotal: shipTotal
+  };
+
+  const summary = shipItems.map(function (it) {
+    return '• ' + (it.description || it.code) + (it.size ? ' ' + it.size : '') + ' × ' + it.qty;
+  }).join('\\n');
+  if (!confirm('Record shipment ' + shipment.id + '?\\n\\n' + summary + '\\n\\nSubtotal: $' + shipTotal.toFixed(2))) return;
+
+  shipItems.forEach(function (si) {
+    const line = activeOrderObj.items.find(function (it) {
+      return String(it.code) === String(si.code) && String(it.size || '') === String(si.size || '');
+    });
+    if (!line) return;
+    line.qtyShipped = (parseInt(line.qtyShipped, 10) || 0) + si.qty;
+  });
+  activeOrderObj.shipments.push(shipment);
+
+  const allDone = activeOrderObj.items.every(function (it) { return itemBackorderQty(it) === 0; });
+  if (allDone) {
+    document.getElementById('m-status-sel').value = 'delivered';
+    activeOrderObj.status = 'delivered';
+  } else {
+    document.getElementById('m-status-sel').value = 'partially_shipped';
+    activeOrderObj.status = 'partially_shipped';
+  }
+
+  // Persist via existing save path
+  const ok = await saveOrderChanges({ keepOpen: true });
+  if (!ok) return;
+  renderEditableItems();
+  showStatus('Shipment ' + shipment.id + ' recorded' + (allDone ? ' — order fully shipped.' : ' — backorder remains.'), false);
 }
 
 function rowCalcCases(idx) {
@@ -2038,10 +2221,11 @@ function deleteActiveOrder() {
   deleteOrder(activeOrderObj.id);
 }
 
-async function saveOrderChanges() {
-  if(!activeOrderObj) return;
+async function saveOrderChanges(opts) {
+  opts = opts || {};
+  if(!activeOrderObj) return false;
   const name = document.getElementById('edit-cust-name').value.trim();
-  if(!name) { alert("Customer Name is required."); return; }
+  if(!name) { alert("Customer Name is required."); return false; }
   
   activeOrderObj.customer.name = name;
   activeOrderObj.customer.company = document.getElementById('edit-cust-company').value.trim();
@@ -2058,6 +2242,10 @@ async function saveOrderChanges() {
     activeOrderObj.items[i].qty = q;
     activeOrderObj.items[i].unitPrice = p;
     activeOrderObj.items[i].lineTotal = q * p;
+    let shipped = parseInt(activeOrderObj.items[i].qtyShipped, 10);
+    if (!Number.isFinite(shipped) || shipped < 0) shipped = 0;
+    if (shipped > q) shipped = q;
+    activeOrderObj.items[i].qtyShipped = shipped;
     newTotal += (q * p);
     const cat = window.apbsFindProduct
       ? window.apbsFindProduct(masterProducts, activeOrderObj.items[i].code, activeOrderObj.items[i].size)
@@ -2070,6 +2258,7 @@ async function saveOrderChanges() {
     }
   });
   activeOrderObj.total = newTotal;
+  if (!Array.isArray(activeOrderObj.shipments)) activeOrderObj.shipments = [];
   
   try {
     const r = await adminFetch('/admin/orders', { method:'POST', body: JSON.stringify(activeOrderObj) });
@@ -2079,10 +2268,13 @@ async function saveOrderChanges() {
     }
     const saved = await r.json().catch(() => ({}));
     if (saved && saved.orderId) activeOrderObj.id = saved.orderId;
-    showStatus('Order ' + activeOrderObj.id + ' saved.', false); 
-    closeOrderModal({target: {id: 'order-modal-overlay'}}); 
-    loadOrders(); 
-  } catch(e) { showStatus('Save Failed: ' + e.message, true); }
+    showStatus('Order ' + activeOrderObj.id + ' saved.', false);
+    if (!opts.keepOpen) {
+      closeOrderModal({target: {id: 'order-modal-overlay'}});
+    }
+    loadOrders();
+    return true;
+  } catch(e) { showStatus('Save Failed: ' + e.message, true); return false; }
 }
 
 // --- CONSOLIDATED EMAIL LOGIC ---
@@ -2110,6 +2302,7 @@ function openEmailModal(e) {
   let btn = document.getElementById('btn-execute-send');
   btn.disabled = false; btn.innerHTML = '🚀 Send Email(s)'; btn.style.background = '#3498db';
 
+  populateEmailShipmentSelect();
   onEmailFormatChange();
   document.getElementById('email-modal-overlay').style.display = 'flex';
 }
@@ -2117,14 +2310,82 @@ function openEmailModal(e) {
 function onEmailFormatChange() {
   const sel = document.getElementById('email-format-sel');
   const hint = document.getElementById('email-format-hint');
+  const shipWrap = document.getElementById('email-shipment-wrap');
   if (!sel || !hint) return;
+  const needsShipment = sel.value === 'packing' || sel.value === 'invoice' || sel.value === 'deliver';
+  if (shipWrap) shipWrap.style.display = needsShipment ? 'block' : 'none';
   if (sel.value === 'packing') {
     hint.style.display = 'block';
-    hint.innerHTML = 'Packing slip shows product, <strong style="color:var(--gold);">qty ordered</strong>, and <strong style="color:var(--gold);">qty delivered</strong> — no prices. Full-width layout sized for <strong style="color:var(--gold);">US Letter</strong> print/PDF. Delivered qty defaults to ordered qty (edit line pieces on the order first for partials).';
+    hint.innerHTML = 'Packing slip: <strong style="color:var(--gold);">qty ordered</strong> vs <strong style="color:var(--gold);">qty delivered</strong> for the selected shipment — no prices. Full-width US Letter print layout.';
+  } else if (sel.value === 'invoice') {
+    hint.style.display = 'block';
+    hint.innerHTML = 'Invoice bills <strong style="color:var(--gold);">only the selected shipment</strong> quantities and amount due. Full-width US Letter print layout.';
+  } else if (sel.value === 'deliver') {
+    hint.style.display = 'block';
+    hint.innerHTML = 'Delivery thank-you can reference the selected shipment. Full-width US Letter print layout.';
   } else {
-    hint.style.display = 'none';
-    hint.textContent = '';
+    hint.style.display = 'block';
+    hint.innerHTML = 'Confirmation shows the <strong style="color:var(--gold);">full order</strong> (all lines + pricing). Full-width US Letter print layout.';
   }
+}
+
+function populateEmailShipmentSelect() {
+  const sel = document.getElementById('email-shipment-sel');
+  if (!sel || !activeOrderObj) return;
+  const ships = Array.isArray(activeOrderObj.shipments) ? activeOrderObj.shipments : [];
+  if (!ships.length) {
+    sel.innerHTML = '<option value="">No shipments yet — record a shipment on the order first</option>';
+    return;
+  }
+  sel.innerHTML = ships.map(function (s, i) {
+    const label = (s.id || ('SHIP-' + (i + 1))) + ' · ' +
+      (s.shippedAt ? new Date(s.shippedAt).toLocaleDateString() : '') +
+      ' · $' + (Number(s.subtotal) || 0).toFixed(2);
+    return '<option value="' + i + '"' + (i === ships.length - 1 ? ' selected' : '') + '>' + escAttr(label) + '</option>';
+  }).join('');
+}
+
+function getSelectedShipment() {
+  if (!activeOrderObj || !Array.isArray(activeOrderObj.shipments) || !activeOrderObj.shipments.length) return null;
+  const sel = document.getElementById('email-shipment-sel');
+  const idx = sel ? parseInt(sel.value, 10) : NaN;
+  if (!Number.isFinite(idx) || idx < 0 || idx >= activeOrderObj.shipments.length) {
+    return activeOrderObj.shipments[activeOrderObj.shipments.length - 1];
+  }
+  return activeOrderObj.shipments[idx];
+}
+
+/** Build a view of the order scoped to one shipment (for packing / invoice / deliver). */
+function orderViewForShipment(order, shipment) {
+  if (!shipment) return order;
+  const byKey = {};
+  (order.items || []).forEach(function (it) {
+    byKey[String(it.code) + '||' + String(it.size || '')] = it;
+  });
+  const items = (shipment.items || []).map(function (si) {
+    const key = String(si.code) + '||' + String(si.size || '');
+    const ordered = byKey[key];
+    const qty = parseInt(si.qty, 10) || 0;
+    const unitPrice = Number(si.unitPrice != null ? si.unitPrice : (ordered && ordered.unitPrice)) || 0;
+    return {
+      code: si.code,
+      size: si.size || '',
+      description: si.description || (ordered && ordered.description) || '',
+      qty: qty,
+      qtyOrdered: ordered ? ordered.qty : qty,
+      qtyDelivered: qty,
+      unitPrice: unitPrice,
+      lineTotal: qty * unitPrice,
+      pcsPerCtn: ordered ? ordered.pcsPerCtn : 1
+    };
+  });
+  const total = items.reduce(function (s, it) { return s + (Number(it.lineTotal) || 0); }, 0);
+  return Object.assign({}, order, {
+    items: items,
+    total: total,
+    shipmentId: shipment.id || '',
+    shipmentDate: shipment.shippedAt || order.placedAt
+  });
 }
 
 function closeEmailModal(e) {
@@ -2154,35 +2415,30 @@ function emailEscape(s) {
 
 function emailNoteRow(note) {
   if (!note) return '';
-  return '<tr><td class="email-pad" style="padding:20px 36px 0;"><div style="background:#fffbf0;border-left:4px solid #C8981F;padding:16px;border-radius:0 4px 4px 0;"><div style="font-size:11px;color:#C8981F;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Message from All Pro:</div><div style="font-size:14px;color:#333;line-height:1.6;">' +
+  return '<tr><td class="email-pad" style="padding:16px 28px 0;"><div style="background:#fffbf0;border-left:4px solid #C8981F;padding:16px;"><div style="font-size:11px;color:#C8981F;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Message from All Pro:</div><div style="font-size:14px;color:#333;line-height:1.6;">' +
     emailEscape(note).replace(/\n/g, '<br>') +
     '</div></div></td></tr>';
 }
 
 function emailItemRows(items) {
-  return (items || []).map(function (i) {
-    return '<tr><td style="padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #f0f0f0;">' +
+  return (items || []).map(function (i, idx) {
+    const rowBg = (idx % 2 === 0) ? '#ffffff' : '#e8ecef';
+    const cell = 'padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #e8e8e8;background:' + rowBg + ';';
+    return '<tr><td style="' + cell + '">' +
       emailEscape((i.description || '') + ' ' + (i.size || '')) +
       '<br/><span style="font-size:11px;color:#888">' + emailEscape(String(i.qty)) +
       ' pcs @ $' + (Number(i.unitPrice) || 0).toFixed(2) +
-      '</span></td><td style="padding:10px 14px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #f0f0f0;white-space:nowrap;">$' +
+      '</span></td><td style="' + cell + 'text-align:right;white-space:nowrap;">$' +
       (Number(i.lineTotal) || 0).toFixed(2) + '</td></tr>';
   }).join('');
 }
 
-/** Fluid email shell: full width on mobile, up to 720px on desktop (Outlook-safe). */
-function wrapOrderEmail(badgeLabel, badgeBg, badgeColor, bodyRowsHtml) {
-  return '<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>All Pro Building Supplies</title><!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>table{border-collapse:collapse;}td{font-family:Arial,sans-serif;}</style><![endif]--><style type="text/css">html,body{margin:0!important;padding:0!important;width:100%!important;}body{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}img{border:0;height:auto;line-height:100%;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}@media only screen and (max-width:640px){.email-shell{width:100%!important;max-width:100%!important;}.email-pad{padding-left:16px!important;padding-right:16px!important;}.email-stack{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;border-right:0!important;}.email-stack+.email-stack{border-top:1px solid #e8e8e8!important;}}</style></head><body style="margin:0;padding:0;background:#f4f4f4;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f4;width:100%;border-collapse:collapse;"><tr><td align="center" style="padding:24px 12px;"><!--[if mso]><table role="presentation" width="720" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]--><table role="presentation" class="email-shell" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:720px;width:100%;background:#ffffff;border-radius:4px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-collapse:collapse;"><tr><td class="email-pad" style="background:#0C1117;padding:28px 36px;border-bottom:4px solid #C8981F;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="email-stack" style="vertical-align:middle;"><div style="font-family:Arial Black,Arial,sans-serif;font-size:20px;font-weight:900;color:#FFFFFF;letter-spacing:2px;text-transform:uppercase;">ALL PRO BUILDING SUPPLIES</div><div style="font-size:11px;color:#C8981F;letter-spacing:3px;text-transform:uppercase;margin-top:3px;">LLC</div></td><td class="email-stack" align="right" style="vertical-align:middle;padding-top:8px;"><div style="background:' + badgeBg + ';color:' + badgeColor + ';font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border-radius:2px;display:inline-block;">' + emailEscape(badgeLabel) + '</div></td></tr></table></td></tr>' +
-    bodyRowsHtml +
-    '<tr><td class="email-pad" style="background:#0C1117;padding:20px 36px;text-align:center;"><div style="font-size:12px;color:#888;">&copy; 2026 All Pro Building Supplies LLC</div></td></tr></table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>';
-}
-
 /**
- * Full-width packing slip shell sized for letter (8.5×11) print.
- * Uses 100% width (no 720px email cap) + @page letter rules.
+ * Full-width letter-printable email shell (shared by all admin email formats).
  */
-function wrapPackingSlipEmail(badgeLabel, badgeBg, badgeColor, bodyRowsHtml) {
-  return '<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Packing Slip — All Pro Building Supplies</title><!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>table{border-collapse:collapse;}td{font-family:Arial,sans-serif;}</style><![endif]--><style type="text/css">' +
+function wrapOrderEmail(badgeLabel, badgeBg, badgeColor, bodyRowsHtml, titleOpt) {
+  const title = titleOpt || 'All Pro Building Supplies';
+  return '<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>' + emailEscape(title) + '</title><!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>table{border-collapse:collapse;}td{font-family:Arial,sans-serif;}</style><![endif]--><style type="text/css">' +
     'html,body{margin:0!important;padding:0!important;width:100%!important;}' +
     'body{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}' +
     'table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}' +
@@ -2211,22 +2467,27 @@ function wrapPackingSlipEmail(badgeLabel, badgeBg, badgeColor, bodyRowsHtml) {
     '</table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>';
 }
 
+function wrapPackingSlipEmail(badgeLabel, badgeBg, badgeColor, bodyRowsHtml) {
+  return wrapOrderEmail(badgeLabel, badgeBg, badgeColor, bodyRowsHtml, 'Packing Slip — All Pro Building Supplies');
+}
+
 function buildConfirmEmail(order, note) {
   const itemsHtml = emailItemRows(order.items);
+  const pad = '28px';
   const poNotesHtml = (order.po || order.notes)
-    ? '<tr><td class="email-pad" style="padding:0 36px 24px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;border-radius:4px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ' +
+    ? '<tr><td class="email-pad" style="padding:16px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ' +
       emailEscape(order.po || 'N/A') + '</div><div style="font-size:12px;color:#666;"><strong style="color:#333">Notes:</strong> ' +
       emailEscape(order.notes || 'None') + '</div></td></tr></table></td></tr>'
     : '';
   const rows =
-    '<tr><td class="email-pad" style="padding:32px 36px 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Here is a copy of your order. If any changes were made by our team, they are reflected below.</p></td></tr>' +
+    '<tr><td class="email-pad" style="padding:24px ' + pad + ' 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Here is a copy of your order. If any changes were made by our team, they are reflected below.</p></td></tr>' +
     emailNoteRow(note) +
-    '<tr><td class="email-pad" style="padding:24px 36px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border-radius:4px;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">' + emailEscape(new Date(order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:16px 20px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Status &amp; Logistics</div><div style="font-size:13px;color:#222;"><strong>' + emailEscape(String(order.status || '').toUpperCase()) + '</strong><br>' + emailEscape(order.delivery && order.delivery.address ? order.delivery.address : '') + '</div></td></tr></table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:24px 36px 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Items Ordered</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e8e8e8;border-radius:4px;overflow:hidden;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:right;">Total</td></tr>' + itemsHtml + '</table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:0 36px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td></td><td style="padding:16px 0;border-top:2px solid #C8981F;width:220px;" align="right"><span style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Order Total&nbsp;&nbsp;</span><span style="font-size:22px;font-weight:700;color:#0C1117;">$' + (Number(order.total) || 0).toFixed(2) + '</span></td></tr></table></td></tr>' +
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">' + emailEscape(new Date(order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:14px 16px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Status &amp; Logistics</div><div style="font-size:13px;color:#222;"><strong>' + emailEscape(String(order.status || '').toUpperCase()) + '</strong><br>' + emailEscape(order.delivery && order.delivery.address ? order.delivery.address : '') + '</div></td></tr></table></td></tr>' +
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Items Ordered</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e8e8e8;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:right;">Total</td></tr>' + itemsHtml + '</table></td></tr>' +
+    '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td></td><td style="padding:16px 0;border-top:2px solid #C8981F;width:220px;" align="right"><span style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Order Total&nbsp;&nbsp;</span><span style="font-size:22px;font-weight:700;color:#0C1117;">$' + (Number(order.total) || 0).toFixed(2) + '</span></td></tr></table></td></tr>' +
     poNotesHtml +
-    '<tr><td class="email-pad" style="padding:0 36px;"><hr style="border:none;border-top:1px solid #eee;margin:0;"/></td></tr>' +
-    '<tr><td class="email-pad" style="padding:24px 36px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about your order?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
+    '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><hr style="border:none;border-top:1px solid #eee;margin:16px 0 0;"/></td></tr>' +
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 24px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about your order?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
   return wrapOrderEmail('ORDER COPY', '#C8981F', '#0C1117', rows);
 }
 
@@ -2260,11 +2521,17 @@ function buildPackingSlipEmail(order, note) {
   const shipTo = order.delivery && order.delivery.address ? order.delivery.address : '';
   const method = order.delivery && order.delivery.method ? String(order.delivery.method) : '';
   const pad = '28px';
+  const shipLabel = order.shipmentId
+    ? '<div style="font-size:12px;color:#666;margin-top:8px;"><strong style="color:#333">Shipment:</strong> ' + emailEscape(order.shipmentId) +
+      (order.shipmentDate ? ' · ' + emailEscape(new Date(order.shipmentDate).toLocaleDateString()) : '') + '</div>'
+    : '';
   const poNotesHtml = (order.po || order.notes)
     ? '<tr><td class="email-pad" style="padding:16px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ' +
       emailEscape(order.po || 'N/A') + '</div><div style="font-size:12px;color:#666;"><strong style="color:#333">Notes:</strong> ' +
-      emailEscape(order.notes || 'None') + '</div></td></tr></table></td></tr>'
-    : '';
+      emailEscape(order.notes || 'None') + '</div>' + shipLabel + '</td></tr></table></td></tr>'
+    : (shipLabel
+      ? '<tr><td class="email-pad" style="padding:16px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;"><tr><td style="padding:14px 18px;">' + shipLabel + '</td></tr></table></td></tr>'
+      : '');
   const rows =
     '<tr><td class="email-pad" style="padding:24px ' + pad + ' 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Please find the packing slip for your delivery below. Quantities ordered and delivered are listed with no pricing.</p></td></tr>' +
     poNotesHtml +
@@ -2282,26 +2549,37 @@ function buildPackingSlipEmail(order, note) {
 }
 
 function buildDeliveredEmail(order, note) {
+  const pad = '28px';
+  const shipBit = order.shipmentId
+    ? ' Shipment <strong>' + emailEscape(order.shipmentId) + '</strong> for'
+    : '';
+  const amountBit = order.shipmentId
+    ? '<td class="email-stack" style="padding:14px 16px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Shipment Total</div><div style="font-size:14px;font-weight:700;color:#0C1117;">$' + (Number(order.total) || 0).toFixed(2) + '</div></td>'
+    : '<td class="email-stack" style="padding:14px 16px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order Total</div><div style="font-size:14px;font-weight:700;color:#0C1117;">$' + (Number(order.total) || 0).toFixed(2) + '</div></td>';
   const rows =
-    '<tr><td class="email-pad" style="padding:32px 36px 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Great news! Your order <strong>' + emailEscape(order.id) + '</strong> has been successfully delivered or picked up.</p><p style="margin:16px 0 0;font-size:15px;color:#444;line-height:1.6;">Thank you for your business. We truly appreciate you choosing All Pro Building Supplies, and we look forward to outfitting your next job.</p></td></tr>' +
+    '<tr><td class="email-pad" style="padding:24px ' + pad + ' 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Great news!' + shipBit + ' order <strong>' + emailEscape(order.id) + '</strong> has been successfully delivered or picked up.</p><p style="margin:16px 0 0;font-size:15px;color:#444;line-height:1.6;">Thank you for your business. We truly appreciate you choosing All Pro Building Supplies, and we look forward to outfitting your next job.</p></td></tr>' +
     emailNoteRow(note) +
-    '<tr><td class="email-pad" style="padding:24px 36px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border-radius:4px;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td><td class="email-stack" style="padding:16px 20px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order Total</div><div style="font-size:14px;font-weight:700;color:#0C1117;">$' + (Number(order.total) || 0).toFixed(2) + '</div></td></tr></table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:24px 36px 24px;"><hr style="border:none;border-top:1px solid #eee;margin:0;"/></td></tr>' +
-    '<tr><td class="email-pad" style="padding:0 36px 36px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions? We\'re always here:</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td>' + amountBit + '</tr></table></td></tr>' +
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ';"><hr style="border:none;border-top:1px solid #eee;margin:0;"/></td></tr>' +
+    '<tr><td class="email-pad" style="padding:0 ' + pad + ' 24px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions? We\'re always here:</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
   return wrapOrderEmail('ORDER DELIVERED', '#3498db', '#FFFFFF', rows);
 }
 
 function buildInvoiceEmail(order, note) {
   const itemsHtml = emailItemRows(order.items);
+  const pad = '28px';
+  const invLabel = order.shipmentId
+    ? emailEscape(order.id) + ' / ' + emailEscape(order.shipmentId)
+    : emailEscape(order.id);
   const rows =
-    '<tr><td class="email-pad" style="padding:32px 36px 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Please find your invoice for the order below. Thank you for your business!</p></td></tr>' +
+    '<tr><td class="email-pad" style="padding:24px ' + pad + ' 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Please find your invoice' + (order.shipmentId ? ' for shipment <strong>' + emailEscape(order.shipmentId) + '</strong>' : '') + ' below. Thank you for your business!</p></td></tr>' +
     emailNoteRow(note) +
-    '<tr><td class="email-pad" style="padding:24px 36px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border-radius:4px;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Invoice / Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">' + emailEscape(new Date(order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:16px 20px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Logistics</div><div style="font-size:13px;color:#222;">' + emailEscape(order.delivery && order.delivery.address ? order.delivery.address : '') + '</div></td></tr></table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:24px 36px 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Items Billed</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e8e8e8;border-radius:4px;overflow:hidden;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:right;">Total</td></tr>' + itemsHtml + '</table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:0 36px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td></td><td style="padding:16px 0;border-top:2px solid #C8981F;width:220px;" align="right"><span style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Amount Due&nbsp;&nbsp;</span><span style="font-size:22px;font-weight:700;color:#0C1117;">$' + (Number(order.total) || 0).toFixed(2) + '</span></td></tr></table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:0 36px 24px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0f8ff;border:1px solid #a3d5ff;border-radius:4px;"><tr><td style="padding:16px 20px;"><div style="font-size:13px;font-weight:700;color:#2c3e50;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Payment Instructions</div><div style="font-size:13px;color:#34495e;line-height:1.6;"><strong>Zelle:</strong> Please send payment to <strong>payments@allprobuildingsupplies.com</strong> or <strong>allprobuildingsupplies</strong>.<br><div style="margin-top:8px;"><img src="https://allprobuildingsupplies.com/assets/zelle-qr.png" alt="Zelle QR Code" width="140" style="width:140px;max-width:140px;height:auto;border-radius:8px;border:1px solid #ccc;display:block;"></div><span style="font-size:11px;color:#7f8c8d;">*Please include your Order ID (' + emailEscape(order.id) + ') in the memo field.</span></div></td></tr></table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:0 36px;"><hr style="border:none;border-top:1px solid #eee;margin:0;"/></td></tr>' +
-    '<tr><td class="email-pad" style="padding:24px 36px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about this invoice?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Invoice / Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + invLabel + '</div></td><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">' + emailEscape(new Date(order.shipmentDate || order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:14px 16px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Logistics</div><div style="font-size:13px;color:#222;">' + emailEscape(order.delivery && order.delivery.address ? order.delivery.address : '') + '</div></td></tr></table></td></tr>' +
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Items Billed</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e8e8e8;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:right;">Total</td></tr>' + itemsHtml + '</table></td></tr>' +
+    '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td></td><td style="padding:16px 0;border-top:2px solid #C8981F;width:220px;" align="right"><span style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Amount Due&nbsp;&nbsp;</span><span style="font-size:22px;font-weight:700;color:#0C1117;">$' + (Number(order.total) || 0).toFixed(2) + '</span></td></tr></table></td></tr>' +
+    '<tr><td class="email-pad" style="padding:0 ' + pad + ' 20px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0f8ff;border:1px solid #a3d5ff;"><tr><td style="padding:16px 20px;"><div style="font-size:13px;font-weight:700;color:#2c3e50;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Payment Instructions</div><div style="font-size:13px;color:#34495e;line-height:1.6;"><strong>Zelle:</strong> Please send payment to <strong>payments@allprobuildingsupplies.com</strong> or <strong>allprobuildingsupplies</strong>.<br><div style="margin-top:8px;"><img src="https://allprobuildingsupplies.com/assets/zelle-qr.png" alt="Zelle QR Code" width="140" style="width:140px;max-width:140px;height:auto;border-radius:8px;border:1px solid #ccc;display:block;"></div><span style="font-size:11px;color:#7f8c8d;">*Please include your Order ID (' + emailEscape(order.id) + (order.shipmentId ? ' / ' + emailEscape(order.shipmentId) : '') + ') in the memo field.</span></div></td></tr></table></td></tr>' +
+    '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><hr style="border:none;border-top:1px solid #eee;margin:0;"/></td></tr>' +
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 24px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about this invoice?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
   return wrapOrderEmail('INVOICE', '#C8981F', '#0C1117', rows);
 }
 
@@ -2331,10 +2609,17 @@ async function executeSendEmail() {
   }
 
   let htmlBody = '', subject = '';
-  if(type === 'confirm') { htmlBody = buildConfirmEmail(activeOrderObj, customNote); subject = 'Order Update — Confirmation — ' + activeOrderObj.id; } 
-  else if(type === 'packing') { htmlBody = buildPackingSlipEmail(activeOrderObj, customNote); subject = 'Packing Slip — ' + activeOrderObj.id + ' — All Pro Building Supplies'; }
-  else if(type === 'deliver') { htmlBody = buildDeliveredEmail(activeOrderObj, customNote); subject = 'Order Delivered — Thank You! — All Pro Building Supplies'; } 
-  else if(type === 'invoice') { htmlBody = buildInvoiceEmail(activeOrderObj, customNote); subject = 'Invoice — Order ' + activeOrderObj.id + ' — All Pro Building Supplies'; }
+  const shipment = (type === 'packing' || type === 'invoice' || type === 'deliver') ? getSelectedShipment() : null;
+  if ((type === 'packing' || type === 'invoice') && !shipment) {
+    msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b';
+    msgEl.textContent = 'Record a shipment on this order first, then select it for packing slip / invoice.';
+    return;
+  }
+  const shipView = shipment ? orderViewForShipment(activeOrderObj, shipment) : activeOrderObj;
+  if(type === 'confirm') { htmlBody = buildConfirmEmail(activeOrderObj, customNote); subject = 'Order Update — Confirmation — ' + activeOrderObj.id; }
+  else if(type === 'packing') { htmlBody = buildPackingSlipEmail(shipView, customNote); subject = 'Packing Slip — ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies'; }
+  else if(type === 'deliver') { htmlBody = buildDeliveredEmail(shipView, customNote); subject = 'Order Delivered — Thank You! — All Pro Building Supplies'; }
+  else if(type === 'invoice') { htmlBody = buildInvoiceEmail(shipView, customNote); subject = 'Invoice — Order ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies'; }
   const btn = document.getElementById('btn-execute-send');
   btn.disabled = true; btn.innerHTML = 'Sending...';
   msgEl.style.display = 'block'; msgEl.style.color = '#3498db'; msgEl.textContent = 'Processing request...';
