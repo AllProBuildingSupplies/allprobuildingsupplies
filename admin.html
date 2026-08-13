@@ -2198,21 +2198,23 @@ function buildConfirmEmail(order, note) {
 
 /** Packing slip line rows: product + qty ordered + qty delivered (no prices). */
 function emailPackingItemRows(items) {
-  return (items || []).map(function (i) {
+  return (items || []).map(function (i, idx) {
     const ordered = parseInt(i.qtyOrdered != null ? i.qtyOrdered : i.qty, 10) || 0;
     const deliveredRaw = i.qtyDelivered != null ? i.qtyDelivered : (i.deliveredQty != null ? i.deliveredQty : i.qty);
     const delivered = parseInt(deliveredRaw, 10);
     const deliveredQty = Number.isFinite(delivered) ? delivered : ordered;
     const codeSize = [i.code, i.size].filter(Boolean).join(' · ');
+    const rowBg = (idx % 2 === 0) ? '#ffffff' : '#e8ecef';
+    const cell = 'padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #e8e8e8;vertical-align:top;background:' + rowBg + ';';
     return '<tr>' +
-      '<td style="padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #f0f0f0;vertical-align:top;">' +
+      '<td style="' + cell + '">' +
         emailEscape((i.description || '') + (i.size ? ' ' + i.size : '')) +
         (codeSize ? '<br/><span style="font-size:11px;color:#888;">' + emailEscape(codeSize) + '</span>' : '') +
       '</td>' +
-      '<td style="padding:10px 14px;font-size:13px;color:#333;text-align:center;border-bottom:1px solid #f0f0f0;white-space:nowrap;vertical-align:top;">' +
+      '<td style="' + cell + 'text-align:center;white-space:nowrap;">' +
         emailEscape(String(ordered)) +
       '</td>' +
-      '<td style="padding:10px 14px;font-size:13px;color:#333;text-align:center;border-bottom:1px solid #f0f0f0;white-space:nowrap;vertical-align:top;font-weight:700;">' +
+      '<td style="' + cell + 'text-align:center;white-space:nowrap;font-weight:700;">' +
         emailEscape(String(deliveredQty)) +
       '</td>' +
     '</tr>';
@@ -2224,12 +2226,13 @@ function buildPackingSlipEmail(order, note) {
   const shipTo = order.delivery && order.delivery.address ? order.delivery.address : '';
   const method = order.delivery && order.delivery.method ? String(order.delivery.method) : '';
   const poNotesHtml = (order.po || order.notes)
-    ? '<tr><td class="email-pad" style="padding:0 36px 24px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;border-radius:4px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ' +
+    ? '<tr><td class="email-pad" style="padding:20px 36px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;border-radius:4px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ' +
       emailEscape(order.po || 'N/A') + '</div><div style="font-size:12px;color:#666;"><strong style="color:#333">Notes:</strong> ' +
       emailEscape(order.notes || 'None') + '</div></td></tr></table></td></tr>'
     : '';
   const rows =
     '<tr><td class="email-pad" style="padding:32px 36px 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Please find the packing slip for your delivery below. Quantities ordered and delivered are listed with no pricing.</p></td></tr>' +
+    poNotesHtml +
     emailNoteRow(note) +
     '<tr><td class="email-pad" style="padding:24px 36px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border-radius:4px;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td><td class="email-stack" style="padding:16px 20px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">' + emailEscape(new Date(order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:16px 20px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Ship / Deliver To</div><div style="font-size:13px;color:#222;">' +
       (method ? '<strong>' + emailEscape(method.toUpperCase()) + '</strong><br>' : '') +
@@ -2238,7 +2241,6 @@ function buildPackingSlipEmail(order, note) {
     '<tr><td class="email-pad" style="padding:24px 36px 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Packing List</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e8e8e8;border-radius:4px;overflow:hidden;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;">Qty Ordered</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;">Qty Delivered</td></tr>' +
     itemsHtml +
     '</table></td></tr>' +
-    poNotesHtml +
     '<tr><td class="email-pad" style="padding:0 36px;"><hr style="border:none;border-top:1px solid #eee;margin:16px 0 0;"/></td></tr>' +
     '<tr><td class="email-pad" style="padding:24px 36px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about this delivery?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
   return wrapOrderEmail('PACKING SLIP', '#2ecc71', '#0C1117', rows);
