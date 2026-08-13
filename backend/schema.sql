@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS orders (
   po               TEXT,
   notes            TEXT,
   customer_snapshot TEXT,
+  shipments_json   TEXT DEFAULT '[]',
   created_at       TEXT
 );
 
@@ -51,5 +52,6 @@ CREATE TABLE IF NOT EXISTS order_items (
   product_sku       TEXT,
   size              TEXT,
   quantity          INTEGER,
-  price_at_purchase REAL
+  price_at_purchase REAL,
+  qty_shipped       INTEGER DEFAULT 0
 );

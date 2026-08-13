@@ -254,7 +254,7 @@ function userCanOrderPieces(user) {
 }
 
 function emailShell(bodyRowsHtml) {
-  return `<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>All Pro Building Supplies</title><!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>table{border-collapse:collapse;}td{font-family:Arial,sans-serif;}</style><![endif]--><style type="text/css">html,body{margin:0!important;padding:0!important;width:100%!important;}body{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}@media only screen and (max-width:640px){.email-shell{width:100%!important;max-width:100%!important;}.email-pad{padding-left:16px!important;padding-right:16px!important;}.email-stack{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;border-right:0!important;}.email-stack+.email-stack{border-top:1px solid #e8e8e8!important;}}</style></head><body style="margin:0;padding:0;background:#f4f4f4;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f4;width:100%;border-collapse:collapse;"><tr><td align="center" style="padding:24px 12px;"><!--[if mso]><table role="presentation" width="720" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]--><table role="presentation" class="email-shell" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:720px;width:100%;background:#ffffff;border-radius:4px;overflow:hidden;border-collapse:collapse;"><tr><td class="email-pad" style="background:#0C1117;padding:28px 36px;border-bottom:4px solid #C8981F;"><div style="font-family:Arial Black,Arial,sans-serif;font-size:20px;font-weight:900;color:#FFFFFF;letter-spacing:2px;">ALL PRO BUILDING SUPPLIES</div><div style="font-size:11px;color:#C8981F;letter-spacing:3px;margin-top:3px;">LLC</div></td></tr>${bodyRowsHtml}<tr><td class="email-pad" style="background:#0C1117;padding:20px 36px;text-align:center;"><div style="font-size:12px;color:#888;">&copy; 2026 All Pro Building Supplies LLC</div></td></tr></table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>`;
+  return `<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>All Pro Building Supplies</title><!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>table{border-collapse:collapse;}td{font-family:Arial,sans-serif;}</style><![endif]--><style type="text/css">html,body{margin:0!important;padding:0!important;width:100%!important;}body{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}@page{size:letter;margin:0.4in;}@media print{html,body{width:100%!important;background:#ffffff!important;}.email-outer{padding:0!important;background:#ffffff!important;}.email-shell{width:100%!important;max-width:100%!important;box-shadow:none!important;border-radius:0!important;}.email-pad{padding-left:18px!important;padding-right:18px!important;}a{color:inherit!important;text-decoration:none!important;}}@media only screen and (max-width:640px){.email-shell{width:100%!important;max-width:100%!important;}.email-pad{padding-left:16px!important;padding-right:16px!important;}.email-stack{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;border-right:0!important;}.email-stack+.email-stack{border-top:1px solid #e8e8e8!important;}}</style></head><body style="margin:0;padding:0;background:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><table role="presentation" class="email-outer" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;width:100%;border-collapse:collapse;"><tr><td align="center" class="email-outer" style="padding:0;"><!--[if mso]><table role="presentation" width="750" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]--><table role="presentation" class="email-shell" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:100%;width:100%;background:#ffffff;border-collapse:collapse;"><tr><td class="email-pad" style="background:#0C1117;padding:22px 28px;border-bottom:4px solid #C8981F;"><div style="font-family:Arial Black,Arial,sans-serif;font-size:20px;font-weight:900;color:#FFFFFF;letter-spacing:2px;">ALL PRO BUILDING SUPPLIES</div><div style="font-size:11px;color:#C8981F;letter-spacing:3px;margin-top:3px;">LLC</div></td></tr>${bodyRowsHtml}<tr><td class="email-pad" style="background:#0C1117;padding:16px 28px;text-align:center;"><div style="font-size:12px;color:#888;">&copy; 2026 All Pro Building Supplies LLC</div></td></tr></table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>`;
 }
 
 function buildOrderReceivedEmailHtml(order, items) {
@@ -293,34 +293,45 @@ async function loadOwnedOrder(env, orderId, userEmail) {
   const itemRows = await env.DB.prepare('SELECT * FROM order_items WHERE order_id = ?').bind(orderId).all();
   const prods = await env.DB.prepare('SELECT * FROM products').all();
   const items = itemRows.results.map((it) => mapOrderItem(it, prods.results));
-  let customer = { name: 'Unknown', email: em };
-  try {
-    if (order.customer_snapshot) customer = JSON.parse(order.customer_snapshot);
-  } catch (_) {}
-  return {
-    id: order.id,
-    placedAt: order.created_at,
-    status: order.status,
-    total: order.total_amount,
-    delivery: { method: order.delivery_method, address: order.delivery_address || '' },
-    po: order.po || '',
-    notes: order.notes || '',
-    customer,
-    items,
-  };
+  return formatOrderRow(order, items);
 }
 
 function mapOrderItem(it, prods) {
   const match = findProduct(prods, it.product_sku, it.size);
   const canonSize = match ? match.size : normalizeSize(it.size);
+  const qty = parseInt(it.quantity, 10) || 0;
+  let qtyShipped = parseInt(it.qty_shipped, 10);
+  if (!Number.isFinite(qtyShipped) || qtyShipped < 0) qtyShipped = 0;
+  if (qtyShipped > qty) qtyShipped = qty;
   return {
     code: it.product_sku,
     size: canonSize,
-    qty: it.quantity,
+    qty,
+    qtyShipped,
+    qtyBackordered: Math.max(0, qty - qtyShipped),
     unitPrice: it.price_at_purchase,
-    lineTotal: it.quantity * it.price_at_purchase,
+    lineTotal: qty * it.price_at_purchase,
     description: match ? match.description : 'Unknown Product',
     pcsPerCtn: match ? match.pack : 1,
+  };
+}
+
+function formatOrderRow(o, orderItems) {
+  let customer = { name: 'Unknown' };
+  try {
+    if (o.customer_snapshot) customer = JSON.parse(o.customer_snapshot);
+  } catch (_) {}
+  return {
+    id: o.id,
+    placedAt: o.created_at,
+    status: o.status,
+    total: o.total_amount,
+    delivery: { method: o.delivery_method, address: o.delivery_address || '' },
+    po: o.po || '',
+    notes: o.notes || '',
+    customer,
+    items: orderItems,
+    shipments: parseShipmentsJson(o.shipments_json),
   };
 }
 
@@ -446,6 +457,64 @@ async function ensureProductFactoryColumns(env) {
   try {
     await env.DB.prepare(`ALTER TABLE products ADD COLUMN lesso_code TEXT DEFAULT ''`).run();
   } catch (_) {}
+}
+
+/** Partial shipments: cumulative qty_shipped per line + shipments history JSON on orders. */
+async function ensureOrderShipmentColumns(env) {
+  try {
+    await env.DB.prepare(`ALTER TABLE order_items ADD COLUMN qty_shipped INTEGER DEFAULT 0`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN shipments_json TEXT DEFAULT '[]'`).run();
+  } catch (_) {}
+}
+
+function parseShipmentsJson(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function normalizeShipments(shipments) {
+  if (!Array.isArray(shipments)) return [];
+  return shipments
+    .map((s, idx) => {
+      if (!s || typeof s !== 'object') return null;
+      const items = Array.isArray(s.items)
+        ? s.items
+            .map((it) => {
+              const qty = parseInt(it.qty, 10) || 0;
+              if (qty < 1) return null;
+              const unitPrice = Number(it.unitPrice);
+              return {
+                code: String(it.code || '').trim(),
+                size: it.size != null ? String(it.size) : '',
+                description: it.description != null ? String(it.description) : '',
+                qty,
+                unitPrice: Number.isFinite(unitPrice) ? unitPrice : 0,
+                lineTotal:
+                  Number.isFinite(Number(it.lineTotal)) && Number(it.lineTotal) >= 0
+                    ? Number(it.lineTotal)
+                    : qty * (Number.isFinite(unitPrice) ? unitPrice : 0),
+              };
+            })
+            .filter(Boolean)
+        : [];
+      if (!items.length) return null;
+      const subtotal = items.reduce((sum, it) => sum + (Number(it.lineTotal) || 0), 0);
+      return {
+        id: String(s.id || 'SHIP-' + (idx + 1)),
+        shippedAt: s.shippedAt || new Date().toISOString(),
+        note: s.note != null ? String(s.note) : '',
+        items,
+        subtotal: Number.isFinite(Number(s.subtotal)) ? Number(s.subtotal) : subtotal,
+      };
+    })
+    .filter(Boolean);
 }
 
 function factoryCode(value) {
@@ -724,11 +793,17 @@ function validateAdminOrderItems(allProds, items, options = {}) {
     }
     const lineTotal = unitPrice * qty;
     total += lineTotal;
+    let qtyShipped = parseInt(i.qtyShipped, 10);
+    if (!Number.isFinite(qtyShipped) || qtyShipped < 0) qtyShipped = 0;
+    if (qtyShipped > qty) {
+      return { error: `Shipped qty cannot exceed ordered qty for ${match.code} ${match.size}` };
+    }
     validated.push({
       code: match.code,
       size: match.size,
       description: match.description,
       qty,
+      qtyShipped,
       unitPrice,
       lineTotal,
       pcsPerCtn: match.pack,
@@ -816,6 +891,7 @@ export default {
       const auth = await authFromRequest(request, env);
       await ensureAddressesTable(env);
       await ensureProductFactoryColumns(env);
+      await ensureOrderShipmentColumns(env);
       // One-time (idempotent) load of initial Tommur/Lesso codes into products.
       try {
         await seedFactoryCodes(env, canonicalizeSize);
@@ -1172,21 +1248,7 @@ export default {
         const prods = await env.DB.prepare('SELECT * FROM products').all();
         const formattedOrders = orders.results.map((o) => {
           const orderItems = items.results.filter((it) => it.order_id === o.id).map((it) => mapOrderItem(it, prods.results));
-          let customer = { name: 'Unknown', email: em };
-          try {
-            if (o.customer_snapshot) customer = JSON.parse(o.customer_snapshot);
-          } catch (_) {}
-          return {
-            id: o.id,
-            placedAt: o.created_at,
-            status: o.status,
-            total: o.total_amount,
-            delivery: { method: o.delivery_method, address: o.delivery_address || '' },
-            po: o.po || '',
-            notes: o.notes || '',
-            customer,
-            items: orderItems,
-          };
+          return formatOrderRow(o, orderItems);
         });
         return jsonResponse(formattedOrders);
       }
@@ -1544,21 +1606,7 @@ export default {
 
         const formattedOrders = orders.results.map((o) => {
           const orderItems = items.results.filter((i) => i.order_id === o.id).map((i) => mapOrderItem(i, prods.results));
-          let customer = { name: 'Unknown' };
-          try {
-            if (o.customer_snapshot) customer = JSON.parse(o.customer_snapshot);
-          } catch (_) {}
-          return {
-            id: o.id,
-            placedAt: o.created_at,
-            status: o.status,
-            total: o.total_amount,
-            delivery: { method: o.delivery_method, address: o.delivery_address || '' },
-            po: o.po || '',
-            notes: o.notes || '',
-            customer,
-            items: orderItems,
-          };
+          return formatOrderRow(o, orderItems);
         });
         return jsonResponse(formattedOrders);
       }
@@ -1586,11 +1634,14 @@ export default {
         });
         if (priced.error && (o.items || []).length > 0) return jsonResponse({ error: priced.error }, 400);
 
+        const shipments = normalizeShipments(o.shipments);
+        const shipmentsJson = JSON.stringify(shipments);
+
         const stmts = [
           env.DB.prepare(
-            `INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-             ON CONFLICT(id) DO UPDATE SET status=excluded.status, total_amount=excluded.total_amount, delivery_address=excluded.delivery_address, po=excluded.po, notes=excluded.notes, customer_snapshot=excluded.customer_snapshot`
+            `INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, shipments_json, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET status=excluded.status, total_amount=excluded.total_amount, delivery_address=excluded.delivery_address, po=excluded.po, notes=excluded.notes, customer_snapshot=excluded.customer_snapshot, shipments_json=excluded.shipments_json`
           ).bind(
             o.id,
             o.customer?.email || 'unknown',
@@ -1601,6 +1652,7 @@ export default {
             o.po || '',
             o.notes || '',
             JSON.stringify(o.customer || {}),
+            shipmentsJson,
             o.placedAt || new Date().toISOString()
           ),
           env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(o.id),
@@ -1610,8 +1662,8 @@ export default {
         for (const i of itemsToSave) {
           stmts.push(
             env.DB.prepare(
-              'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)'
-            ).bind(o.id, i.code, i.size, i.qty, i.unitPrice)
+              'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase, qty_shipped) VALUES (?, ?, ?, ?, ?, ?)'
+            ).bind(o.id, i.code, i.size, i.qty, i.unitPrice, i.qtyShipped || 0)
           );
         }
         await env.DB.batch(stmts);
