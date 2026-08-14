@@ -534,7 +534,9 @@ const ADMIN_MS_PKCE_KEY = 'apbs_admin_ms_pkce';
 let adminMsConfig = null;
 
 function adminMsRedirectUri() {
-  return window.location.origin + window.location.pathname;
+  // Always use /admin.html so Entra redirect URIs stay stable even if the
+  // browser is on /admin or a Pages preview path variant.
+  return window.location.origin + '/admin.html';
 }
 
 function adminMsRandomString(len) {
