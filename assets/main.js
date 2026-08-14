@@ -2,7 +2,50 @@
 // GLOBAL LAYOUT INJECTION
 // ══════════════════════════════════════════
 
-window.APBS_API_BASE = "https://allpro-api.baruch-6d5.workers.dev/api";
+(function initApbsApiBase() {
+  var host = '';
+  try { host = String(window.location.hostname || '').toLowerCase(); } catch (_) {}
+  // Test/staging hosts → test Worker (never the live domain).
+  var isTest =
+    host === 'allpro-test.pages.dev' ||
+    host.endsWith('.allpro-test.pages.dev') ||
+    host === 'test.allprobuildingsupplies.com' ||
+    host.endsWith('.test.allprobuildingsupplies.com');
+  // Explicit query override for local checks: ?apbs_env=test
+  try {
+    var q = new URLSearchParams(window.location.search || '');
+    if (q.get('apbs_env') === 'test') isTest = true;
+    if (q.get('apbs_env') === 'live') isTest = false;
+  } catch (_) {}
+
+  window.APBS_IS_TEST = !!isTest;
+  window.APBS_API_BASE = isTest
+    ? 'https://allpro-api-test.baruch-6d5.workers.dev/api'
+    : 'https://allpro-api.baruch-6d5.workers.dev/api';
+})();
+
+function apbsShowTestBanner() {
+  if (!window.APBS_IS_TEST) return;
+  if (document.getElementById('apbs-test-banner')) return;
+  var bar = document.createElement('div');
+  bar.id = 'apbs-test-banner';
+  bar.setAttribute('role', 'status');
+  bar.style.cssText = [
+    'position:sticky', 'top:0', 'z-index:100001',
+    'background:#8B1E1E', 'color:#fff',
+    'font-family:DM Mono,monospace', 'font-size:12px', 'letter-spacing:1px',
+    'text-align:center', 'padding:8px 12px',
+    'border-bottom:2px solid #C8981F'
+  ].join(';');
+  bar.innerHTML = 'TEST SITE — not live. Data here will not affect allprobuildingsupplies.com';
+  var root = document.body;
+  if (root) root.insertBefore(bar, root.firstChild);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', apbsShowTestBanner);
+} else {
+  apbsShowTestBanner();
+}
 
 /**
  * Characters Excel/CSV often use (or corrupt into) instead of ASCII "x"

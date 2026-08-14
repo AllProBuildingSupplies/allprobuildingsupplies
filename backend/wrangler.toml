@@ -5,10 +5,25 @@ compatibility_date = "2024-04-21"
 # Secrets (wrangler secret put NAME): ADMIN_TOKEN, JWT_SECRET,
 # EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY,
 # EMAILJS_PRIVATE_KEY (optional), NOTIFY_EMAIL
+#
+# Test/staging Worker (does NOT touch production):
+#   npx wrangler deploy --env test
+#   npx wrangler secret put ADMIN_TOKEN --env test
+#   npx wrangler secret put JWT_SECRET --env test
 
-# Bindings to your D1 Databases
+# Bindings to your D1 Databases (PRODUCTION)
 [[d1_databases]]
 binding = "DB"
 database_name = "allpro-db"
 database_id = "31689783-6a85-460f-b9ac-7ba9d7be8dc0"
 preview_database_id = "cb7c6d87-4ca6-4897-a953-4d81650034b8"
+
+# ── TEST / STAGING ────────────────────────────────────────────
+# Separate Worker name + separate D1 (preview DB). Live site untouched.
+[env.test]
+name = "allpro-api-test"
+
+[[env.test.d1_databases]]
+binding = "DB"
+database_name = "allpro-db"
+database_id = "cb7c6d87-4ca6-4897-a953-4d81650034b8"
