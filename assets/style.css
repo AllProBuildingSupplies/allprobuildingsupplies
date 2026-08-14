@@ -1886,9 +1886,61 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
 .wms-action-row .btn-view { flex: 0 0 auto; }
 .wms-step { min-width: 44px; padding: 0 14px; font-size: 20px; }
 .wms-hint { margin: 8px 0 0; font-size: 12px; color: var(--silver); line-height: 1.4; }
+.wms-section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(200,152,31,.2);
+}
+.wms-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.wms-pick-list, .wms-movements { display: grid; gap: 8px; }
+.wms-pick-row, .wms-move-row {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(139,160,178,.25);
+  background: rgba(12,17,23,.4);
+  color: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.wms-pick-row.is-short { border-color: rgba(231,76,60,.45); }
+.wms-pick-row:active, .wms-pick-row:hover { border-color: var(--gold); }
+.wms-pick-code, .wms-move-main { font-family: 'Oswald', sans-serif; font-size: 16px; color: var(--white); }
+.wms-pick-desc { font-size: 12px; color: var(--silver); }
+.wms-pick-meta, .wms-move-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); }
+.wms-move-row { cursor: default; }
+.fin-panel { max-width: 960px; }
+.fin-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: .04em;
+}
+.fin-unpaid { color: #ffb4a8; border: 1px solid rgba(231,76,60,.4); }
+.fin-partial { color: #f5c76a; border: 1px solid rgba(200,152,31,.45); }
+.fin-paid { color: #8fd6a8; border: 1px solid rgba(46,204,113,.4); }
+.fin-pay-methods {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid rgba(200,152,31,.2);
+  background: rgba(12,17,23,.35);
+  border-radius: 4px;
+}
+.fin-pay-methods-body { font-size: 13px; color: var(--silver); line-height: 1.6; display: grid; gap: 6px; }
 
 @media (max-width: 768px) {
   #tab-stock.admin-panel.active { display: block; }
+  #tab-finance.admin-panel.active { display: block; }
   .wms-qty-val { font-size: 56px; }
   .wms-action-row .btn-save,
   .wms-action-row .btn-add { flex: 1 1 auto; justify-content: center; }

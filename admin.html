@@ -46,6 +46,7 @@
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="switchTab('orders')" data-tab="orders">Orders</button>
       <button class="admin-tab" onclick="switchTab('stock')" data-tab="stock">Stock</button>
+      <button class="admin-tab" onclick="switchTab('finance')" data-tab="finance">Finance</button>
       <button class="admin-tab" onclick="switchTab('products')" data-tab="products">Products</button>
       <button class="admin-tab" onclick="switchTab('users')" data-tab="users">Users</button>
     </div>
@@ -72,6 +73,10 @@
     <button type="button" class="admin-glance-card" onclick="adminMobileOpen('stock')">
       <span class="admin-glance-label">Stock</span>
       <span class="admin-glance-meta" id="glance-stock-count">Receive / adjust →</span>
+    </button>
+    <button type="button" class="admin-glance-card" onclick="adminMobileOpenFinance('open')">
+      <span class="admin-glance-label">Finance</span>
+      <span class="admin-glance-meta" id="glance-finance-count">AR →</span>
     </button>
     <button type="button" class="admin-glance-card" onclick="adminMobileOpen('products')">
       <span class="admin-glance-label">Products</span>
@@ -156,6 +161,52 @@
         </div>
       </div>
       <div id="wms-empty" class="wms-empty">Search a product code to begin.</div>
+
+      <div class="wms-section">
+        <div class="wms-section-head">
+          <div class="wms-action-title" style="margin:0;">Pick list — open backorders</div>
+          <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="renderWmsPickList()">Refresh</button>
+        </div>
+        <p class="wms-hint" style="margin-bottom:10px;">Aggregated from open orders (pending / confirmed / partial). Short = need more than on hand.</p>
+        <div id="wms-pick-list" class="wms-pick-list" aria-live="polite">Loading…</div>
+      </div>
+
+      <div class="wms-section">
+        <div class="wms-section-head">
+          <div class="wms-action-title" style="margin:0;">Recent receive / adjust</div>
+          <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="loadWmsMovements()">Refresh</button>
+        </div>
+        <div id="wms-movements" class="wms-movements" aria-live="polite">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-finance" class="admin-panel">
+    <div class="fin-panel">
+      <p class="wms-lead">Accounts receivable — unpaid invoices, mark paid, and send invoices with card / Zelle / wire / ACH payment options.</p>
+      <div class="oms-status-chips" id="fin-status-chips" role="toolbar" aria-label="Payment status filter">
+        <button type="button" class="oms-chip active" data-fin-pay="open">Open AR</button>
+        <button type="button" class="oms-chip" data-fin-pay="unpaid">Unpaid</button>
+        <button type="button" class="oms-chip" data-fin-pay="partial">Partial</button>
+        <button type="button" class="oms-chip" data-fin-pay="paid">Paid</button>
+        <button type="button" class="oms-chip" data-fin-pay="all">All</button>
+      </div>
+      <div class="oms-queue-meta" id="fin-queue-meta">Loading…</div>
+      <div id="fin-cards" class="orders-cards" aria-live="polite"></div>
+      <div class="admin-orders-desktop-table">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
+          <table class="data-table" style="min-width:720px;">
+            <thead>
+              <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Payment</th><th>Method</th><th>Action</th></tr>
+            </thead>
+            <tbody id="fin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="fin-pay-methods" id="fin-pay-methods">
+        <div class="wms-action-title">Invoice payment options (sent with invoices)</div>
+        <div id="fin-pay-methods-body" class="fin-pay-methods-body">Loading…</div>
+      </div>
     </div>
   </div>
 
@@ -484,6 +535,21 @@
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
+          <div class="modal-lbl" style="color:var(--gold)">Payment</div>
+          <select id="m-payment-sel" class="data-input" style="margin-bottom:8px;">
+            <option value="unpaid">Unpaid</option>
+            <option value="partial">Partial</option>
+            <option value="paid">Paid</option>
+          </select>
+          <select id="m-payment-method" class="data-input" style="margin-bottom:8px;">
+            <option value="">Method —</option>
+            <option value="card">Card</option>
+            <option value="zelle">Zelle</option>
+            <option value="wire">Wire</option>
+            <option value="ach">ACH</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="text" id="m-payment-note" class="data-input" style="margin-bottom:16px;" placeholder="Payment note (optional)">
           <button class="btn-save" style="width:100%;" onclick="saveOrderChanges()">💾 Save All Changes</button>
           <button type="button" class="btn-del" id="btn-delete-order" style="width:100%;margin-top:12px;display:none;" onclick="deleteActiveOrder()">🗑 Delete Order Permanently</button>
         </div>
@@ -877,6 +943,7 @@ function switchTab(tab) {
   if(targetPanel) targetPanel.classList.add('active');
   if (tab === 'products') loadProducts();
   if (tab === 'stock') initWmsStockTab();
+  if (tab === 'finance') initFinanceTab();
   if (tab === 'orders') loadOrders();
   if (tab === 'users') loadUsers();
 }
@@ -897,6 +964,13 @@ function adminMobileOpenOrders(statusFilter) {
   syncOmsStatusChips();
   adminMobileOpen('orders');
   renderOrdersQueue();
+}
+
+function adminMobileOpenFinance(payFilter) {
+  window.finPayFilter = payFilter || 'open';
+  syncFinPayChips();
+  adminMobileOpen('finance');
+  initFinanceTab();
 }
 
 function adminEnableMobileProducts() {
@@ -937,6 +1011,7 @@ function updateAdminGlanceCounts() {
   const o = document.getElementById('glance-orders-count');
   const p = document.getElementById('glance-products-count');
   const s = document.getElementById('glance-stock-count');
+  const f = document.getElementById('glance-finance-count');
   const u = document.getElementById('glance-users-count');
   if (o && Array.isArray(masterOrders)) {
     const openish = masterOrders.filter(orderIsOpen).length;
@@ -951,6 +1026,18 @@ function updateAdminGlanceCounts() {
     setN('glance-pending-n', 'pending');
     setN('glance-confirmed-n', 'confirmed');
     setN('glance-partial-n', 'partially_shipped');
+  }
+  if (f && Array.isArray(masterOrders)) {
+    const unpaidN = masterOrders.filter(function (x) {
+      const ps = String(x.paymentStatus || 'unpaid').toLowerCase();
+      return ps !== 'paid' && String(x.status || '').toLowerCase() !== 'cancelled';
+    }).length;
+    const due = masterOrders.reduce(function (sum, x) {
+      const ps = String(x.paymentStatus || 'unpaid').toLowerCase();
+      if (ps === 'paid' || String(x.status || '').toLowerCase() === 'cancelled') return sum;
+      return sum + (Number(x.total) || 0);
+    }, 0);
+    f.textContent = unpaidN + ' open · $' + due.toFixed(2);
   }
   if (p && Array.isArray(masterProducts)) {
     p.textContent = masterProducts.length + ' SKUs →';
@@ -1053,7 +1140,12 @@ function initWmsStockTab() {
   ensureWmsProductsLoaded().then(function () {
     renderWmsResults();
     renderWmsActive();
+    renderWmsPickList();
   }).catch(function () {});
+  loadWmsMovements();
+  if (!Array.isArray(masterOrders) || !masterOrders.length) {
+    loadOrders().then(function () { renderWmsPickList(); }).catch(function () {});
+  }
   if (wmsSearchBound) return;
   wmsSearchBound = true;
   const search = document.getElementById('wms-search');
@@ -1068,6 +1160,116 @@ function initWmsStockTab() {
         if (first) first.click();
       }
     });
+  }
+}
+
+function wmsStockOnHand(code, size) {
+  const row = (masterProducts || []).find(function (p) {
+    return String(p.code) === String(code) && String(p.size) === String(size);
+  });
+  return row ? (parseInt(row.stock, 10) || 0) : 0;
+}
+
+function buildWmsPickRows() {
+  const map = new Map();
+  (masterOrders || []).filter(orderIsOpen).forEach(function (o) {
+    (o.items || []).forEach(function (it) {
+      const ordered = parseInt(it.qty, 10) || 0;
+      let shipped = parseInt(it.qtyShipped, 10);
+      if (!Number.isFinite(shipped) || shipped < 0) shipped = 0;
+      const need = Math.max(0, ordered - shipped);
+      if (need < 1) return;
+      const code = String(it.code || '').trim();
+      const size = String(it.size || '').trim();
+      if (!code) return;
+      const key = code + '\0' + size;
+      if (!map.has(key)) {
+        map.set(key, {
+          code: code,
+          size: size,
+          description: it.description || '',
+          need: 0,
+          orders: []
+        });
+      }
+      const row = map.get(key);
+      row.need += need;
+      if (row.orders.indexOf(o.id) === -1) row.orders.push(o.id);
+      if (!row.description && it.description) row.description = it.description;
+    });
+  });
+  return Array.from(map.values()).map(function (r) {
+    r.onHand = wmsStockOnHand(r.code, r.size);
+    r.short = Math.max(0, r.need - r.onHand);
+    return r;
+  }).sort(function (a, b) {
+    if (b.short !== a.short) return b.short - a.short;
+    if (a.code !== b.code) return a.code.localeCompare(b.code);
+    return String(a.size).localeCompare(String(b.size));
+  });
+}
+
+function renderWmsPickList() {
+  const box = document.getElementById('wms-pick-list');
+  if (!box) return;
+  const rows = buildWmsPickRows();
+  if (!rows.length) {
+    box.innerHTML = '<div class="wms-miss">No open backorders — pick list is clear.</div>';
+    return;
+  }
+  box.innerHTML = rows.slice(0, 80).map(function (r) {
+    const shortCls = r.short > 0 ? ' is-short' : '';
+    return (
+      '<button type="button" class="wms-pick-row' + shortCls + '" data-code="' + escAttr(r.code) + '" data-size="' + escAttr(r.size) + '">' +
+        '<span class="wms-pick-code">' + escAttr(r.code) + ' · ' + escAttr(r.size) + '</span>' +
+        '<span class="wms-pick-desc">' + escAttr(r.description || '') + '</span>' +
+        '<span class="wms-pick-meta">Need ' + r.need.toLocaleString() +
+          ' · On hand ' + r.onHand.toLocaleString() +
+          (r.short ? (' · Short ' + r.short.toLocaleString()) : '') +
+          ' · ' + r.orders.length + ' order' + (r.orders.length === 1 ? '' : 's') + '</span>' +
+      '</button>'
+    );
+  }).join('');
+  box.querySelectorAll('.wms-pick-row').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      wmsSelectCode(btn.getAttribute('data-code') || '');
+      wmsSelectSize(btn.getAttribute('data-size') || '');
+      const search = document.getElementById('wms-search');
+      if (search) search.value = btn.getAttribute('data-code') || '';
+      renderWmsResults();
+      const active = document.getElementById('wms-active');
+      if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
+}
+
+async function loadWmsMovements() {
+  const box = document.getElementById('wms-movements');
+  if (!box) return;
+  try {
+    const r = await adminFetch('/admin/stock/movements?limit=40');
+    const data = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    const moves = data.movements || [];
+    if (!moves.length) {
+      box.innerHTML = '<div class="wms-miss">No receive/adjust history yet.</div>';
+      return;
+    }
+    box.innerHTML = moves.map(function (m) {
+      const delta = parseInt(m.delta, 10) || 0;
+      const sign = delta > 0 ? '+' : '';
+      const when = m.created_at ? new Date(m.created_at).toLocaleString() : '';
+      return (
+        '<div class="wms-move-row">' +
+          '<span class="wms-move-main">' + escAttr(m.code) + ' ' + escAttr(m.size || '') +
+            ' · <strong>' + sign + delta + '</strong> (' + escAttr(m.reason || '') + ')</span>' +
+          '<span class="wms-move-meta">' + (m.qty_before != null ? (m.qty_before + ' → ' + m.qty_after) : '') +
+            (when ? ' · ' + escAttr(when) : '') + '</span>' +
+        '</div>'
+      );
+    }).join('');
+  } catch (e) {
+    box.innerHTML = '<div class="wms-miss">' + escAttr(e.message || 'Could not load history') + '</div>';
   }
 }
 
@@ -1205,6 +1407,8 @@ async function wmsRefreshAfterChange() {
   await loadProducts();
   renderWmsResults();
   renderWmsActive();
+  renderWmsPickList();
+  loadWmsMovements();
 }
 
 async function wmsReceive() {
@@ -1276,6 +1480,189 @@ async function wmsAdjust() {
     showStatus(e.message || 'Adjust failed', true);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Apply'; }
+  }
+}
+
+// --- Finance / AR ---
+window.finPayFilter = window.finPayFilter || 'open';
+let finChipsBound = false;
+let cachedPaymentMethods = null;
+
+async function getPaymentMethods(force) {
+  if (cachedPaymentMethods && !force) return cachedPaymentMethods;
+  const r = await adminFetch('/admin/payment-methods');
+  const data = await r.json().catch(function () { return {}; });
+  if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  cachedPaymentMethods = data;
+  return data;
+}
+
+function syncFinPayChips() {
+  document.querySelectorAll('#fin-status-chips .oms-chip').forEach(function (btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-fin-pay') === window.finPayFilter);
+  });
+}
+
+function initFinanceTab() {
+  if (!finChipsBound) {
+    finChipsBound = true;
+    const chips = document.getElementById('fin-status-chips');
+    if (chips) {
+      chips.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-fin-pay]');
+        if (!btn) return;
+        window.finPayFilter = btn.getAttribute('data-fin-pay') || 'open';
+        syncFinPayChips();
+        renderFinanceQueue();
+      });
+    }
+  }
+  syncFinPayChips();
+  const ensure = (!Array.isArray(masterOrders) || !masterOrders.length)
+    ? loadOrders()
+    : Promise.resolve();
+  ensure.then(function () {
+    renderFinanceQueue();
+  }).catch(function () {
+    renderFinanceQueue();
+  });
+  renderFinancePaymentMethods();
+}
+
+async function renderFinancePaymentMethods() {
+  const box = document.getElementById('fin-pay-methods-body');
+  if (!box) return;
+  try {
+    const m = await getPaymentMethods(true);
+    const bits = [];
+    if (m.card) {
+      bits.push('<div><strong>Card:</strong> ' +
+        (m.card.url
+          ? ('<a href="' + escAttr(m.card.url) + '" target="_blank" rel="noopener" style="color:var(--gold);">' + escAttr(m.card.url) + '</a>')
+          : 'No PAYMENT_CC_LINK yet — invoices still offer card via contact note') +
+        '</div>');
+    }
+    if (m.zelle) {
+      bits.push('<div><strong>Zelle:</strong> ' + escAttr(m.zelle.email || '') +
+        (m.zelle.handle ? (' / ' + escAttr(m.zelle.handle)) : '') + '</div>');
+    }
+    if (m.wire) {
+      bits.push('<div><strong>Wire:</strong> ' + escAttr(String(m.wire.instructions || '').split('\n')[0]) + '</div>');
+    }
+    if (m.ach) {
+      bits.push('<div><strong>ACH:</strong> ' + escAttr(String(m.ach.instructions || '').split('\n')[0]) + '</div>');
+    }
+    box.innerHTML = bits.join('') || 'Payment methods unavailable.';
+  } catch (e) {
+    box.innerHTML = escAttr(e.message || 'Could not load payment methods');
+  }
+}
+
+function orderPaymentStatus(o) {
+  return String((o && o.paymentStatus) || 'unpaid').toLowerCase() || 'unpaid';
+}
+
+function filteredFinanceOrders() {
+  const f = window.finPayFilter || 'open';
+  return (masterOrders || []).filter(function (o) {
+    const ps = orderPaymentStatus(o);
+    const cancelled = String(o.status || '').toLowerCase() === 'cancelled';
+    if (f === 'all') return true;
+    if (f === 'paid') return ps === 'paid';
+    if (f === 'unpaid') return ps === 'unpaid' && !cancelled;
+    if (f === 'partial') return ps === 'partial' && !cancelled;
+    // open AR
+    return ps !== 'paid' && !cancelled;
+  });
+}
+
+function paymentBadgeHtml(ps) {
+  const label = ps === 'paid' ? 'Paid' : (ps === 'partial' ? 'Partial' : 'Unpaid');
+  const cls = ps === 'paid' ? 'fin-paid' : (ps === 'partial' ? 'fin-partial' : 'fin-unpaid');
+  return '<span class="fin-badge ' + cls + '">' + label + '</span>';
+}
+
+function renderFinanceQueue() {
+  const rows = filteredFinanceOrders();
+  const meta = document.getElementById('fin-queue-meta');
+  const cards = document.getElementById('fin-cards');
+  const tbody = document.getElementById('fin-tbody');
+  const due = rows.reduce(function (s, o) {
+    return orderPaymentStatus(o) === 'paid' ? s : s + (Number(o.total) || 0);
+  }, 0);
+  if (meta) {
+    meta.textContent = rows.length + ' order' + (rows.length === 1 ? '' : 's') +
+      ' · $' + due.toFixed(2) + (window.finPayFilter === 'paid' ? ' (paid filter)' : ' open AR in view');
+  }
+  if (cards) {
+    cards.innerHTML = rows.slice(0, 100).map(function (o) {
+      const name = (o.customer && (o.customer.company || o.customer.name)) || '';
+      const ps = orderPaymentStatus(o);
+      const dDate = o.placedAt ? new Date(o.placedAt).toLocaleDateString() : '';
+      return (
+        '<div class="order-glance-card">' +
+          '<div class="order-glance-top">' +
+            '<span class="order-glance-id">' + escAttr(o.id) + '</span>' +
+            '<span class="order-glance-date">' + escAttr(dDate) + '</span>' +
+          '</div>' +
+          '<div class="order-glance-name">' + escAttr(name || 'No name') + '</div>' +
+          '<div class="order-glance-stats">' +
+            '<span class="order-glance-total">$' + (Number(o.total) || 0).toFixed(2) + '</span>' +
+            paymentBadgeHtml(ps) +
+          '</div>' +
+          '<div class="order-glance-actions">' +
+            '<button type="button" class="btn-view" onclick="openOrderModal(\'' + escAttr(o.id) + '\')">Open</button>' +
+            (ps !== 'paid'
+              ? '<button type="button" class="btn-save" onclick="markOrderPaid(\'' + escAttr(o.id) + '\')">Mark paid</button>'
+              : '') +
+            '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Invoice</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('') || '<div class="wms-miss">No orders in this filter.</div>';
+  }
+  if (tbody) {
+    tbody.innerHTML = rows.map(function (o) {
+      const name = (o.customer && (o.customer.company || o.customer.name)) || '';
+      const ps = orderPaymentStatus(o);
+      const dDate = o.placedAt ? new Date(o.placedAt).toLocaleDateString() : '';
+      return (
+        '<tr>' +
+          '<td>' + escAttr(o.id) + '</td>' +
+          '<td>' + escAttr(dDate) + '</td>' +
+          '<td>' + escAttr(name) + '</td>' +
+          '<td>$' + (Number(o.total) || 0).toFixed(2) + '</td>' +
+          '<td>' + paymentBadgeHtml(ps) + '</td>' +
+          '<td>' + escAttr(o.paymentMethod || '—') + '</td>' +
+          '<td style="white-space:nowrap;">' +
+            '<button type="button" class="btn-view" onclick="openOrderModal(\'' + escAttr(o.id) + '\')">Edit</button> ' +
+            (ps !== 'paid' ? '<button type="button" class="btn-save" onclick="markOrderPaid(\'' + escAttr(o.id) + '\')">Paid</button> ' : '') +
+            '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Invoice</button>' +
+          '</td>' +
+        '</tr>'
+      );
+    }).join('');
+  }
+  updateAdminGlanceCounts();
+}
+
+async function markOrderPaid(orderId) {
+  const o = (masterOrders || []).find(function (x) { return x.id === orderId; });
+  if (!o) return showStatus('Order not found', true);
+  const method = prompt('Payment method (card / zelle / wire / ach / other):', o.paymentMethod || 'zelle');
+  if (method === null) return;
+  o.paymentStatus = 'paid';
+  o.paymentMethod = String(method || '').trim().toLowerCase();
+  o.paidAt = new Date().toISOString();
+  try {
+    const r = await adminFetch('/admin/orders', { method: 'POST', body: JSON.stringify(o) });
+    const data = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    showStatus(orderId + ' marked paid.', false);
+    await loadOrders();
+    renderFinanceQueue();
+  } catch (e) {
+    showStatus(e.message || 'Mark paid failed', true);
   }
 }
 
@@ -2428,6 +2815,12 @@ async function loadOrders() {
     if (!Array.isArray(masterOrders)) throw new Error(masterOrders.error || 'Invalid orders response');
     renderOrdersQueue();
     updateAdminGlanceCounts();
+    if (document.getElementById('tab-finance') && document.getElementById('tab-finance').classList.contains('active')) {
+      renderFinanceQueue();
+    }
+    if (document.getElementById('tab-stock') && document.getElementById('tab-stock').classList.contains('active')) {
+      renderWmsPickList();
+    }
   } catch(e) {
     console.error(e);
     if (String(e.message || '').includes('Unauthorized')) {
@@ -2674,7 +3067,8 @@ async function openOrderModal(orderId) {
       status: 'pending',
       customer: { name: '', company: '', email: '', phone: '' },
       delivery: { method: 'delivery', address: '' },
-      po: '', notes: '', total: 0, items: [], shipments: []
+      po: '', notes: '', total: 0, items: [], shipments: [],
+      paymentStatus: 'unpaid', paymentMethod: '', paymentNote: '', paidAt: null
     };
     document.getElementById('modal-main-title').textContent = 'Create New Order: ' + newId;
   }
@@ -2694,6 +3088,12 @@ async function openOrderModal(orderId) {
   document.getElementById('edit-po').value = activeOrderObj.po || '';
   document.getElementById('edit-notes').value = activeOrderObj.notes || '';
   document.getElementById('m-status-sel').value = activeOrderObj.status || 'pending';
+  const paySel = document.getElementById('m-payment-sel');
+  if (paySel) paySel.value = activeOrderObj.paymentStatus || 'unpaid';
+  const payMethod = document.getElementById('m-payment-method');
+  if (payMethod) payMethod.value = activeOrderObj.paymentMethod || '';
+  const payNote = document.getElementById('m-payment-note');
+  if (payNote) payNote.value = activeOrderObj.paymentNote || '';
 
   const custEmail = (activeOrderObj.customer.email || '').trim();
   if (custEmail) {
@@ -3312,6 +3712,18 @@ async function saveOrderChanges(opts) {
   activeOrderObj.po = document.getElementById('edit-po').value.trim();
   activeOrderObj.notes = document.getElementById('edit-notes').value.trim();
   activeOrderObj.status = document.getElementById('m-status-sel').value;
+  const paySel = document.getElementById('m-payment-sel');
+  const payMethod = document.getElementById('m-payment-method');
+  const payNote = document.getElementById('m-payment-note');
+  if (paySel) {
+    activeOrderObj.paymentStatus = paySel.value || 'unpaid';
+    if (activeOrderObj.paymentStatus === 'paid' && !activeOrderObj.paidAt) {
+      activeOrderObj.paidAt = new Date().toISOString();
+    }
+    if (activeOrderObj.paymentStatus === 'unpaid') activeOrderObj.paidAt = null;
+  }
+  if (payMethod) activeOrderObj.paymentMethod = payMethod.value || '';
+  if (payNote) activeOrderObj.paymentNote = payNote.value.trim();
 
   let qtys = document.querySelectorAll('.edit-pcs'), prices = document.querySelectorAll('.edit-price'), newTotal = 0;
   qtys.forEach((qInput, i) => {
@@ -3678,19 +4090,73 @@ function buildDeliveredEmail(order, note) {
   return wrapOrderEmail('ORDER DELIVERED', '#3498db', '#FFFFFF', rows);
 }
 
-function buildInvoiceEmail(order, note) {
+function paymentMethodsBlockHtml(methods, order) {
+  const m = methods || {};
+  const orderRef = emailEscape(order.id) + (order.shipmentId ? ' / ' + emailEscape(order.shipmentId) : '');
+  const memo = '*Please include your Order ID (' + orderRef + ') in the memo / reference field.';
+  let cardUrl = (m.card && m.card.url) ? String(m.card.url).trim() : '';
+  if (cardUrl) {
+    const sep = cardUrl.indexOf('?') >= 0 ? '&' : '?';
+    if (cardUrl.indexOf('client_reference_id=') === -1) {
+      cardUrl = cardUrl + sep + 'client_reference_id=' + encodeURIComponent(order.id);
+    }
+  }
+  const sections = [];
+  sections.push(
+    '<div style="margin-bottom:14px;"><strong style="color:#0C1117;">Credit / Debit Card</strong><br>' +
+    (cardUrl
+      ? ('<a href="' + emailEscape(cardUrl) + '" style="display:inline-block;margin-top:8px;padding:10px 16px;background:#C8981F;color:#0C1117;text-decoration:none;font-weight:700;border-radius:4px;">Pay by Card</a>' +
+         '<div style="font-size:12px;color:#555;margin-top:6px;">' + emailEscape((m.card && m.card.note) || 'Pay securely online by card.') + '</div>')
+      : ('<span style="font-size:13px;color:#34495e;">Call <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a> or email ' +
+         '<a href="mailto:payments@allprobuildingsupplies.com?subject=' + encodeURIComponent('Card payment — ' + order.id) + '" style="color:#C8981F;">payments@allprobuildingsupplies.com</a> for a secure card payment link.</span>')) +
+    '</div>'
+  );
+  if (m.zelle) {
+    sections.push(
+      '<div style="margin-bottom:14px;"><strong style="color:#0C1117;">Zelle</strong><br>' +
+      '<span style="font-size:13px;color:#34495e;">Send to <strong>' + emailEscape(m.zelle.email || 'payments@allprobuildingsupplies.com') + '</strong>' +
+      (m.zelle.handle ? (' or <strong>' + emailEscape(m.zelle.handle) + '</strong>') : '') + '.</span>' +
+      (m.zelle.qrUrl
+        ? ('<div style="margin-top:8px;"><img src="' + emailEscape(m.zelle.qrUrl) + '" alt="Zelle QR Code" width="140" style="width:140px;max-width:140px;height:auto;border-radius:8px;border:1px solid #ccc;display:block;"></div>')
+        : '') +
+      '</div>'
+    );
+  }
+  if (m.wire) {
+    sections.push(
+      '<div style="margin-bottom:14px;"><strong style="color:#0C1117;">Wire Transfer</strong><br>' +
+      '<span style="font-size:13px;color:#34495e;white-space:pre-line;">' + emailEscape(m.wire.instructions || '') + '</span></div>'
+    );
+  }
+  if (m.ach) {
+    sections.push(
+      '<div style="margin-bottom:10px;"><strong style="color:#0C1117;">ACH / Bank Transfer</strong><br>' +
+      '<span style="font-size:13px;color:#34495e;white-space:pre-line;">' + emailEscape(m.ach.instructions || '') + '</span></div>'
+    );
+  }
+  return (
+    '<tr><td class="email-pad" style="padding:0 28px 20px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0f8ff;border:1px solid #a3d5ff;"><tr><td style="padding:16px 20px;">' +
+    '<div style="font-size:13px;font-weight:700;color:#2c3e50;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">How to Pay</div>' +
+    sections.join('') +
+    '<div style="font-size:11px;color:#7f8c8d;margin-top:4px;">' + memo + '</div>' +
+    '</td></tr></table></td></tr>'
+  );
+}
+
+function buildInvoiceEmail(order, note, paymentMethods) {
   const itemsHtml = emailItemRows(order.items);
   const pad = '28px';
   const invLabel = order.shipmentId
     ? emailEscape(order.id) + ' / ' + emailEscape(order.shipmentId)
     : emailEscape(order.id);
+  const payBlock = paymentMethodsBlockHtml(paymentMethods || cachedPaymentMethods || {}, order);
   const rows =
     '<tr><td class="email-pad" style="padding:24px ' + pad + ' 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Please find your invoice' + (order.shipmentId ? ' for shipment <strong>' + emailEscape(order.shipmentId) + '</strong>' : '') + ' below. Thank you for your business!</p></td></tr>' +
     emailNoteRow(note) +
     '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Invoice / Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + invLabel + '</div></td><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">' + emailEscape(new Date(order.shipmentDate || order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:14px 16px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Logistics</div><div style="font-size:13px;color:#222;">' + emailEscape(order.delivery && order.delivery.address ? order.delivery.address : '') + '</div></td></tr></table></td></tr>' +
     '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Items Billed</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e8e8e8;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:right;">Total</td></tr>' + itemsHtml + '</table></td></tr>' +
     '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td></td><td style="padding:16px 0;border-top:2px solid #C8981F;width:220px;" align="right"><span style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Amount Due&nbsp;&nbsp;</span><span style="font-size:22px;font-weight:700;color:#0C1117;">$' + (Number(order.total) || 0).toFixed(2) + '</span></td></tr></table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:0 ' + pad + ' 20px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0f8ff;border:1px solid #a3d5ff;"><tr><td style="padding:16px 20px;"><div style="font-size:13px;font-weight:700;color:#2c3e50;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Payment Instructions</div><div style="font-size:13px;color:#34495e;line-height:1.6;"><strong>Zelle:</strong> Please send payment to <strong>payments@allprobuildingsupplies.com</strong> or <strong>allprobuildingsupplies</strong>.<br><div style="margin-top:8px;"><img src="https://allprobuildingsupplies.com/assets/zelle-qr.png" alt="Zelle QR Code" width="140" style="width:140px;max-width:140px;height:auto;border-radius:8px;border:1px solid #ccc;display:block;"></div><span style="font-size:11px;color:#7f8c8d;">*Please include your Order ID (' + emailEscape(order.id) + (order.shipmentId ? ' / ' + emailEscape(order.shipmentId) : '') + ') in the memo field.</span></div></td></tr></table></td></tr>' +
+    payBlock +
     '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><hr style="border:none;border-top:1px solid #eee;margin:0;"/></td></tr>' +
     '<tr><td class="email-pad" style="padding:20px ' + pad + ' 24px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about this invoice?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
   return wrapOrderEmail('INVOICE', '#C8981F', '#0C1117', rows);
@@ -3739,7 +4205,12 @@ async function executeSendEmail() {
   if(type === 'confirm') { htmlBody = buildConfirmEmail(activeOrderObj, customNote); subject = 'Order Update — Confirmation — ' + activeOrderObj.id; }
   else if(type === 'packing') { htmlBody = buildPackingSlipEmail(shipView, customNote); subject = 'Packing Slip — ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies'; }
   else if(type === 'deliver') { htmlBody = buildDeliveredEmail(shipView, customNote); subject = 'Order Delivered — Thank You! — All Pro Building Supplies'; }
-  else if(type === 'invoice') { htmlBody = buildInvoiceEmail(shipView, customNote); subject = 'Invoice — Order ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies'; }
+  else if(type === 'invoice') {
+    let payMethods = cachedPaymentMethods;
+    try { payMethods = await getPaymentMethods(); } catch (_) {}
+    htmlBody = buildInvoiceEmail(shipView, customNote, payMethods);
+    subject = 'Invoice — Order ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies';
+  }
   const btn = document.getElementById('btn-execute-send');
   btn.disabled = true; btn.innerHTML = 'Sending...';
   msgEl.style.display = 'block'; msgEl.style.color = '#3498db';

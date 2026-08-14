@@ -10,12 +10,18 @@ compatibility_date = "2024-04-21"
 #   MICROSOFT_CLIENT_ID, MICROSOFT_TENANT_ID
 #   ADMIN_SSO_EMAIL (default baruch@allprobuildingsupplies.com)
 #
+# Invoice payment methods (optional; sensible defaults exist in code):
+#   PAYMENT_CC_LINK or PAYMENT_STRIPE_LINK — Stripe Payment Link / card checkout URL
+#   PAYMENT_ZELLE_EMAIL, PAYMENT_ZELLE_HANDLE, PAYMENT_ZELLE_QR_URL
+#   PAYMENT_WIRE_INSTRUCTIONS, PAYMENT_ACH_INSTRUCTIONS (multi-line text OK as secret)
+#
 # Test/staging Worker (does NOT touch production):
 #   npx wrangler deploy --env test
 #   npx wrangler secret put ADMIN_TOKEN --env test
 #   npx wrangler secret put JWT_SECRET --env test
 #   npx wrangler secret put MICROSOFT_CLIENT_ID --env test
 #   npx wrangler secret put MICROSOFT_TENANT_ID --env test
+#   npx wrangler secret put PAYMENT_CC_LINK --env test
 
 # Bindings to your D1 Databases (PRODUCTION)
 [[d1_databases]]
@@ -28,6 +34,13 @@ preview_database_id = "cb7c6d87-4ca6-4897-a953-4d81650034b8"
 # Separate Worker name + separate D1 (preview DB). Live site untouched.
 [env.test]
 name = "allpro-api-test"
+
+# Non-secret invoice payment copy for staging (override with secrets for live bank details).
+[env.test.vars]
+PAYMENT_ZELLE_EMAIL = "payments@allprobuildingsupplies.com"
+PAYMENT_ZELLE_HANDLE = "allprobuildingsupplies"
+PAYMENT_WIRE_INSTRUCTIONS = "Wire transfer to All Pro Building Supplies. Email payments@allprobuildingsupplies.com or call 732-734-1123 for routing & account numbers. Include your Order ID in the wire memo."
+PAYMENT_ACH_INSTRUCTIONS = "ACH / bank transfer to All Pro Building Supplies. Email payments@allprobuildingsupplies.com for ACH details. Include your Order ID in the payment memo."
 
 [[env.test.d1_databases]]
 binding = "DB"

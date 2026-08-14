@@ -384,6 +384,10 @@ function formatOrderRow(o, orderItems) {
     customer,
     items,
     shipments,
+    paymentStatus: o.payment_status || 'unpaid',
+    paidAt: o.paid_at || null,
+    paymentMethod: o.payment_method || '',
+    paymentNote: o.payment_note || '',
   };
 }
 
@@ -776,6 +780,127 @@ async function ensureOrderShipmentColumns(env) {
   } catch (_) {}
   try {
     await env.DB.prepare(`ALTER TABLE orders ADD COLUMN shipments_json TEXT DEFAULT '[]'`).run();
+  } catch (_) {}
+}
+
+/** AR / payment tracking on orders. */
+async function ensureOrderPaymentColumns(env) {
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN payment_status TEXT DEFAULT 'unpaid'`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN paid_at TEXT`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN payment_method TEXT DEFAULT ''`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN payment_note TEXT DEFAULT ''`).run();
+  } catch (_) {}
+}
+
+/** Audit log for warehouse receive / adjust. */
+async function ensureStockMovementsTable(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS stock_movements (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL,
+      size TEXT NOT NULL DEFAULT '',
+      delta INTEGER NOT NULL,
+      reason TEXT DEFAULT 'receive',
+      qty_before INTEGER,
+      qty_after INTEGER,
+      created_at TEXT,
+      admin_note TEXT DEFAULT ''
+    )
+  `).run();
+  try {
+    await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_stock_movements_created ON stock_movements(created_at)`).run();
+  } catch (_) {}
+}
+
+function paymentMethodsFromEnv(env) {
+  const zelleEmail = String(env.PAYMENT_ZELLE_EMAIL || 'payments@allprobuildingsupplies.com').trim();
+  const zelleHandle = String(env.PAYMENT_ZELLE_HANDLE || 'allprobuildingsupplies').trim();
+  const zelleQr = String(env.PAYMENT_ZELLE_QR_URL || 'https://allprobuildingsupplies.com/assets/zelle-qr.png').trim();
+  const ccLink = String(env.PAYMENT_CC_LINK || env.PAYMENT_STRIPE_LINK || '').trim();
+  const wireDefault =
+    'Wire transfer to All Pro Building Supplies.\n' +
+    'Email payments@allprobuildingsupplies.com or call 732-734-1123 for bank routing & account numbers.\n' +
+    'Include your Order ID in the wire memo.';
+  const achDefault =
+    'ACH / bank transfer to All Pro Building Supplies.\n' +
+    'Email payments@allprobuildingsupplies.com for ACH routing details.\n' +
+    'Include your Order ID in the payment memo.';
+  const wire = String(env.PAYMENT_WIRE_INSTRUCTIONS || wireDefault).trim();
+  const ach = String(env.PAYMENT_ACH_INSTRUCTIONS || achDefault).trim();
+  return {
+    zelle: {
+      enabled: true,
+      label: 'Zelle',
+      email: zelleEmail,
+      handle: zelleHandle,
+      qrUrl: zelleQr,
+    },
+    card: {
+      enabled: true,
+      label: 'Credit / Debit Card',
+      url: ccLink,
+      note: ccLink
+        ? 'Pay securely online by card. Include your Order ID if prompted.'
+        : 'Pay by card — reply to this invoice or call 732-734-1123 and we will send a secure payment link. Set PAYMENT_CC_LINK on the API for a direct checkout URL.',
+    },
+    wire: {
+      enabled: true,
+      label: 'Wire Transfer',
+      instructions: wire,
+    },
+    ach: {
+      enabled: true,
+      label: 'ACH / Bank Transfer',
+      instructions: ach,
+    },
+  };
+}
+
+function normalizePaymentFields(o) {
+  const raw = String(o.paymentStatus || o.payment_status || 'unpaid').toLowerCase().trim();
+  const paymentStatus = ['unpaid', 'partial', 'paid'].includes(raw) ? raw : 'unpaid';
+  let paidAt = o.paidAt || o.paid_at || null;
+  if (paymentStatus === 'paid') {
+    if (!paidAt) paidAt = new Date().toISOString();
+  } else if (paymentStatus === 'unpaid') {
+    paidAt = null;
+  } else if (paidAt) {
+    paidAt = String(paidAt);
+  } else {
+    paidAt = null;
+  }
+  return {
+    paymentStatus,
+    paidAt,
+    paymentMethod: String(o.paymentMethod || o.payment_method || '').trim().slice(0, 80),
+    paymentNote: String(o.paymentNote || o.payment_note || '').trim().slice(0, 500),
+  };
+}
+
+async function logStockMovement(env, { code, size, delta, reason, qtyBefore, qtyAfter, note }) {
+  try {
+    await env.DB.prepare(
+      `INSERT INTO stock_movements (code, size, delta, reason, qty_before, qty_after, created_at, admin_note)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        code,
+        size || '',
+        delta,
+        reason || 'adjust',
+        qtyBefore,
+        qtyAfter,
+        new Date().toISOString(),
+        note || ''
+      )
+      .run();
   } catch (_) {}
 }
 
@@ -1233,6 +1358,8 @@ export default {
       await ensureProductCategoryColumns(env);
       await ensureUsersCompatColumns(env);
       await ensureOrderShipmentColumns(env);
+      await ensureOrderPaymentColumns(env);
+      await ensureStockMovementsTable(env);
       // One-time (idempotent) load of initial Tommur/Lesso codes into products.
       try {
         await seedFactoryCodes(env, canonicalizeSize);
@@ -2046,6 +2173,7 @@ export default {
         const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
         const stmts = [];
         const missing = [];
+        const applied = [];
         let updated = 0;
 
         for (const raw of items) {
@@ -2065,6 +2193,8 @@ export default {
             missing.push({ code, size, qty: addQty, error: 'Product not found' });
             continue;
           }
+          const before = parseInt(match.qty, 10) || 0;
+          const after = before + addQty;
           stmts.push(
             env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(
               addQty,
@@ -2072,11 +2202,23 @@ export default {
               match.size
             )
           );
+          applied.push({ code: match.code, size: match.size, before, delta: addQty, after });
+          match.qty = after;
           updated += 1;
         }
 
         if (stmts.length) await env.DB.batch(stmts);
-        return jsonResponse({ success: true, updated, missing });
+        for (const a of applied) {
+          await logStockMovement(env, {
+            code: a.code,
+            size: a.size,
+            delta: a.delta,
+            reason: 'receive',
+            qtyBefore: a.before,
+            qtyAfter: a.after,
+          });
+        }
+        return jsonResponse({ success: true, updated, applied, missing });
       }
 
       // Adjust stock by signed delta (can be negative). Floor at 0.
@@ -2121,13 +2263,37 @@ export default {
             )
           );
           applied.push({ code: match.code, size: match.size, before, delta, after });
-          // Keep in-memory qty accurate for duplicate lines in one request
           match.qty = after;
           updated += 1;
         }
 
         if (stmts.length) await env.DB.batch(stmts);
+        for (const a of applied) {
+          await logStockMovement(env, {
+            code: a.code,
+            size: a.size,
+            delta: a.after - a.before,
+            reason: 'adjust',
+            qtyBefore: a.before,
+            qtyAfter: a.after,
+          });
+        }
         return jsonResponse({ success: true, updated, applied, missing });
+      }
+
+      if (path === '/api/admin/stock/movements' && request.method === 'GET') {
+        const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10) || 50, 200);
+        const { results } = await env.DB.prepare(
+          `SELECT id, code, size, delta, reason, qty_before, qty_after, created_at, admin_note
+           FROM stock_movements ORDER BY datetime(created_at) DESC, id DESC LIMIT ?`
+        )
+          .bind(limit)
+          .all();
+        return jsonResponse({ movements: results || [] });
+      }
+
+      if (path === '/api/admin/payment-methods' && request.method === 'GET') {
+        return jsonResponse(paymentMethodsFromEnv(env));
       }
 
       if (path === '/api/admin/orders' && request.method === 'GET') {
@@ -2170,6 +2336,7 @@ export default {
 
         const shipments = normalizeShipments(o.shipments);
         const shipmentsJson = JSON.stringify(shipments);
+        const pay = normalizePaymentFields(o);
         const placedIso = o.placedAt || new Date().toISOString();
         const placedMs = Date.parse(placedIso);
         const placedAtInt = Number.isFinite(placedMs) ? placedMs : Date.now();
@@ -2183,6 +2350,10 @@ export default {
           po: o.po || '',
           notes: o.notes || '',
           shipments,
+          paymentStatus: pay.paymentStatus,
+          paymentMethod: pay.paymentMethod,
+          paymentNote: pay.paymentNote,
+          paidAt: pay.paidAt,
         });
 
         const stmts = [
@@ -2190,9 +2361,10 @@ export default {
             `INSERT INTO orders (
                id, user_id, user_email, status,
                total_amount, total, delivery_method, delivery_address, po, notes,
-               customer_snapshot, shipments_json, created_at, placed_at, data
+               customer_snapshot, shipments_json, created_at, placed_at, data,
+               payment_status, paid_at, payment_method, payment_note
              )
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              ON CONFLICT(id) DO UPDATE SET
                status=excluded.status,
                total_amount=excluded.total_amount,
@@ -2205,6 +2377,10 @@ export default {
                data=excluded.data,
                user_email=excluded.user_email,
                user_id=excluded.user_id,
+               payment_status=excluded.payment_status,
+               paid_at=excluded.paid_at,
+               payment_method=excluded.payment_method,
+               payment_note=excluded.payment_note,
                created_at=COALESCE(orders.created_at, excluded.created_at),
                placed_at=COALESCE(orders.placed_at, excluded.placed_at)`
           ).bind(
@@ -2222,7 +2398,11 @@ export default {
             shipmentsJson,
             placedIso,
             placedAtInt,
-            legacyData
+            legacyData,
+            pay.paymentStatus,
+            pay.paidAt,
+            pay.paymentMethod,
+            pay.paymentNote
           ),
           env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(o.id),
         ];
