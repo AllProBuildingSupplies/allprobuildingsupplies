@@ -10,6 +10,8 @@ trap cleanup EXIT
 mkdir -p "$DIST/assets" "$DIST/images"
 shopt -s nullglob
 cp -f "$ROOT"/*.html "$DIST/" 2>/dev/null || true
+cp -f "$ROOT/sw.js" "$DIST/" 2>/dev/null || true
+cp -f "$ROOT/manifest.webmanifest" "$DIST/" 2>/dev/null || true
 cp -a "$ROOT/assets/." "$DIST/assets/"
 cp -a "$ROOT/images/." "$DIST/images/" 2>/dev/null || true
 rm -f "$DIST/CNAME"
