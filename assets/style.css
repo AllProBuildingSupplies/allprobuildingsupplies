@@ -1188,6 +1188,13 @@ h1.htitle strong { color: var(--gold); }
   .desktop-only-block,
   .desktop-only-inline { display: none !important; }
 
+  /* No custom yellow cursor on touch / phone */
+  #cursor,
+  #cursor-ring { display: none !important; visibility: hidden !important; }
+  html, body, a, button, input, select, textarea, label, .cat-card, .btn-gold, .btn-ghost, .btn-view, .btn-del, .btn-save, .btn-add {
+    cursor: auto !important;
+  }
+
   .section, .sec { padding: 22px 0 !important; }
   .sec-inner, .container, .page-hero-inner { padding-left: var(--page-pad); padding-right: var(--page-pad); }
   .page-home .sec-cats { padding-top: 18px !important; padding-bottom: 18px !important; }
@@ -1539,6 +1546,20 @@ h1.htitle strong { color: var(--gold); }
   .desktop-only-block { display: block !important; }
   .desktop-only-inline { display: inline-flex !important; }
   .admin-users-desktop-table { display: block !important; }
+}
+
+/* Touch / coarse pointer devices: never show custom cursor */
+@media (hover: none), (pointer: coarse) {
+  #cursor,
+  #cursor-ring { display: none !important; visibility: hidden !important; }
+  html, body, a, button, input, select, textarea, label {
+    cursor: auto !important;
+  }
+}
+html.apbs-no-custom-cursor #cursor,
+html.apbs-no-custom-cursor #cursor-ring { display: none !important; }
+html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
+  cursor: auto !important;
 }
 
 /* --- TEST ENVIRONMENT FIXES --- */

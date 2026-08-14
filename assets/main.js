@@ -365,9 +365,11 @@ function ensureGlobalLayout(){
 // ══════════════════════════════════════════
 
 function initGlobalScripts() {
-  // CURSOR — one rAF-coalesced paint per frame max; no perpetual ring loop (ring is display:none)
+  // CURSOR — desktop pointer only; never on touch / coarse pointers
   const cur = document.getElementById('cursor');
-  if (cur) {
+  const finePointer = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const wideEnough = !(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+  if (cur && finePointer && wideEnough) {
     let mx = 0, my = 0, raf = null;
     function paint() {
       raf = null;
@@ -385,6 +387,11 @@ function initGlobalScripts() {
       },
       { passive: true }
     );
+  } else {
+    if (cur) cur.style.display = 'none';
+    const ring = document.getElementById('cursor-ring');
+    if (ring) ring.style.display = 'none';
+    document.documentElement.classList.add('apbs-no-custom-cursor');
   }
 
   // SCROLL REVEAL
