@@ -2051,6 +2051,57 @@ export default {
         return jsonResponse({ success: true, updated, missing });
       }
 
+      // Adjust stock by signed delta (can be negative). Floor at 0.
+      // Body: { items: [{ code, size, delta }, ...] }
+      if (path === '/api/admin/products/adjust' && request.method === 'POST') {
+        const body = await request.json();
+        const items = Array.isArray(body) ? body : (body && body.items) || [];
+        if (!items.length) {
+          return jsonResponse({ error: 'No items to adjust' }, 400);
+        }
+
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const stmts = [];
+        const missing = [];
+        const applied = [];
+        let updated = 0;
+
+        for (const raw of items) {
+          const code = String(raw.code || raw.sku || '').trim();
+          const size = normalizeSize(raw.size);
+          const delta = parseInt(raw.delta ?? raw.qty ?? raw.adjust, 10);
+          if (!code || !size) {
+            missing.push({ code, size, delta, error: 'Missing code or size' });
+            continue;
+          }
+          if (!Number.isFinite(delta) || delta === 0) {
+            missing.push({ code, size, delta, error: 'Invalid delta (must be non-zero integer)' });
+            continue;
+          }
+          const match = findProduct(allProds, code, size);
+          if (!match) {
+            missing.push({ code, size, delta, error: 'Product not found' });
+            continue;
+          }
+          const before = parseInt(match.qty, 10) || 0;
+          const after = Math.max(0, before + delta);
+          stmts.push(
+            env.DB.prepare('UPDATE products SET qty = ? WHERE code = ? AND size = ?').bind(
+              after,
+              match.code,
+              match.size
+            )
+          );
+          applied.push({ code: match.code, size: match.size, before, delta, after });
+          // Keep in-memory qty accurate for duplicate lines in one request
+          match.qty = after;
+          updated += 1;
+        }
+
+        if (stmts.length) await env.DB.batch(stmts);
+        return jsonResponse({ success: true, updated, applied, missing });
+      }
+
       if (path === '/api/admin/orders' && request.method === 'GET') {
         const orders = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
         const items = await env.DB.prepare('SELECT * FROM order_items').all();

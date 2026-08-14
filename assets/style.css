@@ -1691,5 +1691,59 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
   cursor: auto !important;
 }
 
+/* --- WMS Stock tab (phone-first receive / adjust) --- */
+.wms-panel { max-width: 720px; }
+.wms-lead { color: var(--silver); font-size: 14px; margin: 0 0 16px; line-height: 1.45; }
+.wms-lbl {
+  display: block; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold);
+  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px;
+}
+.wms-search { width: 100%; margin-bottom: 12px; font-size: 16px; padding: 14px; }
+.wms-results { display: grid; gap: 8px; margin-bottom: 16px; }
+.wms-result-btn {
+  display: grid; gap: 2px; text-align: left; width: 100%;
+  padding: 12px 14px; background: var(--ink2); border: 1px solid rgba(200,152,31,.22);
+  color: var(--smoke); cursor: pointer;
+}
+.wms-result-btn.is-active,
+.wms-result-btn:active { border-color: var(--gold); background: rgba(200,152,31,.08); }
+.wms-result-code { font-family: 'Oswald', sans-serif; font-size: 18px; color: var(--white); }
+.wms-result-desc { font-size: 13px; color: var(--silver); }
+.wms-result-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); }
+.wms-miss, .wms-empty { color: var(--silver); font-size: 13px; padding: 8px 0 16px; }
+.wms-active {
+  border: 1px solid rgba(200,152,31,.28); background: var(--ink2); padding: 16px; margin-bottom: 12px;
+}
+.wms-active-code { font-family: 'Oswald', sans-serif; font-size: 24px; color: var(--white); }
+.wms-active-desc { color: var(--silver); font-size: 13px; margin-bottom: 12px; }
+.wms-size-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.wms-size-chip {
+  display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  min-width: 72px; padding: 10px 12px; background: var(--ink3);
+  border: 1px solid rgba(139,160,178,.25); color: var(--smoke); cursor: pointer;
+}
+.wms-size-chip strong { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gold); }
+.wms-size-chip.is-active { border-color: var(--gold); background: rgba(200,152,31,.1); }
+.wms-qty-block { text-align: center; margin: 8px 0 18px; }
+.wms-qty-lbl { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: .08em; text-transform: uppercase; }
+.wms-qty-val { font-family: 'Oswald', sans-serif; font-size: 48px; color: var(--white); line-height: 1.1; }
+.wms-qty-size { color: var(--silver); font-size: 13px; }
+.wms-actions { display: grid; gap: 14px; }
+.wms-action-title { font-family: 'Oswald', sans-serif; font-size: 16px; color: var(--white); margin-bottom: 8px; }
+.wms-action-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.wms-action-row .data-input { flex: 1 1 100px; min-width: 90px; font-size: 16px; padding: 12px; }
+.wms-action-row .btn-save,
+.wms-action-row .btn-add,
+.wms-action-row .btn-view { flex: 0 0 auto; }
+.wms-step { min-width: 44px; padding: 0 14px; font-size: 20px; }
+.wms-hint { margin: 8px 0 0; font-size: 12px; color: var(--silver); line-height: 1.4; }
+
+@media (max-width: 768px) {
+  #tab-stock.admin-panel.active { display: block; }
+  .wms-qty-val { font-size: 56px; }
+  .wms-action-row .btn-save,
+  .wms-action-row .btn-add { flex: 1 1 auto; justify-content: center; }
+}
+
 /* --- TEST ENVIRONMENT FIXES --- */
 #global-header { display: contents; }

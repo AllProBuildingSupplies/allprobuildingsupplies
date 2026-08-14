@@ -45,6 +45,7 @@
     <h1 class="admin-title">Database Manager <span>v2.0</span></h1>
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="switchTab('orders')" data-tab="orders">Orders</button>
+      <button class="admin-tab" onclick="switchTab('stock')" data-tab="stock">Stock</button>
       <button class="admin-tab" onclick="switchTab('products')" data-tab="products">Products</button>
       <button class="admin-tab" onclick="switchTab('users')" data-tab="users">Users</button>
     </div>
@@ -68,6 +69,10 @@
       <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('confirmed')">Confirmed <span id="glance-confirmed-n">0</span></button>
       <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('partially_shipped')">Partial <span id="glance-partial-n">0</span></button>
     </div>
+    <button type="button" class="admin-glance-card" onclick="adminMobileOpen('stock')">
+      <span class="admin-glance-label">Stock</span>
+      <span class="admin-glance-meta" id="glance-stock-count">Receive / adjust →</span>
+    </button>
     <button type="button" class="admin-glance-card" onclick="adminMobileOpen('products')">
       <span class="admin-glance-label">Products</span>
       <span class="admin-glance-meta" id="glance-products-count">Open →</span>
@@ -110,6 +115,47 @@
     </div>
     <div class="action-bar admin-orders-actions">
       <button class="btn-add" style="border-color:var(--gold);color:var(--gold);" onclick="openOrderModal(null)">+ Create New Order</button>
+    </div>
+  </div>
+
+  <div id="tab-stock" class="admin-panel">
+    <div class="wms-panel">
+      <p class="wms-lead">Warehouse stock — look up a SKU, see on-hand qty, receive inbound pieces, or adjust (+/−).</p>
+      <label class="wms-lbl" for="wms-search">Find product</label>
+      <input type="search" id="wms-search" class="data-input wms-search" placeholder="Code, description, Tommur, or Lesso…" autocomplete="off">
+      <div id="wms-results" class="wms-results" aria-live="polite"></div>
+      <div id="wms-active" class="wms-active" hidden>
+        <div class="wms-active-head">
+          <div class="wms-active-code" id="wms-active-code"></div>
+          <div class="wms-active-desc" id="wms-active-desc"></div>
+        </div>
+        <div class="wms-size-row" id="wms-size-row" role="listbox" aria-label="Sizes"></div>
+        <div class="wms-qty-block">
+          <div class="wms-qty-lbl">On hand</div>
+          <div class="wms-qty-val" id="wms-qty-val">—</div>
+          <div class="wms-qty-size" id="wms-qty-size"></div>
+        </div>
+        <div class="wms-actions">
+          <div class="wms-action">
+            <div class="wms-action-title">Receive</div>
+            <div class="wms-action-row">
+              <input type="number" id="wms-receive-qty" class="data-input" min="1" step="1" inputmode="numeric" placeholder="Pcs">
+              <button type="button" class="btn-save" id="wms-receive-btn" onclick="wmsReceive()">+ Receive</button>
+            </div>
+          </div>
+          <div class="wms-action">
+            <div class="wms-action-title">Adjust (+/−)</div>
+            <div class="wms-action-row">
+              <button type="button" class="btn-view wms-step" onclick="wmsNudgeAdjust(-1)">−</button>
+              <input type="number" id="wms-adjust-delta" class="data-input" step="1" inputmode="numeric" placeholder="e.g. -5 or 10">
+              <button type="button" class="btn-view wms-step" onclick="wmsNudgeAdjust(1)">+</button>
+              <button type="button" class="btn-add" id="wms-adjust-btn" onclick="wmsAdjust()">Apply</button>
+            </div>
+            <p class="wms-hint">Negative lowers stock (won’t go below 0). Positive adds.</p>
+          </div>
+        </div>
+      </div>
+      <div id="wms-empty" class="wms-empty">Search a product code to begin.</div>
     </div>
   </div>
 
@@ -816,6 +862,7 @@ function switchTab(tab) {
   const targetPanel = document.getElementById('tab-' + tab);
   if(targetPanel) targetPanel.classList.add('active');
   if (tab === 'products') loadProducts();
+  if (tab === 'stock') initWmsStockTab();
   if (tab === 'orders') loadOrders();
   if (tab === 'users') loadUsers();
 }
@@ -875,6 +922,7 @@ function orderBackorderPcs(o) {
 function updateAdminGlanceCounts() {
   const o = document.getElementById('glance-orders-count');
   const p = document.getElementById('glance-products-count');
+  const s = document.getElementById('glance-stock-count');
   const u = document.getElementById('glance-users-count');
   if (o && Array.isArray(masterOrders)) {
     const openish = masterOrders.filter(orderIsOpen).length;
@@ -891,10 +939,16 @@ function updateAdminGlanceCounts() {
     setN('glance-partial-n', 'partially_shipped');
   }
   if (p && Array.isArray(masterProducts)) {
-    p.textContent = masterProducts.length + ' rows';
+    p.textContent = masterProducts.length + ' SKUs →';
+  }
+  if (s && Array.isArray(masterProducts)) {
+    const pcs = masterProducts.reduce(function (n, row) { return n + (parseInt(row.stock, 10) || 0); }, 0);
+    s.textContent = pcs.toLocaleString() + ' pcs on hand →';
   }
   if (u && Array.isArray(masterUsers)) {
-    const pending = masterUsers.filter(x => String(x.status || '').toLowerCase() === 'pending').length;
+    const pending = masterUsers.filter(function (x) {
+      return String(x.status || '').toLowerCase() === 'pending';
+    }).length;
     u.textContent = pending ? (pending + ' pending') : (masterUsers.length + ' accounts');
   }
 }
@@ -968,6 +1022,246 @@ async function loadProducts() {
     console.error(e);
     tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load products. Check API connection.</td></tr>';
     showStatus('Products load failed: ' + e.message, true);
+  }
+}
+
+// --- WMS Slice 1: phone-first receive + adjust ---
+let wmsSelectedCode = '';
+let wmsSelectedSize = '';
+let wmsSearchBound = false;
+
+async function ensureWmsProductsLoaded() {
+  if (Array.isArray(masterProducts) && masterProducts.length) return;
+  await loadProducts();
+}
+
+function initWmsStockTab() {
+  ensureWmsProductsLoaded().then(function () {
+    renderWmsResults();
+    renderWmsActive();
+  }).catch(function () {});
+  if (wmsSearchBound) return;
+  wmsSearchBound = true;
+  const search = document.getElementById('wms-search');
+  if (search) {
+    search.addEventListener('input', function () {
+      renderWmsResults();
+    });
+    search.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = document.querySelector('#wms-results .wms-result-btn');
+        if (first) first.click();
+      }
+    });
+  }
+}
+
+function wmsGroupedProducts() {
+  const map = new Map();
+  (masterProducts || []).forEach(function (p) {
+    const code = String(p.code || '').trim();
+    if (!code) return;
+    if (!map.has(code)) {
+      map.set(code, {
+        code: code,
+        description: p.description || '',
+        tommur_code: p.tommur_code || '',
+        lesso_code: p.lesso_code || '',
+        sizes: []
+      });
+    }
+    const g = map.get(code);
+    if (!g.description && p.description) g.description = p.description;
+    g.sizes.push({
+      size: p.size,
+      stock: parseInt(p.stock, 10) || 0,
+      pack: p.pack
+    });
+  });
+  return Array.from(map.values());
+}
+
+function wmsMatchesQuery(group, q) {
+  if (!q) return true;
+  const hay = [
+    group.code,
+    group.description,
+    group.tommur_code,
+    group.lesso_code
+  ].join(' ').toLowerCase();
+  return hay.indexOf(q) !== -1;
+}
+
+function renderWmsResults() {
+  const box = document.getElementById('wms-results');
+  const empty = document.getElementById('wms-empty');
+  if (!box) return;
+  const q = String((document.getElementById('wms-search') || {}).value || '').trim().toLowerCase();
+  const groups = wmsGroupedProducts().filter(function (g) { return wmsMatchesQuery(g, q); });
+  if (!q) {
+    box.innerHTML = '';
+    if (empty && !wmsSelectedCode) empty.hidden = false;
+    return;
+  }
+  if (empty) empty.hidden = true;
+  if (!groups.length) {
+    box.innerHTML = '<div class="wms-miss">No products match.</div>';
+    return;
+  }
+  box.innerHTML = groups.slice(0, 40).map(function (g) {
+    const pcs = g.sizes.reduce(function (n, s) { return n + (s.stock || 0); }, 0);
+    const active = g.code === wmsSelectedCode ? ' is-active' : '';
+    return (
+      '<button type="button" class="wms-result-btn' + active + '" data-code="' + escAttr(g.code) + '">' +
+        '<span class="wms-result-code">' + escAttr(g.code) + '</span>' +
+        '<span class="wms-result-desc">' + escAttr(g.description || '') + '</span>' +
+        '<span class="wms-result-meta">' + g.sizes.length + ' size' + (g.sizes.length === 1 ? '' : 's') +
+          ' · ' + pcs.toLocaleString() + ' pcs</span>' +
+      '</button>'
+    );
+  }).join('');
+  box.querySelectorAll('.wms-result-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      wmsSelectCode(btn.getAttribute('data-code') || '');
+    });
+  });
+}
+
+function wmsSelectCode(code) {
+  wmsSelectedCode = String(code || '').trim();
+  const group = wmsGroupedProducts().find(function (g) { return g.code === wmsSelectedCode; });
+  wmsSelectedSize = group && group.sizes.length ? group.sizes[0].size : '';
+  const empty = document.getElementById('wms-empty');
+  if (empty) empty.hidden = true;
+  renderWmsResults();
+  renderWmsActive();
+}
+
+function wmsSelectSize(size) {
+  wmsSelectedSize = size;
+  renderWmsActive();
+}
+
+function wmsCurrentRow() {
+  return (masterProducts || []).find(function (p) {
+    return p.code === wmsSelectedCode && String(p.size) === String(wmsSelectedSize);
+  }) || null;
+}
+
+function renderWmsActive() {
+  const panel = document.getElementById('wms-active');
+  if (!panel) return;
+  const group = wmsGroupedProducts().find(function (g) { return g.code === wmsSelectedCode; });
+  if (!group) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  document.getElementById('wms-active-code').textContent = group.code;
+  document.getElementById('wms-active-desc').textContent = group.description || '';
+  const sizeRow = document.getElementById('wms-size-row');
+  sizeRow.innerHTML = group.sizes.map(function (s) {
+    const on = String(s.size) === String(wmsSelectedSize) ? ' is-active' : '';
+    return (
+      '<button type="button" class="wms-size-chip' + on + '" data-size="' + escAttr(s.size) + '">' +
+        '<span>' + escAttr(s.size) + '</span>' +
+        '<strong>' + (s.stock || 0).toLocaleString() + '</strong>' +
+      '</button>'
+    );
+  }).join('');
+  sizeRow.querySelectorAll('.wms-size-chip').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      wmsSelectSize(btn.getAttribute('data-size') || '');
+    });
+  });
+  const row = wmsCurrentRow();
+  document.getElementById('wms-qty-val').textContent = row ? String(row.stock || 0) : '—';
+  document.getElementById('wms-qty-size').textContent = row ? ('Size ' + row.size) : '';
+}
+
+function wmsNudgeAdjust(step) {
+  const el = document.getElementById('wms-adjust-delta');
+  if (!el) return;
+  const cur = parseInt(el.value, 10);
+  el.value = String((Number.isFinite(cur) ? cur : 0) + step);
+}
+
+async function wmsRefreshAfterChange() {
+  await loadProducts();
+  renderWmsResults();
+  renderWmsActive();
+}
+
+async function wmsReceive() {
+  const row = wmsCurrentRow();
+  if (!row) {
+    showStatus('Pick a product and size first.', true);
+    return;
+  }
+  const qty = parseInt((document.getElementById('wms-receive-qty') || {}).value, 10);
+  if (!Number.isFinite(qty) || qty <= 0) {
+    showStatus('Receive qty must be a positive number.', true);
+    return;
+  }
+  const btn = document.getElementById('wms-receive-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const r = await adminFetch('/admin/products/receive', {
+      method: 'POST',
+      body: JSON.stringify({ items: [{ code: row.code, size: row.size, qty: qty }] })
+    });
+    const data = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    if (data.missing && data.missing.length) {
+      throw new Error(data.missing[0].error || 'Receive failed');
+    }
+    showStatus('Received +' + qty + ' · ' + row.code + ' ' + row.size, false);
+    const inp = document.getElementById('wms-receive-qty');
+    if (inp) inp.value = '';
+    await wmsRefreshAfterChange();
+  } catch (e) {
+    showStatus(e.message || 'Receive failed', true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '+ Receive'; }
+  }
+}
+
+async function wmsAdjust() {
+  const row = wmsCurrentRow();
+  if (!row) {
+    showStatus('Pick a product and size first.', true);
+    return;
+  }
+  const delta = parseInt((document.getElementById('wms-adjust-delta') || {}).value, 10);
+  if (!Number.isFinite(delta) || delta === 0) {
+    showStatus('Enter a non-zero adjust amount (e.g. -5 or 10).', true);
+    return;
+  }
+  const btn = document.getElementById('wms-adjust-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const r = await adminFetch('/admin/products/adjust', {
+      method: 'POST',
+      body: JSON.stringify({ items: [{ code: row.code, size: row.size, delta: delta }] })
+    });
+    const data = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    if (data.missing && data.missing.length) {
+      throw new Error(data.missing[0].error || 'Adjust failed');
+    }
+    const applied = (data.applied && data.applied[0]) || null;
+    const msg = applied
+      ? ('Adjusted ' + row.code + ' ' + row.size + ': ' + applied.before + ' → ' + applied.after)
+      : 'Stock adjusted';
+    showStatus(msg, false);
+    const inp = document.getElementById('wms-adjust-delta');
+    if (inp) inp.value = '';
+    await wmsRefreshAfterChange();
+  } catch (e) {
+    showStatus(e.message || 'Adjust failed', true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Apply'; }
   }
 }
 
