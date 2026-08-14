@@ -3061,16 +3061,19 @@ function renderEditableItems() {
     if (!Number.isFinite(shipped) || shipped < 0) shipped = 0;
     const backorder = Math.max(0, (parseInt(item.qty, 10) || 0) - shipped);
     
-    html += `<tr>
-      <td data-label="Item">${escAttr(displayDesc)} ${escAttr(item.size)}<br><span style="font-size:10px;color:var(--silver)">${escAttr(item.code)} (Pack: ${item.pcsPerCtn || '-'})</span></td>
-      <td data-label="Cases"><input type="number" class="data-input edit-cases" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${displayCases}" min="0" step="any" style="width:70px;" oninput="rowCalcCases(${idx})"></td>
-      <td data-label="Ordered"><input type="number" class="data-input edit-pcs" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${item.qty}" min="1" style="width:70px;" oninput="rowCalcPieces(${idx})"></td>
-      <td data-label="Shipped" class="shipped-cell" style="font-family:monospace;color:var(--white);">${shipped}</td>
-      <td data-label="Backorder" class="backorder-cell" style="font-family:monospace;color:${backorder ? '#bb8fce' : 'var(--silver)'};">${backorder}</td>
-      <td data-label="Ship Now"><input type="number" class="data-input edit-ship-now" data-idx="${idx}" data-backorder="${backorder}" value="" min="0" max="${backorder}" placeholder="0" style="width:70px;border-color:rgba(200,152,31,.45);" oninput="clampShipNow(${idx})"></td>
-      <td data-label="Unit Price"><input type="number" step="0.01" class="data-input edit-price" data-idx="${idx}" value="${(item.unitPrice||0).toFixed(2)}" style="width:90px;" oninput="liveRecalc()"></td>
-      <td data-label="Line Total" class="live-line-tot" style="text-align:right;font-family:monospace;color:var(--white)">$${lineTot.toFixed(2)}</td>
-      <td data-label="Action"><button class="btn-del" onclick="removeOrderItem(${idx})">X</button></td>
+    html += `<tr class="order-line-row">
+      <td data-label="Item" class="order-line-item">
+        <div class="order-line-desc">${escAttr(displayDesc)}</div>
+        <div class="order-line-meta"><span>${escAttr(item.code)}</span><span>${escAttr(item.size || '')}</span><span>pk ${escAttr(item.pcsPerCtn || '-')}</span></div>
+      </td>
+      <td data-label="Cases"><input type="number" class="data-input edit-cases" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${displayCases}" min="0" step="any" oninput="rowCalcCases(${idx})"></td>
+      <td data-label="Ord"><input type="number" class="data-input edit-pcs" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${item.qty}" min="1" oninput="rowCalcPieces(${idx})"></td>
+      <td data-label="Ship" class="shipped-cell">${shipped}</td>
+      <td data-label="BO" class="backorder-cell" style="color:${backorder ? '#bb8fce' : 'var(--silver)'};">${backorder}</td>
+      <td data-label="Now"><input type="number" class="data-input edit-ship-now" data-idx="${idx}" data-backorder="${backorder}" value="" min="0" max="${backorder}" placeholder="0" oninput="clampShipNow(${idx})"></td>
+      <td data-label="Price"><input type="number" step="0.01" class="data-input edit-price" data-idx="${idx}" value="${(item.unitPrice||0).toFixed(2)}" oninput="liveRecalc()"></td>
+      <td data-label="Total" class="live-line-tot">$${lineTot.toFixed(2)}</td>
+      <td data-label="" class="order-line-del"><button class="btn-del" onclick="removeOrderItem(${idx})" title="Remove line">✕</button></td>
     </tr>`;
   });
   
