@@ -128,6 +128,7 @@ function sizeMatchCandidates(size) {
 }
 
 function findProduct(prods, code, size) {
+  if (!Array.isArray(prods) || !prods.length) return null;
   const c = String(code || '').trim();
   const want = canonicalizeSize(size);
   if (!c || !want) return null;
@@ -522,6 +523,33 @@ async function ensureProductFactoryColumns(env) {
 
 /** Partial shipments: cumulative qty_shipped per line + shipments history JSON on orders. */
 async function ensureOrderShipmentColumns(env) {
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN created_at TEXT`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN user_id TEXT`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN status TEXT DEFAULT 'pending'`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN total_amount REAL`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN delivery_method TEXT`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN delivery_address TEXT`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN po TEXT`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN notes TEXT`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE orders ADD COLUMN customer_snapshot TEXT`).run();
+  } catch (_) {}
   try {
     await env.DB.prepare(`ALTER TABLE order_items ADD COLUMN qty_shipped INTEGER DEFAULT 0`).run();
   } catch (_) {}
@@ -1665,9 +1693,12 @@ export default {
         const orders = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
         const items = await env.DB.prepare('SELECT * FROM order_items').all();
         const prods = await env.DB.prepare('SELECT * FROM products').all();
+        const orderRows = orders.results || [];
+        const itemRows = items.results || [];
+        const prodRows = prods.results || [];
 
-        const formattedOrders = orders.results.map((o) => {
-          const orderItems = items.results.filter((i) => i.order_id === o.id).map((i) => mapOrderItem(i, prods.results));
+        const formattedOrders = orderRows.map((o) => {
+          const orderItems = itemRows.filter((i) => i.order_id === o.id).map((i) => mapOrderItem(i, prodRows));
           return formatOrderRow(o, orderItems);
         });
         return jsonResponse(formattedOrders);
