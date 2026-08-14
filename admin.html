@@ -51,10 +51,15 @@
 
   <div id="admin-mobile-home" class="admin-mobile-home" aria-label="Admin at a glance">
     <div class="admin-glance-title">At a glance</div>
-    <button type="button" class="admin-glance-card" onclick="adminMobileOpen('orders')">
+    <button type="button" class="admin-glance-card" onclick="adminMobileOpenOrders('open')">
       <span class="admin-glance-label">Orders</span>
       <span class="admin-glance-meta" id="glance-orders-count">Open →</span>
     </button>
+    <div class="admin-glance-order-chips" id="glance-order-chips">
+      <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('pending')">Pending <span id="glance-pending-n">0</span></button>
+      <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('confirmed')">Confirmed <span id="glance-confirmed-n">0</span></button>
+      <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('partially_shipped')">Partial <span id="glance-partial-n">0</span></button>
+    </div>
     <button type="button" class="admin-glance-card" onclick="adminMobileOpen('products')">
       <span class="admin-glance-label">Products</span>
       <span class="admin-glance-meta" id="glance-products-count">Open →</span>
@@ -67,16 +72,35 @@
   <button type="button" id="admin-mobile-back" class="admin-mobile-back" onclick="adminMobileBack()">← Back to glance</button>
 
   <div id="tab-orders" class="admin-panel active">
-    <p style="color:var(--silver);font-size:14px;margin-bottom:20px;">Manage and edit customer orders. Click 'View Details' to edit order contents, change status, and send invoices.</p>
+    <div class="oms-toolbar">
+      <input type="search" id="oms-search" class="data-input oms-search" placeholder="Search order #, name, company, or PO…" autocomplete="off">
+      <div class="oms-date-row">
+        <label class="oms-date-lbl">From <input type="date" id="oms-date-from" class="data-input"></label>
+        <label class="oms-date-lbl">To <input type="date" id="oms-date-to" class="data-input"></label>
+      </div>
+      <div class="oms-status-chips" id="oms-status-chips" role="toolbar" aria-label="Order status filter">
+        <button type="button" class="oms-chip active" data-oms-status="open">Open</button>
+        <button type="button" class="oms-chip" data-oms-status="pending">Pending</button>
+        <button type="button" class="oms-chip" data-oms-status="confirmed">Confirmed</button>
+        <button type="button" class="oms-chip" data-oms-status="partially_shipped">Partial</button>
+        <button type="button" class="oms-chip" data-oms-status="delivered">Delivered</button>
+        <button type="button" class="oms-chip" data-oms-status="cancelled">Cancelled</button>
+        <button type="button" class="oms-chip" data-oms-status="all">All</button>
+      </div>
+    </div>
+    <div class="oms-queue-meta" id="oms-queue-meta">Loading orders…</div>
+    <div id="orders-cards" class="orders-cards" aria-live="polite"></div>
+    <div class="admin-orders-desktop-table">
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
     <table class="data-table" id="orders-table" style="min-width:720px;">
       <thead>
-        <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th><th>Action</th></tr>
+        <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>PO</th><th>Total</th><th>Status</th><th>Backorder</th><th>Action</th></tr>
       </thead>
       <tbody id="orders-tbody"></tbody>
     </table>
     </div>
-    <div class="action-bar">
+    </div>
+    <div class="action-bar admin-orders-actions">
       <button class="btn-add" style="border-color:var(--gold);color:var(--gold);" onclick="openOrderModal(null)">+ Create New Order</button>
     </div>
   </div>
@@ -384,6 +408,16 @@
       </div>
     </div>
 
+    <div class="oms-quick-bar" id="oms-quick-bar">
+      <div class="modal-lbl" style="color:var(--gold);margin-bottom:8px;">Quick actions</div>
+      <div class="oms-quick-grid">
+        <button type="button" class="btn-view oms-qa" id="oms-qa-confirm" onclick="omsQuickConfirm()">✓ Confirm</button>
+        <button type="button" class="btn-save oms-qa" id="oms-qa-ship" onclick="omsQuickShipRemaining()">📦 Ship remaining</button>
+        <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-pack" onclick="omsQuickEmail('packing')">Packing slip</button>
+        <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-inv" onclick="omsQuickEmail('invoice')">Invoice</button>
+      </div>
+    </div>
+
     <div style="background:var(--ink); border:1px solid rgba(200,152,31,.2); padding:20px; border-radius:4px;">
       <div class="modal-grid" style="margin-bottom:0; gap:20px;">
         
@@ -605,6 +639,13 @@ function adminMobileOpen(tab) {
   switchTab(tab);
 }
 
+function adminMobileOpenOrders(statusFilter) {
+  window.omsStatusFilter = statusFilter || 'open';
+  syncOmsStatusChips();
+  adminMobileOpen('orders');
+  renderOrdersQueue();
+}
+
 function adminEnableMobileProducts() {
   document.body.classList.add('admin-mobile-products-override');
   const note = document.getElementById('admin-products-mobile-note');
@@ -623,13 +664,39 @@ function adminMobileBack() {
   document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
 }
 
+function orderIsOpen(o) {
+  const st = String(o && o.status || '').toLowerCase();
+  return st !== 'delivered' && st !== 'cancelled';
+}
+
+function orderBackorderPcs(o) {
+  let n = 0;
+  (o.items || []).forEach(function (it) {
+    const ordered = parseInt(it.qty, 10) || 0;
+    let shipped = parseInt(it.qtyShipped, 10);
+    if (!Number.isFinite(shipped) || shipped < 0) shipped = 0;
+    n += Math.max(0, ordered - shipped);
+  });
+  return n;
+}
+
 function updateAdminGlanceCounts() {
   const o = document.getElementById('glance-orders-count');
   const p = document.getElementById('glance-products-count');
   const u = document.getElementById('glance-users-count');
   if (o && Array.isArray(masterOrders)) {
-    const openish = masterOrders.filter(x => !['delivered', 'cancelled'].includes(String(x.status || '').toLowerCase())).length;
-    o.textContent = openish + ' active · ' + masterOrders.length + ' total';
+    const openish = masterOrders.filter(orderIsOpen).length;
+    o.textContent = openish + ' open · ' + masterOrders.length + ' total';
+    const setN = function (id, st) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = String(masterOrders.filter(function (x) {
+        return String(x.status || '').toLowerCase() === st;
+      }).length);
+    };
+    setN('glance-pending-n', 'pending');
+    setN('glance-confirmed-n', 'confirmed');
+    setN('glance-partial-n', 'partially_shipped');
   }
   if (p && Array.isArray(masterProducts)) {
     p.textContent = masterProducts.length + ' rows';
@@ -1678,7 +1745,179 @@ function initOrdersTableActions() {
     if (!orderId) return;
     if (btn.dataset.orderAction === 'edit') openOrderModal(orderId);
     else if (btn.dataset.orderAction === 'delete') deleteOrder(orderId);
+    else if (btn.dataset.orderAction === 'confirm') omsConfirmOrderId(orderId);
+    else if (btn.dataset.orderAction === 'ship') omsShipOrderId(orderId);
+    else if (btn.dataset.orderAction === 'email') omsEmailOrderId(orderId, btn.getAttribute('data-email-format') || 'confirm');
   });
+}
+
+window.omsStatusFilter = window.omsStatusFilter || 'open';
+window.omsSearchQ = '';
+window.omsDateFrom = '';
+window.omsDateTo = '';
+
+function syncOmsStatusChips() {
+  document.querySelectorAll('#oms-status-chips .oms-chip').forEach(function (btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-oms-status') === window.omsStatusFilter);
+  });
+}
+
+function initOmsToolbar() {
+  const chips = document.getElementById('oms-status-chips');
+  if (chips && chips.dataset.bound !== '1') {
+    chips.dataset.bound = '1';
+    chips.addEventListener('click', function (e) {
+      const btn = e.target.closest('[data-oms-status]');
+      if (!btn) return;
+      window.omsStatusFilter = btn.getAttribute('data-oms-status') || 'open';
+      syncOmsStatusChips();
+      renderOrdersQueue();
+    });
+  }
+  const search = document.getElementById('oms-search');
+  if (search && search.dataset.bound !== '1') {
+    search.dataset.bound = '1';
+    let t = null;
+    search.addEventListener('input', function () {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        window.omsSearchQ = search.value || '';
+        renderOrdersQueue();
+      }, 120);
+    });
+  }
+  ['oms-date-from', 'oms-date-to'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (!el || el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
+    el.addEventListener('change', function () {
+      window.omsDateFrom = (document.getElementById('oms-date-from') || {}).value || '';
+      window.omsDateTo = (document.getElementById('oms-date-to') || {}).value || '';
+      renderOrdersQueue();
+    });
+  });
+  const cards = document.getElementById('orders-cards');
+  if (cards && cards.dataset.bound !== '1') {
+    cards.dataset.bound = '1';
+    cards.addEventListener('click', function (e) {
+      const btn = e.target.closest('[data-order-action]');
+      if (!btn) return;
+      const orderId = btn.getAttribute('data-order-id');
+      if (!orderId) return;
+      if (btn.dataset.orderAction === 'edit') openOrderModal(orderId);
+      else if (btn.dataset.orderAction === 'delete') deleteOrder(orderId);
+      else if (btn.dataset.orderAction === 'confirm') omsConfirmOrderId(orderId);
+      else if (btn.dataset.orderAction === 'ship') omsShipOrderId(orderId);
+      else if (btn.dataset.orderAction === 'email') omsEmailOrderId(orderId, btn.getAttribute('data-email-format') || 'confirm');
+    });
+  }
+  syncOmsStatusChips();
+}
+
+function filterMasterOrders() {
+  const q = String(window.omsSearchQ || '').trim().toLowerCase();
+  const st = String(window.omsStatusFilter || 'open').toLowerCase();
+  const from = window.omsDateFrom || '';
+  const to = window.omsDateTo || '';
+  return (masterOrders || []).filter(function (o) {
+    const status = String(o.status || '').toLowerCase();
+    if (st === 'open') {
+      if (!orderIsOpen(o)) return false;
+    } else if (st !== 'all' && status !== st) {
+      return false;
+    }
+    if (from || to) {
+      const d = o.placedAt ? new Date(o.placedAt) : null;
+      if (!d || isNaN(d.getTime())) return false;
+      const day = d.toISOString().slice(0, 10);
+      if (from && day < from) return false;
+      if (to && day > to) return false;
+    }
+    if (!q) return true;
+    const hay = [
+      o.id,
+      o.po,
+      o.customer && o.customer.name,
+      o.customer && o.customer.company,
+      o.customer && o.customer.email,
+      o.customer && o.customer.phone,
+      o.status
+    ].map(function (x) { return String(x || '').toLowerCase(); }).join(' ');
+    return hay.indexOf(q) !== -1;
+  });
+}
+
+function renderOrdersQueue() {
+  initOmsToolbar();
+  initOrdersTableActions();
+  const list = filterMasterOrders();
+  const meta = document.getElementById('oms-queue-meta');
+  if (meta) {
+    const label = window.omsStatusFilter === 'open' ? 'open'
+      : (window.omsStatusFilter === 'all' ? 'all' : String(window.omsStatusFilter).replace(/_/g, ' '));
+    meta.textContent = list.length + ' order' + (list.length === 1 ? '' : 's') +
+      ' · showing ' + label +
+      (window.omsSearchQ ? ' · filtered' : '');
+  }
+
+  const tbody = document.getElementById('orders-tbody');
+  const cardsEl = document.getElementById('orders-cards');
+  if (!list.length) {
+    if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--silver);padding:24px;">No orders match this queue.</td></tr>';
+    if (cardsEl) cardsEl.innerHTML = '<div class="mcat-empty">No orders match this queue.</div>';
+    return;
+  }
+
+  let tableHtml = '';
+  let cardsHtml = '';
+  list.forEach(function (o) {
+    const dDate = o.placedAt ? new Date(o.placedAt).toLocaleDateString() : '—';
+    const st = String(o.status || '');
+    const back = orderBackorderPcs(o);
+    const open = orderIsOpen(o);
+    const name = (o.customer && o.customer.name) || '';
+    const company = (o.customer && o.customer.company) || '';
+    const po = o.po || '';
+    tableHtml += `<tr class="order-row" data-status="${escAttr(st)}">
+      <td data-label="Order ID" style="font-family:monospace;color:var(--gold);">${escAttr(o.id)}</td>
+      <td data-label="Date">${escAttr(dDate)}</td>
+      <td data-label="Customer">${escAttr(name)}<br><span style="font-size:10px;color:var(--silver)">${escAttr(company)}</span></td>
+      <td data-label="PO">${escAttr(po || '—')}</td>
+      <td data-label="Total" style="font-family:monospace">$${(o.total||0).toFixed(2)}</td>
+      <td data-label="Status"><span class="badge ${escAttr(st)}">${escAttr(st.replace(/_/g, ' '))}</span></td>
+      <td data-label="Backorder">${back ? (back + ' pcs') : '—'}</td>
+      <td data-label="Action" class="order-row-actions">
+        <button type="button" class="btn-view" data-order-action="edit" data-order-id="${escAttr(o.id)}">Open</button>
+        ${open && st === 'pending' ? `<button type="button" class="btn-view" data-order-action="confirm" data-order-id="${escAttr(o.id)}">Confirm</button>` : ''}
+        ${open && back > 0 ? `<button type="button" class="btn-save" data-order-action="ship" data-order-id="${escAttr(o.id)}">Ship</button>` : ''}
+        <button type="button" class="btn-del" data-order-action="delete" data-order-id="${escAttr(o.id)}">Delete</button>
+      </td>
+    </tr>`;
+    cardsHtml += `<article class="order-glance" data-status="${escAttr(st)}">
+      <div class="order-glance-top">
+        <span class="order-glance-id">${escAttr(o.id)}</span>
+        <span class="order-glance-date">${escAttr(dDate)}</span>
+      </div>
+      <div class="order-glance-name">${escAttr(name || 'No name')}</div>
+      <div class="order-glance-mid">
+        <span>${escAttr(company || '—')}</span>
+        <span>${po ? ('PO ' + escAttr(po)) : 'No PO'}</span>
+      </div>
+      <div class="order-glance-stats">
+        <span class="order-glance-total">$${(o.total||0).toFixed(2)}</span>
+        <span class="badge ${escAttr(st)}">${escAttr(st.replace(/_/g, ' '))}</span>
+        <span class="order-glance-bo">${back ? (back + ' backorder') : 'Fully shipped'}</span>
+      </div>
+      <div class="order-glance-actions">
+        <button type="button" class="btn-view" data-order-action="edit" data-order-id="${escAttr(o.id)}">Open</button>
+        ${open && st === 'pending' ? `<button type="button" class="btn-view" data-order-action="confirm" data-order-id="${escAttr(o.id)}">Confirm</button>` : ''}
+        ${open && back > 0 ? `<button type="button" class="btn-save" data-order-action="ship" data-order-id="${escAttr(o.id)}">Ship</button>` : ''}
+        <button type="button" class="btn-email-cmd" data-order-action="email" data-email-format="packing" data-order-id="${escAttr(o.id)}">Email</button>
+      </div>
+    </article>`;
+  });
+  if (tbody) tbody.innerHTML = tableHtml;
+  if (cardsEl) cardsEl.innerHTML = cardsHtml;
 }
 
 async function loadOrders() {
@@ -1688,32 +1927,166 @@ async function loadOrders() {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     masterOrders = await r.json();
     if (!Array.isArray(masterOrders)) throw new Error(masterOrders.error || 'Invalid orders response');
-
-    let html = '';
-    masterOrders.forEach(o => {
-      const dDate = new Date(o.placedAt).toLocaleDateString();
-      html += `<tr>
-        <td data-label="Order ID" style="font-family:monospace;color:var(--gold);">${escAttr(o.id)}</td>
-        <td data-label="Date">${dDate}</td>
-        <td data-label="Customer">${escAttr(o.customer.name || '')}<br><span style="font-size:10px;color:var(--silver)">${escAttr(o.customer.company || '')}</span></td>
-        <td data-label="Total" style="font-family:monospace">$${(o.total||0).toFixed(2)}</td>
-        <td data-label="Status"><span class="badge ${escAttr(o.status || '')}">${escAttr(String(o.status || '').replace(/_/g, ' '))}</span></td>
-        <td data-label="Action" style="white-space:nowrap;">
-          <button type="button" class="btn-view" data-order-action="edit" data-order-id="${escAttr(o.id)}">View & Edit</button>
-          <button type="button" class="btn-del" style="margin-left:8px;" data-order-action="delete" data-order-id="${escAttr(o.id)}">Delete</button>
-        </td>
-      </tr>`;
-    });
-    tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:var(--silver);padding:24px;">No orders yet.</td></tr>';
+    renderOrdersQueue();
     updateAdminGlanceCounts();
   } catch(e) {
     console.error(e);
     if (String(e.message || '').includes('Unauthorized')) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ff6b6b;padding:24px;">Please log in again.</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ff6b6b;padding:24px;">Please log in again.</td></tr>';
       return;
     }
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load orders.</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load orders.</td></tr>';
+    const cardsEl = document.getElementById('orders-cards');
+    if (cardsEl) cardsEl.innerHTML = '<div class="mcat-empty" style="color:#ff6b6b;">Failed to load orders.</div>';
     showStatus('Orders load failed: ' + e.message, true);
+  }
+}
+
+async function persistOrderObject(order) {
+  const r = await adminFetch('/admin/orders', { method: 'POST', body: JSON.stringify(order) });
+  if (!r.ok) {
+    const err = await r.json().catch(function () { return {}; });
+    throw new Error(err.error || ('HTTP ' + r.status));
+  }
+  return r.json().catch(function () { return {}; });
+}
+
+async function omsConfirmOrderId(orderId) {
+  const o = (masterOrders || []).find(function (x) { return x.id === orderId; });
+  if (!o) return;
+  if (!orderIsOpen(o)) return showStatus('Order is already closed.', true);
+  if (String(o.status) === 'confirmed') return showStatus('Already confirmed.', false);
+  if (!confirm('Mark ' + orderId + ' as Confirmed?')) return;
+  const prev = o.status;
+  o.status = 'confirmed';
+  try {
+    await persistOrderObject(o);
+    showStatus(orderId + ' confirmed.', false);
+    await loadOrders();
+  } catch (e) {
+    o.status = prev;
+    showStatus('Confirm failed: ' + e.message, true);
+  }
+}
+
+async function omsShipOrderId(orderId) {
+  const o = (masterOrders || []).find(function (x) { return x.id === orderId; });
+  if (!o) return;
+  if (!orderIsOpen(o)) return showStatus('Order is closed.', true);
+  const back = orderBackorderPcs(o);
+  if (back < 1) return showStatus('Nothing left to ship.', true);
+
+  const shipItems = [];
+  let shipTotal = 0;
+  (o.items || []).forEach(function (item) {
+    const qty = itemBackorderQty(item);
+    if (qty < 1) return;
+    const unitPrice = Number(item.unitPrice) || 0;
+    const lineTotal = qty * unitPrice;
+    shipTotal += lineTotal;
+    shipItems.push({
+      code: item.code,
+      size: item.size || '',
+      description: item.description || '',
+      qty: qty,
+      unitPrice: unitPrice,
+      lineTotal: lineTotal
+    });
+  });
+  if (!shipItems.length) return;
+
+  const summary = shipItems.map(function (it) {
+    return '• ' + (it.description || it.code) + (it.size ? ' ' + it.size : '') + ' × ' + it.qty;
+  }).join('\n');
+  if (!confirm('Ship remaining on ' + orderId + '?\n\n' + summary + '\n\nSubtotal: $' + shipTotal.toFixed(2))) return;
+
+  if (!Array.isArray(o.shipments)) o.shipments = [];
+  const shipment = {
+    id: 'SHIP-' + (o.shipments.length + 1),
+    shippedAt: new Date().toISOString(),
+    note: '',
+    items: shipItems,
+    subtotal: shipTotal
+  };
+  shipItems.forEach(function (si) {
+    const line = o.items.find(function (it) {
+      return String(it.code) === String(si.code) && String(it.size || '') === String(si.size || '');
+    });
+    if (!line) return;
+    line.qtyShipped = (parseInt(line.qtyShipped, 10) || 0) + si.qty;
+  });
+  o.shipments.push(shipment);
+  const allDone = o.items.every(function (it) { return itemBackorderQty(it) === 0; });
+  o.status = allDone ? 'delivered' : 'partially_shipped';
+
+  try {
+    await persistOrderObject(o);
+    showStatus('Shipment ' + shipment.id + ' recorded' + (allDone ? ' — delivered.' : ' — still open (partial).'), false);
+    await loadOrders();
+    if (confirm('Open email for packing slip / invoice?')) {
+      await openOrderModal(orderId);
+      omsQuickEmail(allDone ? 'invoice' : 'packing');
+    }
+  } catch (e) {
+    showStatus('Ship failed: ' + e.message, true);
+    await loadOrders();
+  }
+}
+
+async function omsEmailOrderId(orderId, format) {
+  await openOrderModal(orderId);
+  omsQuickEmail(format || 'confirm');
+}
+
+async function omsQuickConfirm() {
+  if (!activeOrderObj) return;
+  if (!orderIsOpen(activeOrderObj)) return showStatus('Order is already closed.', true);
+  if (String(activeOrderObj.status) === 'confirmed' || String(activeOrderObj.status) === 'partially_shipped') {
+    return showStatus('Already past pending.', false);
+  }
+  if (!confirm('Mark ' + activeOrderObj.id + ' as Confirmed?')) return;
+  document.getElementById('m-status-sel').value = 'confirmed';
+  activeOrderObj.status = 'confirmed';
+  const ok = await saveOrderChanges({ keepOpen: true });
+  if (ok) {
+    toggleEditLock('confirmed');
+    updateOmsQuickBar();
+  }
+}
+
+async function omsQuickShipRemaining() {
+  if (!activeOrderObj) return;
+  fillShipNowRemaining();
+  await recordShipment();
+  updateOmsQuickBar();
+}
+
+function omsQuickEmail(format) {
+  if (!activeOrderObj) return;
+  openEmailModal();
+  const sel = document.getElementById('email-format-sel');
+  if (sel) {
+    sel.value = format || 'confirm';
+    onEmailFormatChange();
+  }
+}
+
+function updateOmsQuickBar() {
+  const bar = document.getElementById('oms-quick-bar');
+  if (!bar || !activeOrderObj) return;
+  const open = orderIsOpen(activeOrderObj);
+  const back = orderBackorderPcs(activeOrderObj);
+  const st = String(activeOrderObj.status || '');
+  bar.style.display = 'block';
+  const conf = document.getElementById('oms-qa-confirm');
+  const ship = document.getElementById('oms-qa-ship');
+  if (conf) {
+    conf.disabled = !open || st !== 'pending';
+    conf.style.opacity = conf.disabled ? '0.45' : '1';
+  }
+  if (ship) {
+    ship.disabled = !open || back < 1;
+    ship.style.opacity = ship.disabled ? '0.45' : '1';
   }
 }
 
@@ -1833,6 +2206,7 @@ async function openOrderModal(orderId) {
   
   renderEditableItems();
   toggleEditLock(activeOrderObj.status || 'pending');
+  updateOmsQuickBar();
   
   document.getElementById('order-modal-overlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';

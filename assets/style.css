@@ -1072,6 +1072,103 @@ h1.htitle strong { color: var(--gold); }
   [data-r] { transition: none !important; }
 }
 
+  /* OMS order queue */
+  .orders-cards { display: none; }
+  .admin-glance-order-chips {
+    display: none;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin: -4px 0 4px;
+  }
+  .oms-toolbar { margin-bottom: 14px; }
+  .oms-search { width: 100%; margin-bottom: 10px; box-sizing: border-box; }
+  .oms-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .oms-date-lbl { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--silver); font-family: 'DM Mono', monospace; }
+  .oms-date-lbl .data-input { width: 100%; box-sizing: border-box; }
+  .oms-status-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .oms-chip {
+    background: var(--ink3); border: 1px solid rgba(139,160,178,.25); color: var(--silver);
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .3px;
+    padding: 8px 10px; cursor: pointer;
+  }
+  .oms-chip.active, .oms-chip:active {
+    border-color: var(--gold); color: var(--gold); background: rgba(200,152,31,.1);
+  }
+  .oms-chip span { color: var(--smoke); margin-left: 4px; }
+  .oms-queue-meta {
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--silver);
+    margin-bottom: 12px; letter-spacing: .3px;
+  }
+  .oms-quick-bar {
+    margin: 0 0 16px; padding: 14px; background: rgba(200,152,31,.06);
+    border: 1px solid rgba(200,152,31,.25);
+  }
+  .oms-quick-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .oms-qa { width: 100% !important; justify-content: center; text-align: center; padding: 12px 8px !important; font-size: 12px !important; margin: 0 !important; }
+  .order-row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .order-row-actions .btn-view,
+  .order-row-actions .btn-save,
+  .order-row-actions .btn-del { margin: 0; }
+
+@media (max-width: 768px) {
+  .admin-glance-order-chips { display: grid; }
+  .orders-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .admin-orders-desktop-table { display: none !important; }
+  .order-glance {
+    display: grid;
+    gap: 6px;
+    padding: 12px;
+    background: var(--ink3);
+    border: 1px solid rgba(200,152,31,.22);
+  }
+  .order-glance[data-status="pending"] { border-color: rgba(200,152,31,.55); }
+  .order-glance[data-status="confirmed"] { border-color: rgba(52,152,219,.45); }
+  .order-glance[data-status="partially_shipped"] { border-color: rgba(230,126,34,.5); }
+  .order-glance[data-status="delivered"] { border-color: rgba(46,204,113,.35); }
+  .order-glance-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .order-glance-id { font-family: monospace; color: var(--gold); font-size: 14px; }
+  .order-glance-date { font-size: 12px; color: var(--silver); }
+  .order-glance-name { font-family: 'Oswald', sans-serif; font-size: 17px; color: var(--white); line-height: 1.15; }
+  .order-glance-mid {
+    display: flex; justify-content: space-between; gap: 8px;
+    font-size: 12px; color: var(--silver);
+  }
+  .order-glance-stats {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    font-size: 12px;
+  }
+  .order-glance-total { font-family: monospace; color: var(--gold); font-size: 14px; }
+  .order-glance-bo { color: var(--smoke); }
+  .order-glance-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .order-glance-actions .btn-view,
+  .order-glance-actions .btn-save,
+  .order-glance-actions .btn-del,
+  .order-glance-actions .btn-email-cmd {
+    width: 100%; margin: 0 !important; padding: 10px 4px; font-size: 11px; text-align: center;
+  }
+  #tab-orders .oms-toolbar { margin-top: 0; }
+  .admin-orders-actions .btn-add { width: 100%; }
+}
+
+@media (min-width: 769px) {
+  .orders-cards,
+  .admin-glance-order-chips { display: none !important; }
+  .admin-orders-desktop-table { display: block !important; }
+  .oms-quick-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
 /* --- Mobile efficiency utilities --- */
 .mobile-only-block,
 .mobile-only-flex,
