@@ -49,12 +49,21 @@
       <select class="mobile-filter-sel" id="mobile-sub-select" aria-label="Sub category" onchange="onMobileSubChange(this.value)"></select>
     </div>
 
+    <!-- Mobile glanceable drill-down (phone only; desktop uses accordion below) -->
+    <div id="mobile-catalog" class="mobile-catalog" aria-live="polite">
+      <div class="mcat-crumb" id="mcat-crumb"></div>
+      <div id="mcat-panel-main" class="mcat-panel"></div>
+      <div id="mcat-panel-sub" class="mcat-panel" hidden></div>
+      <div id="mcat-panel-list" class="mcat-panel" hidden></div>
+      <div id="mcat-panel-detail" class="mcat-panel" hidden></div>
+    </div>
+
     <div class="filter-stack" id="filter-stack">
       <div class="filter-bar" id="main-filters" role="toolbar" aria-label="Main categories"></div>
       <div class="filter-bar" id="sub-filters" role="toolbar" aria-label="Sub categories"></div>
     </div>
     
-    <div id="prod-sections">
+    <div id="prod-sections" class="prod-sections-desktop">
       <div style="text-align:center;padding:40px;color:var(--silver);font-family:'DM Mono',monospace;">Loading Live Inventory...</div>
     </div>
     
@@ -454,10 +463,295 @@ async function fetchAndRenderProducts() {
     window.catProductGroups = groups;
     buildMainFilters(groups);
     applyUrlCategoryFilter();
+    initMobileCatalog(groups);
   } catch(e) {
     document.getElementById('prod-sections').innerHTML = '<div style="color:#ff6b6b;padding:40px;text-align:center;">Failed to load catalog. Please refresh.</div>';
     console.error(e);
   }
+}
+
+// ── Mobile glanceable catalog (category → type → product → sizes) ──
+window.mcatLevel = 'main';
+window.mcatMain = null;
+window.mcatSub = null;
+window.mcatCode = null;
+
+function isMobileCatalog() {
+  return window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+}
+
+function mcatCounts(groups) {
+  var mains = {};
+  Object.keys(groups).forEach(function (code) {
+    var g = groups[code];
+    var key = catMainKey(g.mainCat);
+    var lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
+    if (!mains[key]) mains[key] = { key: key, label: lab, products: 0, subs: {} };
+    mains[key].products += 1;
+    var sub = g.subCat || code;
+    if (!mains[key].subs[sub]) mains[key].subs[sub] = 0;
+    mains[key].subs[sub] += 1;
+  });
+  return mains;
+}
+
+function mcatShowPanel(id) {
+  ['mcat-panel-main', 'mcat-panel-sub', 'mcat-panel-list', 'mcat-panel-detail'].forEach(function (pid) {
+    var el = document.getElementById(pid);
+    if (el) el.hidden = (pid !== id);
+  });
+}
+
+function mcatRenderCrumb() {
+  var el = document.getElementById('mcat-crumb');
+  if (!el) return;
+  var parts = [];
+  parts.push('<button type="button" class="mcat-crumb-btn" onclick="mcatGoMain()">All</button>');
+  if (window.mcatMain) {
+    var mains = mcatCounts(window.catProductGroups || {});
+    var lab = (mains[window.mcatMain] && mains[window.mcatMain].label) || window.mcatMain;
+    parts.push('<span class="mcat-crumb-sep">›</span>');
+    parts.push('<button type="button" class="mcat-crumb-btn" onclick="mcatGoSub()">' + catEscHtml(lab) + '</button>');
+  }
+  if (window.mcatSub) {
+    parts.push('<span class="mcat-crumb-sep">›</span>');
+    parts.push('<button type="button" class="mcat-crumb-btn" onclick="mcatGoList()">' + catEscHtml(window.mcatSub) + '</button>');
+  }
+  if (window.mcatCode && window.catProductGroups && window.catProductGroups[window.mcatCode]) {
+    parts.push('<span class="mcat-crumb-sep">›</span>');
+    parts.push('<span class="mcat-crumb-now">' + catEscHtml(window.catProductGroups[window.mcatCode].desc || window.mcatCode) + '</span>');
+  }
+  el.innerHTML = parts.join('');
+  el.style.display = (window.mcatLevel === 'main' && !((document.getElementById('prod-search') || {}).value || '').trim()) ? 'none' : 'flex';
+}
+
+function mcatGoMain() {
+  window.mcatLevel = 'main';
+  window.mcatMain = null;
+  window.mcatSub = null;
+  window.mcatCode = null;
+  var s = document.getElementById('prod-search');
+  if (s) s.value = '';
+  mcatRenderMain();
+}
+
+function mcatGoSub() {
+  if (!window.mcatMain) return mcatGoMain();
+  window.mcatLevel = 'sub';
+  window.mcatSub = null;
+  window.mcatCode = null;
+  mcatRenderSub(window.mcatMain);
+}
+
+function mcatGoList() {
+  if (!window.mcatMain || !window.mcatSub) return mcatGoSub();
+  window.mcatLevel = 'list';
+  window.mcatCode = null;
+  mcatRenderList(window.mcatMain, window.mcatSub);
+}
+
+function mcatRenderMain() {
+  var panel = document.getElementById('mcat-panel-main');
+  if (!panel || !window.catProductGroups) return;
+  var mains = mcatCounts(window.catProductGroups);
+  var keys = Object.keys(mains).sort(function (a, b) {
+    if (a === '__EMPTY__') return 1;
+    if (b === '__EMPTY__') return -1;
+    return mains[a].label.localeCompare(mains[b].label);
+  });
+  var html = '<div class="mcat-title">Browse by department</div><div class="mcat-tile-grid">';
+  keys.forEach(function (k) {
+    var m = mains[k];
+    html += '<button type="button" class="mcat-tile" onclick="mcatOpenMain(\'' + catEscAttr(k).replace(/'/g, "\\'") + '\')">' +
+      '<span class="mcat-tile-name">' + catEscHtml(m.label) + '</span>' +
+      '<span class="mcat-tile-meta">' + m.products + ' product' + (m.products === 1 ? '' : 's') + '</span>' +
+      '<span class="mcat-tile-arr">→</span></button>';
+  });
+  html += '</div>';
+  panel.innerHTML = html;
+  mcatShowPanel('mcat-panel-main');
+  mcatRenderCrumb();
+  window.mcatLevel = 'main';
+}
+
+function mcatOpenMain(key) {
+  window.mcatMain = key;
+  window.mcatSub = null;
+  window.mcatCode = null;
+  var mains = mcatCounts(window.catProductGroups || {});
+  var m = mains[key];
+  if (m) {
+    var subs = Object.keys(m.subs);
+    if (subs.length === 1) {
+      window.mcatSub = subs[0];
+      window.mcatLevel = 'list';
+      mcatRenderList(key, subs[0]);
+      return;
+    }
+  }
+  window.mcatLevel = 'sub';
+  mcatRenderSub(key);
+}
+
+function mcatRenderSub(mainKey) {
+  var panel = document.getElementById('mcat-panel-sub');
+  if (!panel || !window.catProductGroups) return;
+  var mains = mcatCounts(window.catProductGroups);
+  var m = mains[mainKey];
+  if (!m) return mcatGoMain();
+  var subs = Object.keys(m.subs).sort(function (a, b) { return a.localeCompare(b); });
+  var html = '<div class="mcat-title">' + catEscHtml(m.label) + '</div><div class="mcat-row-list">';
+  subs.forEach(function (sub) {
+    html += '<button type="button" class="mcat-row" onclick="mcatOpenSub(\'' +
+      String(sub).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
+      '<span class="mcat-row-name">' + catEscHtml(sub) + '</span>' +
+      '<span class="mcat-row-meta">' + m.subs[sub] + '</span>' +
+      '<span class="mcat-tile-arr">→</span></button>';
+  });
+  html += '</div>';
+  panel.innerHTML = html;
+  mcatShowPanel('mcat-panel-sub');
+  mcatRenderCrumb();
+}
+
+function mcatOpenSub(sub) {
+  window.mcatSub = sub;
+  window.mcatCode = null;
+  window.mcatLevel = 'list';
+  mcatRenderList(window.mcatMain, sub);
+}
+
+function mcatProductsFor(mainKey, subLabel, query) {
+  var groups = window.catProductGroups || {};
+  var qt = (query || '').trim().toLowerCase();
+  var out = [];
+  Object.keys(groups).forEach(function (code) {
+    var g = groups[code];
+    var mk = catMainKey(g.mainCat);
+    var sub = g.subCat || code;
+    if (!qt) {
+      if (mainKey && mk !== mainKey) return;
+      if (subLabel && sub !== subLabel) return;
+    } else {
+      var hay = (code + ' ' + g.desc + ' ' + g.mainCat + ' ' + sub + ' ' + g.rows.map(function (r) { return r.size; }).join(' ')).toLowerCase();
+      if (hay.indexOf(qt) === -1) return;
+    }
+    out.push({ code: code, data: g });
+  });
+  out.sort(function (a, b) { return String(a.data.desc || '').localeCompare(String(b.data.desc || '')); });
+  return out;
+}
+
+function mcatRenderList(mainKey, subLabel, query) {
+  var panel = document.getElementById('mcat-panel-list');
+  if (!panel) return;
+  var items = mcatProductsFor(mainKey, subLabel, query);
+  var title = query ? ('Search results (' + items.length + ')') : catEscHtml(subLabel || 'Products');
+  var html = '<div class="mcat-title">' + title + '</div>';
+  if (!items.length) {
+    html += '<div class="mcat-empty">No products match. Try another search or go back.</div>';
+  } else {
+    html += '<div class="mcat-row-list">';
+    items.forEach(function (it) {
+      var sizes = it.data.rows.length;
+      html += '<button type="button" class="mcat-row mcat-row-prod" onclick="mcatOpenProduct(\'' +
+        String(it.code).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
+        '<img class="mcat-row-thumb" src="' + catEscAttr(it.data.image || 'images/logo.png') + '" alt="" loading="lazy"/>' +
+        '<span class="mcat-row-text"><span class="mcat-row-code">' + catEscHtml(it.code) + '</span>' +
+        '<span class="mcat-row-name">' + catEscHtml(it.data.desc || '') + '</span>' +
+        '<span class="mcat-row-meta">' + sizes + ' size' + (sizes === 1 ? '' : 's') + '</span></span>' +
+        '<span class="mcat-tile-arr">→</span></button>';
+    });
+    html += '</div>';
+  }
+  panel.innerHTML = html;
+  mcatShowPanel('mcat-panel-list');
+  mcatRenderCrumb();
+}
+
+function mcatOpenProduct(code) {
+  window.mcatCode = code;
+  window.mcatLevel = 'detail';
+  mcatRenderDetail(code);
+}
+
+function mcatRenderDetail(code) {
+  var panel = document.getElementById('mcat-panel-detail');
+  var g = window.catProductGroups && window.catProductGroups[code];
+  if (!panel || !g) return;
+  var html = '<div class="mcat-detail-head">' +
+    '<img class="mcat-detail-img" src="' + catEscAttr(g.image || 'images/logo.png') + '" alt="" onclick="openLightbox(\'' + catEscAttr(g.image || '') + '\',\'' + catEscAttr(g.desc || '').replace(/'/g, "\\'") + '\')"/>' +
+    '<div><div class="mcat-row-code">' + catEscHtml(code) + '</div>' +
+    '<div class="mcat-detail-title">' + catEscHtml(g.desc || '') + '</div></div></div>';
+  html += '<div class="mcat-size-list">';
+  g.rows.forEach(function (item) {
+    var isOOS = isLoggedIn ? item.qty <= 0 : !item.inStock;
+    var avail = isOOS
+      ? '<span class="mcat-oos">Call for availability</span>'
+      : (isLoggedIn
+        ? '<span class="mcat-in">In stock · ' + item.qty + '</span>'
+        : '<span class="mcat-in">In stock</span>');
+    var price = isLoggedIn
+      ? '<span class="mcat-price">$' + item.price.toFixed(2) + '</span>'
+      : '<span class="mcat-price locked">Login for price</span>';
+    var sizeCanon = (window.normalizeProductSize || function (s) { return String(s || '').trim().replace(/"/g, ''); })(item.size);
+    var sizeAttr = sizeCanon.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    var descClean = String(g.desc || '').replace(/"/g, '&quot;');
+    var btn;
+    if (isOOS) {
+      btn = '<button class="add-to-cart-btn" disabled style="border-color:#555;color:#555;">Out of stock</button>';
+    } else {
+      btn = '<button class="add-to-cart-btn" data-code="' + catEscAttr(code) + '" data-size="' + sizeAttr +
+        '" data-desc="' + descClean + '" data-pcs="' + item.pack + '" data-price="' + item.price +
+        '" data-qty="' + item.qty + '" onclick="addToCart(this)">+ Cart</button>';
+    }
+    html += '<div class="mcat-size-row">' +
+      '<div class="mcat-size-left"><strong>' + catEscHtml(item.size) + '</strong>' +
+      '<div class="mcat-size-pack">' + item.pack + '/CTN</div>' + avail + '</div>' +
+      '<div class="mcat-size-right">' + price + btn + '</div></div>';
+  });
+  html += '</div>';
+  panel.innerHTML = html;
+  mcatShowPanel('mcat-panel-detail');
+  mcatRenderCrumb();
+}
+
+function initMobileCatalog(groups) {
+  if (!groups) return;
+  window.mcatMain = null;
+  window.mcatSub = null;
+  window.mcatCode = null;
+  // Honor ?main= from home category cards
+  var mainParam = new URLSearchParams(window.location.search).get('main');
+  if (mainParam) {
+    var matchedKey = null;
+    Object.keys(groups).forEach(function (code) {
+      var g = groups[code];
+      var lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
+      if (lab.toLowerCase() === mainParam.toLowerCase()) matchedKey = catMainKey(g.mainCat);
+    });
+    if (matchedKey) {
+      window.mcatMain = matchedKey;
+      window.mcatLevel = 'sub';
+      mcatRenderSub(matchedKey);
+      return;
+    }
+  }
+  mcatRenderMain();
+}
+
+function mcatOnSearch(qt) {
+  if (!isMobileCatalog()) return;
+  qt = (qt || '').trim();
+  if (!qt) {
+    if (window.mcatCode) return mcatRenderDetail(window.mcatCode);
+    if (window.mcatSub) return mcatRenderList(window.mcatMain, window.mcatSub);
+    if (window.mcatMain) return mcatRenderSub(window.mcatMain);
+    return mcatRenderMain();
+  }
+  window.mcatLevel = 'list';
+  window.mcatCode = null;
+  mcatRenderList(null, null, qt);
 }
 
 // Ensure global layout exists before fetching
@@ -477,6 +771,7 @@ if(searchInput){
     clearTimeout(searchDebounce);
     searchDebounce = setTimeout(function(){
       applyCatalogFilters();
+      mcatOnSearch(self.value);
     }, 160);
   });
 }

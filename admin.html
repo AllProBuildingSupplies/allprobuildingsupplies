@@ -49,6 +49,23 @@
     }
   </style>
 
+  <div id="admin-mobile-home" class="admin-mobile-home" aria-label="Admin at a glance">
+    <div class="admin-glance-title">At a glance</div>
+    <button type="button" class="admin-glance-card" onclick="adminMobileOpen('orders')">
+      <span class="admin-glance-label">Orders</span>
+      <span class="admin-glance-meta" id="glance-orders-count">Open →</span>
+    </button>
+    <button type="button" class="admin-glance-card" onclick="adminMobileOpen('products')">
+      <span class="admin-glance-label">Products</span>
+      <span class="admin-glance-meta" id="glance-products-count">Open →</span>
+    </button>
+    <button type="button" class="admin-glance-card" onclick="adminMobileOpen('users')">
+      <span class="admin-glance-label">Users</span>
+      <span class="admin-glance-meta" id="glance-users-count">Open →</span>
+    </button>
+  </div>
+  <button type="button" id="admin-mobile-back" class="admin-mobile-back" onclick="adminMobileBack()">← Back to glance</button>
+
   <div id="tab-orders" class="admin-panel active">
     <p style="color:var(--silver);font-size:14px;margin-bottom:20px;">Manage and edit customer orders. Click 'View Details' to edit order contents, change status, and send invoices.</p>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
@@ -65,6 +82,11 @@
   </div>
 
   <div id="tab-products" class="admin-panel">
+    <div class="admin-products-mobile-note">
+      <strong>Desktop only</strong>
+      Inventory editing, CSV upload, and receive-shipment tools are built for a wide screen. Open Admin on a computer to manage products.
+    </div>
+    <div class="admin-products-desktop-only">
     <p style="color:var(--silver);font-size:14px;margin-bottom:20px;">Edit your master inventory. This data feeds directly into the live Products and Checkout pages. <span style="color:var(--gold);">Tommur / Lesso codes are admin-only</span> and never shown to customers.</p>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
     <table class="data-table" id="prod-table" style="min-width:1100px;">
@@ -104,6 +126,7 @@
       <strong style="color:var(--gold);">Replace tip:</strong> Bulk Upload / Replace replaces the whole product list (not add-to-stock).
       Sizes <code>1.5</code> and <code>1-1/2</code> (and <code>2x1.5</code> / <code>2x1-1/2</code>) are treated as the same item.
     </p>
+    </div>
   </div>
 
   <div id="tab-users" class="admin-panel">
@@ -499,6 +522,11 @@ function productFromOptionKey(key) {
 }
 
 // --- ADMIN AUTH GATE ---
+let masterUsers = [], masterOrders = [], masterProducts = [];
+let activeCustomerAddresses = [];
+let addressModalUser = null;
+let activeOrderObj = null;
+
 async function checkAdminAuth() {
   const pin = document.getElementById('admin-pin').value;
   document.getElementById('admin-auth-err').style.display = 'none';
@@ -529,20 +557,15 @@ function unlockAdmin() {
     err.style.display = 'none';
     err.textContent = 'Incorrect password.';
   }
-  switchTab('orders');
   loadOrders();
   loadProducts();
   loadUsers();
+  if (isAdminMobile()) {
+    adminMobileBack();
+  } else {
+    switchTab('orders');
+  }
 }
-
-if (sessionStorage.getItem('apbs_admin_token')) unlockAdmin();
-
-if (sessionStorage.getItem('apbs_admin_token')) unlockAdmin();
-
-let masterUsers = [], masterOrders = [], masterProducts = [];
-let activeCustomerAddresses = [];
-let addressModalUser = null;
-let activeOrderObj = null; 
 
 // Advanced Error Reporter
 function showStatus(msg, isErr) {
@@ -564,6 +587,63 @@ function switchTab(tab) {
   if (tab === 'orders') loadOrders();
   if (tab === 'users') loadUsers();
 }
+
+function isAdminMobile() {
+  return window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+}
+
+function adminMobileOpen(tab) {
+  document.body.classList.add('admin-mobile-browsing');
+  const back = document.getElementById('admin-mobile-back');
+  if (back) back.classList.add('is-visible');
+  switchTab(tab);
+}
+
+function adminMobileBack() {
+  document.body.classList.remove('admin-mobile-browsing');
+  const back = document.getElementById('admin-mobile-back');
+  if (back) back.classList.remove('is-visible');
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+}
+
+function updateAdminGlanceCounts() {
+  const o = document.getElementById('glance-orders-count');
+  const p = document.getElementById('glance-products-count');
+  const u = document.getElementById('glance-users-count');
+  if (o && Array.isArray(masterOrders)) {
+    const openish = masterOrders.filter(x => !['delivered', 'cancelled'].includes(String(x.status || '').toLowerCase())).length;
+    o.textContent = openish + ' active · ' + masterOrders.length + ' total';
+  }
+  if (p && Array.isArray(masterProducts)) {
+    p.textContent = masterProducts.length + ' rows';
+  }
+  if (u && Array.isArray(masterUsers)) {
+    const pending = masterUsers.filter(x => String(x.status || '').toLowerCase() === 'pending').length;
+    u.textContent = pending ? (pending + ' pending') : (masterUsers.length + ' accounts');
+  }
+}
+
+function adminShowDesktopDefault() {
+  if (!isAdminMobile()) {
+    document.body.classList.remove('admin-mobile-browsing');
+    const back = document.getElementById('admin-mobile-back');
+    if (back) back.classList.remove('is-visible');
+    switchTab('orders');
+  } else {
+    adminMobileBack();
+  }
+}
+
+if (sessionStorage.getItem('apbs_admin_token')) unlockAdmin();
+
+window.addEventListener('resize', function () {
+  if (!document.getElementById('main-admin-content') || document.getElementById('main-admin-content').style.display === 'none') return;
+  if (!isAdminMobile() && document.body.classList.contains('admin-mobile-browsing') === false) {
+    const anyActive = document.querySelector('.admin-panel.active');
+    if (!anyActive) switchTab('orders');
+  }
+});
 
 // --- OPTIMIZED TABLE BUILDERS ---
 async function loadProducts() {
@@ -609,6 +689,7 @@ async function loadProducts() {
     });
     tbody.innerHTML = html || '<tr><td colspan="12" style="text-align:center;color:var(--silver);padding:24px;">No products in database. Add rows or upload a CSV.</td></tr>';
     populateProductDropdown();
+    updateAdminGlanceCounts();
   } catch(e) {
     console.error(e);
     tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#ff6b6b;padding:24px;">Failed to load products. Check API connection.</td></tr>';
@@ -1087,6 +1168,7 @@ async function loadUsers() {
     });
     document.getElementById('users-tbody').innerHTML = html;
     populateModalCustomerDropdown();
+    updateAdminGlanceCounts();
   } catch(e) {
     console.error(e);
     if (!String(e.message || '').includes('Unauthorized')) {
@@ -1516,6 +1598,7 @@ async function loadOrders() {
       </tr>`;
     });
     tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:var(--silver);padding:24px;">No orders yet.</td></tr>';
+    updateAdminGlanceCounts();
   } catch(e) {
     console.error(e);
     if (String(e.message || '').includes('Unauthorized')) {
