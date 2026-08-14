@@ -522,3 +522,78 @@ async function submitContactForm(btn) {
     btn.disabled = false;
   }
 }
+
+// ══════════════════════════════════════════
+// PWA — service worker + install prompt
+// ══════════════════════════════════════════
+(function initApbsPwa() {
+  if (!('serviceWorker' in navigator)) return;
+
+  var register = function () {
+    var swUrl = 'sw.js';
+    try {
+      swUrl = new URL('sw.js', window.location.href).pathname;
+    } catch (_) {}
+    navigator.serviceWorker.register(swUrl).catch(function () {});
+  };
+
+  if (document.readyState === 'complete') register();
+  else window.addEventListener('load', register);
+
+  var deferredPrompt = null;
+  var dismissedKey = 'apbs_pwa_install_dismissed';
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    try {
+      if (sessionStorage.getItem(dismissedKey) === '1') return;
+    } catch (_) {}
+    showInstallBanner();
+  });
+
+  function showInstallBanner() {
+    if (document.getElementById('apbs-pwa-install')) return;
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return;
+    if (window.navigator.standalone) return;
+
+    var bar = document.createElement('div');
+    bar.id = 'apbs-pwa-install';
+    bar.setAttribute('role', 'dialog');
+    bar.innerHTML =
+      '<div class="apbs-pwa-install-text">' +
+        '<strong>Install All Pro</strong>' +
+        '<span>Add to your home screen for quick access</span>' +
+      '</div>' +
+      '<div class="apbs-pwa-install-actions">' +
+        '<button type="button" class="btn-gold" id="apbs-pwa-install-btn">Install</button>' +
+        '<button type="button" class="btn-ghost" id="apbs-pwa-dismiss-btn">Not now</button>' +
+      '</div>';
+    document.body.appendChild(bar);
+
+    document.getElementById('apbs-pwa-install-btn').addEventListener('click', function () {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(function () {
+        deferredPrompt = null;
+        hideInstallBanner(true);
+      });
+    });
+    document.getElementById('apbs-pwa-dismiss-btn').addEventListener('click', function () {
+      hideInstallBanner(true);
+    });
+  }
+
+  function hideInstallBanner(remember) {
+    var bar = document.getElementById('apbs-pwa-install');
+    if (bar) bar.remove();
+    if (remember) {
+      try { sessionStorage.setItem(dismissedKey, '1'); } catch (_) {}
+    }
+  }
+
+  window.addEventListener('appinstalled', function () {
+    deferredPrompt = null;
+    hideInstallBanner(true);
+  });
+})();

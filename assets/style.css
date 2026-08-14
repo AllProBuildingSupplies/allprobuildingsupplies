@@ -1969,3 +1969,51 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
 
 /* --- TEST ENVIRONMENT FIXES --- */
 #global-header { display: contents; }
+
+/* --- PWA install banner + standalone --- */
+#apbs-pwa-install {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 100050;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--ink2);
+  border: 1px solid rgba(200,152,31,.35);
+  box-shadow: 0 12px 40px rgba(0,0,0,.45);
+}
+.apbs-pwa-install-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.apbs-pwa-install-text strong {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  color: var(--white);
+}
+.apbs-pwa-install-text span {
+  font-size: 12px;
+  color: var(--silver);
+}
+.apbs-pwa-install-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.apbs-pwa-install-actions .btn-gold,
+.apbs-pwa-install-actions .btn-ghost {
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  #apbs-pwa-install { display: none !important; }
+  body.page-home #hero { min-height: 100dvh; }
+}
+

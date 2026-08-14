@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Offline — All Pro Building Supplies</title>
+<meta name="theme-color" content="#0C1117"/>
+<link rel="stylesheet" href="assets/style.css"/>
+<meta name="theme-color" content="#0C1117"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<style>
+  .offline-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px 20px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,152,31,.12), transparent 55%), var(--ink);
+  }
+  .offline-wrap img { width: 120px; margin-bottom: 24px; }
+  .offline-wrap h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    color: var(--white);
+    margin: 0 0 12px;
+  }
+  .offline-wrap p {
+    color: var(--silver);
+    max-width: 360px;
+    line-height: 1.55;
+    margin: 0 0 24px;
+  }
+</style>
+</head>
+<body>
+  <div class="offline-wrap">
+    <img src="images/logo.png" alt="All Pro Building Supplies"/>
+    <h1>You're offline</h1>
+    <p>All Pro needs a connection for catalog, cart, and admin. Check your signal, then try again.</p>
+    <a class="btn-gold" href="index.html">Retry</a>
+  </div>
+</body>
+</html>
