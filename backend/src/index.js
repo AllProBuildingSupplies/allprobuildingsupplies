@@ -319,20 +319,71 @@ function mapOrderItem(it, prods) {
 
 function formatOrderRow(o, orderItems) {
   let customer = { name: 'Unknown' };
+  let delivery = { method: o.delivery_method || null, address: o.delivery_address || '' };
+  let po = o.po || '';
+  let notes = o.notes || '';
+  let shipments = parseShipmentsJson(o.shipments_json);
+  let items = orderItems || [];
+
   try {
     if (o.customer_snapshot) customer = JSON.parse(o.customer_snapshot);
   } catch (_) {}
+
+  // Legacy preview rows store the full payload in `data` and use placed_at/total.
+  if ((!customer || customer.name === 'Unknown') || (!items.length && o.data)) {
+    try {
+      const legacy = o.data ? JSON.parse(o.data) : null;
+      if (legacy && typeof legacy === 'object') {
+        if (legacy.customer) customer = legacy.customer;
+        if (legacy.delivery) {
+          delivery = {
+            method: legacy.delivery.method || delivery.method,
+            address: legacy.delivery.address || delivery.address || '',
+          };
+        }
+        if (legacy.po != null && !po) po = legacy.po;
+        if (legacy.notes != null && !notes) notes = legacy.notes;
+        if ((!shipments || !shipments.length) && legacy.shipments) {
+          shipments = normalizeShipments(legacy.shipments);
+        }
+        if (!items.length && Array.isArray(legacy.items)) {
+          items = legacy.items.map((it) => ({
+            code: it.code || it.product_sku || '',
+            size: it.size || '',
+            qty: parseInt(it.qty != null ? it.qty : it.quantity, 10) || 0,
+            qtyShipped: parseInt(it.qtyShipped != null ? it.qtyShipped : it.qty_shipped, 10) || 0,
+            qtyBackordered: 0,
+            unitPrice: it.unitPrice != null ? it.unitPrice : it.price_at_purchase,
+            lineTotal: null,
+            description: it.description || '',
+            pcsPerCtn: it.pcsPerCtn || it.pack || 1,
+          }));
+          for (const it of items) {
+            it.qtyBackordered = Math.max(0, (it.qty || 0) - (it.qtyShipped || 0));
+            it.lineTotal = (it.qty || 0) * (parseFloat(it.unitPrice) || 0);
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  let placedAt = o.created_at || null;
+  if (!placedAt && o.placed_at != null) {
+    const n = Number(o.placed_at);
+    placedAt = Number.isFinite(n) ? new Date(n).toISOString() : String(o.placed_at);
+  }
+
   return {
     id: o.id,
-    placedAt: o.created_at,
+    placedAt,
     status: o.status,
-    total: o.total_amount,
-    delivery: { method: o.delivery_method, address: o.delivery_address || '' },
-    po: o.po || '',
-    notes: o.notes || '',
+    total: o.total_amount != null ? o.total_amount : o.total,
+    delivery,
+    po,
+    notes,
     customer,
-    items: orderItems,
-    shipments: parseShipmentsJson(o.shipments_json),
+    items,
+    shipments,
   };
 }
 
@@ -519,6 +570,53 @@ async function ensureProductFactoryColumns(env) {
   try {
     await env.DB.prepare(`ALTER TABLE products ADD COLUMN lesso_code TEXT DEFAULT ''`).run();
   } catch (_) {}
+}
+
+/** Category columns used by catalog sync / public product shaping. */
+async function ensureProductCategoryColumns(env) {
+  try {
+    await env.DB.prepare(`ALTER TABLE products ADD COLUMN main_category TEXT DEFAULT ''`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE products ADD COLUMN sub_category TEXT DEFAULT ''`).run();
+  } catch (_) {}
+}
+
+/**
+ * Preview/legacy D1 may use password_hash / can_order_pieces / registered_at.
+ * Add the camelCase columns this Worker writes so admin create/update works.
+ */
+async function ensureUsersCompatColumns(env) {
+  const cols = [
+    'password TEXT',
+    'canOrderPieces INTEGER DEFAULT 1',
+    'registeredAt TEXT',
+    'approvedAt TEXT',
+  ];
+  for (const col of cols) {
+    try {
+      await env.DB.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run();
+    } catch (_) {}
+  }
+  // Backfill password from legacy hash column when present and password empty.
+  try {
+    await env.DB.prepare(
+      `UPDATE users SET password = password_hash
+       WHERE (password IS NULL OR TRIM(password) = '')
+         AND password_hash IS NOT NULL AND TRIM(password_hash) != ''`
+    ).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(
+      `UPDATE users SET canOrderPieces = COALESCE(canOrderPieces, can_order_pieces, 1)
+       WHERE canOrderPieces IS NULL`
+    ).run();
+  } catch (_) {}
+}
+
+async function tableColumns(env, table) {
+  const { results } = await env.DB.prepare(`PRAGMA table_info(${table})`).all();
+  return (results || []).map((r) => ({ name: r.name, type: r.type, notnull: r.notnull, dflt: r.dflt_value, pk: r.pk }));
 }
 
 /** Partial shipments: cumulative qty_shipped per line + shipments history JSON on orders. */
@@ -981,6 +1079,8 @@ export default {
       await ensureCoreSchema(env);
       await ensureAddressesTable(env);
       await ensureProductFactoryColumns(env);
+      await ensureProductCategoryColumns(env);
+      await ensureUsersCompatColumns(env);
       await ensureOrderShipmentColumns(env);
       // One-time (idempotent) load of initial Tommur/Lesso codes into products.
       try {
@@ -1033,26 +1133,32 @@ export default {
         if (!password) {
           return jsonResponse({ error: 'Password is required' }, 400);
         }
-        const { results } = await env.DB.prepare('SELECT * FROM users WHERE email = ? AND password = ?')
-          .bind(email.trim().toLowerCase(), password)
+        const { results } = await env.DB.prepare(
+          `SELECT * FROM users
+           WHERE email = ?
+             AND (password = ? OR password_hash = ?)`
+        )
+          .bind(email.trim().toLowerCase(), password, password)
           .all();
         if (results.length === 0) return jsonResponse({ error: 'Invalid email or password' }, 401);
         const user = results[0];
         if (user.status !== 'approved') return jsonResponse({ error: 'Account pending approval.' }, 403);
         const secret = jwtSecret(env);
         if (!secret) return jsonResponse({ error: 'Auth not configured' }, 503);
+        const canPieces = user.canOrderPieces === 1 || user.can_order_pieces === 1;
         const token = await signToken(
           {
             role: 'user',
             sub: user.id,
             email: user.email.toLowerCase(),
             status: user.status,
-            canOrderPieces: user.canOrderPieces === 1,
+            canOrderPieces: canPieces,
           },
           secret
         );
         delete user.password;
-        user.canOrderPieces = user.canOrderPieces === 1;
+        delete user.password_hash;
+        user.canOrderPieces = canPieces;
         return jsonResponse({ message: 'Login successful', token, user });
       }
 
@@ -1353,11 +1459,25 @@ export default {
         return jsonResponse({ error: 'Unauthorized' }, 401);
       }
 
+      if (path === '/api/admin/schema' && request.method === 'GET') {
+        const tables = ['products', 'users', 'orders', 'order_items', 'user_addresses'];
+        const out = {};
+        for (const t of tables) {
+          try {
+            out[t] = await tableColumns(env, t);
+          } catch (e) {
+            out[t] = { error: String(e && e.message ? e.message : e) };
+          }
+        }
+        return jsonResponse(out);
+      }
+
       if (path === '/api/admin/users' && request.method === 'GET') {
         const { results } = await env.DB.prepare('SELECT * FROM users').all();
         const safe = results.map((u) => {
           const copy = { ...u };
           delete copy.password;
+          delete copy.password_hash;
           return copy;
         });
         return jsonResponse(safe);
@@ -1366,12 +1486,41 @@ export default {
       if (path === '/api/admin/users' && request.method === 'POST') {
         const u = await request.json();
         const storedPw = await ensureStoredPassword(u.password);
+        const id = String(u.id || Date.now());
+        const email = String(u.email || '').trim().toLowerCase();
+        const status = u.status || 'pending';
+        const canPieces = u.canOrderPieces ? 1 : 0;
+        const nowIso = new Date().toISOString();
+        // Preview/legacy D1 requires password_hash + password_algo (NOT NULL).
         await env.DB.prepare(
-          `INSERT INTO users (id, fname, lname, company, email, phone, password, status, canOrderPieces, registeredAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO users (
+             id, fname, lname, company, email, phone,
+             password, password_hash, password_algo,
+             status, canOrderPieces, can_order_pieces,
+             registeredAt, registered_at, approvedAt, approved_at, added_by_admin
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
-          .bind(u.id, u.fname, u.lname, u.company, u.email.toLowerCase(), u.phone || '', storedPw, u.status, u.canOrderPieces ? 1 : 0, new Date().toISOString())
+          .bind(
+            id,
+            u.fname || '',
+            u.lname || '',
+            u.company || '',
+            email,
+            u.phone || '',
+            storedPw,
+            storedPw,
+            'sha256',
+            status,
+            canPieces,
+            canPieces,
+            nowIso,
+            nowIso,
+            status === 'approved' ? nowIso : null,
+            status === 'approved' ? nowIso : null,
+            1
+          )
           .run();
-        return jsonResponse({ success: true });
+        return jsonResponse({ success: true, id });
       }
 
       if (path === '/api/admin/users' && request.method === 'PUT') {
@@ -1758,24 +1907,59 @@ export default {
 
         const shipments = normalizeShipments(o.shipments);
         const shipmentsJson = JSON.stringify(shipments);
+        const placedIso = o.placedAt || new Date().toISOString();
+        const placedMs = Date.parse(placedIso);
+        const placedAtInt = Number.isFinite(placedMs) ? placedMs : Date.now();
+        const custEmail = String(o.customer?.email || 'unknown').trim().toLowerCase();
+        const totalAmt = priced.total || 0;
+        // Legacy preview schema still has NOT NULL placed_at / total / data / user_email.
+        const legacyData = JSON.stringify({
+          customer: o.customer || {},
+          delivery: o.delivery || {},
+          items: priced.validated || [],
+          po: o.po || '',
+          notes: o.notes || '',
+          shipments,
+        });
 
         const stmts = [
           env.DB.prepare(
-            `INSERT INTO orders (id, user_id, status, total_amount, delivery_method, delivery_address, po, notes, customer_snapshot, shipments_json, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-             ON CONFLICT(id) DO UPDATE SET status=excluded.status, total_amount=excluded.total_amount, delivery_address=excluded.delivery_address, po=excluded.po, notes=excluded.notes, customer_snapshot=excluded.customer_snapshot, shipments_json=excluded.shipments_json`
+            `INSERT INTO orders (
+               id, user_id, user_email, status,
+               total_amount, total, delivery_method, delivery_address, po, notes,
+               customer_snapshot, shipments_json, created_at, placed_at, data
+             )
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET
+               status=excluded.status,
+               total_amount=excluded.total_amount,
+               total=excluded.total,
+               delivery_address=excluded.delivery_address,
+               po=excluded.po,
+               notes=excluded.notes,
+               customer_snapshot=excluded.customer_snapshot,
+               shipments_json=excluded.shipments_json,
+               data=excluded.data,
+               user_email=excluded.user_email,
+               user_id=excluded.user_id,
+               created_at=COALESCE(orders.created_at, excluded.created_at),
+               placed_at=COALESCE(orders.placed_at, excluded.placed_at)`
           ).bind(
             o.id,
-            o.customer?.email || 'unknown',
+            custEmail,
+            custEmail,
             o.status,
-            priced.total || 0,
+            totalAmt,
+            totalAmt,
             o.delivery?.method || 'delivery',
             o.delivery?.address || '',
             o.po || '',
             o.notes || '',
             JSON.stringify(o.customer || {}),
             shipmentsJson,
-            o.placedAt || new Date().toISOString()
+            placedIso,
+            placedAtInt,
+            legacyData
           ),
           env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(o.id),
         ];
@@ -1795,9 +1979,8 @@ export default {
         }
 
         // Persist address + phone on the customer's address book when possible.
-        const custEmail = String(o.customer?.email || '').trim().toLowerCase();
         const delAddr = String(o.delivery?.address || '').trim();
-        if (custEmail && delAddr && delAddr.toUpperCase() !== 'PICKUP') {
+        if (custEmail && custEmail !== 'unknown' && delAddr && delAddr.toUpperCase() !== 'PICKUP') {
           const dbUser = await findUserByEmailOrId(env, custEmail);
           if (dbUser) {
             try {
@@ -1839,7 +2022,8 @@ export default {
 
       return jsonResponse({ error: 'Route Not Found' }, 404);
     } catch (error) {
-      return jsonResponse({ error: 'Internal Server Error' }, 500);
+      const detail = error && error.message ? String(error.message) : String(error);
+      return jsonResponse({ error: 'Internal Server Error', detail }, 500);
     }
   },
 };
