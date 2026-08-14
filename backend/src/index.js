@@ -1158,22 +1158,25 @@ export default {
         });
       }
 
-      // Exchange Microsoft auth code (PKCE) → verify email allowlist → APBS admin JWT.
+      // Verify Microsoft ID token (SPA redeems code in-browser) → APBS admin JWT.
       if (path === '/api/admin/login/microsoft' && request.method === 'POST') {
         const sso = microsoftSsoConfig(env);
         if (!sso.enabled) {
           return jsonResponse({ error: 'Microsoft SSO is not configured on this API.' }, 503);
         }
         const body = await request.json().catch(() => ({}));
-        const code = body && body.code != null ? String(body.code) : '';
-        const codeVerifier = body && body.codeVerifier != null ? String(body.codeVerifier) : '';
-        const redirectUri = body && body.redirectUri != null ? String(body.redirectUri) : '';
-        if (!code || !codeVerifier || !redirectUri) {
-          return jsonResponse({ error: 'code, codeVerifier, and redirectUri are required' }, 400);
+        const idToken = body && body.idToken != null ? String(body.idToken) : '';
+        if (!idToken) {
+          return jsonResponse(
+            {
+              error:
+                'idToken is required. SPA clients must redeem the auth code in the browser, then send the ID token.',
+            },
+            400
+          );
         }
         try {
-          const tokens = await exchangeMicrosoftAuthCode(env, { code, codeVerifier, redirectUri });
-          const { email, payload } = await verifyMicrosoftIdToken(tokens.id_token, {
+          const { email, payload } = await verifyMicrosoftIdToken(idToken, {
             tenantId: sso.tenantId,
             clientId: sso.clientId,
           });

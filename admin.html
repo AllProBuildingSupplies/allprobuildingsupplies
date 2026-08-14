@@ -605,7 +605,9 @@ async function startMicrosoftAdminLogin() {
       verifier: verifier,
       state: state,
       nonce: nonce,
-      redirectUri: adminMsRedirectUri()
+      redirectUri: adminMsRedirectUri(),
+      clientId: adminMsConfig.clientId,
+      tenantId: adminMsConfig.tenantId
     }));
     const params = new URLSearchParams({
       client_id: adminMsConfig.clientId,
@@ -639,7 +641,7 @@ async function finishMicrosoftAdminLoginFromCallback() {
 
   // Clean the URL so refresh does not re-post the code.
   try {
-    const clean = window.location.origin + window.location.pathname + window.location.hash;
+    const clean = window.location.origin + '/admin.html' + window.location.hash;
     window.history.replaceState({}, document.title, clean);
   } catch (_) {}
 
@@ -660,14 +662,34 @@ async function finishMicrosoftAdminLoginFromCallback() {
 
   setAdminMsHint('Completing Microsoft sign-in…');
   try {
+    // SPA apps must redeem the auth code from the browser (CORS Origin required).
+    const tokenUrl =
+      'https://login.microsoftonline.com/' +
+      encodeURIComponent(pkce.tenantId || (adminMsConfig && adminMsConfig.tenantId) || 'common') +
+      '/oauth2/v2.0/token';
+    const form = new URLSearchParams({
+      client_id: pkce.clientId || (adminMsConfig && adminMsConfig.clientId) || '',
+      scope: 'openid profile email',
+      code: code,
+      redirect_uri: pkce.redirectUri || adminMsRedirectUri(),
+      grant_type: 'authorization_code',
+      code_verifier: pkce.verifier
+    });
+    const tokenRes = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form
+    });
+    const tokens = await tokenRes.json().catch(function () { return {}; });
+    if (!tokenRes.ok || !tokens.id_token) {
+      const desc = tokens.error_description || tokens.error || ('HTTP ' + tokenRes.status);
+      throw new Error('Microsoft token exchange failed: ' + desc);
+    }
+
     const r = await fetch(API_BASE + '/admin/login/microsoft', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code: code,
-        codeVerifier: pkce.verifier,
-        redirectUri: pkce.redirectUri || adminMsRedirectUri()
-      })
+      body: JSON.stringify({ idToken: tokens.id_token })
     });
     const data = await r.json().catch(function () { return {}; });
     if (!r.ok) throw new Error(data.error || 'Microsoft login failed');
