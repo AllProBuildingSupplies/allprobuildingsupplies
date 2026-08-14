@@ -480,6 +480,129 @@ function jwtSecret(env) {
   return env.JWT_SECRET || env.ADMIN_TOKEN;
 }
 
+function microsoftSsoConfig(env) {
+  const clientId = String(env.MICROSOFT_CLIENT_ID || env.AZURE_CLIENT_ID || '').trim();
+  const tenantId = String(env.MICROSOFT_TENANT_ID || env.AZURE_TENANT_ID || '').trim();
+  const emailRaw = String(env.ADMIN_SSO_EMAIL || env.ADMIN_SSO_EMAILS || 'baruch@allprobuildingsupplies.com').trim();
+  const allowEmails = emailRaw
+    .split(/[,;\s]+/)
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return {
+    enabled: !!(clientId && tenantId),
+    clientId,
+    tenantId,
+    allowEmails,
+  };
+}
+
+function b64urlToBytes(str) {
+  const pad = '='.repeat((4 - (str.length % 4)) % 4);
+  const b64 = (String(str) + pad).replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+function decodeJwtPart(part) {
+  return JSON.parse(new TextDecoder().decode(b64urlToBytes(part)));
+}
+
+async function fetchMicrosoftJwks(tenantId) {
+  const configUrl = `https://login.microsoftonline.com/${tenantId}/v2.0/.well-known/openid-configuration`;
+  const configRes = await fetch(configUrl);
+  if (!configRes.ok) throw new Error('Could not load Microsoft OpenID configuration');
+  const config = await configRes.json();
+  if (!config.jwks_uri) throw new Error('Microsoft JWKS URI missing');
+  const jwksRes = await fetch(config.jwks_uri);
+  if (!jwksRes.ok) throw new Error('Could not load Microsoft signing keys');
+  return { config, jwks: await jwksRes.json() };
+}
+
+async function verifyMicrosoftIdToken(idToken, { tenantId, clientId }) {
+  if (!idToken || typeof idToken !== 'string') throw new Error('Missing Microsoft ID token');
+  const parts = idToken.split('.');
+  if (parts.length !== 3) throw new Error('Invalid Microsoft ID token');
+  const header = decodeJwtPart(parts[0]);
+  const payload = decodeJwtPart(parts[1]);
+  if (header.alg !== 'RS256') throw new Error('Unsupported Microsoft token algorithm');
+
+  const { config, jwks } = await fetchMicrosoftJwks(tenantId);
+  const jwk = (jwks.keys || []).find((k) => k.kid === header.kid && k.kty === 'RSA');
+  if (!jwk) throw new Error('Microsoft signing key not found');
+
+  const key = await crypto.subtle.importKey(
+    'jwk',
+    jwk,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['verify']
+  );
+  const ok = await crypto.subtle.verify(
+    'RSASSA-PKCS1-v1_5',
+    key,
+    b64urlToBytes(parts[2]),
+    encoder.encode(`${parts[0]}.${parts[1]}`)
+  );
+  if (!ok) throw new Error('Microsoft token signature invalid');
+
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp && payload.exp < now - 60) throw new Error('Microsoft token expired');
+  if (payload.nbf && payload.nbf > now + 60) throw new Error('Microsoft token not yet valid');
+
+  const expectedIssuers = [
+    `https://login.microsoftonline.com/${tenantId}/v2.0`,
+    `https://sts.windows.net/${tenantId}/`,
+    config.issuer,
+  ].filter(Boolean);
+  if (!expectedIssuers.includes(payload.iss)) {
+    throw new Error('Microsoft token issuer mismatch');
+  }
+
+  const aud = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+  if (!aud.map(String).includes(String(clientId))) {
+    throw new Error('Microsoft token audience mismatch');
+  }
+
+  const email = String(
+    payload.preferred_username || payload.email || payload.upn || payload.unique_name || ''
+  )
+    .trim()
+    .toLowerCase();
+  if (!email || !email.includes('@')) {
+    throw new Error('Microsoft account has no email claim');
+  }
+
+  return { payload, email };
+}
+
+async function exchangeMicrosoftAuthCode(env, { code, codeVerifier, redirectUri }) {
+  const sso = microsoftSsoConfig(env);
+  if (!sso.enabled) throw new Error('Microsoft SSO is not configured');
+  const body = new URLSearchParams({
+    client_id: sso.clientId,
+    scope: 'openid profile email',
+    code: String(code || ''),
+    redirect_uri: String(redirectUri || ''),
+    grant_type: 'authorization_code',
+    code_verifier: String(codeVerifier || ''),
+  });
+  const tokenUrl = `https://login.microsoftonline.com/${sso.tenantId}/oauth2/v2.0/token`;
+  const res = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const desc = data.error_description || data.error || `HTTP ${res.status}`;
+    throw new Error(`Microsoft token exchange failed: ${desc}`);
+  }
+  if (!data.id_token) throw new Error('Microsoft did not return an ID token');
+  return data;
+}
+
 async function ensureAddressesTable(env) {
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS user_addresses (
@@ -1112,6 +1235,67 @@ export default {
         }
         const token = await signToken({ role: 'admin' }, secret, 24);
         return jsonResponse({ success: true, token });
+      }
+
+      // Public: whether Microsoft SSO is configured (client/tenant IDs are SPA-public).
+      if (path === '/api/admin/login/microsoft/config' && request.method === 'GET') {
+        const sso = microsoftSsoConfig(env);
+        return jsonResponse({
+          enabled: sso.enabled,
+          clientId: sso.enabled ? sso.clientId : '',
+          tenantId: sso.enabled ? sso.tenantId : '',
+          allowEmails: sso.enabled ? sso.allowEmails : [],
+        });
+      }
+
+      // Verify Microsoft ID token (SPA redeems code in-browser) → APBS admin JWT.
+      if (path === '/api/admin/login/microsoft' && request.method === 'POST') {
+        const sso = microsoftSsoConfig(env);
+        if (!sso.enabled) {
+          return jsonResponse({ error: 'Microsoft SSO is not configured on this API.' }, 503);
+        }
+        const body = await request.json().catch(() => ({}));
+        const idToken = body && body.idToken != null ? String(body.idToken) : '';
+        if (!idToken) {
+          return jsonResponse(
+            {
+              error:
+                'idToken is required. SPA clients must redeem the auth code in the browser, then send the ID token.',
+            },
+            400
+          );
+        }
+        try {
+          const { email, payload } = await verifyMicrosoftIdToken(idToken, {
+            tenantId: sso.tenantId,
+            clientId: sso.clientId,
+          });
+          if (!sso.allowEmails.includes(email)) {
+            return jsonResponse(
+              { error: `Microsoft account ${email} is not authorized for admin access.` },
+              403
+            );
+          }
+          const secret = jwtSecret(env);
+          if (!secret) {
+            return jsonResponse({ error: 'Auth not configured. Set JWT_SECRET or ADMIN_TOKEN.' }, 503);
+          }
+          const token = await signToken(
+            {
+              role: 'admin',
+              auth: 'microsoft',
+              email,
+              name: payload.name || '',
+              oid: payload.oid || payload.sub || '',
+            },
+            secret,
+            24
+          );
+          return jsonResponse({ success: true, token, email });
+        } catch (e) {
+          const msg = e && e.message ? String(e.message) : 'Microsoft login failed';
+          return jsonResponse({ error: msg }, 401);
+        }
       }
 
       if (path === '/api/products' && request.method === 'GET') {

@@ -6,10 +6,16 @@ compatibility_date = "2024-04-21"
 # EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY,
 # EMAILJS_PRIVATE_KEY (optional), NOTIFY_EMAIL
 #
+# Admin Microsoft SSO (optional; password login remains as backup):
+#   MICROSOFT_CLIENT_ID, MICROSOFT_TENANT_ID
+#   ADMIN_SSO_EMAIL (default baruch@allprobuildingsupplies.com)
+#
 # Test/staging Worker (does NOT touch production):
 #   npx wrangler deploy --env test
 #   npx wrangler secret put ADMIN_TOKEN --env test
 #   npx wrangler secret put JWT_SECRET --env test
+#   npx wrangler secret put MICROSOFT_CLIENT_ID --env test
+#   npx wrangler secret put MICROSOFT_TENANT_ID --env test
 
 # Bindings to your D1 Databases (PRODUCTION)
 [[d1_databases]]

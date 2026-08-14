@@ -1032,6 +1032,38 @@ h1.htitle strong { color: var(--gold); }
 /* Admin Auth Gate */
 #admin-auth-gate{display:flex; flex-direction:column; align-items:center; justify-content:center; position:fixed; inset:0; background:var(--ink); z-index:100000;}
 .auth-box{background:var(--ink2); border:1px solid var(--gold); padding:40px; text-align:center; max-width:400px; width:90%;}
+.admin-ms-btn{
+  width:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  background:#fff !important;
+  color:#1a1a1a !important;
+  border:1px solid rgba(255,255,255,.25);
+  margin-bottom:10px;
+}
+.admin-ms-btn:disabled{opacity:.45; cursor:not-allowed;}
+.admin-ms-btn .admin-ms-icon{display:inline-flex; line-height:0;}
+.admin-ms-hint{color:var(--silver); font-size:12px; margin:0 0 18px; line-height:1.4; font-family:'DM Mono',monospace;}
+.admin-login-divider{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:4px 0 16px;
+  color:var(--silver);
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-family:'DM Mono',monospace;
+}
+.admin-login-divider::before,
+.admin-login-divider::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:rgba(200,152,31,.25);
+}
 
 /* --- BULLETPROOF CURSOR FIX --- */
 #cursor, #cursor-ring { 

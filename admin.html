@@ -13,7 +13,15 @@
   <div class="auth-box">
     <img src="images/logo.png" alt="All Pro" style="width:120px;margin-bottom:20px;">
     <h2 style="font-family:'Oswald',sans-serif;color:var(--white);margin-bottom:24px;letter-spacing:1px;">Admin Portal Login</h2>
-    <input type="password" id="admin-pin" class="data-input" placeholder="Enter Admin Password" style="text-align:center;font-size:16px;padding:14px;margin-bottom:16px;">
+    <button type="button" id="admin-ms-btn" class="btn-save admin-ms-btn" onclick="startMicrosoftAdminLogin()" disabled>
+      <span class="admin-ms-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+      </span>
+      Sign in with Microsoft
+    </button>
+    <p id="admin-ms-hint" class="admin-ms-hint">Loading Microsoft sign-in…</p>
+    <div class="admin-login-divider"><span>or password</span></div>
+    <input type="password" id="admin-pin" class="data-input" placeholder="Enter Admin Password" style="text-align:center;font-size:16px;padding:14px;margin-bottom:16px;" autocomplete="current-password">
     <button class="btn-save" style="width:100%;" onclick="checkAdminAuth()">Access Dashboard</button>
     <div id="admin-auth-err" style="color:#ff6b6b;font-size:12px;margin-top:12px;display:none;font-family:'DM Mono',monospace;">Incorrect password.</div>
     <a href="index.html" style="display:block;margin-top:24px;color:var(--silver);font-size:12px;">← Back to Website</a>
@@ -589,6 +597,179 @@ document.getElementById('admin-pin').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') checkAdminAuth();
 });
 
+// --- Microsoft SSO (PKCE) — password login remains as backup ---
+const ADMIN_MS_PKCE_KEY = 'apbs_admin_ms_pkce';
+let adminMsConfig = null;
+
+function adminMsRedirectUri() {
+  // Always use /admin.html so Entra redirect URIs stay stable even if the
+  // browser is on /admin or a Pages preview path variant.
+  return window.location.origin + '/admin.html';
+}
+
+function adminMsRandomString(len) {
+  const bytes = new Uint8Array(len);
+  crypto.getRandomValues(bytes);
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s).replace(/[^a-zA-Z0-9]/g, '').slice(0, len);
+}
+
+async function adminMsCodeChallenge(verifier) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  const bytes = new Uint8Array(digest);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function setAdminMsHint(text, isErr) {
+  const el = document.getElementById('admin-ms-hint');
+  if (!el) return;
+  el.textContent = text || '';
+  el.style.color = isErr ? '#ff6b6b' : 'var(--silver)';
+}
+
+function setAdminAuthError(msg) {
+  const err = document.getElementById('admin-auth-err');
+  if (!err) return;
+  err.style.display = msg ? 'block' : 'none';
+  err.textContent = msg || '';
+}
+
+async function loadMicrosoftAdminConfig() {
+  const btn = document.getElementById('admin-ms-btn');
+  try {
+    const r = await fetch(API_BASE + '/admin/login/microsoft/config', {
+      headers: { Accept: 'application/json' }
+    });
+    const data = await r.json().catch(function () { return {}; });
+    adminMsConfig = data;
+    if (data && data.enabled && data.clientId && data.tenantId) {
+      if (btn) btn.disabled = false;
+      setAdminMsHint('Use your Microsoft work account (baruch@allprobuildingsupplies.com).');
+    } else {
+      if (btn) btn.disabled = true;
+      setAdminMsHint('Microsoft sign-in is not configured on this API yet. Use password for now.');
+    }
+  } catch (_) {
+    if (btn) btn.disabled = true;
+    setAdminMsHint('Could not reach API for Microsoft sign-in. Use password for now.', true);
+  }
+}
+
+async function startMicrosoftAdminLogin() {
+  setAdminAuthError('');
+  if (!adminMsConfig || !adminMsConfig.enabled) {
+    setAdminAuthError('Microsoft sign-in is not configured yet.');
+    return;
+  }
+  try {
+    const verifier = adminMsRandomString(64);
+    const challenge = await adminMsCodeChallenge(verifier);
+    const state = adminMsRandomString(24);
+    const nonce = adminMsRandomString(24);
+    sessionStorage.setItem(ADMIN_MS_PKCE_KEY, JSON.stringify({
+      verifier: verifier,
+      state: state,
+      nonce: nonce,
+      redirectUri: adminMsRedirectUri(),
+      clientId: adminMsConfig.clientId,
+      tenantId: adminMsConfig.tenantId
+    }));
+    const params = new URLSearchParams({
+      client_id: adminMsConfig.clientId,
+      response_type: 'code',
+      redirect_uri: adminMsRedirectUri(),
+      response_mode: 'query',
+      scope: 'openid profile email',
+      state: state,
+      nonce: nonce,
+      code_challenge: challenge,
+      code_challenge_method: 'S256',
+      prompt: 'select_account'
+    });
+    window.location.href =
+      'https://login.microsoftonline.com/' +
+      encodeURIComponent(adminMsConfig.tenantId) +
+      '/oauth2/v2.0/authorize?' +
+      params.toString();
+  } catch (e) {
+    setAdminAuthError(e.message || 'Could not start Microsoft sign-in.');
+  }
+}
+
+async function finishMicrosoftAdminLoginFromCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const state = params.get('state');
+  const err = params.get('error');
+  const errDesc = params.get('error_description');
+  if (!code && !err) return false;
+
+  // Clean the URL so refresh does not re-post the code.
+  try {
+    const clean = window.location.origin + '/admin.html' + window.location.hash;
+    window.history.replaceState({}, document.title, clean);
+  } catch (_) {}
+
+  if (err) {
+    setAdminAuthError(errDesc || err || 'Microsoft sign-in was cancelled.');
+    return true;
+  }
+
+  let pkce = null;
+  try {
+    pkce = JSON.parse(sessionStorage.getItem(ADMIN_MS_PKCE_KEY) || 'null');
+  } catch (_) {}
+  sessionStorage.removeItem(ADMIN_MS_PKCE_KEY);
+  if (!pkce || !pkce.verifier || !pkce.state || pkce.state !== state) {
+    setAdminAuthError('Microsoft sign-in state mismatch. Please try again.');
+    return true;
+  }
+
+  setAdminMsHint('Completing Microsoft sign-in…');
+  try {
+    // SPA apps must redeem the auth code from the browser (CORS Origin required).
+    const tokenUrl =
+      'https://login.microsoftonline.com/' +
+      encodeURIComponent(pkce.tenantId || (adminMsConfig && adminMsConfig.tenantId) || 'common') +
+      '/oauth2/v2.0/token';
+    const form = new URLSearchParams({
+      client_id: pkce.clientId || (adminMsConfig && adminMsConfig.clientId) || '',
+      scope: 'openid profile email',
+      code: code,
+      redirect_uri: pkce.redirectUri || adminMsRedirectUri(),
+      grant_type: 'authorization_code',
+      code_verifier: pkce.verifier
+    });
+    const tokenRes = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form
+    });
+    const tokens = await tokenRes.json().catch(function () { return {}; });
+    if (!tokenRes.ok || !tokens.id_token) {
+      const desc = tokens.error_description || tokens.error || ('HTTP ' + tokenRes.status);
+      throw new Error('Microsoft token exchange failed: ' + desc);
+    }
+
+    const r = await fetch(API_BASE + '/admin/login/microsoft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken: tokens.id_token })
+    });
+    const data = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error(data.error || 'Microsoft login failed');
+    sessionStorage.setItem('apbs_admin_token', data.token);
+    unlockAdmin();
+  } catch (e) {
+    setAdminAuthError(e.message || 'Microsoft login failed.');
+    setAdminMsHint('Use your Microsoft work account, or sign in with password.');
+  }
+  return true;
+}
+
 function unlockAdmin() {
   document.getElementById('admin-auth-gate').style.display = 'none';
   document.getElementById('main-admin-content').style.display = 'block';
@@ -606,6 +787,17 @@ function unlockAdmin() {
     switchTab('orders');
   }
 }
+
+// Boot admin session / Microsoft OAuth callback (async; do not block parse)
+(async function bootAdminAuth() {
+  const handledMs = await finishMicrosoftAdminLoginFromCallback();
+  if (handledMs) return;
+  if (sessionStorage.getItem('apbs_admin_token')) {
+    unlockAdmin();
+    return;
+  }
+  await loadMicrosoftAdminConfig();
+})();
 
 // Advanced Error Reporter
 function showStatus(msg, isErr) {
@@ -718,7 +910,6 @@ function adminShowDesktopDefault() {
   }
 }
 
-if (sessionStorage.getItem('apbs_admin_token')) unlockAdmin();
 
 window.addEventListener('resize', function () {
   if (!document.getElementById('main-admin-content') || document.getElementById('main-admin-content').style.display === 'none') return;
