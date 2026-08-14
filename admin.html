@@ -58,6 +58,39 @@
     </div>
   </div>
 
+  <div class="admin-desktop-kpi" id="admin-desktop-kpi" aria-label="Desktop at a glance">
+    <button type="button" class="kpi" onclick="switchTab('orders'); window.omsStatusFilter='open'; syncOmsStatusChips(); renderOrdersQueue();">
+      <div class="kpi-label">Open orders</div>
+      <div class="kpi-value" id="desk-kpi-open">—</div>
+      <div class="kpi-sub" id="desk-kpi-orders-sub">All statuses</div>
+    </button>
+    <button type="button" class="kpi" onclick="switchTab('orders'); window.omsStatusFilter='pending'; syncOmsStatusChips(); renderOrdersQueue();">
+      <div class="kpi-label">Pending</div>
+      <div class="kpi-value" id="desk-kpi-pending">—</div>
+      <div class="kpi-sub">Awaiting confirm</div>
+    </button>
+    <button type="button" class="kpi" onclick="switchTab('orders'); window.omsStatusFilter='partially_shipped'; syncOmsStatusChips(); renderOrdersQueue();">
+      <div class="kpi-label">Partially shipped</div>
+      <div class="kpi-value" id="desk-kpi-partial">—</div>
+      <div class="kpi-sub">Still open</div>
+    </button>
+    <button type="button" class="kpi" onclick="switchTab('finance'); window.finPayFilter='open'; syncFinPayChips(); initFinanceTab();">
+      <div class="kpi-label">Accounts receivable</div>
+      <div class="kpi-value" id="desk-kpi-ar">—</div>
+      <div class="kpi-sub" id="desk-kpi-ar-sub">Unpaid / partial</div>
+    </button>
+    <button type="button" class="kpi" onclick="switchTab('stock')">
+      <div class="kpi-label">Stock on hand</div>
+      <div class="kpi-value" id="desk-kpi-stock">—</div>
+      <div class="kpi-sub">Pieces</div>
+    </button>
+    <button type="button" class="kpi" onclick="switchTab('users')">
+      <div class="kpi-label">Pending users</div>
+      <div class="kpi-value" id="desk-kpi-users">—</div>
+      <div class="kpi-sub">Approvals</div>
+    </button>
+  </div>
+
   <style>
     .admin-container { max-width: none !important; width: 100%; padding-left: var(--page-pad, 32px); padding-right: var(--page-pad, 32px); box-sizing: border-box; }
     @media (min-width: 1100px) {
@@ -74,7 +107,7 @@
     <div class="admin-glance-order-chips" id="glance-order-chips">
       <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('pending')">Pending <span id="glance-pending-n">0</span></button>
       <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('confirmed')">Confirmed <span id="glance-confirmed-n">0</span></button>
-      <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('partially_shipped')">Partial <span id="glance-partial-n">0</span></button>
+      <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('partially_shipped')">Partially shipped <span id="glance-partial-n">0</span></button>
     </div>
     <button type="button" class="admin-glance-card" onclick="adminMobileOpen('stock')">
       <span class="admin-glance-label">Stock</span>
@@ -82,7 +115,7 @@
     </button>
     <button type="button" class="admin-glance-card" onclick="adminMobileOpenFinance('open')">
       <span class="admin-glance-label">Finance</span>
-      <span class="admin-glance-meta" id="glance-finance-count">AR →</span>
+      <span class="admin-glance-meta" id="glance-finance-count">Accounts receivable →</span>
     </button>
     <button type="button" class="admin-glance-card" onclick="adminMobileOpen('products')">
       <span class="admin-glance-label">Products</span>
@@ -106,7 +139,7 @@
         <button type="button" class="oms-chip active" data-oms-status="open">Open</button>
         <button type="button" class="oms-chip" data-oms-status="pending">Pending</button>
         <button type="button" class="oms-chip" data-oms-status="confirmed">Confirmed</button>
-        <button type="button" class="oms-chip" data-oms-status="partially_shipped">Partial</button>
+        <button type="button" class="oms-chip" data-oms-status="partially_shipped">Partially shipped</button>
         <button type="button" class="oms-chip" data-oms-status="delivered">Delivered</button>
         <button type="button" class="oms-chip" data-oms-status="cancelled">Cancelled</button>
         <button type="button" class="oms-chip" data-oms-status="all">All</button>
@@ -150,7 +183,7 @@
           <div class="wms-action">
             <div class="wms-action-title">Receive</div>
             <div class="wms-action-row">
-              <input type="number" id="wms-receive-qty" class="data-input" min="1" step="1" inputmode="numeric" placeholder="Pcs">
+              <input type="number" id="wms-receive-qty" class="data-input" min="1" step="1" inputmode="numeric" placeholder="Pieces">
               <button type="button" class="btn-save" id="wms-receive-btn" onclick="wmsReceive()">+ Receive</button>
             </div>
           </div>
@@ -191,7 +224,7 @@
     <div class="fin-panel">
       <p class="wms-lead">Accounts receivable — unpaid invoices, mark paid, and send invoices with card / Zelle / wire / ACH payment options.</p>
       <div class="oms-status-chips" id="fin-status-chips" role="toolbar" aria-label="Payment status filter">
-        <button type="button" class="oms-chip active" data-fin-pay="open">Open AR</button>
+        <button type="button" class="oms-chip active" data-fin-pay="open">Open receivables</button>
         <button type="button" class="oms-chip" data-fin-pay="unpaid">Unpaid</button>
         <button type="button" class="oms-chip" data-fin-pay="partial">Partial</button>
         <button type="button" class="oms-chip" data-fin-pay="paid">Paid</button>
@@ -235,7 +268,7 @@
           <th>Sub category</th>
           <th>Description</th>
           <th>Size</th>
-          <th>Pcs / Ctn</th>
+          <th>Pieces / Carton</th>
           <th>Inventory Qty</th>
           <th>Unit Price ($)</th>
           <th>Image URL</th>
@@ -1040,8 +1073,30 @@ function updateAdminGlanceCounts() {
   const s = document.getElementById('glance-stock-count');
   const f = document.getElementById('glance-finance-count');
   const u = document.getElementById('glance-users-count');
+  const openish = Array.isArray(masterOrders) ? masterOrders.filter(orderIsOpen).length : 0;
+  const pendingN = Array.isArray(masterOrders) ? masterOrders.filter(function (x) {
+    return String(x.status || '').toLowerCase() === 'pending';
+  }).length : 0;
+  const partialN = Array.isArray(masterOrders) ? masterOrders.filter(function (x) {
+    return String(x.status || '').toLowerCase() === 'partially_shipped';
+  }).length : 0;
+  const unpaidN = Array.isArray(masterOrders) ? masterOrders.filter(function (x) {
+    const ps = String(x.paymentStatus || 'unpaid').toLowerCase();
+    return ps !== 'paid' && String(x.status || '').toLowerCase() !== 'cancelled';
+  }).length : 0;
+  const due = Array.isArray(masterOrders) ? masterOrders.reduce(function (sum, x) {
+    const ps = String(x.paymentStatus || 'unpaid').toLowerCase();
+    if (ps === 'paid' || String(x.status || '').toLowerCase() === 'cancelled') return sum;
+    return sum + (Number(x.total) || 0);
+  }, 0) : 0;
+  const pcs = Array.isArray(masterProducts) ? masterProducts.reduce(function (n, row) {
+    return n + (parseInt(row.stock, 10) || 0);
+  }, 0) : 0;
+  const pendingUsers = Array.isArray(masterUsers) ? masterUsers.filter(function (x) {
+    return String(x.status || '').toLowerCase() === 'pending';
+  }).length : 0;
+
   if (o && Array.isArray(masterOrders)) {
-    const openish = masterOrders.filter(orderIsOpen).length;
     o.textContent = openish + ' open · ' + masterOrders.length + ' total';
     const setN = function (id, st) {
       const el = document.getElementById(id);
@@ -1055,30 +1110,30 @@ function updateAdminGlanceCounts() {
     setN('glance-partial-n', 'partially_shipped');
   }
   if (f && Array.isArray(masterOrders)) {
-    const unpaidN = masterOrders.filter(function (x) {
-      const ps = String(x.paymentStatus || 'unpaid').toLowerCase();
-      return ps !== 'paid' && String(x.status || '').toLowerCase() !== 'cancelled';
-    }).length;
-    const due = masterOrders.reduce(function (sum, x) {
-      const ps = String(x.paymentStatus || 'unpaid').toLowerCase();
-      if (ps === 'paid' || String(x.status || '').toLowerCase() === 'cancelled') return sum;
-      return sum + (Number(x.total) || 0);
-    }, 0);
     f.textContent = unpaidN + ' open · $' + due.toFixed(2);
   }
   if (p && Array.isArray(masterProducts)) {
     p.textContent = masterProducts.length + ' SKUs →';
   }
   if (s && Array.isArray(masterProducts)) {
-    const pcs = masterProducts.reduce(function (n, row) { return n + (parseInt(row.stock, 10) || 0); }, 0);
-    s.textContent = pcs.toLocaleString() + ' pcs on hand →';
+    s.textContent = pcs.toLocaleString() + ' pieces on hand →';
   }
   if (u && Array.isArray(masterUsers)) {
-    const pending = masterUsers.filter(function (x) {
-      return String(x.status || '').toLowerCase() === 'pending';
-    }).length;
-    u.textContent = pending ? (pending + ' pending') : (masterUsers.length + ' accounts');
+    u.textContent = pendingUsers ? (pendingUsers + ' pending') : (masterUsers.length + ' accounts');
   }
+
+  const setText = function (id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+  setText('desk-kpi-open', String(openish));
+  setText('desk-kpi-pending', String(pendingN));
+  setText('desk-kpi-partial', String(partialN));
+  setText('desk-kpi-ar', '$' + due.toFixed(0));
+  setText('desk-kpi-ar-sub', unpaidN + ' unpaid / partial');
+  setText('desk-kpi-stock', pcs.toLocaleString());
+  setText('desk-kpi-users', String(pendingUsers));
+  setText('desk-kpi-orders-sub', (Array.isArray(masterOrders) ? masterOrders.length : 0) + ' total orders');
 }
 
 function adminShowDesktopDefault() {
@@ -1136,7 +1191,7 @@ async function loadProducts() {
         <td data-label="Sub category"><input class="data-input" data-field="sub_category" value="${escAttr(p.sub_category)}"></td>
         <td data-label="Description"><input class="data-input" data-field="description" value="${escAttr(p.description)}"></td>
         <td data-label="Size"><input class="data-input" data-field="size" value="${escAttr(p.size)}"></td>
-        <td data-label="Pcs / Ctn"><input type="number" class="data-input" data-field="pack" value="${escAttr(p.pack)}"></td>
+        <td data-label="Pieces / Carton"><input type="number" class="data-input" data-field="pack" value="${escAttr(p.pack)}"></td>
         <td data-label="Inventory Qty"><input type="number" class="data-input" data-field="qty" value="${escAttr(p.stock)}"></td>
         <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" data-field="price" value="${escAttr(p.price)}"></td>
         <td data-label="Image URL"><input class="data-input" data-field="image" value="${escAttr(p.image)}"></td>
@@ -1807,7 +1862,7 @@ function addProductRow() {
     <td data-label="Sub category"><input class="data-input" data-field="sub_category" value=""></td>
     <td data-label="Description"><input class="data-input" data-field="description" value=""></td>
     <td data-label="Size"><input class="data-input" data-field="size" value=""></td>
-    <td data-label="Pcs / Ctn"><input type="number" class="data-input" data-field="pack" value=""></td>
+    <td data-label="Pieces / Carton"><input type="number" class="data-input" data-field="pack" value=""></td>
     <td data-label="Inventory Qty"><input type="number" class="data-input" data-field="qty" value=""></td>
     <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" data-field="price" value=""></td>
     <td data-label="Image URL"><input class="data-input" data-field="image" value=""></td>
@@ -3630,15 +3685,15 @@ function renderEditableItems() {
     html += `<tr class="order-line-row">
       <td data-label="Item" class="order-line-item">
         <div class="order-line-desc">${escAttr(displayDesc)}</div>
-        <div class="order-line-meta"><span>${escAttr(item.code)}</span><span>${escAttr(item.size || '')}</span><span>pk ${escAttr(item.pcsPerCtn || '-')}</span></div>
+        <div class="order-line-meta"><span>${escAttr(item.code)}</span><span>${escAttr(item.size || '')}</span><span>pack ${escAttr(item.pcsPerCtn || '-')}</span></div>
       </td>
       <td data-label="Cases"><input type="number" class="data-input edit-cases" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${displayCases}" min="0" step="any" oninput="rowCalcCases(${idx})"></td>
-      <td data-label="Ord"><input type="number" class="data-input edit-pcs" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${item.qty}" min="1" oninput="rowCalcPieces(${idx})"></td>
-      <td data-label="Ship" class="shipped-cell">${shipped}</td>
-      <td data-label="BO" class="backorder-cell" style="color:${backorder ? '#bb8fce' : 'var(--silver)'};">${backorder}</td>
-      <td data-label="Now"><input type="number" class="data-input edit-ship-now" data-idx="${idx}" data-backorder="${backorder}" value="" min="0" max="${backorder}" placeholder="0" oninput="clampShipNow(${idx})"></td>
-      <td data-label="Price"><input type="number" step="0.01" class="data-input edit-price" data-idx="${idx}" value="${(item.unitPrice||0).toFixed(2)}" oninput="liveRecalc()"></td>
-      <td data-label="Total" class="live-line-tot">$${lineTot.toFixed(2)}</td>
+      <td data-label="Ordered"><input type="number" class="data-input edit-pcs" data-idx="${idx}" data-pack="${packNum}" data-stock="${maxAllowed}" value="${item.qty}" min="1" oninput="rowCalcPieces(${idx})"></td>
+      <td data-label="Shipped" class="shipped-cell">${shipped}</td>
+      <td data-label="Backorder" class="backorder-cell" style="color:${backorder ? '#bb8fce' : 'var(--silver)'};">${backorder}</td>
+      <td data-label="Ship Now"><input type="number" class="data-input edit-ship-now" data-idx="${idx}" data-backorder="${backorder}" value="" min="0" max="${backorder}" placeholder="0" oninput="clampShipNow(${idx})"></td>
+      <td data-label="Unit Price"><input type="number" step="0.01" class="data-input edit-price" data-idx="${idx}" value="${(item.unitPrice||0).toFixed(2)}" oninput="liveRecalc()"></td>
+      <td data-label="Line Total" class="live-line-tot">$${lineTot.toFixed(2)}</td>
       <td data-label="" class="order-line-del"><button class="btn-del" onclick="removeOrderItem(${idx})" title="Remove line">✕</button></td>
     </tr>`;
   });
