@@ -95,7 +95,8 @@ h2.sh span{color:var(--gold)}
 
 /* FOOTER */
 footer{background:var(--ink);border-top:1px solid rgba(200,152,31,.12)}
-.ft-top{max-width:var(--page-max);width:100%;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;padding:64px var(--page-pad) 48px;box-sizing:border-box}
+.ft-top{max-width:var(--page-max);width:100%;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;padding:64px var(--page-pad) 48px;box-sizing:border-box}
+.ft-brand{min-width:0}
 .ft-logo{height:54px;width:auto;margin-bottom:18px;opacity:.9}
 .ft-txt{font-size:14px;color:var(--silver);line-height:1.75;max-width:280px;margin-bottom:26px}
 .ft-socials{display:flex;gap:10px}
@@ -527,6 +528,9 @@ h1.htitle strong { color: var(--gold); }
 /* --- about.html --- */
 
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-top:64px}
+.about-lead{font-size:16px;color:var(--silver);line-height:1.85;margin-top:24px;margin-bottom:24px;font-weight:300}
+.about-extra{font-size:16px;color:var(--silver);line-height:1.85;margin-bottom:24px;font-weight:300}
+.about-acts{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:0}
 .about-values{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:64px}
 .val-card{background:var(--ink3);padding:36px 32px;border:1px solid rgba(139,160,178,.08);transition:border-color .3s}
 .val-card:hover{border-color:rgba(200,152,31,.25)}
@@ -1246,6 +1250,97 @@ h1.htitle strong { color: var(--gold); }
   .hero-btns .btn-ghost { padding: 12px 10px !important; font-size: 12px; width: auto !important; flex: 1; }
   .hero-proof { display: none !important; }
   .ticker { display: none !important; }
+
+  /* Footer — brand as full-width banner, links in 2 cols */
+  .ft-top {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 18px 14px !important;
+    padding: 22px var(--page-pad) 16px !important;
+  }
+  .ft-brand {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 14px 14px;
+    background: var(--ink2);
+    border: 1px solid rgba(200,152,31,.18);
+    margin-bottom: 4px;
+  }
+  .ft-brand .ft-logo { height: 40px; margin: 0; }
+  .ft-brand .ft-txt {
+    flex: 1 1 160px;
+    max-width: none !important;
+    margin: 0 !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+  .ft-brand .ft-socials { margin-left: auto; }
+  .ft-col h4 { margin-bottom: 10px; padding-bottom: 8px; font-size: 11px; letter-spacing: 2px; }
+  .ft-col ul { gap: 8px; }
+  .ft-col ul a { font-size: 13px; }
+  .ft-bot {
+    padding: 12px var(--page-pad) !important;
+    font-size: 11px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* About — compact mobile */
+  .page-about .page-hero { padding: 14px 0 10px !important; }
+  .page-about .page-title { font-size: clamp(24px, 7vw, 34px) !important; margin: 0; }
+  .page-about .page-subtitle { font-size: 13px; margin-top: 6px; line-height: 1.35; }
+  .page-about .sec { padding: 18px 0 !important; }
+  .page-about .about-grid { margin-top: 8px !important; gap: 14px !important; }
+  .page-about .sh { font-size: 24px; line-height: 1.15; margin: 0; }
+  .page-about .about-lead { margin-top: 10px !important; margin-bottom: 12px !important; font-size: 14px !important; line-height: 1.45 !important; }
+  .page-about .about-acts { gap: 8px; }
+  .page-about .about-acts .btn-gold,
+  .page-about .about-acts .btn-ghost { flex: 1; justify-content: center; padding: 12px 10px; font-size: 12px; }
+  .page-about .team-card { padding: 16px 14px !important; }
+  .page-about .team-name { font-size: 22px; }
+  .page-about .team-title { margin-bottom: 8px; }
+  .page-about .team-body { font-size: 13px !important; line-height: 1.4 !important; margin-bottom: 12px !important; }
+  .page-about .about-stat-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 3px !important;
+    margin-top: 14px !important;
+  }
+  .page-about .stat-card { padding: 14px 8px !important; }
+  .page-about .stat-big { font-size: 22px !important; }
+  .page-about .stat-sub { font-size: 10px !important; letter-spacing: 1px !important; margin-top: 4px !important; }
+  .page-about .about-values {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 3px !important;
+    margin-top: 12px !important;
+  }
+  .page-about .val-card { padding: 14px 12px !important; }
+  .page-about .val-icon { font-size: 20px; margin-bottom: 6px; }
+  .page-about .val-title { font-size: 15px; margin-bottom: 4px; }
+  .page-about .val-body { font-size: 12px; line-height: 1.35; }
+  .page-about .home-cta .cta-band-inner {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 18px var(--page-pad) !important;
+  }
+  .page-about .home-cta .cta-h { font-size: 22px; margin-bottom: 2px; }
+  .page-about .home-cta .cta-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+  .page-about .home-cta .btn-dark { width: 100%; justify-content: center; padding: 12px 10px; font-size: 13px; }
+
+  /* Contact — compact mobile */
+  .page-contact .page-hero { padding: 14px 0 10px !important; }
+  .page-contact .page-title { font-size: clamp(24px, 7vw, 34px) !important; margin: 0; }
+  .page-contact .page-subtitle { font-size: 13px; margin-top: 6px; line-height: 1.35; }
+  .page-contact .sec-contact { padding: 14px 0 18px !important; }
+  .page-contact .contact-layout { margin-top: 8px !important; gap: 18px !important; }
+  .page-contact .ct-cards { gap: 8px !important; }
+  .page-contact .ct-card { padding: 12px !important; }
+  .page-contact .lbl[style*="margin-top:48px"] { margin-top: 16px !important; }
+  .page-contact .hours-grid { margin-top: 8px !important; }
+  .page-contact .hour-card { padding: 12px 14px; }
+  .page-contact .cf { padding: 14px !important; }
+  .page-contact .fsub { width: 100%; justify-content: center; }
 
   /* Products — get to catalog fast */
   .page-products .page-hero { padding: 14px 0 10px !important; }

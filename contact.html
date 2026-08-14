@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="assets/style.css"/>
 
 </head>
-<body>
+<body class="page-contact">
   <div id="cursor"></div><div id="cursor-ring"></div>
 <div id="global-header"></div>
 
@@ -15,10 +15,11 @@
   <div class="page-hero-inner">
     <div class="page-breadcrumb"><a href="index.html">Home</a> › Contact</div>
     <div class="page-title" data-r>Get In <span>Touch</span></div>
-    <p class="page-subtitle" data-r>Call, email, or fill out the form. We get back to you fast — no tickets, no hold queues, just real answers from real people.</p>
+    <p class="page-subtitle desktop-only-block" data-r>Call, email, or fill out the form. We get back to you fast — no tickets, no hold queues, just real answers from real people.</p>
+    <p class="page-subtitle mobile-only-block">Call, email, or send a message. We answer fast.</p>
   </div>
 </div>
-<div class="ticker" aria-hidden="true"><div class="ticker-track">
+<div class="ticker desktop-only-block" aria-hidden="true"><div class="ticker-track">
     <div class="t-item g">Building Materials <span class="t-dia">◆</span></div><div class="t-item">Plumbing Supplies <span class="t-dia">◆</span></div>
     <div class="t-item g">Hardware <span class="t-dia">◆</span></div><div class="t-item">Contractor Supplies <span class="t-dia">◆</span></div>
     <div class="t-item g">PVC Pipe &amp; Fittings <span class="t-dia">◆</span></div><div class="t-item">DWV Essentials <span class="t-dia">◆</span></div>
@@ -30,7 +31,7 @@
     <div class="t-item g">Fasteners &amp; Anchors <span class="t-dia">◆</span></div><div class="t-item">Fast Response <span class="t-dia">◆</span></div>
     <div class="t-item g">Special Orders Welcome <span class="t-dia">◆</span></div><div class="t-item">Volume Pricing <span class="t-dia">◆</span></div>
 </div></div>
-<section class="sec" style="background:var(--ink)">
+<section class="sec sec-contact" style="background:var(--ink)">
   <div class="sec-inner">
     <div class="contact-layout">
       <div>
@@ -38,10 +39,10 @@
         <div class="ct-cards" data-r>
           <div class="ct-card"><div class="ct-ico">📞</div><div><div class="ct-lbl">Phone</div><div class="ct-val"><a href="tel:17327341123">732-734-1123</a></div></div></div>
           <div class="ct-card"><div class="ct-ico">✉️</div><div><div class="ct-lbl">Email</div><div class="ct-val"><a href="mailto:info@allprobuildingsupplies.com">info@allprobuildingsupplies.com</a></div></div></div>
-          <div class="ct-card"><div class="ct-ico">🌐</div><div><div class="ct-lbl">Website</div><div class="ct-val">allprobuildingsupplies.com</div></div></div>
-          <div class="ct-card"><div class="ct-ico">📦</div><div><div class="ct-lbl">For Pricing Emails, Include</div><div class="ct-val" style="font-size:14px;color:var(--silver)">Item Code · Size · Quantity · Delivery ZIP</div></div></div>
+          <div class="ct-card desktop-only-block"><div class="ct-ico">🌐</div><div><div class="ct-lbl">Website</div><div class="ct-val">allprobuildingsupplies.com</div></div></div>
+          <div class="ct-card"><div class="ct-ico">📦</div><div><div class="ct-lbl">For Pricing</div><div class="ct-val" style="font-size:14px;color:var(--silver)">Code · Size · Qty · ZIP</div></div></div>
         </div>
-        <div class="ct-tagline" data-r style="margin-top:36px">No tickets. No hold queues.<br><strong>Just fast answers.</strong></div>
+        <div class="ct-tagline desktop-only-block" data-r style="margin-top:36px">No tickets. No hold queues.<br><strong>Just fast answers.</strong></div>
         <div class="lbl" data-r style="margin-top:48px">Business Hours</div>
         <div class="hours-grid" data-r>
           <div class="hour-card"><div class="hour-day">Mon – Fri</div><div class="hour-time">7:00 AM – 5:00 PM</div></div>
@@ -66,14 +67,14 @@
               <option>Contractor Account Setup</option><option>General Inquiry</option>
             </select>
           </div>
-          <div class="fg"><label class="fl">Message (include codes, sizes, quantities, delivery ZIP)</label><textarea class="fta" placeholder="E.g.: 3&quot; PVC Schedule 40 elbow, qty 200, delivery to 07001…"></textarea></div>
+          <div class="fg"><label class="fl">Message (codes, sizes, qty, ZIP)</label><textarea class="fta" placeholder="E.g.: 3&quot; PVC Schedule 40 elbow, qty 200, delivery to 07001…"></textarea></div>
           <button type="button" class="fsub" onclick="submitContactForm(this)">Send Message <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
     </div>
   </div>
 </section>
-<section class="cta-band">
+<section class="cta-band home-cta desktop-only-block">
   <div class="cta-band-inner">
     <div><div class="cta-h">Ready to Get Your Supplies?</div><div class="cta-s">Call or email with your list — we respond fast with pricing and availability.</div></div>
     <div class="cta-acts">

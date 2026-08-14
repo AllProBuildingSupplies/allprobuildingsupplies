@@ -306,9 +306,10 @@ function loadGlobalLayout() {
   const footerHTML = `
     <footer>
       <div class="ft-top">
-        <div>
+        <div class="ft-brand">
           <img src="images/logo.png" alt="All Pro Building Supplies" class="ft-logo" onerror="this.style.display='none'"/>
-          <p class="ft-txt">Contractor-grade building materials, plumbing, hardware, and contractor supplies. Fast response, real people, reliable service.</p>
+          <p class="ft-txt desktop-only-block">Contractor-grade building materials, plumbing, hardware, and contractor supplies. Fast response, real people, reliable service.</p>
+          <p class="ft-txt mobile-only-block">Contractor-grade materials. Fast response. Real people.</p>
           <div class="ft-socials">
             <a href="mailto:info@allprobuildingsupplies.com" class="soc">✉</a>
             <a href="tel:17327341123" class="soc">📞</a>
