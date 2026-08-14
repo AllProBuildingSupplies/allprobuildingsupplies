@@ -1412,102 +1412,84 @@ h1.htitle strong { color: var(--gold); }
   #orders-table td[data-label="Action"] .btn-view,
   #orders-table td[data-label="Action"] .btn-del { width: auto; flex: 1; margin: 0; padding: 10px 8px; font-size: 12px; }
 
-  /* Users — dense glance cards */
+  /* Users — dense glance cards (real cards on phone; table on desktop) */
   .admin-users-intro { display: none; }
-  .admin-users-wrap { width: 100%; }
-  #users-table { min-width: 0 !important; width: 100%; }
-  #users-table thead { display: none !important; }
-  #users-table tbody { display: block; }
-  #users-table tr.user-card-row,
-  #users-table tr {
-    display: grid !important;
+  .admin-users-desktop-table { display: none !important; }
+  .users-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .user-glance {
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px 10px;
     align-items: center;
-    padding: 12px 12px !important;
-    margin-bottom: 10px !important;
+    padding: 12px;
     background: var(--ink3);
-    border: 1px solid rgba(200,152,31,.2);
-    border-radius: 0;
+    border: 1px solid rgba(200,152,31,.22);
   }
-  #users-table tr[data-status="pending"] { border-color: rgba(200,152,31,.55); }
-  #users-table tr[data-status="approved"] { border-color: rgba(46,204,113,.35); }
-  #users-table td {
-    display: block !important;
-    padding: 0 !important;
-    border: none !important;
-    width: auto !important;
+  .user-glance[data-status="pending"] { border-color: rgba(200,152,31,.55); }
+  .user-glance[data-status="approved"] { border-color: rgba(46,204,113,.35); }
+  .user-glance-top {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr minmax(110px, 34%);
+    gap: 8px;
+    align-items: center;
   }
-  #users-table td::before { display: none !important; content: none !important; }
-  #users-table .user-cell-id { display: none !important; }
-  #users-table .user-cell-name {
-    grid-column: 1;
-    grid-row: 1;
+  .user-glance-name {
     font-family: 'Oswald', sans-serif;
     font-size: 17px;
     color: var(--white);
-    line-height: 1.2;
+    line-height: 1.15;
+    min-width: 0;
   }
-  #users-table .user-cell-status {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    width: 100%;
-    max-width: 128px;
-  }
-  #users-table .user-cell-company {
-    grid-column: 1;
-    grid-row: 2;
-    font-size: 13px;
-    color: var(--smoke);
-  }
-  #users-table .user-cell-phone {
-    grid-column: 2;
-    grid-row: 2;
-    text-align: right;
-    font-size: 13px;
-    color: var(--silver);
-  }
-  #users-table .user-cell-phone a { color: var(--gold); text-decoration: none; }
-  #users-table .user-cell-email {
+  .user-glance-mid {
     grid-column: 1 / -1;
-    grid-row: 3;
-    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .user-glance-company { color: var(--smoke); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .user-glance-phone { color: var(--silver); flex-shrink: 0; }
+  .user-glance-phone a { color: var(--gold); text-decoration: none; }
+  .user-glance-email {
+    grid-column: 1 / -1;
     font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--silver);
+    text-decoration: none;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  #users-table .user-cell-email a { color: var(--silver); text-decoration: none; }
-  #users-table .user-cell-pcs {
-    grid-column: 1;
-    grid-row: 4;
-  }
-  #users-table .user-cell-pw {
-    grid-column: 2;
-    grid-row: 4;
-  }
-  #users-table .user-cell-actions {
+  .user-glance-controls {
     grid-column: 1 / -1;
-    grid-row: 5;
-    display: flex !important;
-    flex-direction: row !important;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-top: 4px;
   }
-  #users-table .user-cell-status .data-input,
-  #users-table .user-cell-pcs .data-input,
-  #users-table .user-cell-pw .data-input {
-    width: 100% !important;
-    min-width: 0 !important;
+  .user-glance-controls .data-input,
+  .user-glance-top .data-input {
+    width: 100%;
     box-sizing: border-box;
     font-size: 12px;
-    padding: 8px 8px;
+    padding: 8px;
+    min-width: 0;
   }
-  #users-table .user-cell-actions .btn-view,
-  #users-table .user-cell-actions .btn-del {
-    width: auto;
+  .user-glance-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .user-glance-actions .btn-view,
+  .user-glance-actions .btn-del {
     flex: 1;
+    width: auto;
     margin: 0 !important;
     padding: 10px 8px;
     font-size: 12px;
@@ -1544,11 +1526,13 @@ h1.htitle strong { color: var(--gold); }
   .admin-mobile-home,
   .admin-mobile-back,
   .admin-products-mobile-note,
+  .users-cards,
   .mobile-only-block,
   .mobile-only-flex,
   .mobile-only-inline { display: none !important; }
   .desktop-only-block { display: block !important; }
   .desktop-only-inline { display: inline-flex !important; }
+  .admin-users-desktop-table { display: block !important; }
 }
 
 /* --- TEST ENVIRONMENT FIXES --- */

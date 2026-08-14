@@ -132,7 +132,8 @@
 
   <div id="tab-users" class="admin-panel">
     <p class="admin-users-intro" style="color:var(--silver);font-size:14px;margin-bottom:20px;">Approve or reject trade accounts. Only 'approved' users can view pricing and place orders.</p>
-    <div class="admin-users-wrap">
+    <div id="users-cards" class="users-cards" aria-live="polite"></div>
+    <div class="admin-users-wrap admin-users-desktop-table">
     <table class="data-table" id="users-table">
       <thead>
         <tr><th>ID</th><th>Name</th><th>Email</th><th>Company</th><th>Phone</th><th>Password</th><th>Status</th><th>Pieces Allowed</th><th></th></tr>
@@ -1151,36 +1152,90 @@ async function loadUsers() {
     if (!Array.isArray(masterUsers)) throw new Error(masterUsers.error || 'Invalid users response');
     
     let html = '';
+    let cards = '';
     masterUsers.forEach(u => {
       const piecesAllowed = u.canOrderPieces === 1 || u.canOrderPieces === true;
       const st = String(u.status || 'pending').toLowerCase();
+      const id = escAttr(u.id);
+      const email = escAttr(u.email);
+      const name = escAttr(u.fname) + ' ' + escAttr(u.lname);
+      const company = escAttr(u.company || '—');
+      const phone = u.phone ? escAttr(u.phone) : '';
+      const statusBg = st === 'approved' ? 'rgba(46,204,113,.1)' : (st === 'pending' ? 'rgba(200,152,31,.12)' : 'var(--ink3)');
       html += `<tr class="user-card-row" data-status="${escAttr(st)}">
-        <td data-label="ID" class="user-cell-id">${escAttr(u.id)}</td>
-        <td data-label="Name" class="user-cell-name">${escAttr(u.fname)} ${escAttr(u.lname)}</td>
-        <td data-label="Email" class="user-cell-email"><a href="mailto:${escAttr(u.email)}">${escAttr(u.email)}</a></td>
-        <td data-label="Company" class="user-cell-company">${escAttr(u.company || '—')}</td>
-        <td data-label="Phone" class="user-cell-phone">${u.phone ? `<a href="tel:${escAttr(u.phone)}">${escAttr(u.phone)}</a>` : '—'}</td>
-        <td data-label="Password" class="user-cell-pw"><input type="password" class="data-input pw-sel" data-id="${escAttr(u.id)}" value="" placeholder="New pw (blank=keep)" autocomplete="new-password"></td>
+        <td data-label="ID" class="user-cell-id">${id}</td>
+        <td data-label="Name" class="user-cell-name">${name}</td>
+        <td data-label="Email" class="user-cell-email"><a href="mailto:${email}">${email}</a></td>
+        <td data-label="Company" class="user-cell-company">${company}</td>
+        <td data-label="Phone" class="user-cell-phone">${phone ? `<a href="tel:${phone}">${phone}</a>` : '—'}</td>
+        <td data-label="Password" class="user-cell-pw"><input type="password" class="data-input pw-sel" data-id="${id}" value="" placeholder="New pw (blank=keep)" autocomplete="new-password"></td>
         <td data-label="Status" class="user-cell-status">
-          <select class="data-input status-sel" data-id="${escAttr(u.id)}" style="background:${st==='approved'?'rgba(46,204,113,.1)':(st==='pending'?'rgba(200,152,31,.12)':'var(--ink3)')}">
+          <select class="data-input status-sel" data-id="${id}" style="background:${statusBg}">
             <option value="pending" ${st==='pending'?'selected':''}>Pending</option>
             <option value="approved" ${st==='approved'?'selected':''}>Approved</option>
             <option value="rejected" ${st==='rejected'?'selected':''}>Rejected</option>
           </select>
         </td>
         <td data-label="Pieces Allowed" class="user-cell-pcs">
-          <select class="data-input pcs-sel" data-id="${escAttr(u.id)}">
+          <select class="data-input pcs-sel" data-id="${id}">
             <option value="true" ${piecesAllowed?'selected':''}>Pieces OK</option>
             <option value="false" ${!piecesAllowed?'selected':''}>Cases only</option>
           </select>
         </td>
         <td data-label="Action" class="user-cell-actions">
-          <button type="button" class="btn-view" onclick="openUserAddresses('${escAttr(u.email)}')">Addresses</button>
-          <button type="button" class="btn-del" onclick="deleteUser('${escAttr(u.id)}')">Delete</button>
+          <button type="button" class="btn-view" onclick="openUserAddresses('${email}')">Addresses</button>
+          <button type="button" class="btn-del" onclick="deleteUser('${id}')">Delete</button>
         </td>
       </tr>`;
+      cards += `<article class="user-glance" data-status="${escAttr(st)}" data-id="${id}">
+        <div class="user-glance-top">
+          <div class="user-glance-name">${name}</div>
+          <select class="data-input status-sel" data-id="${id}" style="background:${statusBg}">
+            <option value="pending" ${st==='pending'?'selected':''}>Pending</option>
+            <option value="approved" ${st==='approved'?'selected':''}>Approved</option>
+            <option value="rejected" ${st==='rejected'?'selected':''}>Rejected</option>
+          </select>
+        </div>
+        <div class="user-glance-mid">
+          <span class="user-glance-company">${company}</span>
+          <span class="user-glance-phone">${phone ? `<a href="tel:${phone}">${phone}</a>` : '—'}</span>
+        </div>
+        <a class="user-glance-email" href="mailto:${email}">${email}</a>
+        <div class="user-glance-controls">
+          <select class="data-input pcs-sel" data-id="${id}">
+            <option value="true" ${piecesAllowed?'selected':''}>Pieces OK</option>
+            <option value="false" ${!piecesAllowed?'selected':''}>Cases only</option>
+          </select>
+          <input type="password" class="data-input pw-sel" data-id="${id}" value="" placeholder="New pw" autocomplete="new-password">
+        </div>
+        <div class="user-glance-actions">
+          <button type="button" class="btn-view" onclick="openUserAddresses('${email}')">Addresses</button>
+          <button type="button" class="btn-del" onclick="deleteUser('${id}')">Delete</button>
+        </div>
+      </article>`;
     });
-    document.getElementById('users-tbody').innerHTML = html;
+    document.getElementById('users-tbody').innerHTML = html || '<tr><td colspan="9" style="text-align:center;color:var(--silver);padding:24px;">No users yet.</td></tr>';
+    const cardsEl = document.getElementById('users-cards');
+    if (cardsEl) cardsEl.innerHTML = cards || '<div class="mcat-empty">No users yet.</div>';
+    // Keep mobile card controls in sync with matching desktop row controls (same data-id)
+    if (cardsEl) {
+      cardsEl.querySelectorAll('.status-sel, .pcs-sel, .pw-sel').forEach(function (el) {
+        el.addEventListener('change', function () {
+          const id = el.getAttribute('data-id');
+          const cls = el.classList.contains('status-sel') ? 'status-sel' : (el.classList.contains('pcs-sel') ? 'pcs-sel' : 'pw-sel');
+          document.querySelectorAll('#users-table .' + cls + '[data-id="' + id + '"]').forEach(function (other) {
+            if (other !== el) other.value = el.value;
+          });
+        });
+        el.addEventListener('input', function () {
+          if (!el.classList.contains('pw-sel')) return;
+          const id = el.getAttribute('data-id');
+          document.querySelectorAll('#users-table .pw-sel[data-id="' + id + '"]').forEach(function (other) {
+            if (other !== el) other.value = el.value;
+          });
+        });
+      });
+    }
     populateModalCustomerDropdown();
     updateAdminGlanceCounts();
   } catch(e) {
@@ -1251,16 +1306,21 @@ async function deleteUser(id) {
 async function saveUsers() {
   const btn = event.target; btn.textContent = 'Saving...'; btn.disabled = true;
   const updates = [];
+  const root = (isAdminMobile() && document.getElementById('users-cards'))
+    ? document.getElementById('users-cards')
+    : document.getElementById('users-table');
   
-  for (const sel of document.querySelectorAll('.status-sel')) {
+  for (const sel of root.querySelectorAll('.status-sel')) {
     const id = sel.dataset.id;
-    const pwRaw = document.querySelector(`.pw-sel[data-id="${id}"]`).value.trim();
+    const pwEl = root.querySelector(`.pw-sel[data-id="${id}"]`);
+    const pcsEl = root.querySelector(`.pcs-sel[data-id="${id}"]`);
+    const pwRaw = (pwEl && pwEl.value || '').trim();
     let password = '********';
     if (pwRaw) password = await window.apbsHashPassword(pwRaw);
     updates.push({
         id: id,
         status: sel.value,
-        canOrderPieces: document.querySelector(`.pcs-sel[data-id="${id}"]`).value === 'true',
+        canOrderPieces: pcsEl ? pcsEl.value === 'true' : true,
         password: password
     });
   }
