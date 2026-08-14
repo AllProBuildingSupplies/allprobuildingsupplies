@@ -824,6 +824,8 @@ function paymentMethodsFromEnv(env) {
   const zelleHandle = String(env.PAYMENT_ZELLE_HANDLE || 'allprobuildingsupplies').trim();
   const zelleQr = String(env.PAYMENT_ZELLE_QR_URL || 'https://allprobuildingsupplies.com/assets/zelle-qr.png').trim();
   const ccLink = String(env.PAYMENT_CC_LINK || env.PAYMENT_STRIPE_LINK || '').trim();
+  const feeRaw = parseFloat(env.PAYMENT_CC_FEE_PERCENT);
+  const feePercent = Number.isFinite(feeRaw) && feeRaw >= 0 ? feeRaw : 3.5;
   const wireDefault =
     'Wire transfer to All Pro Building Supplies.\n' +
     'Email payments@allprobuildingsupplies.com or call 732-734-1123 for bank routing & account numbers.\n' +
@@ -834,6 +836,7 @@ function paymentMethodsFromEnv(env) {
     'Include your Order ID in the payment memo.';
   const wire = String(env.PAYMENT_WIRE_INSTRUCTIONS || wireDefault).trim();
   const ach = String(env.PAYMENT_ACH_INSTRUCTIONS || achDefault).trim();
+  const feeLabel = feePercent > 0 ? `${feePercent}% convenience fee` : 'no convenience fee';
   return {
     zelle: {
       enabled: true,
@@ -846,9 +849,10 @@ function paymentMethodsFromEnv(env) {
       enabled: true,
       label: 'Credit / Debit Card',
       url: ccLink,
+      feePercent,
       note: ccLink
-        ? 'Pay securely online by card. Include your Order ID if prompted.'
-        : 'Pay by card — reply to this invoice or call 732-734-1123 and we will send a secure payment link. Set PAYMENT_CC_LINK on the API for a direct checkout URL.',
+        ? `Pay by card (${feeLabel} applies to the invoice total). Include your Order ID if prompted.`
+        : `Pay by card — call 732-734-1123 or email payments@allprobuildingsupplies.com. A ${feeLabel} applies to card payments.`,
     },
     wire: {
       enabled: true,
