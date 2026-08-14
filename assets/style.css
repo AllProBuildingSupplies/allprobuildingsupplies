@@ -2014,6 +2014,5 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
 }
 @media (display-mode: standalone), (display-mode: fullscreen) {
   #apbs-pwa-install { display: none !important; }
-  body.page-home #hero { min-height: 100dvh; }
 }
 
