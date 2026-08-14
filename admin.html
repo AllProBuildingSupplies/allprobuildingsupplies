@@ -131,14 +131,16 @@
   </div>
 
   <div id="tab-users" class="admin-panel">
-    <p style="color:var(--silver);font-size:14px;margin-bottom:20px;">Approve or reject trade accounts. Only 'approved' users can view pricing and place orders.</p>
+    <p class="admin-users-intro" style="color:var(--silver);font-size:14px;margin-bottom:20px;">Approve or reject trade accounts. Only 'approved' users can view pricing and place orders.</p>
+    <div class="admin-users-wrap">
     <table class="data-table" id="users-table">
       <thead>
         <tr><th>ID</th><th>Name</th><th>Email</th><th>Company</th><th>Phone</th><th>Password</th><th>Status</th><th>Pieces Allowed</th><th></th></tr>
       </thead>
       <tbody id="users-tbody"></tbody>
     </table>
-    <div class="action-bar">
+    </div>
+    <div class="action-bar admin-users-actions">
       <button class="btn-add" style="border-color:var(--gold);color:var(--gold);" onclick="openUserModal()">+ Create New User</button>
       <button class="btn-save" onclick="saveUsers()">Save Approvals & Passwords</button>
     </div>
@@ -1151,28 +1153,29 @@ async function loadUsers() {
     let html = '';
     masterUsers.forEach(u => {
       const piecesAllowed = u.canOrderPieces === 1 || u.canOrderPieces === true;
-      html += `<tr>
-        <td data-label="ID" style="font-family:monospace;color:var(--silver);">${escAttr(u.id)}</td>
-        <td data-label="Name">${escAttr(u.fname)} ${escAttr(u.lname)}</td>
-        <td data-label="Email">${escAttr(u.email)}</td>
-        <td data-label="Company">${escAttr(u.company || '')}</td>
-        <td data-label="Phone">${escAttr(u.phone || '—')}</td>
-        <td data-label="Password"><input type="password" class="data-input pw-sel" data-id="${u.id}" value="" placeholder="New password (blank = keep)" style="width:160px;"></td>
-        <td data-label="Status">
-          <select class="data-input status-sel" data-id="${u.id}" style="background:${u.status==='approved'?'rgba(46,204,113,.1)':'var(--ink3)'}">
-            <option value="pending" ${u.status==='pending'?'selected':''}>Pending</option>
-            <option value="approved" ${u.status==='approved'?'selected':''}>Approved</option>
-            <option value="rejected" ${u.status==='rejected'?'selected':''}>Rejected</option>
+      const st = String(u.status || 'pending').toLowerCase();
+      html += `<tr class="user-card-row" data-status="${escAttr(st)}">
+        <td data-label="ID" class="user-cell-id">${escAttr(u.id)}</td>
+        <td data-label="Name" class="user-cell-name">${escAttr(u.fname)} ${escAttr(u.lname)}</td>
+        <td data-label="Email" class="user-cell-email"><a href="mailto:${escAttr(u.email)}">${escAttr(u.email)}</a></td>
+        <td data-label="Company" class="user-cell-company">${escAttr(u.company || '—')}</td>
+        <td data-label="Phone" class="user-cell-phone">${u.phone ? `<a href="tel:${escAttr(u.phone)}">${escAttr(u.phone)}</a>` : '—'}</td>
+        <td data-label="Password" class="user-cell-pw"><input type="password" class="data-input pw-sel" data-id="${escAttr(u.id)}" value="" placeholder="New pw (blank=keep)" autocomplete="new-password"></td>
+        <td data-label="Status" class="user-cell-status">
+          <select class="data-input status-sel" data-id="${escAttr(u.id)}" style="background:${st==='approved'?'rgba(46,204,113,.1)':(st==='pending'?'rgba(200,152,31,.12)':'var(--ink3)')}">
+            <option value="pending" ${st==='pending'?'selected':''}>Pending</option>
+            <option value="approved" ${st==='approved'?'selected':''}>Approved</option>
+            <option value="rejected" ${st==='rejected'?'selected':''}>Rejected</option>
           </select>
         </td>
-        <td data-label="Pieces Allowed">
-          <select class="data-input pcs-sel" data-id="${u.id}">
-            <option value="true" ${piecesAllowed?'selected':''}>Yes</option>
-            <option value="false" ${!piecesAllowed?'selected':''}>Cases Only</option>
+        <td data-label="Pieces Allowed" class="user-cell-pcs">
+          <select class="data-input pcs-sel" data-id="${escAttr(u.id)}">
+            <option value="true" ${piecesAllowed?'selected':''}>Pieces OK</option>
+            <option value="false" ${!piecesAllowed?'selected':''}>Cases only</option>
           </select>
         </td>
-        <td data-label="Action" style="white-space:nowrap;">
-          <button type="button" class="btn-view" style="margin-right:6px;" onclick="openUserAddresses('${escAttr(u.email)}')">Addresses</button>
+        <td data-label="Action" class="user-cell-actions">
+          <button type="button" class="btn-view" onclick="openUserAddresses('${escAttr(u.email)}')">Addresses</button>
           <button type="button" class="btn-del" onclick="deleteUser('${escAttr(u.id)}')">Delete</button>
         </td>
       </tr>`;
