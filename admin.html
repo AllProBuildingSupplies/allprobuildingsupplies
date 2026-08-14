@@ -530,15 +530,29 @@
         <input type="checkbox" id="chk-admin"> 
         Send to Admin <span style="color:var(--silver);font-size:12px;">(orders@allprobuildingsupplies.com)</span>
       </label>
-      <label class="chk-row" style="margin-bottom:0;">
+      <label class="chk-row">
         <input type="checkbox" id="chk-custom" onchange="document.getElementById('custom-email-container').style.display=this.checked?'block':'none'"> 
-        Send to Custom Email...
+        Also send separately…
       </label>
+      <p style="font-size:11px;color:var(--silver);margin:0 0 8px 28px;line-height:1.4;">Each address gets its own copy — other recipients are not visible.</p>
       
-      <div id="custom-email-container" style="display:none; margin-top:12px;">
+      <div id="custom-email-container" style="display:none; margin-top:4px; margin-bottom:14px;">
         <div class="custom-email-row">
           <input type="email" class="data-input custom-email-input" placeholder="e.g. accounting@builder.com" style="border-color:rgba(255,255,255,.2);">
-          <button class="btn-view" style="padding:0 12px; font-size:16px;" onclick="addCustomEmailField()" title="Add another email">+</button>
+          <button class="btn-view" style="padding:0 12px; font-size:16px;" onclick="addCustomEmailField()" title="Add another separate email">+</button>
+        </div>
+      </div>
+
+      <label class="chk-row" style="margin-bottom:0;">
+        <input type="checkbox" id="chk-cc" onchange="document.getElementById('cc-email-container').style.display=this.checked?'block':'none'"> 
+        CC on the same email…
+      </label>
+      <p style="font-size:11px;color:var(--silver);margin:0 0 8px 28px;line-height:1.4;">CC addresses see the same message and who else is on the email.</p>
+
+      <div id="cc-email-container" style="display:none; margin-top:4px;">
+        <div class="custom-email-row">
+          <input type="email" class="data-input cc-email-input" placeholder="e.g. partner@builder.com" style="border-color:rgba(52,152,219,.45);">
+          <button class="btn-view" style="padding:0 12px; font-size:16px;" onclick="addCcEmailField()" title="Add another CC">+</button>
         </div>
       </div>
     </div>
@@ -3027,14 +3041,16 @@ function renderShipmentsHistory() {
   el.innerHTML = ships.map(function (s, i) {
     const when = s.shippedAt ? new Date(s.shippedAt).toLocaleString() : '';
     const lines = (s.items || []).map(function (it) {
-      return escAttr(it.description || it.code || '') + (it.size ? ' ' + escAttr(it.size) : '') +
-        ' × <strong style="color:var(--white)">' + escAttr(String(it.qty)) + '</strong>';
-    }).join('<br>');
-    return '<div style="padding:10px 12px;margin-bottom:8px;border:1px solid rgba(139,160,178,.25);background:rgba(0,0,0,.2);">' +
-      '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px;">' +
-      '<strong style="color:var(--gold);font-family:monospace;">' + escAttr(s.id || ('SHIP-' + (i + 1))) + '</strong>' +
+      return '<span class="ship-hist-line">' +
+        escAttr(it.description || it.code || '') +
+        (it.size ? ' ' + escAttr(it.size) : '') +
+        ' × <strong>' + escAttr(String(it.qty)) + '</strong></span>';
+    }).join('');
+    return '<div class="ship-hist-card">' +
+      '<div class="ship-hist-top">' +
+      '<strong class="ship-hist-id">' + escAttr(s.id || ('SHIP-' + (i + 1))) + '</strong>' +
       '<span>' + escAttr(when) + ' · $' + (Number(s.subtotal) || 0).toFixed(2) + '</span></div>' +
-      '<div style="line-height:1.55;">' + lines + '</div></div>';
+      '<div class="ship-hist-lines">' + lines + '</div></div>';
   }).join('');
 }
 
@@ -3348,6 +3364,8 @@ function openEmailModal(e) {
   document.getElementById('chk-cust').checked = true;
   document.getElementById('chk-admin').checked = false;
   document.getElementById('chk-custom').checked = false;
+  const chkCc = document.getElementById('chk-cc');
+  if (chkCc) chkCc.checked = false;
   document.getElementById('email-custom-note').value = ''; 
   document.getElementById('email-format-sel').value = 'confirm';
   
@@ -3356,9 +3374,19 @@ function openEmailModal(e) {
   container.innerHTML = `
     <div class="custom-email-row">
       <input type="email" class="data-input custom-email-input" placeholder="e.g. accounting@builder.com" style="border-color:rgba(255,255,255,.2);">
-      <button class="btn-view" style="padding:0 12px; font-size:16px;" onclick="addCustomEmailField()" title="Add another email">+</button>
+      <button class="btn-view" style="padding:0 12px; font-size:16px;" onclick="addCustomEmailField()" title="Add another separate email">+</button>
     </div>
   `;
+  const ccContainer = document.getElementById('cc-email-container');
+  if (ccContainer) {
+    ccContainer.style.display = 'none';
+    ccContainer.innerHTML = `
+      <div class="custom-email-row">
+        <input type="email" class="data-input cc-email-input" placeholder="e.g. partner@builder.com" style="border-color:rgba(52,152,219,.45);">
+        <button class="btn-view" style="padding:0 12px; font-size:16px;" onclick="addCcEmailField()" title="Add another CC">+</button>
+      </div>
+    `;
+  }
   
   let btn = document.getElementById('btn-execute-send');
   btn.disabled = false; btn.innerHTML = '🚀 Send Email(s)'; btn.style.background = '#3498db';
@@ -3464,6 +3492,30 @@ function addCustomEmailField() {
     <button class="btn-del" style="padding:0 12px; margin-top:0;" onclick="this.parentElement.remove()" title="Remove email">X</button>
   `;
   container.appendChild(div);
+}
+
+function addCcEmailField() {
+  const container = document.getElementById('cc-email-container');
+  if (!container) return;
+  const div = document.createElement('div');
+  div.className = 'custom-email-row';
+  div.innerHTML = `
+    <input type="email" class="data-input cc-email-input" placeholder="e.g. another@builder.com" style="border-color:rgba(52,152,219,.45);">
+    <button class="btn-del" style="padding:0 12px; margin-top:0;" onclick="this.parentElement.remove()" title="Remove CC">X</button>
+  `;
+  container.appendChild(div);
+}
+
+function collectEmailInputs(selector) {
+  const out = [];
+  const seen = {};
+  document.querySelectorAll(selector).forEach(function (inp) {
+    const val = String(inp.value || '').trim().toLowerCase();
+    if (!val || seen[val]) return;
+    seen[val] = true;
+    out.push(val);
+  });
+  return out;
 }
 
 function emailEscape(s) {
@@ -3651,6 +3703,7 @@ async function executeSendEmail() {
   const sendCust = document.getElementById('chk-cust').checked;
   const sendAdmin = document.getElementById('chk-admin').checked;
   const sendCustom = document.getElementById('chk-custom').checked;
+  const sendCc = document.getElementById('chk-cc') && document.getElementById('chk-cc').checked;
   const customNote = document.getElementById('email-custom-note').value.trim();
   
   let recipients = [];
@@ -3658,15 +3711,21 @@ async function executeSendEmail() {
   if(sendAdmin) recipients.push('orders@allprobuildingsupplies.com');
   
   if(sendCustom) {
-    document.querySelectorAll('.custom-email-input').forEach(inp => {
-      const val = inp.value.trim();
-      if(val) recipients.push(val);
+    collectEmailInputs('.custom-email-input').forEach(function (val) {
+      if (recipients.map(function (e) { return String(e).toLowerCase(); }).indexOf(val) === -1) {
+        recipients.push(val);
+      }
     });
   }
 
+  const ccList = sendCc ? collectEmailInputs('.cc-email-input') : [];
+  // Don't CC an address that is already a primary To
+  const toLower = recipients.map(function (e) { return String(e).toLowerCase(); });
+  const ccFiltered = ccList.filter(function (e) { return toLower.indexOf(e) === -1; });
+
   const msgEl = document.getElementById('email-send-msg');
   if(recipients.length === 0) {
-    msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b'; msgEl.textContent = 'Please select at least one valid recipient.'; return;
+    msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b'; msgEl.textContent = 'Please select at least one To recipient (customer, admin, or separate).'; return;
   }
 
   let htmlBody = '', subject = '';
@@ -3683,20 +3742,27 @@ async function executeSendEmail() {
   else if(type === 'invoice') { htmlBody = buildInvoiceEmail(shipView, customNote); subject = 'Invoice — Order ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies'; }
   const btn = document.getElementById('btn-execute-send');
   btn.disabled = true; btn.innerHTML = 'Sending...';
-  msgEl.style.display = 'block'; msgEl.style.color = '#3498db'; msgEl.textContent = 'Processing request...';
+  msgEl.style.display = 'block'; msgEl.style.color = '#3498db';
+  msgEl.textContent = ccFiltered.length
+    ? ('Sending to ' + recipients.length + ' with ' + ccFiltered.length + ' CC…')
+    : ('Sending separately to ' + recipients.length + '…');
 
   try {
     const r = await fetch(API_BASE + '/admin/email/send', {
       method: 'POST',
       headers: getAdminHeaders(),
-      body: JSON.stringify({ recipients, subject, htmlBody })
+      body: JSON.stringify({ recipients, cc: ccFiltered, subject, htmlBody })
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Send failed');
     const successCount = data.sentCount || 0;
     if (successCount > 0) {
-      msgEl.style.color = '#2ecc71'; msgEl.textContent = 'Sent successfully to ' + successCount + ' recipient(s).';
-      btn.style.background = '#2ecc71'; btn.innerHTML = '✔ Done'; setTimeout(closeEmailModal, 1500);
+      const ccNote = (data.cc && data.cc.length) ? (' (CC: ' + data.cc.join(', ') + ')') : '';
+      msgEl.style.color = '#2ecc71';
+      msgEl.textContent = data.mode === 'shared'
+        ? ('Sent 1 email to ' + (data.sent || recipients).join(', ') + ccNote)
+        : ('Sent separately to ' + successCount + ' recipient(s).');
+      btn.style.background = '#2ecc71'; btn.innerHTML = '✔ Done'; setTimeout(closeEmailModal, 1800);
     } else {
       throw new Error('No emails were sent. Check Worker EmailJS secrets.');
     }

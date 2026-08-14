@@ -1210,16 +1210,38 @@ h1.htitle strong { color: var(--gold); }
   #order-modal .order-items-scroll .data-table td.order-line-del { grid-column: 4; }
 
   /* Shipment history: compact chips instead of tall stacked lines */
-  #shipments-history > div {
-    padding: 8px 10px !important;
-    margin-bottom: 6px !important;
+  #shipments-history .ship-hist-card {
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border: 1px solid rgba(139,160,178,.25);
+    background: rgba(0,0,0,.2);
   }
-  #shipments-history > div > div:last-child {
+  #shipments-history .ship-hist-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: var(--silver);
+  }
+  #shipments-history .ship-hist-id {
+    color: var(--gold);
+    font-family: monospace;
+  }
+  #shipments-history .ship-hist-lines {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 8px;
-    line-height: 1.3 !important;
   }
+  #shipments-history .ship-hist-line {
+    font-size: 11px;
+    color: var(--silver);
+    background: rgba(255,255,255,.04);
+    padding: 3px 6px;
+    border: 1px solid rgba(139,160,178,.15);
+  }
+  #shipments-history .ship-hist-line strong { color: var(--white); }
 }
 
 

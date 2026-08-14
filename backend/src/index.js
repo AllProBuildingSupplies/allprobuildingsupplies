@@ -1158,7 +1158,7 @@ function sanitizeEmailSubject(subject) {
   return s.replace(/\s+/g, ' ').trim();
 }
 
-async function sendEmailJs(env, templateParams, toEmail) {
+async function sendEmailJs(env, templateParams, toEmail, options = {}) {
   const serviceId = env.EMAILJS_SERVICE_ID;
   const templateId = env.EMAILJS_TEMPLATE_ID;
   const publicKey = env.EMAILJS_PUBLIC_KEY;
@@ -1169,11 +1169,24 @@ async function sendEmailJs(env, templateParams, toEmail) {
   if (params.email_subject != null) {
     params.email_subject = sanitizeEmailSubject(params.email_subject);
   }
+  const toList = normalizeEmailList(toEmail);
+  const ccList = normalizeEmailList(options.cc || options.ccEmail || params.cc_email || '');
+  const toJoined = toList.join(', ');
+  const ccJoined = ccList.join(', ');
+  const primaryTo = toList[0] || String(toEmail || '').trim();
   const body = {
     service_id: serviceId,
     template_id: templateId,
     user_id: publicKey,
-    template_params: { ...params, to_email: toEmail, cust_email: toEmail },
+    template_params: {
+      ...params,
+      to_email: toJoined || primaryTo,
+      cust_email: primaryTo,
+      // EmailJS template Cc field should be set to {{cc_email}} (or {{email_cc}}).
+      cc_email: ccJoined,
+      email_cc: ccJoined,
+      cc: ccJoined,
+    },
   };
   if (env.EMAILJS_PRIVATE_KEY) body.accessToken = env.EMAILJS_PRIVATE_KEY;
   const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -1185,7 +1198,22 @@ async function sendEmailJs(env, templateParams, toEmail) {
     const txt = await res.text();
     throw new Error(txt || `EmailJS HTTP ${res.status}`);
   }
-  return { ok: true };
+  return { ok: true, to: toList, cc: ccList };
+}
+
+function normalizeEmailList(value) {
+  const raw = Array.isArray(value) ? value : String(value == null ? '' : value).split(/[,;]+/);
+  const out = [];
+  const seen = new Set();
+  for (const part of raw) {
+    const email = String(part || '')
+      .trim()
+      .toLowerCase();
+    if (!email || !email.includes('@') || seen.has(email)) continue;
+    seen.add(email);
+    out.push(email);
+  }
+  return out;
 }
 
 export default {
@@ -2244,15 +2272,41 @@ export default {
       }
 
       if (path === '/api/admin/email/send' && request.method === 'POST') {
-        const { recipients, subject, htmlBody } = await request.json();
-        const sent = [];
-        for (const email of recipients || []) {
-          try {
-            await sendEmailJs(env, { email_subject: subject, email_body: htmlBody }, email);
-            sent.push(email);
-          } catch (_) {}
+        const { recipients, cc, subject, htmlBody } = await request.json();
+        const toList = normalizeEmailList(recipients);
+        const ccList = normalizeEmailList(cc);
+        if (!toList.length) {
+          return jsonResponse({ error: 'At least one To recipient is required' }, 400);
         }
-        return jsonResponse({ success: true, sentCount: sent.length, sent });
+        const params = { email_subject: subject, email_body: htmlBody };
+
+        // No CC → keep legacy behavior: one separate send per To (recipients don't see each other).
+        if (!ccList.length) {
+          const sent = [];
+          for (const email of toList) {
+            try {
+              await sendEmailJs(env, params, email);
+              sent.push(email);
+            } catch (_) {}
+          }
+          return jsonResponse({ success: true, mode: 'separate', sentCount: sent.length, sent, cc: [] });
+        }
+
+        // With CC → one shared email so To + CC can see each other.
+        const ccOnly = ccList.filter((e) => !toList.includes(e));
+        try {
+          await sendEmailJs(env, params, toList, { cc: ccOnly });
+          return jsonResponse({
+            success: true,
+            mode: 'shared',
+            sentCount: 1,
+            sent: toList,
+            cc: ccOnly,
+          });
+        } catch (e) {
+          const msg = e && e.message ? String(e.message) : 'Send failed';
+          return jsonResponse({ error: msg, success: false, sentCount: 0 }, 502);
+        }
       }
 
       return jsonResponse({ error: 'Route Not Found' }, 404);
