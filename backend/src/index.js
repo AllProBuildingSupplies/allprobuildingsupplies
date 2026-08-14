@@ -1374,6 +1374,35 @@ export default {
         return jsonResponse({ success: true });
       }
 
+      if (path === '/api/admin/users' && request.method === 'PUT') {
+        const u = await request.json();
+        if (!u || !u.id) return jsonResponse({ error: 'User id required' }, 400);
+        const fname = String(u.fname || '').trim();
+        const lname = String(u.lname || '').trim();
+        const email = String(u.email || '').trim().toLowerCase();
+        if (!fname || !lname || !email) return jsonResponse({ error: 'First name, last name, and email are required' }, 400);
+        const phone = String(u.phone || '').trim();
+        const company = String(u.company || '').trim();
+        const status = String(u.status || 'pending');
+        const canOrderPieces = u.canOrderPieces ? 1 : 0;
+        const pwRaw = (u.password || '').trim();
+        if (pwRaw && pwRaw !== '********') {
+          const pw = await ensureStoredPassword(pwRaw);
+          await env.DB.prepare(
+            `UPDATE users SET fname = ?, lname = ?, company = ?, email = ?, phone = ?, status = ?, canOrderPieces = ?, password = ? WHERE id = ?`
+          )
+            .bind(fname, lname, company, email, phone, status, canOrderPieces, pw, u.id)
+            .run();
+        } else {
+          await env.DB.prepare(
+            `UPDATE users SET fname = ?, lname = ?, company = ?, email = ?, phone = ?, status = ?, canOrderPieces = ? WHERE id = ?`
+          )
+            .bind(fname, lname, company, email, phone, status, canOrderPieces, u.id)
+            .run();
+        }
+        return jsonResponse({ success: true });
+      }
+
       if (path === '/api/admin/users' && request.method === 'DELETE') {
         const id = url.searchParams.get('id');
         const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();

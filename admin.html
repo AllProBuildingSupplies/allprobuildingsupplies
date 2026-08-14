@@ -151,7 +151,8 @@
 <div id="user-modal-overlay" onclick="closeUserModal(event)">
   <div id="user-modal" onclick="event.stopPropagation()" class="auth-box" style="margin:auto; position:relative; width:100%; max-width:500px; padding:32px; text-align:left;">
     <button class="modal-close" onclick="closeUserModal(event)">&times;</button>
-    <div class="modal-title" style="color:var(--gold); border-bottom:1px solid rgba(200,152,31,.3); margin-bottom:20px; padding-bottom:12px; font-size:20px;">Add New User</div>
+    <div class="modal-title" id="user-modal-title" style="color:var(--gold); border-bottom:1px solid rgba(200,152,31,.3); margin-bottom:20px; padding-bottom:12px; font-size:20px;">Add New User</div>
+    <input type="hidden" id="edit-user-id" value="">
     
     <div class="modal-lbl" style="color:var(--white)">First Name *</div>
     <input type="text" id="new-user-fname" class="data-input" style="margin-bottom:16px;">
@@ -165,8 +166,8 @@
     <div class="modal-lbl" style="color:var(--white)">Phone</div>
     <input type="tel" id="new-user-phone" class="data-input" style="margin-bottom:16px;" placeholder="(732) 000-0000">
 
-    <div class="modal-lbl" style="color:var(--white)">Login Password *</div>
-    <input type="password" id="new-user-password" class="data-input" style="margin-bottom:16px;" value="Welcome1!">
+    <div class="modal-lbl" style="color:var(--white)" id="new-user-password-lbl">Login Password *</div>
+    <input type="password" id="new-user-password" class="data-input" style="margin-bottom:16px;" value="Welcome1!" placeholder="Leave blank to keep current">
     
     <div class="modal-lbl" style="color:var(--white)">Company Name</div>
     <input type="text" id="new-user-company" class="data-input" style="margin-bottom:20px;">
@@ -177,6 +178,7 @@
         <select id="new-user-status" class="data-input">
           <option value="approved">Approved</option>
           <option value="pending">Pending</option>
+          <option value="rejected">Rejected</option>
         </select>
       </div>
       <div>
@@ -188,7 +190,7 @@
       </div>
     </div>
 
-    <button class="btn-save" style="width:100%;" onclick="createNewUser(event)">Create User</button>
+    <button class="btn-save" id="user-modal-save-btn" style="width:100%;" onclick="saveUserModal(event)">Create User</button>
   </div>
 </div>
 
@@ -1183,6 +1185,7 @@ async function loadUsers() {
           </select>
         </td>
         <td data-label="Action" class="user-cell-actions">
+          <button type="button" class="btn-view" onclick="openUserModal('${id}')">Edit</button>
           <button type="button" class="btn-view" onclick="openUserAddresses('${email}')">Addresses</button>
           <button type="button" class="btn-del" onclick="deleteUser('${id}')">Delete</button>
         </td>
@@ -1209,8 +1212,9 @@ async function loadUsers() {
           <input type="password" class="data-input pw-sel" data-id="${id}" value="" placeholder="New pw" autocomplete="new-password">
         </div>
         <div class="user-glance-actions">
-          <button type="button" class="btn-view" onclick="openUserAddresses('${email}')">Addresses</button>
-          <button type="button" class="btn-del" onclick="deleteUser('${id}')">Delete</button>
+          <button type="button" class="btn-view user-glance-edit" onclick="openUserModal('${id}')">Edit</button>
+          <button type="button" class="btn-view" onclick="openUserAddresses('${email}')">Addr</button>
+          <button type="button" class="btn-del" onclick="deleteUser('${id}')">Del</button>
         </div>
       </article>`;
     });
@@ -1246,15 +1250,22 @@ async function loadUsers() {
   }
 }
 
-function openUserModal() {
-  document.getElementById('new-user-fname').value = '';
-  document.getElementById('new-user-lname').value = '';
-  document.getElementById('new-user-email').value = '';
-  document.getElementById('new-user-phone').value = '';
-  document.getElementById('new-user-password').value = 'Welcome1!';
-  document.getElementById('new-user-company').value = '';
-  document.getElementById('new-user-status').value = 'approved';
-  document.getElementById('new-user-pcs').value = 'true';
+function openUserModal(userId) {
+  const editing = !!(userId && String(userId));
+  const u = editing ? masterUsers.find(x => String(x.id) === String(userId)) : null;
+  document.getElementById('edit-user-id').value = u ? u.id : '';
+  document.getElementById('user-modal-title').textContent = u ? 'Edit User' : 'Add New User';
+  document.getElementById('user-modal-save-btn').textContent = u ? 'Save Changes' : 'Create User';
+  document.getElementById('new-user-password-lbl').textContent = u ? 'New Password (optional)' : 'Login Password *';
+  document.getElementById('new-user-fname').value = u ? (u.fname || '') : '';
+  document.getElementById('new-user-lname').value = u ? (u.lname || '') : '';
+  document.getElementById('new-user-email').value = u ? (u.email || '') : '';
+  document.getElementById('new-user-phone').value = u ? (u.phone || '') : '';
+  document.getElementById('new-user-password').value = u ? '' : 'Welcome1!';
+  document.getElementById('new-user-company').value = u ? (u.company || '') : '';
+  document.getElementById('new-user-status').value = u ? (u.status || 'pending') : 'approved';
+  const pieces = u ? (u.canOrderPieces === 1 || u.canOrderPieces === true) : true;
+  document.getElementById('new-user-pcs').value = pieces ? 'true' : 'false';
   document.getElementById('user-modal-overlay').style.display = 'flex';
 }
 
@@ -1264,36 +1275,58 @@ function closeUserModal(e) {
   }
 }
 
-async function createNewUser(e) {
+async function saveUserModal(e) {
   const fname = document.getElementById('new-user-fname').value.trim();
   const lname = document.getElementById('new-user-lname').value.trim();
   const email = document.getElementById('new-user-email').value.trim();
+  const editId = document.getElementById('edit-user-id').value.trim();
 
   if(!fname || !lname || !email) return alert('First Name, Last Name, and Email are required.');
 
-  const btn = e.target; btn.textContent = 'Saving...'; btn.disabled = true;
-
-  const plainPw = document.getElementById('new-user-password').value.trim() || 'Welcome1!';
-  const hashedPw = await window.apbsHashPassword(plainPw);
-  const newUser = {
-    id: 'USR-' + Date.now().toString(36).toUpperCase(),
-    fname: fname, lname: lname, email: email,
-    phone: document.getElementById('new-user-phone').value.trim(),
-    company: document.getElementById('new-user-company').value.trim(), 
-    status: document.getElementById('new-user-status').value, 
-    canOrderPieces: document.getElementById('new-user-pcs').value === 'true', 
-    password: hashedPw
-  };
+  const btn = e.target; const prev = btn.textContent; btn.textContent = 'Saving...'; btn.disabled = true;
+  const plainPw = document.getElementById('new-user-password').value.trim();
 
   try {
-    const r = await fetch(API_BASE + '/admin/users', { method:'POST', headers: getAdminHeaders(), body: JSON.stringify(newUser) });
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
-    showStatus('User created securely in D1!', false); 
-    closeUserModal();
-    loadUsers(); 
-  } catch(err) { showStatus('Creation Failed: ' + err.message, true); }
-  
-  btn.textContent = 'Create User'; btn.disabled = false;
+    if (editId) {
+      const payload = {
+        id: editId,
+        fname, lname, email,
+        phone: document.getElementById('new-user-phone').value.trim(),
+        company: document.getElementById('new-user-company').value.trim(),
+        status: document.getElementById('new-user-status').value,
+        canOrderPieces: document.getElementById('new-user-pcs').value === 'true',
+        password: plainPw ? await window.apbsHashPassword(plainPw) : '********'
+      };
+      const r = await fetch(API_BASE + '/admin/users', { method:'PUT', headers: getAdminHeaders(), body: JSON.stringify(payload) });
+      const data = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      showStatus('User updated.', false);
+    } else {
+      const hashedPw = await window.apbsHashPassword(plainPw || 'Welcome1!');
+      const newUser = {
+        id: 'USR-' + Date.now().toString(36).toUpperCase(),
+        fname, lname, email,
+        phone: document.getElementById('new-user-phone').value.trim(),
+        company: document.getElementById('new-user-company').value.trim(),
+        status: document.getElementById('new-user-status').value,
+        canOrderPieces: document.getElementById('new-user-pcs').value === 'true',
+        password: hashedPw
+      };
+      const r = await fetch(API_BASE + '/admin/users', { method:'POST', headers: getAdminHeaders(), body: JSON.stringify(newUser) });
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      showStatus('User created securely in D1!', false);
+    }
+    closeUserModal({ target: { id: 'user-modal-overlay' } });
+    loadUsers();
+  } catch(err) {
+    showStatus((editId ? 'Update' : 'Creation') + ' Failed: ' + err.message, true);
+  }
+
+  btn.textContent = prev; btn.disabled = false;
+}
+
+async function createNewUser(e) {
+  return saveUserModal(e);
 }
 
 async function deleteUser(id) { 
