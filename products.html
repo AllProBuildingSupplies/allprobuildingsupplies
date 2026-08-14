@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="assets/style.css"/>
 
 </head>
-<body>
+<body class="page-products">
 
 <div id="cursor"></div><div id="cursor-ring"></div>
 
@@ -17,31 +17,41 @@
   <div class="page-hero-inner">
     <div class="page-breadcrumb"><a href="index.html">Home</a> › Products</div>
     <div class="page-title" data-r>Product <span>Catalog</span></div>
-    <p class="page-subtitle" data-r>Contractor-grade PVC, DWV fittings, pipes, and more. Pricing shown per piece. Call or email for bulk quotes.</p>
+    <p class="page-subtitle desktop-only-block" data-r>Contractor-grade PVC, DWV fittings, pipes, and more. Pricing shown per piece. Call or email for bulk quotes.</p>
   </div>
 </div>
 
-<section class="sec" style="background:var(--ink)">
+<section class="sec sec-products" style="background:var(--ink)">
   <div class="sec-inner">
 
-    <div class="note-box" id="how-to-order-box">
+    <div class="note-box desktop-only-block" id="how-to-order-box">
       <strong>How to Order:</strong> Call <a href="tel:17327341123" style="color:var(--gold)">732-734-1123</a> or email
       <a href="mailto:info@allprobuildingsupplies.com?subject=Pricing%20Request&body=Code%2C%20Size%2C%20Qty%2C%20Delivery%20ZIP" style="color:var(--gold)">info@allprobuildingsupplies.com</a>
       with your <strong>Item Code &middot; Size &middot; Quantity &middot; Delivery ZIP</strong>.
       Volume pricing available. Don&#39;t see what you need? We can source it &mdash; just ask.
     </div>
+
+    <div class="prod-strip mobile-only-flex" id="how-to-order-mobile">
+      <span>Order:</span>
+      <a href="tel:17327341123">732-734-1123</a>
+      <span class="prod-strip-sep">·</span>
+      <a href="mailto:info@allprobuildingsupplies.com?subject=Pricing%20Request">Email</a>
+      <span class="prod-strip-sep">·</span>
+      <span>Code · Size · Qty · ZIP</span>
+    </div>
     
-    <div id="login-banner" style="display:none;">
-      <div style="font-size:14px;color:var(--smoke)"><strong style="color:var(--white)">&#128274; Pricing visible to approved trade accounts only</strong><br/><span style="font-size:13px;color:var(--silver)">Log in or request access to see wholesale pricing and order online.</span></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <div id="login-banner" class="login-banner" style="display:none;">
+      <div class="login-banner-text desktop-only-block" style="font-size:14px;color:var(--smoke)"><strong style="color:var(--white)">&#128274; Pricing visible to approved trade accounts only</strong><br/><span style="font-size:13px;color:var(--silver)">Log in or request access to see wholesale pricing and order online.</span></div>
+      <div class="login-banner-text mobile-only-block"><strong>Trade pricing</strong> — log in to see prices</div>
+      <div class="login-banner-acts">
         <a href="login.html" class="btn-gold" style="padding:10px 22px;font-size:12px;letter-spacing:1.5px">LOG IN &rarr;</a>
-        <a href="register.html" class="btn-ghost" style="padding:10px 22px;font-size:12px;letter-spacing:1.5px">REQUEST ACCESS</a>
+        <a href="register.html" class="btn-ghost desktop-only-inline" style="padding:10px 22px;font-size:12px;letter-spacing:1.5px">REQUEST ACCESS</a>
       </div>
     </div>
 
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
-      <input class="search-input" type="text" id="prod-search" placeholder="Search by code, description, or size..."/>
+      <input class="search-input" type="text" id="prod-search" placeholder="Search code, size, or name…"/>
     </div>
     
     <div class="mobile-filter-wrap">
@@ -77,7 +87,7 @@
   </div>
 </div>
 
-<section class="cta-band">
+<section class="cta-band desktop-only-block">
   <div class="cta-band-inner">
     <div><div class="cta-h">Ready to Get Your Supplies?</div><div class="cta-s">Call or email with your list — we respond fast with pricing and availability.</div></div>
     <div class="cta-acts">
@@ -101,6 +111,7 @@ let isLoggedIn = false;
   
   var loginBanner = document.getElementById('login-banner');
   var howToOrder  = document.getElementById('how-to-order-box');
+  var howToMobile = document.getElementById('how-to-order-mobile');
   var acctBtn     = document.getElementById('nav-account-btn');
   var loginBtn    = document.getElementById('nav-login-btn');
   var nameEl      = document.getElementById('nav-logged-in-name');
@@ -108,12 +119,14 @@ let isLoggedIn = false;
   if(isLoggedIn){
     if(loginBanner) loginBanner.style.display = 'none';
     if(howToOrder) howToOrder.style.display = 'none';
+    if(howToMobile) { howToMobile.hidden = true; howToMobile.style.display = 'none'; }
     if(acctBtn) acctBtn.style.display = 'inline-flex';
     if(loginBtn) loginBtn.style.display = 'none';
     if(nameEl) nameEl.textContent = user.name || ((user.fname||'') + ' ' + (user.lname||'')).trim();
   } else {
     if(loginBanner) loginBanner.style.display = 'flex';
-    if(howToOrder) howToOrder.style.display = 'block';
+    if(howToOrder) howToOrder.style.display = '';
+    if(howToMobile) { howToMobile.hidden = false; howToMobile.style.display = ''; }
     if(acctBtn) acctBtn.style.display = 'none';
     if(loginBtn) loginBtn.style.display = 'inline-flex';
   }

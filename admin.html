@@ -82,11 +82,12 @@
   </div>
 
   <div id="tab-products" class="admin-panel">
-    <div class="admin-products-mobile-note">
-      <strong>Desktop only</strong>
-      Inventory editing, CSV upload, and receive-shipment tools are built for a wide screen. Open Admin on a computer to manage products.
+    <div class="admin-products-mobile-note" id="admin-products-mobile-note">
+      <strong>Best on desktop</strong>
+      Inventory editing and CSV tools are built for a wide screen.
+      <button type="button" class="btn-view admin-products-override-btn" onclick="adminEnableMobileProducts()">Edit products on this phone anyway</button>
     </div>
-    <div class="admin-products-desktop-only">
+    <div class="admin-products-desktop-only" id="admin-products-desktop-only">
     <p style="color:var(--silver);font-size:14px;margin-bottom:20px;">Edit your master inventory. This data feeds directly into the live Products and Checkout pages. <span style="color:var(--gold);">Tommur / Lesso codes are admin-only</span> and never shown to customers.</p>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
     <table class="data-table" id="prod-table" style="min-width:1100px;">
@@ -599,10 +600,20 @@ function adminMobileOpen(tab) {
   switchTab(tab);
 }
 
+function adminEnableMobileProducts() {
+  document.body.classList.add('admin-mobile-products-override');
+  const note = document.getElementById('admin-products-mobile-note');
+  if (note) note.style.display = 'none';
+  loadProducts();
+}
+
 function adminMobileBack() {
   document.body.classList.remove('admin-mobile-browsing');
+  document.body.classList.remove('admin-mobile-products-override');
   const back = document.getElementById('admin-mobile-back');
   if (back) back.classList.remove('is-visible');
+  const note = document.getElementById('admin-products-mobile-note');
+  if (note) note.style.display = '';
   document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
 }
