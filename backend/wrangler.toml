@@ -14,6 +14,11 @@ compatibility_date = "2024-04-21"
 #   PAYMENT_CC_LINK or PAYMENT_STRIPE_LINK — Stripe Payment Link / card checkout URL
 #   PAYMENT_ZELLE_EMAIL, PAYMENT_ZELLE_HANDLE, PAYMENT_ZELLE_QR_URL
 #   PAYMENT_WIRE_INSTRUCTIONS, PAYMENT_ACH_INSTRUCTIONS (multi-line text OK as secret)
+#   STRIPE_WEBHOOK_SECRET — auto-mark orders paid on checkout.session.completed
+#     Webhook URL (test): https://allpro-api-test.baruch-6d5.workers.dev/api/webhooks/stripe
+#     Events: checkout.session.completed, checkout.session.async_payment_succeeded,
+#             payment_intent.succeeded
+#     Payment Link must pass client_reference_id=<Order ID> (invoices already append this)
 #
 # Test/staging Worker (does NOT touch production):
 #   npx wrangler deploy --env test
@@ -22,6 +27,7 @@ compatibility_date = "2024-04-21"
 #   npx wrangler secret put MICROSOFT_CLIENT_ID --env test
 #   npx wrangler secret put MICROSOFT_TENANT_ID --env test
 #   npx wrangler secret put PAYMENT_CC_LINK --env test
+#   npx wrangler secret put STRIPE_WEBHOOK_SECRET --env test
 
 # Bindings to your D1 Databases (PRODUCTION)
 [[d1_databases]]

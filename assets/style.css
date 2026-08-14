@@ -1937,6 +1937,27 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
   border-radius: 4px;
 }
 .fin-pay-methods-body { font-size: 13px; color: var(--silver); line-height: 1.6; display: grid; gap: 6px; }
+#pay-mark-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(0,0,0,.65);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.pay-mark-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.pay-method-btn.is-active {
+  border-color: var(--gold) !important;
+  color: var(--gold) !important;
+  background: rgba(200,152,31,.12);
+}
 
 @media (max-width: 768px) {
   #tab-stock.admin-panel.active { display: block; }

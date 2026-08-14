@@ -520,6 +520,7 @@
         <button type="button" class="btn-save oms-qa" id="oms-qa-ship" onclick="omsQuickShipRemaining()">📦 Ship remaining</button>
         <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-pack" onclick="omsQuickEmail('packing')">Packing slip</button>
         <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-inv" onclick="omsQuickEmail('invoice')">Invoice</button>
+        <button type="button" class="btn-save oms-qa" id="oms-qa-paid" onclick="omsQuickMarkPaid()">✓ Mark paid</button>
       </div>
     </div>
 
@@ -549,7 +550,8 @@
             <option value="ach">ACH</option>
             <option value="other">Other</option>
           </select>
-          <input type="text" id="m-payment-note" class="data-input" style="margin-bottom:16px;" placeholder="Payment note (optional)">
+          <input type="text" id="m-payment-note" class="data-input" style="margin-bottom:10px;" placeholder="Payment note (optional)">
+          <button type="button" class="btn-save" id="btn-mark-paid-now" style="width:100%;margin-bottom:12px;background:rgba(46,204,113,.15);border-color:#2ecc71;color:#2ecc71;" onclick="markActiveOrderPaid()">✓ Mark paid now</button>
           <button class="btn-save" style="width:100%;" onclick="saveOrderChanges()">💾 Save All Changes</button>
           <button type="button" class="btn-del" id="btn-delete-order" style="width:100%;margin-top:12px;display:none;" onclick="deleteActiveOrder()">🗑 Delete Order Permanently</button>
         </div>
@@ -563,6 +565,25 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<div id="pay-mark-overlay" onclick="closePayMarkModal(event)" style="display:none;">
+  <div id="pay-mark-modal" onclick="event.stopPropagation()" class="auth-box" style="margin:auto;position:relative;width:100%;max-width:420px;padding:28px;text-align:left;">
+    <button class="modal-close" onclick="closePayMarkModal(event)">&times;</button>
+    <div class="modal-title" style="color:var(--gold);border-bottom:1px solid rgba(200,152,31,.3);margin-bottom:12px;padding-bottom:10px;font-size:20px;">Mark order paid</div>
+    <p id="pay-mark-sub" style="color:var(--silver);font-size:13px;margin-bottom:16px;line-height:1.5;"></p>
+    <div class="modal-lbl" style="color:var(--white);">How did they pay?</div>
+    <div class="pay-mark-methods" id="pay-mark-methods">
+      <button type="button" class="btn-view pay-method-btn" data-method="card">Card</button>
+      <button type="button" class="btn-view pay-method-btn" data-method="zelle">Zelle</button>
+      <button type="button" class="btn-view pay-method-btn" data-method="wire">Wire</button>
+      <button type="button" class="btn-view pay-method-btn" data-method="ach">ACH</button>
+      <button type="button" class="btn-view pay-method-btn" data-method="other">Other</button>
+    </div>
+    <div class="modal-lbl" style="color:var(--white);margin-top:14px;">Note <span style="color:var(--silver);font-size:10px;">(optional)</span></div>
+    <input type="text" id="pay-mark-note" class="data-input" style="margin-bottom:16px;" placeholder="e.g. Zelle confirmation #…">
+    <button type="button" class="btn-save" style="width:100%;" id="pay-mark-confirm" onclick="confirmPayMarkModal()">✓ Confirm paid</button>
   </div>
 </div>
 
@@ -1646,24 +1667,127 @@ function renderFinanceQueue() {
   updateAdminGlanceCounts();
 }
 
-async function markOrderPaid(orderId) {
+async function markOrderPaid(orderId, presetMethod) {
   const o = (masterOrders || []).find(function (x) { return x.id === orderId; });
   if (!o) return showStatus('Order not found', true);
-  const method = prompt('Payment method (card / zelle / wire / ach / other):', o.paymentMethod || 'zelle');
-  if (method === null) return;
-  o.paymentStatus = 'paid';
-  o.paymentMethod = String(method || '').trim().toLowerCase();
-  o.paidAt = new Date().toISOString();
+  if (orderPaymentStatus(o) === 'paid') return showStatus(orderId + ' is already paid.', false);
+  openPayMarkModal(orderId, presetMethod || o.paymentMethod || 'zelle');
+}
+
+let payMarkOrderId = '';
+let payMarkMethod = 'zelle';
+
+function openPayMarkModal(orderId, method) {
+  payMarkOrderId = orderId;
+  payMarkMethod = String(method || 'zelle').toLowerCase() || 'zelle';
+  const overlay = document.getElementById('pay-mark-overlay');
+  const sub = document.getElementById('pay-mark-sub');
+  const note = document.getElementById('pay-mark-note');
+  if (sub) {
+    const o = (masterOrders || []).find(function (x) { return x.id === orderId; });
+    const amt = o ? (' · $' + (Number(o.total) || 0).toFixed(2)) : '';
+    sub.textContent = 'Order ' + orderId + amt + ' — sets payment status to Paid. Card payments via Stripe can also auto-mark when the webhook is configured.';
+  }
+  if (note) note.value = '';
+  document.querySelectorAll('#pay-mark-methods .pay-method-btn').forEach(function (btn) {
+    btn.classList.toggle('is-active', btn.getAttribute('data-method') === payMarkMethod);
+  });
+  if (overlay) {
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closePayMarkModal(e) {
+  if (e && e.target && e.target.id && e.target.id !== 'pay-mark-overlay' && !e.target.classList.contains('modal-close')) {
+    return;
+  }
+  const overlay = document.getElementById('pay-mark-overlay');
+  if (overlay) overlay.style.display = 'none';
+  const orderOverlay = document.getElementById('order-modal-overlay');
+  if (!orderOverlay || orderOverlay.style.display !== 'flex') {
+    document.body.style.overflow = '';
+  }
+  payMarkOrderId = '';
+}
+
+(function bindPayMarkMethods() {
+  const box = document.getElementById('pay-mark-methods');
+  if (!box || box.dataset.bound === '1') return;
+  box.dataset.bound = '1';
+  box.addEventListener('click', function (e) {
+    const btn = e.target.closest('.pay-method-btn');
+    if (!btn) return;
+    payMarkMethod = btn.getAttribute('data-method') || 'other';
+    box.querySelectorAll('.pay-method-btn').forEach(function (b) {
+      b.classList.toggle('is-active', b === btn);
+    });
+  });
+})();
+
+async function confirmPayMarkModal() {
+  if (!payMarkOrderId) return;
+  const orderId = payMarkOrderId;
+  const method = payMarkMethod || 'other';
+  const noteEl = document.getElementById('pay-mark-note');
+  const note = noteEl ? noteEl.value.trim() : '';
+  const btn = document.getElementById('pay-mark-confirm');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
   try {
-    const r = await adminFetch('/admin/orders', { method: 'POST', body: JSON.stringify(o) });
-    const data = await r.json().catch(function () { return {}; });
-    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
-    showStatus(orderId + ' marked paid.', false);
+    await postMarkPaid(orderId, method, note);
+    closePayMarkModal();
+    showStatus(orderId + ' marked paid (' + method + ').', false);
+    if (activeOrderObj && activeOrderObj.id === orderId) {
+      activeOrderObj.paymentStatus = 'paid';
+      activeOrderObj.paymentMethod = method;
+      activeOrderObj.paymentNote = note;
+      activeOrderObj.paidAt = new Date().toISOString();
+      const paySel = document.getElementById('m-payment-sel');
+      const payMethod = document.getElementById('m-payment-method');
+      const payNote = document.getElementById('m-payment-note');
+      if (paySel) paySel.value = 'paid';
+      if (payMethod) payMethod.value = method;
+      if (payNote) payNote.value = note;
+      updateOmsQuickBar();
+    }
     await loadOrders();
     renderFinanceQueue();
   } catch (e) {
     showStatus(e.message || 'Mark paid failed', true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Confirm paid'; }
   }
+}
+
+async function postMarkPaid(orderId, method, note) {
+  const r = await adminFetch('/admin/orders/mark-paid', {
+    method: 'POST',
+    body: JSON.stringify({
+      id: orderId,
+      paymentStatus: 'paid',
+      paymentMethod: method || 'other',
+      paymentNote: note || '',
+    }),
+  });
+  const data = await r.json().catch(function () { return {}; });
+  if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  return data;
+}
+
+async function markActiveOrderPaid() {
+  if (!activeOrderObj) return;
+  const methodEl = document.getElementById('m-payment-method');
+  const noteEl = document.getElementById('m-payment-note');
+  const method = (methodEl && methodEl.value) || activeOrderObj.paymentMethod || 'zelle';
+  openPayMarkModal(activeOrderObj.id, method);
+  if (noteEl && noteEl.value && document.getElementById('pay-mark-note')) {
+    document.getElementById('pay-mark-note').value = noteEl.value;
+  }
+}
+
+function omsQuickMarkPaid() {
+  if (!activeOrderObj) return;
+  markActiveOrderPaid();
 }
 
 function addProductRow() {
@@ -2634,6 +2758,7 @@ function initOrdersTableActions() {
     else if (btn.dataset.orderAction === 'confirm') omsConfirmOrderId(orderId);
     else if (btn.dataset.orderAction === 'ship') omsShipOrderId(orderId);
     else if (btn.dataset.orderAction === 'email') omsEmailOrderId(orderId, btn.getAttribute('data-email-format') || 'confirm');
+    else if (btn.dataset.orderAction === 'paid') markOrderPaid(orderId);
   });
 }
 
@@ -2695,6 +2820,7 @@ function initOmsToolbar() {
       else if (btn.dataset.orderAction === 'confirm') omsConfirmOrderId(orderId);
       else if (btn.dataset.orderAction === 'ship') omsShipOrderId(orderId);
       else if (btn.dataset.orderAction === 'email') omsEmailOrderId(orderId, btn.getAttribute('data-email-format') || 'confirm');
+      else if (btn.dataset.orderAction === 'paid') markOrderPaid(orderId);
     });
   }
   syncOmsStatusChips();
@@ -2761,6 +2887,7 @@ function renderOrdersQueue() {
     const st = String(o.status || '');
     const back = orderBackorderPcs(o);
     const open = orderIsOpen(o);
+    const ps = orderPaymentStatus(o);
     const name = (o.customer && o.customer.name) || '';
     const company = (o.customer && o.customer.company) || '';
     const po = o.po || '';
@@ -2770,12 +2897,13 @@ function renderOrdersQueue() {
       <td data-label="Customer">${escAttr(name)}<br><span style="font-size:10px;color:var(--silver)">${escAttr(company)}</span></td>
       <td data-label="PO">${escAttr(po || '—')}</td>
       <td data-label="Total" style="font-family:monospace">$${(o.total||0).toFixed(2)}</td>
-      <td data-label="Status"><span class="badge ${escAttr(st)}">${escAttr(st.replace(/_/g, ' '))}</span></td>
+      <td data-label="Status"><span class="badge ${escAttr(st)}">${escAttr(st.replace(/_/g, ' '))}</span> ${paymentBadgeHtml(ps)}</td>
       <td data-label="Backorder">${back ? (back + ' pcs') : '—'}</td>
       <td data-label="Action" class="order-row-actions">
         <button type="button" class="btn-view" data-order-action="edit" data-order-id="${escAttr(o.id)}">Open</button>
         ${open && st === 'pending' ? `<button type="button" class="btn-view" data-order-action="confirm" data-order-id="${escAttr(o.id)}">Confirm</button>` : ''}
         ${open && back > 0 ? `<button type="button" class="btn-save" data-order-action="ship" data-order-id="${escAttr(o.id)}">Ship</button>` : ''}
+        ${ps !== 'paid' ? `<button type="button" class="btn-save" data-order-action="paid" data-order-id="${escAttr(o.id)}">Paid</button>` : ''}
         <button type="button" class="btn-del" data-order-action="delete" data-order-id="${escAttr(o.id)}">Delete</button>
       </td>
     </tr>`;
@@ -2792,12 +2920,14 @@ function renderOrdersQueue() {
       <div class="order-glance-stats">
         <span class="order-glance-total">$${(o.total||0).toFixed(2)}</span>
         <span class="badge ${escAttr(st)}">${escAttr(st.replace(/_/g, ' '))}</span>
+        ${paymentBadgeHtml(ps)}
         <span class="order-glance-bo">${back ? (back + ' backorder') : 'Fully shipped'}</span>
       </div>
       <div class="order-glance-actions">
         <button type="button" class="btn-view" data-order-action="edit" data-order-id="${escAttr(o.id)}">Open</button>
         ${open && st === 'pending' ? `<button type="button" class="btn-view" data-order-action="confirm" data-order-id="${escAttr(o.id)}">Confirm</button>` : ''}
         ${open && back > 0 ? `<button type="button" class="btn-save" data-order-action="ship" data-order-id="${escAttr(o.id)}">Ship</button>` : ''}
+        ${ps !== 'paid' ? `<button type="button" class="btn-save" data-order-action="paid" data-order-id="${escAttr(o.id)}">Mark paid</button>` : ''}
         <button type="button" class="btn-email-cmd" data-order-action="email" data-email-format="packing" data-order-id="${escAttr(o.id)}">Email</button>
       </div>
     </article>`;
@@ -2969,9 +3099,11 @@ function updateOmsQuickBar() {
   const open = orderIsOpen(activeOrderObj);
   const back = orderBackorderPcs(activeOrderObj);
   const st = String(activeOrderObj.status || '');
+  const paid = orderPaymentStatus(activeOrderObj) === 'paid';
   bar.style.display = 'block';
   const conf = document.getElementById('oms-qa-confirm');
   const ship = document.getElementById('oms-qa-ship');
+  const paidBtn = document.getElementById('oms-qa-paid');
   if (conf) {
     conf.disabled = !open || st !== 'pending';
     conf.style.opacity = conf.disabled ? '0.45' : '1';
@@ -2979,6 +3111,17 @@ function updateOmsQuickBar() {
   if (ship) {
     ship.disabled = !open || back < 1;
     ship.style.opacity = ship.disabled ? '0.45' : '1';
+  }
+  if (paidBtn) {
+    paidBtn.disabled = paid;
+    paidBtn.textContent = paid ? '✓ Paid' : '✓ Mark paid';
+    paidBtn.style.opacity = paid ? '0.45' : '1';
+  }
+  const markNow = document.getElementById('btn-mark-paid-now');
+  if (markNow) {
+    markNow.disabled = paid;
+    markNow.textContent = paid ? '✓ Already paid' : '✓ Mark paid now';
+    markNow.style.opacity = paid ? '0.5' : '1';
   }
 }
 

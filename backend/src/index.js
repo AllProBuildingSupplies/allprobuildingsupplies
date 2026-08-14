@@ -884,6 +884,139 @@ function normalizePaymentFields(o) {
   };
 }
 
+/** Persist paid / partial / unpaid without rewriting line items. */
+async function setOrderPaymentStatus(env, orderId, fields) {
+  const id = String(orderId || '').trim();
+  if (!id) return { error: 'Order id required', status: 400 };
+  const existing = await env.DB.prepare('SELECT id, payment_status FROM orders WHERE id = ?').bind(id).first();
+  if (!existing) return { error: 'Order not found', status: 404 };
+  const pay = normalizePaymentFields({
+    paymentStatus: fields.paymentStatus || fields.payment_status || 'paid',
+    paidAt: fields.paidAt || fields.paid_at,
+    paymentMethod: fields.paymentMethod || fields.payment_method || '',
+    paymentNote: fields.paymentNote || fields.payment_note || '',
+  });
+  await env.DB.prepare(
+    `UPDATE orders SET payment_status = ?, paid_at = ?, payment_method = ?, payment_note = ? WHERE id = ?`
+  )
+    .bind(pay.paymentStatus, pay.paidAt, pay.paymentMethod, pay.paymentNote, id)
+    .run();
+  return { success: true, orderId: id, ...pay, previousStatus: existing.payment_status || 'unpaid' };
+}
+
+function timingSafeEqualHex(a, b) {
+  const aa = String(a || '');
+  const bb = String(b || '');
+  if (aa.length !== bb.length) return false;
+  let out = 0;
+  for (let i = 0; i < aa.length; i++) out |= aa.charCodeAt(i) ^ bb.charCodeAt(i);
+  return out === 0;
+}
+
+async function verifyStripeSignature(rawBody, signatureHeader, secret) {
+  if (!rawBody || !signatureHeader || !secret) return false;
+  const parts = String(signatureHeader).split(',').map((p) => p.trim());
+  let timestamp = '';
+  const v1 = [];
+  for (const part of parts) {
+    const eq = part.indexOf('=');
+    if (eq < 0) continue;
+    const k = part.slice(0, eq);
+    const v = part.slice(eq + 1);
+    if (k === 't') timestamp = v;
+    if (k === 'v1') v1.push(v);
+  }
+  if (!timestamp || !v1.length) return false;
+  const tsNum = parseInt(timestamp, 10);
+  if (!Number.isFinite(tsNum)) return false;
+  // Reject stale signatures (> 5 minutes).
+  if (Math.abs(Date.now() / 1000 - tsNum) > 300) return false;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const mac = await crypto.subtle.sign('HMAC', key, enc.encode(`${timestamp}.${rawBody}`));
+  const hex = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return v1.some((sig) => timingSafeEqualHex(sig, hex));
+}
+
+function orderIdFromStripeObject(obj) {
+  if (!obj || typeof obj !== 'object') return '';
+  const candidates = [
+    obj.client_reference_id,
+    obj.metadata && obj.metadata.order_id,
+    obj.metadata && obj.metadata.orderId,
+    obj.metadata && obj.metadata.apbs_order_id,
+  ];
+  for (const c of candidates) {
+    const id = String(c || '').trim();
+    if (id) return id;
+  }
+  return '';
+}
+
+async function handleStripeWebhook(request, env) {
+  const secret = String(env.STRIPE_WEBHOOK_SECRET || '').trim();
+  if (!secret) {
+    return jsonResponse({ error: 'Stripe webhook not configured (STRIPE_WEBHOOK_SECRET)' }, 503);
+  }
+  const rawBody = await request.text();
+  const sig = request.headers.get('stripe-signature') || request.headers.get('Stripe-Signature') || '';
+  const ok = await verifyStripeSignature(rawBody, sig, secret);
+  if (!ok) return jsonResponse({ error: 'Invalid Stripe signature' }, 400);
+
+  let event;
+  try {
+    event = JSON.parse(rawBody);
+  } catch (_) {
+    return jsonResponse({ error: 'Invalid JSON' }, 400);
+  }
+
+  const type = String(event.type || '');
+  const dataObj = event.data && event.data.object ? event.data.object : null;
+  const paidTypes = new Set([
+    'checkout.session.completed',
+    'checkout.session.async_payment_succeeded',
+    'payment_intent.succeeded',
+  ]);
+  if (!paidTypes.has(type)) {
+    return jsonResponse({ received: true, ignored: type });
+  }
+
+  // For checkout.session.completed, only mark paid when payment_status is paid (or no async).
+  if (type === 'checkout.session.completed') {
+    const ps = String(dataObj && dataObj.payment_status ? dataObj.payment_status : 'paid').toLowerCase();
+    if (ps && ps !== 'paid' && ps !== 'no_payment_required') {
+      return jsonResponse({ received: true, ignored: 'checkout not paid yet', payment_status: ps });
+    }
+  }
+
+  const orderId = orderIdFromStripeObject(dataObj);
+  if (!orderId) {
+    return jsonResponse({
+      received: true,
+      ignored: 'no order id (set client_reference_id or metadata.order_id on the Payment Link / Checkout)',
+    });
+  }
+
+  const noteBits = [`Stripe ${type}`];
+  if (dataObj && dataObj.id) noteBits.push(String(dataObj.id));
+  const result = await setOrderPaymentStatus(env, orderId, {
+    paymentStatus: 'paid',
+    paymentMethod: 'card',
+    paymentNote: noteBits.join(' · ').slice(0, 500),
+    paidAt: new Date().toISOString(),
+  });
+  if (result.error) {
+    return jsonResponse({ received: true, error: result.error, orderId }, result.status || 400);
+  }
+  return jsonResponse({ received: true, markedPaid: true, orderId, previousStatus: result.previousStatus });
+}
+
 async function logStockMovement(env, { code, size, delta, reason, qtyBefore, qtyAfter, note }) {
   try {
     await env.DB.prepare(
@@ -1370,6 +1503,11 @@ export default {
       // ---------------------------------------------------------
       if (path === '/api/health' && request.method === 'GET') {
         return jsonResponse({ status: 'ok' });
+      }
+
+      // Stripe Payment Link / Checkout → auto mark order paid (uses client_reference_id).
+      if (path === '/api/webhooks/stripe' && request.method === 'POST') {
+        return handleStripeWebhook(request, env);
       }
 
       if (path === '/api/admin/login' && request.method === 'POST') {
@@ -2314,6 +2452,20 @@ export default {
       if (path === '/api/admin/orders/next-id' && request.method === 'GET') {
         const id = await nextApbsOrderId(env);
         return jsonResponse({ id });
+      }
+
+      // Lightweight paid / unpaid toggle (no line-item rewrite).
+      if (path === '/api/admin/orders/mark-paid' && request.method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        const id = String(body.id || body.orderId || url.searchParams.get('id') || '').trim();
+        const result = await setOrderPaymentStatus(env, id, {
+          paymentStatus: body.paymentStatus || 'paid',
+          paymentMethod: body.paymentMethod || body.method || 'other',
+          paymentNote: body.paymentNote || body.note || '',
+          paidAt: body.paidAt || null,
+        });
+        if (result.error) return jsonResponse({ error: result.error }, result.status || 400);
+        return jsonResponse(result);
       }
 
       if (path === '/api/admin/orders' && request.method === 'POST') {
