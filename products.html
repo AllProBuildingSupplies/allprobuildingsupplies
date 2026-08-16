@@ -19,11 +19,11 @@
 
 <div id="global-header"></div>
 
-<div class="page-hero">
+<div class="page-hero page-hero-compact">
   <div class="page-hero-inner">
     <div class="page-breadcrumb"><a href="index.html">Home</a> › Products</div>
     <div class="page-title" data-r>Product <span>Catalog</span></div>
-    <p class="page-subtitle desktop-only-block" data-r>Contractor-grade PVC, DWV fittings, pipes, and more. Pricing shown per piece. Call or email for bulk quotes.</p>
+    <p class="page-subtitle desktop-only-block" data-r>PVC, DWV, pipe &amp; fittings — tap a card for sizes. Call for bulk quotes.</p>
   </div>
 </div>
 
@@ -93,16 +93,6 @@
   </div>
 </div>
 
-<section class="cta-band desktop-only-block">
-  <div class="cta-band-inner">
-    <div><div class="cta-h">Ready to Get Your Supplies?</div><div class="cta-s">Call or email with your list — we respond fast with pricing and availability.</div></div>
-    <div class="cta-acts">
-      <a href="tel:17327341123" class="btn-dark">📞 Call 732-734-1123</a>
-      <a href="mailto:info@allprobuildingsupplies.com" class="btn-dark">✉ Email for Pricing</a>
-    </div>
-  </div>
-</section>
-
 <div id="global-footer"></div>
 
 <script src="assets/main.js"></script>
@@ -170,7 +160,6 @@ function applyCatalogFilters() {
     }
     var show = mainOk && subOk && searchOk;
     sec.style.display = show ? '' : 'none';
-    if (qt && searchOk) sec.classList.add('open');
     if (!qt) sec.classList.remove('open');
   });
 }
@@ -422,6 +411,14 @@ async function fetchAndRenderProducts() {
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;');
 
+      var sizeCount = data.rows.length;
+      var inStockCount = data.rows.filter(function (r) {
+        return isLoggedIn ? r.qty > 0 : !!r.inStock;
+      }).length;
+      var statsLabel = sizeCount + (sizeCount === 1 ? ' size' : ' sizes');
+      if (inStockCount > 0) statsLabel += ' · ' + inStockCount + ' avail';
+      else statsLabel += ' · call';
+
       let html = `
         <div class="prod-section" id="${code.replace(/"/g, '')}" data-code="${code.replace(/"/g, '')}" data-main-key="${catEscAttr(mainKey)}" data-sub="${catEscAttr(subLabel)}" data-search="${searchAttr}">
           <div class="prod-section-hdr" onclick="toggleSection(this)">
@@ -431,6 +428,7 @@ async function fetchAndRenderProducts() {
             <div class="prod-section-meta">
               <div class="prod-section-code">${catEscHtml(subLabel)}</div>
               <div class="prod-section-title">${catEscHtml(data.desc)}</div>
+              <div class="prod-section-stats">${catEscHtml(statsLabel)}</div>
             </div>
             <span class="prod-section-chevron">&#9660;</span>
           </div>
@@ -779,7 +777,14 @@ setTimeout(fetchAndRenderProducts, 200);
 // --- UI INTERACTIONS ---
 function toggleSection(hdr){
   var sec = hdr.parentElement;
-  sec.classList.toggle('open');
+  var willOpen = !sec.classList.contains('open');
+  document.querySelectorAll('.prod-section.open').forEach(function(el){
+    if (el !== sec) el.classList.remove('open');
+  });
+  sec.classList.toggle('open', willOpen);
+  if (willOpen && sec.scrollIntoView) {
+    try { sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+  }
 }
 
 var searchInput = document.getElementById('prod-search');
