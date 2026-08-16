@@ -373,10 +373,15 @@ function formatOrderRow(o, orderItems) {
     placedAt = Number.isFinite(n) ? new Date(n).toISOString() : String(o.placed_at);
   }
 
+  let status = o.status;
+  const st = String(status || '').toLowerCase().trim();
+  if (st === 'partial' || st === 'partially shipped' || st === 'partial_shipped') status = 'partially_shipped';
+  else if (st === 'completed' || st === 'complete' || st === 'shipped' || st === 'closed') status = 'delivered';
+
   return {
     id: o.id,
     placedAt,
-    status: o.status,
+    status,
     total: o.total_amount != null ? o.total_amount : o.total,
     delivery,
     po,
