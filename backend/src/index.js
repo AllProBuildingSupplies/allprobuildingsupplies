@@ -783,6 +783,149 @@ async function ensureOrderShipmentColumns(env) {
   } catch (_) {}
 }
 
+/**
+ * Go-live compatibility: map legacy status labels and backfill shipment fields for
+ * already-delivered orders so OMS shows complete shipments without wiping live data.
+ * Idempotent — safe to run on every request.
+ */
+async function backfillLegacyOrderShipments(env) {
+  try {
+    await env.DB.prepare(
+      `UPDATE orders SET status = 'partially_shipped'
+       WHERE LOWER(TRIM(COALESCE(status, ''))) IN ('partial', 'partially shipped', 'partial_shipped')`
+    ).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(
+      `UPDATE orders SET status = 'delivered'
+       WHERE LOWER(TRIM(COALESCE(status, ''))) IN ('completed', 'complete', 'shipped', 'closed')`
+    ).run();
+  } catch (_) {}
+
+  let delivered;
+  try {
+    delivered = await env.DB.prepare(
+      `SELECT id, status, shipments_json, created_at, placed_at, data, total_amount
+       FROM orders
+       WHERE LOWER(TRIM(COALESCE(status, ''))) = 'delivered'`
+    ).all();
+  } catch (_) {
+    return;
+  }
+
+  for (const o of delivered.results || []) {
+    let itemRows;
+    try {
+      itemRows = await env.DB.prepare(
+        `SELECT id, product_sku, size, quantity, price_at_purchase, qty_shipped
+         FROM order_items WHERE order_id = ?`
+      )
+        .bind(o.id)
+        .all();
+    } catch (_) {
+      continue;
+    }
+
+    let items = itemRows.results || [];
+    // Legacy preview rows may only have items inside the `data` JSON blob.
+    if (!items.length && o.data) {
+      try {
+        const legacy = JSON.parse(o.data);
+        if (legacy && Array.isArray(legacy.items) && legacy.items.length) {
+          for (const it of legacy.items) {
+            const qty = parseInt(it.qty != null ? it.qty : it.quantity, 10) || 0;
+            if (qty < 1) continue;
+            const code = String(it.code || it.product_sku || '').trim();
+            const size = it.size != null ? String(it.size) : '';
+            const price = Number(it.unitPrice != null ? it.unitPrice : it.price_at_purchase) || 0;
+            try {
+              await env.DB.prepare(
+                `INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase, qty_shipped)
+                 VALUES (?, ?, ?, ?, ?, ?)`
+              )
+                .bind(o.id, code, size, qty, price, qty)
+                .run();
+            } catch (_) {}
+          }
+          itemRows = await env.DB.prepare(
+            `SELECT id, product_sku, size, quantity, price_at_purchase, qty_shipped
+             FROM order_items WHERE order_id = ?`
+          )
+            .bind(o.id)
+            .all();
+          items = itemRows.results || [];
+        }
+      } catch (_) {}
+    }
+
+    if (!items.length) continue;
+
+    let needsQtyFix = false;
+    for (const it of items) {
+      const qty = parseInt(it.quantity, 10) || 0;
+      let shipped = parseInt(it.qty_shipped, 10);
+      if (!Number.isFinite(shipped) || shipped < 0) shipped = 0;
+      if (shipped < qty) {
+        needsQtyFix = true;
+        break;
+      }
+    }
+    if (needsQtyFix) {
+      try {
+        await env.DB.prepare(
+          `UPDATE order_items
+           SET qty_shipped = quantity
+           WHERE order_id = ? AND COALESCE(qty_shipped, 0) < COALESCE(quantity, 0)`
+        )
+          .bind(o.id)
+          .run();
+      } catch (_) {}
+    }
+
+    const existingShipments = normalizeShipments(parseShipmentsJson(o.shipments_json));
+    if (existingShipments.length) continue;
+
+    const shipItems = [];
+    let subtotal = 0;
+    for (const it of items) {
+      const qty = parseInt(it.quantity, 10) || 0;
+      if (qty < 1) continue;
+      const unitPrice = Number(it.price_at_purchase) || 0;
+      const lineTotal = qty * unitPrice;
+      subtotal += lineTotal;
+      shipItems.push({
+        code: String(it.product_sku || '').trim(),
+        size: it.size != null ? String(it.size) : '',
+        description: '',
+        qty,
+        unitPrice,
+        lineTotal,
+      });
+    }
+    if (!shipItems.length) continue;
+
+    let shippedAt = o.created_at || null;
+    if (!shippedAt && o.placed_at != null) {
+      const n = Number(o.placed_at);
+      shippedAt = Number.isFinite(n) ? new Date(n).toISOString() : String(o.placed_at);
+    }
+    if (!shippedAt) shippedAt = new Date().toISOString();
+
+    const shipment = {
+      id: 'SHIP-1',
+      shippedAt,
+      note: 'Migrated complete shipment from pre-OMS live order',
+      items: shipItems,
+      subtotal,
+    };
+    try {
+      await env.DB.prepare(`UPDATE orders SET shipments_json = ? WHERE id = ?`)
+        .bind(JSON.stringify([shipment]), o.id)
+        .run();
+    } catch (_) {}
+  }
+}
+
 /** AR / payment tracking on orders. */
 async function ensureOrderPaymentColumns(env) {
   try {
@@ -1497,6 +1640,9 @@ export default {
       await ensureOrderShipmentColumns(env);
       await ensureOrderPaymentColumns(env);
       await ensureStockMovementsTable(env);
+      try {
+        await backfillLegacyOrderShipments(env);
+      } catch (_) {}
       // One-time (idempotent) load of initial Tommur/Lesso codes into products.
       try {
         await seedFactoryCodes(env, canonicalizeSize);

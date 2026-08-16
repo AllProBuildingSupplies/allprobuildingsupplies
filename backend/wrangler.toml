@@ -26,12 +26,13 @@ compatibility_date = "2024-04-21"
 #   npx wrangler secret put MICROSOFT_TENANT_ID --env test
 #   Optional later: PAYMENT_CC_LINK, STRIPE_WEBHOOK_SECRET
 
-# Bindings to your D1 Databases (PRODUCTION)
+# Bindings to your D1 Databases (PRODUCTION).
+# Do NOT set preview_database_id here — wrangler may display/bind the preview ID
+# during deploy dry-runs. Staging uses env.test with its own database_id below.
 [[d1_databases]]
 binding = "DB"
 database_name = "allpro-db"
 database_id = "31689783-6a85-460f-b9ac-7ba9d7be8dc0"
-preview_database_id = "cb7c6d87-4ca6-4897-a953-4d81650034b8"
 
 # ── TEST / STAGING ────────────────────────────────────────────
 # Separate Worker name + separate D1 (preview DB). Live site untouched.
