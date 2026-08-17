@@ -2633,7 +2633,6 @@ export default {
 
       if (path === '/api/admin/orders' && request.method === 'POST') {
         const o = await request.json();
-        const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
 
         // New orders without a proper APBS-###### id get the next sequential number.
         const existing = o.id
@@ -2643,11 +2642,28 @@ export default {
           o.id = await nextApbsOrderId(env);
         }
 
-        await restoreOrderItemsStock(env, o.id);
+        // Release prior reservation first, then validate against fresh stock.
+        // Admin saves may include backorders (ordered qty > on-hand), so do not
+        // block on stock — applyOrderItemsStock still floors at 0.
+        const oldItems = await restoreOrderItemsStock(env, o.id);
+        const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
         const priced = validateAdminOrderItems(allProds, o.items || [], {
-          checkStock: o.status !== 'cancelled',
+          checkStock: false,
         });
-        if (priced.error && (o.items || []).length > 0) return jsonResponse({ error: priced.error }, 400);
+        if (priced.error && (o.items || []).length > 0) {
+          // Roll back the restore so a rejected save does not inflate inventory.
+          if (oldItems && oldItems.length) {
+            await applyOrderItemsStock(
+              env,
+              oldItems.map((it) => ({
+                qty: parseInt(it.quantity, 10) || 0,
+                code: it.product_sku,
+                size: it.size,
+              }))
+            );
+          }
+          return jsonResponse({ error: priced.error }, 400);
+        }
 
         const shipments = normalizeShipments(o.shipments);
         const shipmentsJson = JSON.stringify(shipments);
