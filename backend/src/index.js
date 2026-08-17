@@ -1587,6 +1587,14 @@ async function sendEmailJs(env, templateParams, toEmail, options = {}) {
   if (params.email_subject != null) {
     params.email_subject = sanitizeEmailSubject(params.email_subject);
   }
+  if (params.email_body != null) {
+    // EmailJS caps all template variables at 50KB — strip comment/whitespace bloat.
+    params.email_body = String(params.email_body)
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/>\s+</g, '><')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
   const toList = normalizeEmailList(toEmail);
   const ccList = normalizeEmailList(options.cc || options.ccEmail || params.cc_email || '');
   const toJoined = toList.join(', ');
@@ -1607,6 +1615,12 @@ async function sendEmailJs(env, templateParams, toEmail, options = {}) {
     },
   };
   if (env.EMAILJS_PRIVATE_KEY) body.accessToken = env.EMAILJS_PRIVATE_KEY;
+  const approxBytes = JSON.stringify(body.template_params).length;
+  if (approxBytes > 50000) {
+    throw new Error(
+      'Email too large for EmailJS (' + Math.round(approxBytes / 1024) + 'KB / 50KB limit). Reduce line items or split the send.'
+    );
+  }
   const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
