@@ -1749,8 +1749,10 @@ h1.htitle strong { color: var(--gold); }
   .oms-quick-grid { grid-template-columns: repeat(4, 1fr); }
 
   /* OMS desktop table: fixed columns so header lines up with body */
-  .admin-orders-desktop-table > div {
+  .admin-orders-desktop-table > div,
+  .admin-table-scroll {
     overflow-x: auto;
+    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     width: 100%;
   }
@@ -1770,7 +1772,8 @@ h1.htitle strong { color: var(--gold); }
   #orders-table col.oms-col-backorder { width: 9%; }
   #orders-table col.oms-col-action { width: 18%; }
   #orders-table thead th {
-    position: static;
+    position: static !important;
+    top: auto !important;
     background: var(--ink3);
     white-space: nowrap;
     vertical-align: bottom;
@@ -1794,10 +1797,36 @@ h1.htitle strong { color: var(--gold); }
     border-spacing: 0;
   }
   #prod-table thead th {
-    position: static;
+    position: static !important;
+    top: auto !important;
     background: var(--ink3);
     white-space: nowrap;
     vertical-align: bottom;
+  }
+
+  .admin-table-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  #fin-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 720px;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  #fin-table thead th {
+    position: static !important;
+    top: auto !important;
+    background: var(--ink3);
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+  #fin-table th,
+  #fin-table td {
+    box-sizing: border-box;
   }
 }
 
@@ -2554,7 +2583,8 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
   .data-table td { padding: 8px 10px; }
   /* Do not use viewport-sticky table headers — they float mid-table while scrolling. */
   .data-table thead th {
-    position: static;
+    position: static !important;
+    top: auto !important;
     background: var(--ink3);
   }
 
