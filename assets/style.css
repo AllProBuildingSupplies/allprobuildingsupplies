@@ -1365,14 +1365,30 @@ h1.htitle strong { color: var(--gold); }
   margin:0 auto; position:relative; box-sizing:border-box;
 }
 #order-modal .order-items-scroll{
-  overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%;
+  overflow-x:auto;
+  overflow-y:visible;
+  -webkit-overflow-scrolling:touch;
+  width:100%;
+  max-height:none;
 }
 #order-modal .order-items-scroll .data-table{
   min-width:1100px;
+  width:100%;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+}
+#order-modal .order-items-scroll .data-table thead th{
+  position:static !important;
+  top:auto !important;
+  background:var(--ink3);
+  white-space:nowrap;
+  vertical-align:bottom;
 }
 #order-modal .order-items-scroll .data-table th,
 #order-modal .order-items-scroll .data-table td{
   white-space:nowrap;
+  box-sizing:border-box;
 }
 #order-modal .order-items-scroll .data-table td[data-label="Item"],
 #order-modal .order-items-scroll .data-table td.order-line-item{
@@ -2566,19 +2582,29 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
   .wms-qty-val { font-size: 40px; }
   .fin-panel { max-width: none; }
 
-  /* Order modal: denser, status row sticky-feel */
+  /* Order modal: scroll the overlay, not an inner items pane (inner sticky headers break). */
   #order-modal {
     padding: 18px 22px;
-    max-height: calc(100vh - 24px);
+    max-height: none;
   }
   #order-modal .order-items-scroll {
-    max-height: min(42vh, 420px);
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: visible;
   }
-  #order-modal .data-table {
-    min-width: 0 !important;
+  #order-modal .order-items-scroll .data-table {
+    min-width: 1100px !important;
   }
-  #m-items-tbody td,
-  #order-modal thead th {
+  #order-modal .order-items-scroll .data-table thead th {
+    position: static !important;
+    top: auto !important;
+    white-space: nowrap;
+  }
+  #m-items-tbody td {
+    white-space: nowrap;
+  }
+  #m-items-tbody td[data-label="Item"],
+  #m-items-tbody td.order-line-item {
     white-space: normal;
   }
 
