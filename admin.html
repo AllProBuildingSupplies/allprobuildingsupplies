@@ -1778,9 +1778,9 @@ function renderFinanceQueue() {
           '<td>$' + (Number(o.total) || 0).toFixed(2) + '</td>' +
           '<td>' + paymentBadgeHtml(ps) + '</td>' +
           '<td>' + escAttr(o.paymentMethod || '—') + '</td>' +
-          '<td style="white-space:nowrap;">' +
-            '<button type="button" class="btn-view" onclick="openOrderModal(\'' + escAttr(o.id) + '\')">Edit</button> ' +
-            (ps !== 'paid' ? '<button type="button" class="btn-save" onclick="markOrderPaid(\'' + escAttr(o.id) + '\')">Paid</button> ' : '') +
+          '<td class="order-row-actions">' +
+            '<button type="button" class="btn-view" onclick="openOrderModal(\'' + escAttr(o.id) + '\')">Edit</button>' +
+            (ps !== 'paid' ? '<button type="button" class="btn-save" onclick="markOrderPaid(\'' + escAttr(o.id) + '\')">Paid</button>' : '') +
             '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Invoice</button>' +
           '</td>' +
         '</tr>'

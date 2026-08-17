@@ -1353,6 +1353,49 @@ h1.htitle strong { color: var(--gold); }
 .btn-email-cmd{background:transparent;border:1px solid rgba(52,152,219,.4);color:#3498db;padding:12px 20px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s;width:100%;text-transform:uppercase;letter-spacing:1px;margin-top:8px;}
 .btn-email-cmd:hover{background:rgba(52,152,219,.1);border-color:#3498db;}
 
+/* Row actions: Edit / Paid / Invoice / Email — same compact size as .btn-view */
+#fin-table .order-row-actions,
+#orders-table .order-row-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  white-space: normal;
+}
+#fin-table .order-row-actions .btn-view,
+#fin-table .order-row-actions .btn-save,
+#fin-table .order-row-actions .btn-email-cmd,
+#orders-table .order-row-actions .btn-view,
+#orders-table .order-row-actions .btn-save,
+#orders-table .order-row-actions .btn-del,
+#orders-table .order-row-actions .btn-email-cmd,
+.order-glance-actions .btn-view,
+.order-glance-actions .btn-save,
+.order-glance-actions .btn-del,
+.order-glance-actions .btn-email-cmd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto !important;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 6px 12px !important;
+  font-family: 'DM Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transform: none;
+}
+#fin-table .order-row-actions .btn-save:hover,
+#orders-table .order-row-actions .btn-save:hover,
+.order-glance-actions .btn-save:hover {
+  transform: none;
+}
+
 /* Status Messaging */
 #status-msg{font-family:'DM Mono',monospace;font-size:12px;padding:12px;margin-bottom:20px;display:none;}
 .status-success{background:rgba(46,204,113,.1);border:1px solid #2ecc71;color:#2ecc71;}
@@ -1749,7 +1792,7 @@ h1.htitle strong { color: var(--gold); }
   .order-glance-actions .btn-save,
   .order-glance-actions .btn-del,
   .order-glance-actions .btn-email-cmd {
-    width: 100%; margin: 0 !important; padding: 10px 4px; font-size: 11px; text-align: center;
+    width: 100% !important; margin: 0 !important; padding: 6px 4px !important; font-size: 11px !important; text-align: center;
   }
   #tab-orders .oms-toolbar { margin-top: 0; }
   .admin-orders-actions .btn-add { width: 100%; }
