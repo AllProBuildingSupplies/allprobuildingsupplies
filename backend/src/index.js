@@ -12,6 +12,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+/** Isolate-scoped: schema/migration boot is expensive (~dozens of D1 round-trips). Run once per isolate. */
+let schemaReadyPromise = null;
+
 function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -967,6 +970,54 @@ async function ensureStockMovementsTable(env) {
   } catch (_) {}
 }
 
+/**
+ * One-time (per isolate) schema + legacy backfill. Previously ran on every request and
+ * added multi-second latency to public catalog loads.
+ */
+async function ensureRuntimeSchema(env) {
+  if (!schemaReadyPromise) {
+    schemaReadyPromise = (async () => {
+      await ensureCoreSchema(env);
+      await ensureAddressesTable(env);
+      await ensureProductFactoryColumns(env);
+      await ensureProductCategoryColumns(env);
+      await ensureUsersCompatColumns(env);
+      await ensureOrderShipmentColumns(env);
+      await ensureOrderPaymentColumns(env);
+      await ensureStockMovementsTable(env);
+      try {
+        await backfillLegacyOrderShipments(env);
+      } catch (_) {}
+      try {
+        await seedFactoryCodes(env, canonicalizeSize);
+      } catch (_) {}
+    })().catch((err) => {
+      schemaReadyPromise = null;
+      throw err;
+    });
+  }
+  await schemaReadyPromise;
+}
+
+const PRODUCTS_SELECT =
+  'SELECT code, description, size, pack, qty, price, image, main_category, sub_category FROM products';
+
+async function productsCatalogResponse(env, auth) {
+  const { results } = await env.DB.prepare(PRODUCTS_SELECT).all();
+  if (auth.admin) {
+    return jsonResponse(results, 200, { 'Cache-Control': 'private, no-store' });
+  }
+  if (auth.user && auth.user.status === 'approved') {
+    return jsonResponse(results.map(toTradeProduct), 200, {
+      'Cache-Control': 'private, max-age=15',
+    });
+  }
+  // Anonymous catalog is inStock-only (no prices) — short CDN/browser cache is safe.
+  return jsonResponse(results.map(toPublicProduct), 200, {
+    'Cache-Control': 'public, max-age=30, s-maxage=60',
+  });
+}
+
 function paymentMethodsFromEnv(env) {
   const zelleEmail = String(env.PAYMENT_ZELLE_EMAIL || 'payments@allprobuildingsupplies.com').trim();
   const zelleHandle = String(env.PAYMENT_ZELLE_HANDLE || 'allprobuildingsupplies').trim();
@@ -1658,30 +1709,28 @@ export default {
     const path = url.pathname;
 
     try {
-      const auth = await authFromRequest(request, env);
-      await ensureCoreSchema(env);
-      await ensureAddressesTable(env);
-      await ensureProductFactoryColumns(env);
-      await ensureProductCategoryColumns(env);
-      await ensureUsersCompatColumns(env);
-      await ensureOrderShipmentColumns(env);
-      await ensureOrderPaymentColumns(env);
-      await ensureStockMovementsTable(env);
-      try {
-        await backfillLegacyOrderShipments(env);
-      } catch (_) {}
-      // One-time (idempotent) load of initial Tommur/Lesso codes into products.
-      try {
-        await seedFactoryCodes(env, canonicalizeSize);
-      } catch (_) {}
-
-      // ---------------------------------------------------------
-      // PUBLIC ROUTES
-      // ---------------------------------------------------------
+      // Fast public routes: skip schema/migration boot (was ~3–4s of D1 round-trips).
       if (path === '/api/health' && request.method === 'GET') {
         return jsonResponse({ status: 'ok' });
       }
 
+      if (path === '/api/products' && request.method === 'GET') {
+        const auth = await authFromRequest(request, env);
+        try {
+          return await productsCatalogResponse(env, auth);
+        } catch (_) {
+          // Rare: fresh D1 missing columns/tables — boot schema once, then retry.
+          await ensureRuntimeSchema(env);
+          return await productsCatalogResponse(env, auth);
+        }
+      }
+
+      const auth = await authFromRequest(request, env);
+      await ensureRuntimeSchema(env);
+
+      // ---------------------------------------------------------
+      // PUBLIC ROUTES
+      // ---------------------------------------------------------
       // Stripe Payment Link / Checkout → auto mark order paid (uses client_reference_id).
       if (path === '/api/webhooks/stripe' && request.method === 'POST') {
         return handleStripeWebhook(request, env);
@@ -1766,17 +1815,6 @@ export default {
           const msg = e && e.message ? String(e.message) : 'Microsoft login failed';
           return jsonResponse({ error: msg }, 401);
         }
-      }
-
-      if (path === '/api/products' && request.method === 'GET') {
-        const { results } = await env.DB.prepare('SELECT * FROM products').all();
-        if (auth.admin) {
-          return jsonResponse(results);
-        }
-        if (auth.user && auth.user.status === 'approved') {
-          return jsonResponse(results.map(toTradeProduct));
-        }
-        return jsonResponse(results.map(toPublicProduct));
       }
 
       if (path === '/api/login' && request.method === 'POST') {

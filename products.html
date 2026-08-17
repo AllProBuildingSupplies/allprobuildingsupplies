@@ -363,47 +363,45 @@ function applyUrlCategoryFilter() {
   if (matchedKey) setCatMain(matchedKey, null);
 }
 
-async function fetchAndRenderProducts() {
-  try {
-    const apiURL = window.APBS_API_BASE ? window.APBS_API_BASE + '/products' : 'https://allpro-api.baruch-6d5.workers.dev/api/products';
-    const r = await fetch(apiURL, { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const rows = await r.json();
-    if (!Array.isArray(rows)) throw new Error(rows.error || 'Invalid catalog response');
-    
-    let groups = {};
-    
-    for (let i = 0; i < rows.length; i++) {
-      let row = rows[i];
-      if (!row.code) continue;
-      
-      let code = row.code.trim();
-      if (!groups[code]) {
-        var mainRaw = row.main_category != null ? String(row.main_category).trim() : '';
-        var subRaw = row.sub_category != null ? String(row.sub_category).trim() : '';
-        groups[code] = {
-          desc: row.description,
-          image: row.image || 'images/logo.png',
-          rows: [],
-          mainCat: mainRaw,
-          subCat: subRaw || code
-        };
-      }
-      
-      groups[code].rows.push({ 
-        size: row.size, 
-        pack: row.pack, 
-        qty: parseInt(row.qty, 10) || 0, 
-        inStock: row.inStock !== undefined ? !!row.inStock : (parseInt(row.qty, 10) || 0) > 0,
-        price: parseFloat(row.price) || 0 
-      });
+function catalogCacheKey() {
+  return 'apbs_catalog_v1_' + (isLoggedIn ? 'trade' : 'public');
+}
+
+function rowsToGroups(rows) {
+  var groups = {};
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    if (!row.code) continue;
+    var code = row.code.trim();
+    if (!groups[code]) {
+      var mainRaw = row.main_category != null ? String(row.main_category).trim() : '';
+      var subRaw = row.sub_category != null ? String(row.sub_category).trim() : '';
+      groups[code] = {
+        desc: row.description,
+        image: row.image || 'images/logo.png',
+        rows: [],
+        mainCat: mainRaw,
+        subCat: subRaw || code
+      };
     }
+    groups[code].rows.push({
+      size: row.size,
+      pack: row.pack,
+      qty: parseInt(row.qty, 10) || 0,
+      inStock: row.inStock !== undefined ? !!row.inStock : (parseInt(row.qty, 10) || 0) > 0,
+      price: parseFloat(row.price) || 0
+    });
+  }
+  return groups;
+}
 
-    const container = document.getElementById('prod-sections');
-    container.innerHTML = '';
-    const sectionChunks = [];
+function paintCatalogGroups(groups) {
+  const container = document.getElementById('prod-sections');
+  if (!container) return;
+  container.innerHTML = '';
+  const sectionChunks = [];
 
-    for (const [code, data] of Object.entries(groups)) {
+  for (const [code, data] of Object.entries(groups)) {
       var mainKey = catMainKey(data.mainCat);
       var subLabel = data.subCat || code;
       const searchAttr = (code + ' ' + data.desc + ' ' + data.mainCat + ' ' + subLabel + ' ' + data.rows.map(function (r) { return r.size; }).join(' '))
@@ -474,15 +472,42 @@ async function fetchAndRenderProducts() {
       
       html += `</tbody></table></div></div>`;
       sectionChunks.push(html);
-    }
+  }
 
-    container.innerHTML = sectionChunks.join('');
-    window.catProductGroups = groups;
-    buildMainFilters(groups);
-    applyUrlCategoryFilter();
-    initMobileCatalog(groups);
-  } catch(e) {
-    document.getElementById('prod-sections').innerHTML = '<div style="color:#ff6b6b;padding:40px;text-align:center;">Failed to load catalog. Please refresh.</div>';
+  container.innerHTML = sectionChunks.join('');
+  window.catProductGroups = groups;
+  buildMainFilters(groups);
+  applyUrlCategoryFilter();
+  initMobileCatalog(groups);
+}
+
+async function fetchAndRenderProducts() {
+  // Instant paint from last visit while live inventory refreshes in the background.
+  try {
+    var cached = sessionStorage.getItem(catalogCacheKey());
+    if (cached) {
+      var cachedRows = JSON.parse(cached);
+      if (Array.isArray(cachedRows) && cachedRows.length) {
+        paintCatalogGroups(rowsToGroups(cachedRows));
+      }
+    }
+  } catch (_) {}
+
+  try {
+    const apiURL = window.APBS_API_BASE ? window.APBS_API_BASE + '/products' : 'https://allpro-api.baruch-6d5.workers.dev/api/products';
+    const r = await fetch(apiURL, { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const rows = await r.json();
+    if (!Array.isArray(rows)) throw new Error(rows.error || 'Invalid catalog response');
+    try {
+      sessionStorage.setItem(catalogCacheKey(), JSON.stringify(rows));
+    } catch (_) {}
+    paintCatalogGroups(rowsToGroups(rows));
+  } catch (e) {
+    if (!window.catProductGroups) {
+      document.getElementById('prod-sections').innerHTML =
+        '<div style="color:#ff6b6b;padding:40px;text-align:center;">Failed to load catalog. Please refresh.</div>';
+    }
     console.error(e);
   }
 }
@@ -771,8 +796,8 @@ function mcatOnSearch(qt) {
   mcatRenderList(null, null, qt);
 }
 
-// Ensure global layout exists before fetching
-setTimeout(fetchAndRenderProducts, 200);
+// Start catalog fetch immediately (layout already in DOM).
+fetchAndRenderProducts();
 
 // --- UI INTERACTIONS ---
 function toggleSection(hdr){
