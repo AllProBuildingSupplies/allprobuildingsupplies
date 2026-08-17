@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- lumber / sheet stack -->
+  <rect x="18" y="72" width="84" height="14" rx="2" stroke="#C8981F" stroke-width="2.5"/>
+  <rect x="22" y="56" width="76" height="14" rx="2" stroke="#E2AF34" stroke-width="2.5"/>
+  <rect x="26" y="40" width="68" height="14" rx="2" stroke="#C8981F" stroke-width="2.5"/>
+  <!-- upright stud -->
+  <rect x="52" y="18" width="16" height="28" rx="2" stroke="#E2AF34" stroke-width="2.5"/>
+  <path d="M30 86H90" stroke="#C8981F" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+  <path d="M34 70H86" stroke="#C8981F" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+</svg>

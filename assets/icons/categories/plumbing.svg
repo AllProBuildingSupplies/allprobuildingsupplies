@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- pipe run with elbow + valve -->
+  <path d="M28 38h34a8 8 0 0 1 8 8v28a8 8 0 0 0 8 8h22" stroke="#C8981F" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="28" cy="38" r="7" stroke="#E2AF34" stroke-width="2.5"/>
+  <circle cx="100" cy="82" r="7" stroke="#E2AF34" stroke-width="2.5"/>
+  <!-- valve handle -->
+  <path d="M62 52v-14M55 38h14" stroke="#E2AF34" stroke-width="3" stroke-linecap="round"/>
+  <rect x="56" y="50" width="12" height="12" rx="2" stroke="#C8981F" stroke-width="2.5"/>
+  <!-- drop -->
+  <path d="M88 28c0 6-6 12-6 12s-6-6-6-12a6 6 0 1 1 12 0z" stroke="#E2AF34" stroke-width="2.2" fill="rgba(226,175,52,.12)"/>
+</svg>

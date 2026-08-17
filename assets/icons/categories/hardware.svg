@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- wrench -->
+  <path d="M78 28a16 16 0 0 0-22 14l-28 28 12 12 28-28a16 16 0 0 0 14-22l-10 10-8-8 14-14z" stroke="#C8981F" stroke-width="2.8" stroke-linejoin="round"/>
+  <circle cx="78" cy="28" r="5" stroke="#E2AF34" stroke-width="2.2"/>
+  <!-- hex bolt -->
+  <path d="M34 78l8-4.5 8 4.5v9l-8 4.5-8-4.5v-9z" stroke="#E2AF34" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="42" cy="82.5" r="3.2" stroke="#C8981F" stroke-width="2"/>
+  <!-- nut -->
+  <path d="M86 78l7-4 7 4v8l-7 4-7-4v-8z" stroke="#C8981F" stroke-width="2.3" stroke-linejoin="round"/>
+</svg>
