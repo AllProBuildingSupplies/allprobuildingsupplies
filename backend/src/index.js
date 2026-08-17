@@ -2781,16 +2781,42 @@ export default {
         }
         const params = { email_subject: subject, email_body: htmlBody };
 
-        // No CC → keep legacy behavior: one separate send per To (recipients don't see each other).
+        // No CC → one separate send per To (recipients don't see each other).
         if (!ccList.length) {
           const sent = [];
+          const errors = [];
           for (const email of toList) {
             try {
-              await sendEmailJs(env, params, email);
+              const result = await sendEmailJs(env, params, email);
+              if (result && result.skipped) {
+                errors.push({ email, error: result.reason || 'Email not configured' });
+                continue;
+              }
               sent.push(email);
-            } catch (_) {}
+            } catch (e) {
+              errors.push({
+                email,
+                error: e && e.message ? String(e.message) : 'Send failed',
+              });
+            }
           }
-          return jsonResponse({ success: true, mode: 'separate', sentCount: sent.length, sent, cc: [] });
+          if (!sent.length) {
+            const detail =
+              (errors[0] && errors[0].error) ||
+              'Email send failed. Check Worker EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, and EMAILJS_PUBLIC_KEY.';
+            return jsonResponse(
+              { error: detail, success: false, sentCount: 0, sent: [], errors },
+              502
+            );
+          }
+          return jsonResponse({
+            success: true,
+            mode: 'separate',
+            sentCount: sent.length,
+            sent,
+            cc: [],
+            errors: errors.length ? errors : undefined,
+          });
         }
 
         // With CC → one shared email so To + CC can see each other.

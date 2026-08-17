@@ -4558,7 +4558,10 @@ async function executeSendEmail() {
         : ('Sent separately to ' + successCount + ' recipient(s).');
       btn.style.background = '#2ecc71'; btn.innerHTML = '✔ Done'; setTimeout(closeEmailModal, 1800);
     } else {
-      throw new Error('No emails were sent. Check Worker EmailJS secrets.');
+      const detail = (data && data.error) ||
+        (data && data.errors && data.errors[0] && data.errors[0].error) ||
+        'No emails were sent.';
+      throw new Error(detail);
     }
   } catch (e) {
     msgEl.style.color = '#ff6b6b'; msgEl.textContent = e.message || 'Failed to send emails.';
