@@ -1749,8 +1749,10 @@ h1.htitle strong { color: var(--gold); }
   .oms-quick-grid { grid-template-columns: repeat(4, 1fr); }
 
   /* OMS desktop table: fixed columns so header lines up with body */
-  .admin-orders-desktop-table > div {
+  .admin-orders-desktop-table > div,
+  .admin-table-scroll {
     overflow-x: auto;
+    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     width: 100%;
   }
