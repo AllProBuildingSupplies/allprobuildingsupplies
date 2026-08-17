@@ -5,6 +5,7 @@ compatibility_date = "2024-04-21"
 # Secrets (wrangler secret put NAME): ADMIN_TOKEN, JWT_SECRET,
 # EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY,
 # EMAILJS_PRIVATE_KEY (optional), NOTIFY_EMAIL
+# CATALOG_SYNC_TOKEN (optional) — Bearer token for automated product replace/sync
 #
 # Admin Microsoft SSO (live + test; password login remains as backup):
 #   MICROSOFT_CLIENT_ID, MICROSOFT_TENANT_ID, ADMIN_SSO_EMAIL

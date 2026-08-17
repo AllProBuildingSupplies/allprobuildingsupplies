@@ -1451,8 +1451,16 @@ async function importPastOrderAddresses(env, user) {
 
 async function authFromRequest(request, env) {
   const token = getBearer(request);
+  if (!token) return { admin: false, user: null };
+
+  // One-shot / automation catalog sync (Bearer = CATALOG_SYNC_TOKEN).
+  const syncTok = String(env.CATALOG_SYNC_TOKEN || '').trim();
+  if (syncTok && token === syncTok) {
+    return { admin: true, user: null, payload: { role: 'admin', sync: true } };
+  }
+
   const secret = jwtSecret(env);
-  if (!token || !secret) return { admin: false, user: null };
+  if (!secret) return { admin: false, user: null };
   const payload = await verifyToken(token, secret);
   if (!payload) return { admin: false, user: null };
   if (payload.role === 'admin') return { admin: true, user: null, payload };
