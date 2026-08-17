@@ -1599,6 +1599,45 @@ h1.htitle strong { color: var(--gold); }
   .admin-glance-order-chips { display: none !important; }
   .admin-orders-desktop-table { display: block !important; }
   .oms-quick-grid { grid-template-columns: repeat(4, 1fr); }
+
+  /* OMS desktop table: fixed columns so header lines up with body */
+  .admin-orders-desktop-table > div {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  #orders-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 920px !important;
+    border-collapse: collapse;
+  }
+  #orders-table col.oms-col-id { width: 12%; }
+  #orders-table col.oms-col-date { width: 10%; }
+  #orders-table col.oms-col-customer { width: 18%; }
+  #orders-table col.oms-col-po { width: 10%; }
+  #orders-table col.oms-col-total { width: 9%; }
+  #orders-table col.oms-col-status { width: 14%; }
+  #orders-table col.oms-col-backorder { width: 9%; }
+  #orders-table col.oms-col-action { width: 18%; }
+  #orders-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--ink3);
+    white-space: nowrap;
+    vertical-align: bottom;
+    box-sizing: border-box;
+  }
+  #orders-table th,
+  #orders-table td {
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+  }
+  #orders-table td[data-label="Action"],
+  #orders-table th:last-child {
+    white-space: normal;
+  }
 }
 
 /* --- Mobile efficiency utilities --- */
@@ -2356,6 +2395,10 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
     top: 76px;
     z-index: 2;
     background: var(--ink3);
+  }
+  /* Orders queue scrolls inside its own wrapper — stick to top of that scroller */
+  #orders-table thead th {
+    top: 0;
   }
 
   /* WMS full-width two-column desktop */

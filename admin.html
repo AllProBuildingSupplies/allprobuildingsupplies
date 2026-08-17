@@ -149,9 +149,28 @@
     <div id="orders-cards" class="orders-cards" aria-live="polite"></div>
     <div class="admin-orders-desktop-table">
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
-    <table class="data-table" id="orders-table" style="min-width:720px;">
+    <table class="data-table" id="orders-table" style="min-width:920px;">
+      <colgroup>
+        <col class="oms-col-id"/>
+        <col class="oms-col-date"/>
+        <col class="oms-col-customer"/>
+        <col class="oms-col-po"/>
+        <col class="oms-col-total"/>
+        <col class="oms-col-status"/>
+        <col class="oms-col-backorder"/>
+        <col class="oms-col-action"/>
+      </colgroup>
       <thead>
-        <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>PO</th><th>Total</th><th>Status</th><th>Backorder</th><th>Action</th></tr>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Customer</th>
+          <th>PO</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Backorder</th>
+          <th>Action</th>
+        </tr>
       </thead>
       <tbody id="orders-tbody"></tbody>
     </table>
@@ -4022,7 +4041,7 @@ function onEmailFormatChange() {
   if (shipWrap) shipWrap.style.display = needsShipment ? 'block' : 'none';
   if (sel.value === 'packing') {
     hint.style.display = 'block';
-    hint.innerHTML = 'Packing slip: <strong style="color:var(--gold);">qty ordered</strong> vs <strong style="color:var(--gold);">qty delivered</strong> for the selected shipment — no prices. Full-width US Letter print layout.';
+    hint.innerHTML = 'Packing slip columns: <strong style="color:var(--gold);">Ordered</strong>, <strong style="color:var(--gold);">Prev. shipped</strong>, <strong style="color:var(--gold);">This shipment</strong>, <strong style="color:var(--gold);">Still due</strong> — no prices. Full-width US Letter print layout.';
   } else if (sel.value === 'invoice') {
     hint.style.display = 'block';
     hint.innerHTML = 'Invoice bills <strong style="color:var(--gold);">only the selected shipment</strong> quantities and amount due. Full-width US Letter print layout.';
@@ -4051,38 +4070,81 @@ function populateEmailShipmentSelect() {
   }).join('');
 }
 
-function getSelectedShipment() {
-  if (!activeOrderObj || !Array.isArray(activeOrderObj.shipments) || !activeOrderObj.shipments.length) return null;
+function getSelectedShipmentIndex() {
+  if (!activeOrderObj || !Array.isArray(activeOrderObj.shipments) || !activeOrderObj.shipments.length) return -1;
   const sel = document.getElementById('email-shipment-sel');
   const idx = sel ? parseInt(sel.value, 10) : NaN;
   if (!Number.isFinite(idx) || idx < 0 || idx >= activeOrderObj.shipments.length) {
-    return activeOrderObj.shipments[activeOrderObj.shipments.length - 1];
+    return activeOrderObj.shipments.length - 1;
   }
+  return idx;
+}
+
+function getSelectedShipment() {
+  const idx = getSelectedShipmentIndex();
+  if (idx < 0) return null;
   return activeOrderObj.shipments[idx];
 }
 
-/** Build a view of the order scoped to one shipment (for packing / invoice / deliver). */
-function orderViewForShipment(order, shipment) {
+/** Sum qty shipped for a line across a range of prior shipments [0, beforeIndex). */
+function priorShippedQtyForLine(order, code, size, beforeIndex) {
+  const ships = Array.isArray(order.shipments) ? order.shipments : [];
+  const end = Math.max(0, Math.min(beforeIndex, ships.length));
+  let n = 0;
+  const codeKey = String(code || '');
+  const sizeKey = String(size || '');
+  for (let i = 0; i < end; i++) {
+    const items = (ships[i] && ships[i].items) || [];
+    for (let j = 0; j < items.length; j++) {
+      const it = items[j];
+      if (String(it.code || '') === codeKey && String(it.size || '') === sizeKey) {
+        n += parseInt(it.qty, 10) || 0;
+      }
+    }
+  }
+  return n;
+}
+
+/**
+ * Build a view of the order scoped to one shipment (for packing / invoice / deliver).
+ * Packing slip qty fields:
+ *   qtyOrdered, qtyPrevShipped, qtyThisShip, qtyBackorder (still due after this ship).
+ */
+function orderViewForShipment(order, shipment, shipmentIndex) {
   if (!shipment) return order;
+  const ships = Array.isArray(order.shipments) ? order.shipments : [];
+  let idx = typeof shipmentIndex === 'number' ? shipmentIndex : ships.indexOf(shipment);
+  if (idx < 0) {
+    idx = ships.findIndex(function (s) { return s && s.id && shipment.id && s.id === shipment.id; });
+  }
+  if (idx < 0) idx = Math.max(0, ships.length - 1);
+
   const byKey = {};
   (order.items || []).forEach(function (it) {
     byKey[String(it.code) + '||' + String(it.size || '')] = it;
   });
   const items = (shipment.items || []).map(function (si) {
     const key = String(si.code) + '||' + String(si.size || '');
-    const ordered = byKey[key];
-    const qty = parseInt(si.qty, 10) || 0;
-    const unitPrice = Number(si.unitPrice != null ? si.unitPrice : (ordered && ordered.unitPrice)) || 0;
+    const orderedLine = byKey[key];
+    const qtyThis = parseInt(si.qty, 10) || 0;
+    const qtyOrdered = orderedLine ? (parseInt(orderedLine.qty, 10) || 0) : qtyThis;
+    const qtyPrev = priorShippedQtyForLine(order, si.code, si.size, idx);
+    const qtyAfter = qtyPrev + qtyThis;
+    const qtyBackorder = Math.max(0, qtyOrdered - qtyAfter);
+    const unitPrice = Number(si.unitPrice != null ? si.unitPrice : (orderedLine && orderedLine.unitPrice)) || 0;
     return {
       code: si.code,
       size: si.size || '',
-      description: si.description || (ordered && ordered.description) || '',
-      qty: qty,
-      qtyOrdered: ordered ? ordered.qty : qty,
-      qtyDelivered: qty,
+      description: si.description || (orderedLine && orderedLine.description) || '',
+      qty: qtyThis,
+      qtyOrdered: qtyOrdered,
+      qtyPrevShipped: qtyPrev,
+      qtyThisShip: qtyThis,
+      qtyDelivered: qtyThis,
+      qtyBackorder: qtyBackorder,
       unitPrice: unitPrice,
-      lineTotal: qty * unitPrice,
-      pcsPerCtn: ordered ? ordered.pcsPerCtn : 1
+      lineTotal: qtyThis * unitPrice,
+      pcsPerCtn: orderedLine ? orderedLine.pcsPerCtn : 1
     };
   });
   const total = items.reduce(function (s, it) { return s + (Number(it.lineTotal) || 0); }, 0);
@@ -4090,7 +4152,10 @@ function orderViewForShipment(order, shipment) {
     items: items,
     total: total,
     shipmentId: shipment.id || '',
-    shipmentDate: shipment.shippedAt || order.placedAt
+    shipmentDate: shipment.shippedAt || order.placedAt,
+    shipmentIndex: idx,
+    shipmentNumber: idx + 1,
+    shipmentCount: ships.length
   });
 }
 
@@ -4221,27 +4286,33 @@ function buildConfirmEmail(order, note) {
   return wrapOrderEmail('ORDER COPY', '#C8981F', '#0C1117', rows);
 }
 
-/** Packing slip line rows: product + qty ordered + qty delivered (no prices). */
+/** Packing slip line rows: Ordered / Prev. shipped / This shipment / Still due (no prices). */
 function emailPackingItemRows(items) {
+  const thQty = 'padding:8px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;';
   return (items || []).map(function (i, idx) {
     const ordered = parseInt(i.qtyOrdered != null ? i.qtyOrdered : i.qty, 10) || 0;
-    const deliveredRaw = i.qtyDelivered != null ? i.qtyDelivered : (i.deliveredQty != null ? i.deliveredQty : i.qty);
-    const delivered = parseInt(deliveredRaw, 10);
-    const deliveredQty = Number.isFinite(delivered) ? delivered : ordered;
+    const prev = parseInt(i.qtyPrevShipped, 10);
+    const prevQty = Number.isFinite(prev) && prev >= 0 ? prev : 0;
+    const thisRaw = i.qtyThisShip != null ? i.qtyThisShip : (i.qtyDelivered != null ? i.qtyDelivered : i.qty);
+    const thisShip = parseInt(thisRaw, 10);
+    const thisQty = Number.isFinite(thisShip) ? thisShip : 0;
+    let back = parseInt(i.qtyBackorder, 10);
+    if (!Number.isFinite(back) || back < 0) back = Math.max(0, ordered - (prevQty + thisQty));
     const codeSize = [i.code, i.size].filter(Boolean).join(' · ');
     const rowBg = (idx % 2 === 0) ? '#ffffff' : '#e8ecef';
-    const cell = 'padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #e8e8e8;vertical-align:top;background:' + rowBg + ';';
+    const cell = 'padding:10px 8px;font-size:13px;color:#333;border-bottom:1px solid #e8e8e8;vertical-align:top;background:' + rowBg + ';';
+    const dueStyle = back > 0
+      ? cell + 'text-align:center;white-space:nowrap;font-weight:700;color:#c0392b;'
+      : cell + 'text-align:center;white-space:nowrap;color:#888;';
     return '<tr>' +
-      '<td style="' + cell + '">' +
+      '<td style="' + cell + 'padding-left:14px;">' +
         emailEscape((i.description || '') + (i.size ? ' ' + i.size : '')) +
         (codeSize ? '<br/><span style="font-size:11px;color:#888;">' + emailEscape(codeSize) + '</span>' : '') +
       '</td>' +
-      '<td style="' + cell + 'text-align:center;white-space:nowrap;">' +
-        emailEscape(String(ordered)) +
-      '</td>' +
-      '<td style="' + cell + 'text-align:center;white-space:nowrap;font-weight:700;">' +
-        emailEscape(String(deliveredQty)) +
-      '</td>' +
+      '<td style="' + cell + 'text-align:center;white-space:nowrap;">' + emailEscape(String(ordered)) + '</td>' +
+      '<td style="' + cell + 'text-align:center;white-space:nowrap;color:#666;">' + emailEscape(String(prevQty)) + '</td>' +
+      '<td style="' + cell + 'text-align:center;white-space:nowrap;font-weight:700;color:#0C1117;">' + emailEscape(String(thisQty)) + '</td>' +
+      '<td style="' + dueStyle + '">' + emailEscape(String(back)) + '</td>' +
     '</tr>';
   }).join('');
 }
@@ -4251,8 +4322,13 @@ function buildPackingSlipEmail(order, note) {
   const shipTo = order.delivery && order.delivery.address ? order.delivery.address : '';
   const method = order.delivery && order.delivery.method ? String(order.delivery.method) : '';
   const pad = '28px';
-  const shipLabel = order.shipmentId
-    ? '<div style="font-size:12px;color:#666;margin-top:8px;"><strong style="color:#333">Shipment:</strong> ' + emailEscape(order.shipmentId) +
+  const shipNum = order.shipmentNumber
+    ? ('Shipment ' + order.shipmentNumber + (order.shipmentCount ? ' of ' + order.shipmentCount : ''))
+    : '';
+  const shipLabel = (order.shipmentId || shipNum)
+    ? '<div style="font-size:12px;color:#666;margin-top:8px;"><strong style="color:#333">Shipment:</strong> ' +
+      emailEscape(shipNum || '') +
+      (order.shipmentId ? (shipNum ? ' · ' : '') + emailEscape(order.shipmentId) : '') +
       (order.shipmentDate ? ' · ' + emailEscape(new Date(order.shipmentDate).toLocaleDateString()) : '') + '</div>'
     : '';
   const poNotesHtml = (order.po || order.notes)
@@ -4262,15 +4338,22 @@ function buildPackingSlipEmail(order, note) {
     : (shipLabel
       ? '<tr><td class="email-pad" style="padding:16px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;"><tr><td style="padding:14px 18px;">' + shipLabel + '</td></tr></table></td></tr>'
       : '');
+  const qtyHead =
+    '<td style="padding:10px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:11%;">Ordered</td>' +
+    '<td style="padding:10px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:12%;">Prev.&nbsp;shipped</td>' +
+    '<td style="padding:10px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:12%;">This&nbsp;shipment</td>' +
+    '<td style="padding:10px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:11%;">Still&nbsp;due</td>';
   const rows =
-    '<tr><td class="email-pad" style="padding:24px ' + pad + ' 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Please find the packing slip for your delivery below. Quantities ordered and delivered are listed with no pricing.</p></td></tr>' +
+    '<tr><td class="email-pad" style="padding:24px ' + pad + ' 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Please find the packing slip for this shipment. Quantities show what was ordered, what already shipped, what is on this delivery, and what is still due — no pricing.</p></td></tr>' +
     poNotesHtml +
     emailNoteRow(note) +
     '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">' + emailEscape(new Date(order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:14px 16px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Ship / Deliver To</div><div style="font-size:13px;color:#222;">' +
       (method ? '<strong>' + emailEscape(method.toUpperCase()) + '</strong><br>' : '') +
       emailEscape(shipTo) +
     '</div></td></tr></table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Packing List</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e8e8e8;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:18%;">Qty Ordered</td><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:18%;">Qty Delivered</td></tr>' +
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Packing List</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e8e8e8;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td>' +
+    qtyHead +
+    '</tr>' +
     itemsHtml +
     '</table></td></tr>' +
     '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><hr style="border:none;border-top:1px solid #eee;margin:16px 0 0;"/></td></tr>' +
@@ -4439,7 +4522,9 @@ async function executeSendEmail() {
     msgEl.textContent = 'Record a shipment on this order first, then select it for packing slip / invoice.';
     return;
   }
-  const shipView = shipment ? orderViewForShipment(activeOrderObj, shipment) : activeOrderObj;
+  const shipView = shipment
+    ? orderViewForShipment(activeOrderObj, shipment, getSelectedShipmentIndex())
+    : activeOrderObj;
   if(type === 'confirm') { htmlBody = buildConfirmEmail(activeOrderObj, customNote); subject = 'Order Update — Confirmation — ' + activeOrderObj.id; }
   else if(type === 'packing') { htmlBody = buildPackingSlipEmail(shipView, customNote); subject = 'Packing Slip — ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies'; }
   else if(type === 'deliver') { htmlBody = buildDeliveredEmail(shipView, customNote); subject = 'Order Delivered — Thank You! — All Pro Building Supplies'; }
