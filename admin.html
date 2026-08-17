@@ -252,10 +252,27 @@
       <div class="oms-queue-meta" id="fin-queue-meta">Loading…</div>
       <div id="fin-cards" class="orders-cards" aria-live="polite"></div>
       <div class="admin-orders-desktop-table">
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
-          <table class="data-table" style="min-width:720px;">
+        <div class="admin-table-scroll">
+          <table class="data-table" id="fin-table">
+            <colgroup>
+              <col style="width:14%"/>
+              <col style="width:12%"/>
+              <col style="width:24%"/>
+              <col style="width:12%"/>
+              <col style="width:12%"/>
+              <col style="width:10%"/>
+              <col style="width:16%"/>
+            </colgroup>
             <thead>
-              <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Payment</th><th>Method</th><th>Action</th></tr>
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Method</th>
+                <th>Action</th>
+              </tr>
             </thead>
             <tbody id="fin-tbody"></tbody>
           </table>
