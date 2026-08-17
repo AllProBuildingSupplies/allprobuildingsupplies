@@ -533,7 +533,7 @@ h1.htitle strong { color: var(--gold); }
   filter: drop-shadow(0 6px 16px rgba(0,0,0,.4));
   transform: translateX(-50%) scale(1);
   transition: transform .45s cubic-bezier(.16,1,.3,1), opacity .3s;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
 }
 .home-cat-img::before {
@@ -553,7 +553,7 @@ h1.htitle strong { color: var(--gold); }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(10,14,19,.98) 0%, rgba(10,14,19,.72) 34%, rgba(10,14,19,.2) 62%, rgba(26,36,48,.55) 100%);
+  background: linear-gradient(to top, rgba(10,14,19,.98) 0%, rgba(10,14,19,.55) 28%, transparent 58%);
   z-index: 0;
   pointer-events: none;
 }
@@ -561,7 +561,7 @@ h1.htitle strong { color: var(--gold); }
 .home-cat-img .home-cat-name,
 .home-cat-img .home-cat-go {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 .home-cat:hover {
   border-color: rgba(200,152,31,.5);
