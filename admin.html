@@ -4208,58 +4208,79 @@ function emailEscape(s) {
     .replace(/"/g, '&quot;');
 }
 
+/** Keep EmailJS template_params under the 50KB variables cap. */
+function minifyEmailHtml(html) {
+  return String(html == null ? '' : html)
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/>\s+</g, '><')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function emailVarsByteSize(subject, htmlBody) {
+  // Approximate EmailJS template_params JSON size (subject + body + routing fields).
+  const payload = JSON.stringify({
+    email_subject: subject || '',
+    email_body: htmlBody || '',
+    to_email: 'x@y.z',
+    cust_email: 'x@y.z',
+    cc_email: '',
+    email_cc: '',
+    cc: '',
+  });
+  try {
+    return new TextEncoder().encode(payload).length;
+  } catch (_) {
+    return payload.length;
+  }
+}
+
 function emailNoteRow(note) {
   if (!note) return '';
-  return '<tr><td class="email-pad" style="padding:16px 28px 0;"><div style="background:#fffbf0;border-left:4px solid #C8981F;padding:16px;"><div style="font-size:11px;color:#C8981F;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Message from All Pro:</div><div style="font-size:14px;color:#333;line-height:1.6;">' +
+  return '<tr><td class="email-pad" style="padding:12px 20px 0;"><div style="background:#fffbf0;border-left:3px solid #C8981F;padding:12px;"><div style="font-size:11px;color:#C8981F;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Message from All Pro:</div><div style="font-size:13px;color:#333;line-height:1.5;">' +
     emailEscape(note).replace(/\n/g, '<br>') +
     '</div></div></td></tr>';
 }
 
 function emailItemRows(items) {
   return (items || []).map(function (i, idx) {
-    const rowBg = (idx % 2 === 0) ? '#ffffff' : '#e8ecef';
-    const cell = 'padding:10px 14px;font-size:13px;color:#333;border-bottom:1px solid #e8e8e8;background:' + rowBg + ';';
-    return '<tr><td style="' + cell + '">' +
+    const alt = idx % 2 ? ' e1' : '';
+    return '<tr class="er' + alt + '"><td class="ec">' +
       emailEscape((i.description || '') + ' ' + (i.size || '')) +
-      '<br/><span style="font-size:11px;color:#888">' + emailEscape(String(i.qty)) +
+      '<br><span class="es">' + emailEscape(String(i.qty)) +
       ' pcs @ $' + (Number(i.unitPrice) || 0).toFixed(2) +
-      '</span></td><td style="' + cell + 'text-align:right;white-space:nowrap;">$' +
+      '</span></td><td class="ec en eright">$' +
       (Number(i.lineTotal) || 0).toFixed(2) + '</td></tr>';
   }).join('');
 }
 
 /**
  * Full-width letter-printable email shell (shared by all admin email formats).
+ * Row styles live in a compact stylesheet so large line lists stay under EmailJS 50KB.
  */
 function wrapOrderEmail(badgeLabel, badgeBg, badgeColor, bodyRowsHtml, titleOpt) {
   const title = titleOpt || 'All Pro Building Supplies';
-  return '<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>' + emailEscape(title) + '</title><!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>table{border-collapse:collapse;}td{font-family:Arial,sans-serif;}</style><![endif]--><style type="text/css">' +
-    'html,body{margin:0!important;padding:0!important;width:100%!important;}' +
-    'body{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}' +
-    'table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}' +
-    'img{border:0;height:auto;line-height:100%;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}' +
-    '@page{size:letter;margin:0.4in;}' +
-    '@media print{' +
-      'html,body{width:100%!important;background:#ffffff!important;}' +
-      '.email-outer{padding:0!important;background:#ffffff!important;}' +
-      '.email-shell{width:100%!important;max-width:100%!important;box-shadow:none!important;border-radius:0!important;}' +
-      '.email-pad{padding-left:18px!important;padding-right:18px!important;}' +
-      'a{color:inherit!important;text-decoration:none!important;}' +
-    '}' +
-    '@media only screen and (max-width:640px){' +
-      '.email-shell{width:100%!important;max-width:100%!important;}' +
-      '.email-pad{padding-left:16px!important;padding-right:16px!important;}' +
-      '.email-stack{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;border-right:0!important;}' +
-      '.email-stack+.email-stack{border-top:1px solid #e8e8e8!important;}' +
-    '}' +
-    '</style></head><body style="margin:0;padding:0;background:#ffffff;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;">' +
-    '<table role="presentation" class="email-outer" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;width:100%;border-collapse:collapse;"><tr><td align="center" class="email-outer" style="padding:0;">' +
-    '<!--[if mso]><table role="presentation" width="750" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->' +
-    '<table role="presentation" class="email-shell" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:100%;width:100%;background:#ffffff;border-collapse:collapse;">' +
-    '<tr><td class="email-pad" style="background:#0C1117;padding:22px 28px;border-bottom:4px solid #C8981F;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="email-stack" style="vertical-align:middle;"><div style="font-family:Arial Black,Arial,sans-serif;font-size:20px;font-weight:900;color:#FFFFFF;letter-spacing:2px;text-transform:uppercase;">ALL PRO BUILDING SUPPLIES</div><div style="font-size:11px;color:#C8981F;letter-spacing:3px;text-transform:uppercase;margin-top:3px;">LLC</div></td><td class="email-stack" align="right" style="vertical-align:middle;padding-top:8px;"><div style="background:' + badgeBg + ';color:' + badgeColor + ';font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border-radius:2px;display:inline-block;">' + emailEscape(badgeLabel) + '</div></td></tr></table></td></tr>' +
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>' + emailEscape(title) + '</title>' +
+    '<!--[if mso]><style>table,td{font-family:Arial,sans-serif;}</style><![endif]-->' +
+    '<style type="text/css">' +
+    'html,body{margin:0!important;padding:0!important;width:100%!important}' +
+    'body{-webkit-text-size-adjust:100%;font-family:Arial,Helvetica,sans-serif}' +
+    'table,td{border-collapse:collapse}' +
+    '.er{border-bottom:1px solid #e8e8e8}.e1{background:#e8ecef}' +
+    '.ec{padding:8px 10px;font-size:12px;color:#333;vertical-align:top}' +
+    '.en{text-align:center;white-space:nowrap}.eright{text-align:right;white-space:nowrap}' +
+    '.eb{font-weight:700;color:#c0392b}.ew{font-weight:700;color:#0C1117}.em{color:#666}' +
+    '.es{font-size:10px;color:#888}' +
+    '@page{size:letter;margin:.4in}' +
+    '@media print{html,body{background:#fff!important}.email-outer{padding:0!important;background:#fff!important}.email-shell{width:100%!important;max-width:100%!important}.email-pad{padding-left:14px!important;padding-right:14px!important}}' +
+    '@media only screen and (max-width:640px){.email-shell{width:100%!important}.email-pad{padding-left:14px!important;padding-right:14px!important}.email-stack{display:block!important;width:100%!important;border-right:0!important}.email-stack+.email-stack{border-top:1px solid #e8e8e8!important}}' +
+    '</style></head><body style="margin:0;padding:0;background:#fff;">' +
+    '<table role="presentation" class="email-outer" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:#fff;"><tr><td align="center" style="padding:0;">' +
+    '<table role="presentation" class="email-shell" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:100%;width:100%;background:#fff;">' +
+    '<tr><td class="email-pad" style="background:#0C1117;padding:16px 20px;border-bottom:3px solid #C8981F;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="email-stack" style="vertical-align:middle;"><div style="font-family:Arial,sans-serif;font-size:17px;font-weight:900;color:#fff;letter-spacing:1.5px;text-transform:uppercase;">ALL PRO BUILDING SUPPLIES</div><div style="font-size:10px;color:#C8981F;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">LLC</div></td><td class="email-stack" align="right" style="vertical-align:middle;"><div style="background:' + badgeBg + ';color:' + badgeColor + ';font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 10px;display:inline-block;">' + emailEscape(badgeLabel) + '</div></td></tr></table></td></tr>' +
     bodyRowsHtml +
-    '<tr><td class="email-pad" style="background:#0C1117;padding:16px 28px;text-align:center;"><div style="font-size:12px;color:#888;">&copy; 2026 All Pro Building Supplies LLC</div></td></tr>' +
-    '</table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>';
+    '<tr><td class="email-pad" style="background:#0C1117;padding:12px 20px;text-align:center;"><div style="font-size:11px;color:#888;">&copy; 2026 All Pro Building Supplies LLC</div></td></tr>' +
+    '</table></td></tr></table></body></html>';
 }
 
 function wrapPackingSlipEmail(badgeLabel, badgeBg, badgeColor, bodyRowsHtml) {
@@ -4288,7 +4309,6 @@ function buildConfirmEmail(order, note) {
 
 /** Packing slip line rows: Ordered / Prev. shipped / This shipment / Still due (no prices). */
 function emailPackingItemRows(items) {
-  const thQty = 'padding:8px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;';
   return (items || []).map(function (i, idx) {
     const ordered = parseInt(i.qtyOrdered != null ? i.qtyOrdered : i.qty, 10) || 0;
     const prev = parseInt(i.qtyPrevShipped, 10);
@@ -4299,20 +4319,17 @@ function emailPackingItemRows(items) {
     let back = parseInt(i.qtyBackorder, 10);
     if (!Number.isFinite(back) || back < 0) back = Math.max(0, ordered - (prevQty + thisQty));
     const codeSize = [i.code, i.size].filter(Boolean).join(' · ');
-    const rowBg = (idx % 2 === 0) ? '#ffffff' : '#e8ecef';
-    const cell = 'padding:10px 8px;font-size:13px;color:#333;border-bottom:1px solid #e8e8e8;vertical-align:top;background:' + rowBg + ';';
-    const dueStyle = back > 0
-      ? cell + 'text-align:center;white-space:nowrap;font-weight:700;color:#c0392b;'
-      : cell + 'text-align:center;white-space:nowrap;color:#888;';
-    return '<tr>' +
-      '<td style="' + cell + 'padding-left:14px;">' +
+    const alt = idx % 2 ? ' e1' : '';
+    const dueCls = back > 0 ? 'ec en er eb' : 'ec en er em';
+    return '<tr class="er' + alt + '">' +
+      '<td class="ec">' +
         emailEscape((i.description || '') + (i.size ? ' ' + i.size : '')) +
-        (codeSize ? '<br/><span style="font-size:11px;color:#888;">' + emailEscape(codeSize) + '</span>' : '') +
+        (codeSize ? '<br><span class="es">' + emailEscape(codeSize) + '</span>' : '') +
       '</td>' +
-      '<td style="' + cell + 'text-align:center;white-space:nowrap;">' + emailEscape(String(ordered)) + '</td>' +
-      '<td style="' + cell + 'text-align:center;white-space:nowrap;color:#666;">' + emailEscape(String(prevQty)) + '</td>' +
-      '<td style="' + cell + 'text-align:center;white-space:nowrap;font-weight:700;color:#0C1117;">' + emailEscape(String(thisQty)) + '</td>' +
-      '<td style="' + dueStyle + '">' + emailEscape(String(back)) + '</td>' +
+      '<td class="ec en">' + ordered + '</td>' +
+      '<td class="ec en em">' + prevQty + '</td>' +
+      '<td class="ec en ew">' + thisQty + '</td>' +
+      '<td class="' + dueCls + '">' + back + '</td>' +
     '</tr>';
   }).join('');
 }
@@ -4321,43 +4338,42 @@ function buildPackingSlipEmail(order, note) {
   const itemsHtml = emailPackingItemRows(order.items);
   const shipTo = order.delivery && order.delivery.address ? order.delivery.address : '';
   const method = order.delivery && order.delivery.method ? String(order.delivery.method) : '';
-  const pad = '28px';
+  const pad = '20px';
   const shipNum = order.shipmentNumber
     ? ('Shipment ' + order.shipmentNumber + (order.shipmentCount ? ' of ' + order.shipmentCount : ''))
     : '';
   const shipLabel = (order.shipmentId || shipNum)
-    ? '<div style="font-size:12px;color:#666;margin-top:8px;"><strong style="color:#333">Shipment:</strong> ' +
+    ? '<div style="font-size:12px;color:#666;margin-top:6px;"><strong style="color:#333">Shipment:</strong> ' +
       emailEscape(shipNum || '') +
       (order.shipmentId ? (shipNum ? ' · ' : '') + emailEscape(order.shipmentId) : '') +
       (order.shipmentDate ? ' · ' + emailEscape(new Date(order.shipmentDate).toLocaleDateString()) : '') + '</div>'
     : '';
   const poNotesHtml = (order.po || order.notes)
-    ? '<tr><td class="email-pad" style="padding:16px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#666;margin-bottom:4px;"><strong style="color:#333">PO Number:</strong> ' +
+    ? '<tr><td class="email-pad" style="padding:12px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;"><tr><td style="padding:10px 14px;"><div style="font-size:12px;color:#666;margin-bottom:2px;"><strong style="color:#333">PO:</strong> ' +
       emailEscape(order.po || 'N/A') + '</div><div style="font-size:12px;color:#666;"><strong style="color:#333">Notes:</strong> ' +
       emailEscape(order.notes || 'None') + '</div>' + shipLabel + '</td></tr></table></td></tr>'
     : (shipLabel
-      ? '<tr><td class="email-pad" style="padding:16px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;"><tr><td style="padding:14px 18px;">' + shipLabel + '</td></tr></table></td></tr>'
+      ? '<tr><td class="email-pad" style="padding:12px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fffbf0;border:1px solid #f0e0a0;"><tr><td style="padding:10px 14px;">' + shipLabel + '</td></tr></table></td></tr>'
       : '');
   const qtyHead =
-    '<td style="padding:10px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:11%;">Ordered</td>' +
-    '<td style="padding:10px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:12%;">Prev.&nbsp;shipped</td>' +
-    '<td style="padding:10px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:12%;">This&nbsp;shipment</td>' +
-    '<td style="padding:10px 8px;font-size:10px;color:#C8981F;letter-spacing:1px;text-transform:uppercase;font-weight:700;text-align:center;white-space:nowrap;width:11%;">Still&nbsp;due</td>';
+    '<td class="ec en" style="background:#0C1117;color:#C8981F;font-size:10px;font-weight:700;text-transform:uppercase;">Ord</td>' +
+    '<td class="ec en" style="background:#0C1117;color:#C8981F;font-size:10px;font-weight:700;text-transform:uppercase;">Prev</td>' +
+    '<td class="ec en" style="background:#0C1117;color:#C8981F;font-size:10px;font-weight:700;text-transform:uppercase;">This</td>' +
+    '<td class="ec en" style="background:#0C1117;color:#C8981F;font-size:10px;font-weight:700;text-transform:uppercase;">Due</td>';
   const rows =
-    '<tr><td class="email-pad" style="padding:24px ' + pad + ' 0;"><p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:12px 0 0;font-size:15px;color:#444;line-height:1.6;">Please find the packing slip for this shipment. Quantities show what was ordered, what already shipped, what is on this delivery, and what is still due — no pricing.</p></td></tr>' +
+    '<tr><td class="email-pad" style="padding:18px ' + pad + ' 0;"><p style="margin:0;font-size:15px;color:#222;">Hi <strong>' + emailEscape(order.customer.name) + '</strong>,</p><p style="margin:8px 0 0;font-size:13px;color:#444;line-height:1.5;">Packing slip for this shipment — Ordered / Prev. shipped / This shipment / Still due (no pricing).</p></td></tr>' +
     poNotesHtml +
     emailNoteRow(note) +
-    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Order ID</div><div style="font-size:14px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td><td class="email-stack" style="padding:14px 16px;border-right:1px solid #e8e8e8;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Date</div><div style="font-size:14px;color:#222;">' + emailEscape(new Date(order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:14px 16px;vertical-align:top;"><div style="font-size:10px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Ship / Deliver To</div><div style="font-size:13px;color:#222;">' +
+    '<tr><td class="email-pad" style="padding:14px ' + pad + ' 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8f8f8;border:1px solid #e8e8e8;"><tr><td class="email-stack" style="padding:10px 12px;border-right:1px solid #e8e8e8;vertical-align:top;"><div class="es" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Order ID</div><div style="font-size:13px;font-weight:700;color:#C8981F;font-family:monospace;">' + emailEscape(order.id) + '</div></td><td class="email-stack" style="padding:10px 12px;border-right:1px solid #e8e8e8;vertical-align:top;"><div class="es" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Date</div><div style="font-size:13px;color:#222;">' + emailEscape(new Date(order.placedAt).toLocaleDateString()) + '</div></td><td class="email-stack" style="padding:10px 12px;vertical-align:top;"><div class="es" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Ship / Deliver To</div><div style="font-size:12px;color:#222;">' +
       (method ? '<strong>' + emailEscape(method.toUpperCase()) + '</strong><br>' : '') +
       emailEscape(shipTo) +
     '</div></td></tr></table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;"><div style="font-size:11px;color:#888;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Packing List</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e8e8e8;"><tr style="background:#0C1117;"><td style="padding:10px 14px;font-size:11px;color:#C8981F;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Product</td>' +
+    '<tr><td class="email-pad" style="padding:14px ' + pad + ' 0;"><div class="es" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;font-weight:700;">Packing List</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e8e8e8;"><tr><td class="ec" style="background:#0C1117;color:#C8981F;font-size:10px;font-weight:700;text-transform:uppercase;">Product</td>' +
     qtyHead +
     '</tr>' +
     itemsHtml +
     '</table></td></tr>' +
-    '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><hr style="border:none;border-top:1px solid #eee;margin:16px 0 0;"/></td></tr>' +
-    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 24px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about this delivery?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
+    '<tr><td class="email-pad" style="padding:14px ' + pad + ' 18px;"><p style="margin:0;font-size:13px;color:#444;">Questions? <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a> · <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
   return wrapPackingSlipEmail('PACKING SLIP', '#2ecc71', '#0C1117', rows);
 }
 
@@ -4534,6 +4550,16 @@ async function executeSendEmail() {
     htmlBody = buildInvoiceEmail(shipView, customNote, payMethods);
     subject = 'Invoice — Order ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies';
   }
+
+  // EmailJS hard-caps template variables at 50KB — minify and refuse early with a clear message.
+  htmlBody = minifyEmailHtml(htmlBody);
+  const emailBytes = emailVarsByteSize(subject, htmlBody);
+  if (emailBytes > 48000) {
+    msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b';
+    msgEl.textContent = 'Email is too large for EmailJS (' + Math.round(emailBytes / 1024) + 'KB / 50KB limit). Try a smaller shipment or contact support.';
+    return;
+  }
+
   const btn = document.getElementById('btn-execute-send');
   btn.disabled = true; btn.innerHTML = 'Sending...';
   msgEl.style.display = 'block'; msgEl.style.color = '#3498db';
