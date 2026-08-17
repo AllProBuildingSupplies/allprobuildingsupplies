@@ -2633,7 +2633,6 @@ export default {
 
       if (path === '/api/admin/orders' && request.method === 'POST') {
         const o = await request.json();
-        const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
 
         // New orders without a proper APBS-###### id get the next sequential number.
         const existing = o.id
@@ -2643,67 +2642,51 @@ export default {
           o.id = await nextApbsOrderId(env);
         }
 
-        await restoreOrderItemsStock(env, o.id);
+        // Admin saves may include backorders (ordered qty > on-hand), so do not
+        // block on stock — applyOrderItemsStock still floors at 0.
+        const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
         const priced = validateAdminOrderItems(allProds, o.items || [], {
-          checkStock: o.status !== 'cancelled',
+          checkStock: false,
         });
-        if (priced.error && (o.items || []).length > 0) return jsonResponse({ error: priced.error }, 400);
+        if (priced.error && (o.items || []).length > 0) {
+          return jsonResponse({ error: priced.error }, 400);
+        }
 
         const shipments = normalizeShipments(o.shipments);
         const shipmentsJson = JSON.stringify(shipments);
         const pay = normalizePaymentFields(o);
         const placedIso = o.placedAt || new Date().toISOString();
-        const placedMs = Date.parse(placedIso);
-        const placedAtInt = Number.isFinite(placedMs) ? placedMs : Date.now();
         const custEmail = String(o.customer?.email || 'unknown').trim().toLowerCase();
         const totalAmt = priced.total || 0;
-        // Legacy preview schema still has NOT NULL placed_at / total / data / user_email.
-        const legacyData = JSON.stringify({
-          customer: o.customer || {},
-          delivery: o.delivery || {},
-          items: priced.validated || [],
-          po: o.po || '',
-          notes: o.notes || '',
-          shipments,
-          paymentStatus: pay.paymentStatus,
-          paymentMethod: pay.paymentMethod,
-          paymentNote: pay.paymentNote,
-          paidAt: pay.paidAt,
-        });
-
+        // Live D1 matches schema.sql (no legacy user_email / total / placed_at / data cols).
         const stmts = [
           env.DB.prepare(
             `INSERT INTO orders (
-               id, user_id, user_email, status,
-               total_amount, total, delivery_method, delivery_address, po, notes,
-               customer_snapshot, shipments_json, created_at, placed_at, data,
+               id, user_id, status,
+               total_amount, delivery_method, delivery_address, po, notes,
+               customer_snapshot, shipments_json, created_at,
                payment_status, paid_at, payment_method, payment_note
              )
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              ON CONFLICT(id) DO UPDATE SET
                status=excluded.status,
                total_amount=excluded.total_amount,
-               total=excluded.total,
+               delivery_method=excluded.delivery_method,
                delivery_address=excluded.delivery_address,
                po=excluded.po,
                notes=excluded.notes,
                customer_snapshot=excluded.customer_snapshot,
                shipments_json=excluded.shipments_json,
-               data=excluded.data,
-               user_email=excluded.user_email,
                user_id=excluded.user_id,
                payment_status=excluded.payment_status,
                paid_at=excluded.paid_at,
                payment_method=excluded.payment_method,
                payment_note=excluded.payment_note,
-               created_at=COALESCE(orders.created_at, excluded.created_at),
-               placed_at=COALESCE(orders.placed_at, excluded.placed_at)`
+               created_at=COALESCE(orders.created_at, excluded.created_at)`
           ).bind(
             o.id,
             custEmail,
-            custEmail,
             o.status,
-            totalAmt,
             totalAmt,
             o.delivery?.method || 'delivery',
             o.delivery?.address || '',
@@ -2712,8 +2695,6 @@ export default {
             JSON.stringify(o.customer || {}),
             shipmentsJson,
             placedIso,
-            placedAtInt,
-            legacyData,
             pay.paymentStatus,
             pay.paidAt,
             pay.paymentMethod,
@@ -2730,10 +2711,35 @@ export default {
             ).bind(o.id, i.code, i.size, i.qty, i.unitPrice, i.qtyShipped || 0)
           );
         }
-        await env.DB.batch(stmts);
+
+        // Release prior reservation only after validation succeeds. If the write
+        // fails, re-apply the old reservation so inventory is not left inflated.
+        const oldItems = await restoreOrderItemsStock(env, o.id);
+        const reapplyOldStock = async () => {
+          if (!oldItems || !oldItems.length) return;
+          await applyOrderItemsStock(
+            env,
+            oldItems.map((it) => ({
+              qty: parseInt(it.quantity, 10) || 0,
+              code: it.product_sku,
+              size: it.size,
+            }))
+          );
+        };
+        try {
+          await env.DB.batch(stmts);
+        } catch (err) {
+          await reapplyOldStock();
+          throw err;
+        }
 
         if (o.status !== 'cancelled' && itemsToSave.length > 0) {
-          await applyOrderItemsStock(env, itemsToSave);
+          try {
+            await applyOrderItemsStock(env, itemsToSave);
+          } catch (err) {
+            await reapplyOldStock();
+            throw err;
+          }
         }
 
         // Persist address + phone on the customer's address book when possible.
@@ -2775,16 +2781,42 @@ export default {
         }
         const params = { email_subject: subject, email_body: htmlBody };
 
-        // No CC → keep legacy behavior: one separate send per To (recipients don't see each other).
+        // No CC → one separate send per To (recipients don't see each other).
         if (!ccList.length) {
           const sent = [];
+          const errors = [];
           for (const email of toList) {
             try {
-              await sendEmailJs(env, params, email);
+              const result = await sendEmailJs(env, params, email);
+              if (result && result.skipped) {
+                errors.push({ email, error: result.reason || 'Email not configured' });
+                continue;
+              }
               sent.push(email);
-            } catch (_) {}
+            } catch (e) {
+              errors.push({
+                email,
+                error: e && e.message ? String(e.message) : 'Send failed',
+              });
+            }
           }
-          return jsonResponse({ success: true, mode: 'separate', sentCount: sent.length, sent, cc: [] });
+          if (!sent.length) {
+            const detail =
+              (errors[0] && errors[0].error) ||
+              'Email send failed. Check Worker EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, and EMAILJS_PUBLIC_KEY.';
+            return jsonResponse(
+              { error: detail, success: false, sentCount: 0, sent: [], errors },
+              502
+            );
+          }
+          return jsonResponse({
+            success: true,
+            mode: 'separate',
+            sentCount: sent.length,
+            sent,
+            cc: [],
+            errors: errors.length ? errors : undefined,
+          });
         }
 
         // With CC → one shared email so To + CC can see each other.
