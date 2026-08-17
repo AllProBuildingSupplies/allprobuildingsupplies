@@ -1324,7 +1324,20 @@ h1.htitle strong { color: var(--gold); }
 /* Data Tables */
 .data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;margin-bottom:20px;}
 .data-table thead tr{background:rgba(255,255,255,.05);}
-.data-table th{background:rgba(255,255,255,.03);color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:12px;text-align:left;border-bottom:1px solid rgba(200,152,31,.2);}
+/* Never sticky — sticky thead floats over / under rows inside overflow wrappers. */
+.data-table thead th{
+  position:static !important;
+  top:auto !important;
+  background:rgba(255,255,255,.03);
+  color:var(--gold);
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:12px;
+  text-align:left;
+  border-bottom:1px solid rgba(200,152,31,.2);
+}
 .data-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
 .data-input{width:100%;background:var(--ink3);border:1px solid rgba(139,160,178,.2);color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 10px;outline:none;box-sizing:border-box;transition:opacity 0.2s;}
 .data-input:focus{border-color:var(--gold);}
@@ -1799,9 +1812,14 @@ h1.htitle strong { color: var(--gold); }
   #prod-table thead th {
     position: static !important;
     top: auto !important;
+    z-index: auto !important;
     background: var(--ink3);
     white-space: nowrap;
     vertical-align: bottom;
+  }
+  #prod-table th,
+  #prod-table td {
+    box-sizing: border-box;
   }
 
   .admin-table-scroll {

@@ -1,5 +1,5 @@
 /* All Pro Building Supplies — service worker (PWA) */
-const CACHE_VERSION = 'apbs-pwa-v26';
+const CACHE_VERSION = 'apbs-pwa-v27';
 const SHELL = [
   './',
   './index.html',
@@ -63,6 +63,22 @@ function isApiRequest(url) {
   }
 }
 
+function isFreshAsset(url) {
+  try {
+    var u = new URL(url);
+    var p = u.pathname || '';
+    // Always prefer network for CSS/JS/admin so layout fixes are not stuck behind PWA cache.
+    return (
+      p.indexOf('/assets/style.css') !== -1 ||
+      p.indexOf('/assets/main.js') !== -1 ||
+      p.indexOf('/admin.html') !== -1 ||
+      p.indexOf('/sw.js') !== -1
+    );
+  } catch (_) {
+    return false;
+  }
+}
+
 self.addEventListener('fetch', function (event) {
   var request = event.request;
   if (request.method !== 'GET') return;
@@ -77,6 +93,26 @@ self.addEventListener('fetch', function (event) {
           headers: { 'Content-Type': 'application/json' },
         });
       })
+    );
+    return;
+  }
+
+  // CSS / JS / admin: network first so sticky-header and other fixes land immediately.
+  if (isFreshAsset(url)) {
+    event.respondWith(
+      fetch(request)
+        .then(function (response) {
+          if (response && response.status === 200 && response.type !== 'opaque') {
+            var copy = response.clone();
+            caches.open(CACHE_VERSION).then(function (cache) {
+              cache.put(request, copy);
+            });
+          }
+          return response;
+        })
+        .catch(function () {
+          return caches.match(request);
+        })
     );
     return;
   }
@@ -101,7 +137,7 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
-  // Static assets: cache first, then network.
+  // Other static assets: cache first, then network.
   event.respondWith(
     caches.match(request).then(function (cached) {
       if (cached) return cached;
