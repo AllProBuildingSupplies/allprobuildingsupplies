@@ -63,28 +63,44 @@
         <span class="search-icon">&#128269;</span>
         <input class="search-input" type="search" id="prod-search" placeholder="Search code, size, or name…" autocomplete="off" enterkeyhint="search"/>
       </div>
-      <div class="mobile-filter-wrap">
-        <select class="mobile-filter-sel" id="mobile-main-select" aria-label="Main category" onchange="onMobileMainChange(this.value)"></select>
-        <select class="mobile-filter-sel" id="mobile-sub-select" aria-label="Sub category" onchange="onMobileSubChange(this.value)"></select>
+      <div class="catalog-toolbar-row">
+        <button type="button" class="catalog-filter-toggle" id="catalog-filter-toggle" onclick="toggleCatalogFilters()" aria-expanded="false" aria-controls="catalog-sidebar">Filters</button>
+        <p class="catalog-result-meta" id="catalog-result-meta" aria-live="polite"></p>
       </div>
-      <div class="filter-stack" id="filter-stack">
-        <div class="filter-bar" id="main-filters" role="toolbar" aria-label="Main categories"></div>
-        <div class="filter-bar" id="sub-filters" role="toolbar" aria-label="Sub categories"></div>
-      </div>
-      <p class="catalog-result-meta" id="catalog-result-meta" aria-live="polite"></p>
     </div>
 
-    <!-- Mobile glanceable drill-down (phone only; desktop uses accordion below) -->
-    <div id="mobile-catalog" class="mobile-catalog" aria-live="polite">
-      <div class="mcat-crumb" id="mcat-crumb"></div>
-      <div id="mcat-panel-main" class="mcat-panel"></div>
-      <div id="mcat-panel-sub" class="mcat-panel" hidden></div>
-      <div id="mcat-panel-list" class="mcat-panel" hidden></div>
-      <div id="mcat-panel-detail" class="mcat-panel" hidden></div>
-    </div>
-    
-    <div id="prod-sections" class="prod-sections-desktop">
-      <div style="text-align:center;padding:40px;color:var(--silver);font-family:'DM Mono',monospace;">Loading Live Inventory...</div>
+    <div class="catalog-layout" id="catalog-layout">
+      <aside class="catalog-sidebar" id="catalog-sidebar" aria-label="Product filters">
+        <div class="catalog-sidebar-head">
+          <strong>Filters</strong>
+          <button type="button" class="catalog-sidebar-close" onclick="closeCatalogFilters()" aria-label="Close filters">×</button>
+        </div>
+        <div class="catalog-facet" id="facet-availability">
+          <div class="catalog-facet-title">Availability</div>
+          <label class="catalog-check">
+            <input type="checkbox" id="filter-instock" onchange="applyCatalogFilters()"/>
+            <span>In stock only</span>
+          </label>
+        </div>
+        <div class="catalog-facet" id="facet-main">
+          <div class="catalog-facet-title">Department</div>
+          <div class="catalog-facet-opts" id="facet-main-opts"></div>
+        </div>
+        <div class="catalog-facet" id="facet-sub">
+          <div class="catalog-facet-title">Category</div>
+          <div class="catalog-facet-opts" id="facet-sub-opts"></div>
+        </div>
+        <div class="catalog-facet" id="facet-size">
+          <div class="catalog-facet-title">Size</div>
+          <div class="catalog-facet-opts catalog-facet-scroll" id="facet-size-opts"></div>
+        </div>
+        <button type="button" class="btn-ghost catalog-clear-filters" onclick="clearAllCatalogFilters()">Clear filters</button>
+      </aside>
+      <div class="catalog-sidebar-backdrop" id="catalog-sidebar-backdrop" onclick="closeCatalogFilters()" hidden></div>
+
+      <div id="prod-sections" class="prod-sections-desktop sku-grid">
+        <div style="text-align:center;padding:40px;color:var(--silver);font-family:'DM Mono',monospace;grid-column:1/-1;">Loading Live Inventory...</div>
+      </div>
     </div>
     
   </div>
@@ -134,8 +150,10 @@ let isLoggedIn = false;
 
 // --- DYNAMIC PRODUCT RENDERER (CLOUDFLARE D1) ---
 window.catProductGroups = null;
+window.catSkuItems = null;
 window.catActiveMain = 'all';
 window.catActiveSub = 'all';
+window.catActiveSizes = {};
 
 function catEscAttr(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -147,31 +165,74 @@ function catMainKey(mainCat) {
   return (mainCat === '' || mainCat == null) ? '__EMPTY__' : String(mainCat);
 }
 
+function sizeSortKey(size) {
+  var norm = window.normalizeProductSize ? window.normalizeProductSize(size) : String(size || '');
+  var m = String(norm).match(/^(\d+(?:\.\d+)?)/);
+  var n = m ? parseFloat(m[1]) : 9999;
+  return [n, String(size || '')];
+}
+
+function toggleCatalogFilters() {
+  var layout = document.getElementById('catalog-layout');
+  var btn = document.getElementById('catalog-filter-toggle');
+  var open = layout && layout.classList.toggle('filters-open');
+  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  var backdrop = document.getElementById('catalog-sidebar-backdrop');
+  if (backdrop) backdrop.hidden = !open;
+}
+function closeCatalogFilters() {
+  var layout = document.getElementById('catalog-layout');
+  if (layout) layout.classList.remove('filters-open');
+  var btn = document.getElementById('catalog-filter-toggle');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+  var backdrop = document.getElementById('catalog-sidebar-backdrop');
+  if (backdrop) backdrop.hidden = true;
+}
+
+function clearAllCatalogFilters() {
+  window.catActiveMain = 'all';
+  window.catActiveSub = 'all';
+  window.catActiveSizes = {};
+  var stock = document.getElementById('filter-instock');
+  if (stock) stock.checked = false;
+  var searchEl = document.getElementById('prod-search');
+  if (searchEl) searchEl.value = '';
+  rebuildFacetUI();
+  applyCatalogFilters();
+  try { history.replaceState(null, '', 'products.html'); } catch (_) {}
+}
+
 function applyCatalogFilters() {
   var searchEl = document.getElementById('prod-search');
   var qt = (searchEl && searchEl.value) ? searchEl.value.trim().toLowerCase() : '';
   var main = window.catActiveMain;
   var sub = window.catActiveSub;
+  var sizeMap = window.catActiveSizes || {};
+  var sizeKeys = Object.keys(sizeMap).filter(function(k){ return sizeMap[k]; });
+  var stockOnly = !!(document.getElementById('filter-instock') || {}).checked;
   var shown = 0;
-  document.querySelectorAll('.prod-section').forEach(function(sec) {
-    var mk = sec.getAttribute('data-main-key') || '__EMPTY__';
-    var sk = sec.getAttribute('data-sub') || '';
+  var total = 0;
+  document.querySelectorAll('.sku-card').forEach(function(card) {
+    total += 1;
+    var mk = card.getAttribute('data-main-key') || '__EMPTY__';
+    var sk = card.getAttribute('data-sub') || '';
+    var size = card.getAttribute('data-size') || '';
     var mainOk = (main === 'all' || mk === main);
     var subOk = (sub === 'all' || sk === sub);
+    var sizeOk = !sizeKeys.length || sizeKeys.indexOf(size) !== -1;
+    var stockOk = !stockOnly || card.getAttribute('data-instock') === '1';
     var searchOk = true;
     if (qt) {
-      var hay = (sec.getAttribute('data-search') || '').toLowerCase();
+      var hay = (card.getAttribute('data-search') || '').toLowerCase();
       searchOk = hay.indexOf(qt) !== -1;
     }
-    var show = mainOk && subOk && searchOk;
-    sec.style.display = show ? '' : 'none';
-    // Shop-list mode keeps rows expanded — never collapse on filter.
-    if (sec.classList.contains('shop-list-item')) sec.classList.add('open');
-    else if (!qt) sec.classList.remove('open');
+    var show = mainOk && subOk && sizeOk && stockOk && searchOk;
+    card.style.display = show ? '' : 'none';
     if (show) shown += 1;
   });
   updateCatalogCrumb();
-  updateCatalogResultMeta(shown, qt);
+  updateCatalogResultMeta(shown, total, qt);
+  syncFacetCheckedState();
 }
 
 function catalogMainLabel(mainKey) {
@@ -191,15 +252,15 @@ function catalogMainLabel(mainKey) {
 function updateCatalogCrumb() {
   var el = document.getElementById('catalog-crumb');
   if (!el) return;
-  var parts = ['<a href="products.html" onclick="event.preventDefault();clearCatalogPath();">All products</a>'];
   var main = window.catActiveMain;
   var sub = window.catActiveSub;
-  var qtEl = document.getElementById('prod-search');
-  var qt = qtEl && qtEl.value ? qtEl.value.trim() : '';
+  var searchEl = document.getElementById('prod-search');
+  var qt = (searchEl && searchEl.value) ? searchEl.value.trim() : '';
+  var parts = ['<a href="products.html" onclick="event.preventDefault();clearAllCatalogFilters();">All products</a>'];
   if (main && main !== 'all') {
     var lab = catalogMainLabel(main);
     parts.push('<span class="catalog-crumb-sep">›</span>');
-    parts.push('<a href="products.html?main=' + encodeURIComponent(lab) + '" onclick="event.preventDefault();setCatMain(\'' + String(main).replace(/'/g, "\\'") + '\', null);">' + catEscHtml(lab) + '</a>');
+    parts.push('<a href="products.html?main=' + encodeURIComponent(lab) + '" onclick="event.preventDefault();setCatMain(\'' + String(main).replace(/'/g, "\\'") + '\');">' + catEscHtml(lab) + '</a>');
   }
   if (sub && sub !== 'all') {
     parts.push('<span class="catalog-crumb-sep">›</span>');
@@ -212,240 +273,139 @@ function updateCatalogCrumb() {
   el.innerHTML = parts.join('');
 }
 
-function updateCatalogResultMeta(shown, qt) {
+function updateCatalogResultMeta(shown, total, qt) {
   var el = document.getElementById('catalog-result-meta');
   if (!el) return;
-  if (!window.catProductGroups) {
-    el.textContent = '';
-    return;
-  }
-  var total = Object.keys(window.catProductGroups).length;
-  var bits = [shown + ' of ' + total + ' products'];
+  if (!total && window.catSkuItems) total = window.catSkuItems.length;
+  if (!total) { el.textContent = ''; return; }
+  var bits = [shown + ' of ' + total + ' items'];
   if (qt) bits.push('matching “' + qt + '”');
   el.textContent = bits.join(' · ');
 }
 
-function clearCatalogPath() {
-  var searchEl = document.getElementById('prod-search');
-  if (searchEl) searchEl.value = '';
-  setCatMain('all', null);
-  try { history.replaceState(null, '', 'products.html'); } catch (_) {}
-  mcatOnSearch('');
-}
-
-function rebuildSubFilters() {
-  var groups = window.catProductGroups;
-  var subBar = document.getElementById('sub-filters');
-  if (!groups || !subBar) return;
-  var main = window.catActiveMain;
-  var subs = new Set();
-  Object.keys(groups).forEach(function(code) {
-    var data = groups[code];
-    var mk = catMainKey(data.mainCat);
-    if (main === 'all' || mk === main) subs.add(data.subCat || code);
-  });
-  var subArr = Array.from(subs).sort(function(a, b) { return a.localeCompare(b); });
-  subBar.innerHTML = '';
-  var allB = document.createElement('button');
-  allB.type = 'button';
-  allB.className = 'filter-btn on';
-  allB.textContent = 'All';
-  allB.setAttribute('data-cat-sub', 'all');
-  allB.onclick = function() { setCatSub('all', this); };
-  subBar.appendChild(allB);
-  subArr.forEach(function(sub) {
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'filter-btn';
-    btn.textContent = sub;
-    btn.setAttribute('data-cat-sub', sub);
-    btn.onclick = function() { setCatSub(sub, this); };
-    subBar.appendChild(btn);
-  });
+function setCatMain(key) {
+  window.catActiveMain = key || 'all';
   window.catActiveSub = 'all';
-  syncMobileSubSelect();
+  window.catActiveSizes = {};
+  rebuildFacetUI();
+  applyCatalogFilters();
+  closeCatalogFilters();
 }
 
-function buildMainFilters(groups) {
-  var mainBar = document.getElementById('main-filters');
-  if (!mainBar) return;
-  var mainsMap = new Map();
-  Object.keys(groups).forEach(function(code) {
-    var g = groups[code];
-    var key = catMainKey(g.mainCat);
-    var lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
-    mainsMap.set(key, lab);
+function setCatSub(sub) {
+  window.catActiveSub = sub || 'all';
+  rebuildFacetUI();
+  applyCatalogFilters();
+}
+
+function toggleSizeFilter(size, checked) {
+  if (!window.catActiveSizes) window.catActiveSizes = {};
+  if (checked) window.catActiveSizes[size] = true;
+  else delete window.catActiveSizes[size];
+  applyCatalogFilters();
+}
+
+function syncFacetCheckedState() {
+  document.querySelectorAll('#facet-main-opts input[data-main]').forEach(function(inp) {
+    inp.checked = (inp.getAttribute('data-main') === window.catActiveMain) ||
+      (window.catActiveMain === 'all' && inp.getAttribute('data-main') === 'all');
   });
-  var keys = Array.from(mainsMap.keys()).sort(function(a, b) {
+  document.querySelectorAll('#facet-sub-opts input[data-sub]').forEach(function(inp) {
+    inp.checked = (inp.getAttribute('data-sub') === window.catActiveSub) ||
+      (window.catActiveSub === 'all' && inp.getAttribute('data-sub') === 'all');
+  });
+  document.querySelectorAll('#facet-size-opts input[data-size]').forEach(function(inp) {
+    var s = inp.getAttribute('data-size');
+    inp.checked = !!(window.catActiveSizes && window.catActiveSizes[s]);
+  });
+}
+
+function rebuildFacetUI() {
+  var items = window.catSkuItems || [];
+  var mainOpts = document.getElementById('facet-main-opts');
+  var subOpts = document.getElementById('facet-sub-opts');
+  var sizeOpts = document.getElementById('facet-size-opts');
+  if (!mainOpts || !subOpts || !sizeOpts) return;
+
+  var mainsMap = {};
+  var subsMap = {};
+  var sizesMap = {};
+  items.forEach(function(it) {
+    mainsMap[it.mainKey] = it.mainLabel;
+    if (window.catActiveMain === 'all' || it.mainKey === window.catActiveMain) {
+      subsMap[it.sub] = (subsMap[it.sub] || 0) + 1;
+      sizesMap[it.size] = (sizesMap[it.size] || 0) + 1;
+    }
+  });
+
+  var mainKeys = Object.keys(mainsMap).sort(function(a, b) {
     if (a === '__EMPTY__') return 1;
     if (b === '__EMPTY__') return -1;
-    return mainsMap.get(a).localeCompare(mainsMap.get(b));
+    return mainsMap[a].localeCompare(mainsMap[b]);
   });
-  mainBar.innerHTML = '';
-  var allMain = document.createElement('button');
-  allMain.type = 'button';
-  allMain.className = 'filter-btn on';
-  allMain.textContent = 'All';
-  allMain.setAttribute('data-cat-main', 'all');
-  allMain.onclick = function() { setCatMain('all', this); };
-  mainBar.appendChild(allMain);
-  keys.forEach(function(k) {
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'filter-btn';
-    btn.textContent = mainsMap.get(k);
-    btn.setAttribute('data-cat-main', k);
-    btn.onclick = function() { setCatMain(k, this); };
-    mainBar.appendChild(btn);
+  var mainHtml = '<label class="catalog-check"><input type="radio" name="facet-main" data-main="all" ' +
+    (window.catActiveMain === 'all' ? 'checked' : '') +
+    ' onchange="setCatMain(\'all\')"/><span>All <em>(' + items.length + ')</em></span></label>';
+  mainKeys.forEach(function(k) {
+    var count = items.filter(function(it){ return it.mainKey === k; }).length;
+    mainHtml += '<label class="catalog-check"><input type="radio" name="facet-main" data-main="' + catEscAttr(k) + '" ' +
+      (window.catActiveMain === k ? 'checked' : '') +
+      ' onchange="setCatMain(\'' + String(k).replace(/'/g, "\\'") + '\')"/><span>' +
+      catEscHtml(mainsMap[k]) + ' <em>(' + count + ')</em></span></label>';
   });
-  window.catActiveMain = 'all';
-  window.catActiveSub = 'all';
-  populateMobileMainSelect(groups);
-  rebuildSubFilters();
-  applyCatalogFilters();
-}
+  mainOpts.innerHTML = mainHtml;
 
-function setCatMain(mainKey, btn) {
-  window.catActiveMain = mainKey;
-  window.catActiveSub = 'all';
-  var mainBar = document.getElementById('main-filters');
-  if (mainBar) {
-    mainBar.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('on'); });
-    if (btn) btn.classList.add('on');
-    else {
-      var hit = null;
-      mainBar.querySelectorAll('.filter-btn').forEach(function(b) {
-        if (b.getAttribute('data-cat-main') === mainKey) hit = b;
-      });
-      if (!hit) hit = mainBar.querySelector('[data-cat-main="all"]');
-      if (hit) hit.classList.add('on');
-    }
-  }
-  rebuildSubFilters();
-  var mm = document.getElementById('mobile-main-select');
-  if (mm) mm.value = mainKey;
-  applyCatalogFilters();
-}
-
-function setCatSub(subVal, btn) {
-  window.catActiveSub = subVal;
-  var subBar = document.getElementById('sub-filters');
-  if (subBar) {
-    subBar.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('on'); });
-    if (btn) btn.classList.add('on');
-    else {
-      var sel = null;
-      subBar.querySelectorAll('.filter-btn').forEach(function(b) {
-        if (b.getAttribute('data-cat-sub') === subVal) sel = b;
-      });
-      if (!sel) sel = subBar.querySelector('[data-cat-sub="all"]');
-      if (sel) sel.classList.add('on');
-    }
-  }
-  var ms = document.getElementById('mobile-sub-select');
-  if (ms) ms.value = subVal;
-  applyCatalogFilters();
-}
-
-function populateMobileMainSelect(groups) {
-  var mm = document.getElementById('mobile-main-select');
-  if (!mm) return;
-  var mainsMap = new Map();
-  Object.keys(groups).forEach(function(code) {
-    var g = groups[code];
-    var key = catMainKey(g.mainCat);
-    var lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
-    mainsMap.set(key, lab);
+  var subKeys = Object.keys(subsMap).sort(function(a, b){ return a.localeCompare(b); });
+  var subHtml = '<label class="catalog-check"><input type="radio" name="facet-sub" data-sub="all" ' +
+    (window.catActiveSub === 'all' ? 'checked' : '') +
+    ' onchange="setCatSub(\'all\')"/><span>All</span></label>';
+  subKeys.forEach(function(sub) {
+    subHtml += '<label class="catalog-check"><input type="radio" name="facet-sub" data-sub="' + catEscAttr(sub) + '" ' +
+      (window.catActiveSub === sub ? 'checked' : '') +
+      ' onchange="setCatSub(\'' + String(sub).replace(/'/g, "\\'") + '\')"/><span>' +
+      catEscHtml(sub) + ' <em>(' + subsMap[sub] + ')</em></span></label>';
   });
-  var keys = Array.from(mainsMap.keys()).sort(function(a, b) {
-    if (a === '__EMPTY__') return 1;
-    if (b === '__EMPTY__') return -1;
-    return mainsMap.get(a).localeCompare(mainsMap.get(b));
-  });
-  mm.innerHTML = '<option value="all">All departments</option>';
-  keys.forEach(function(k) {
-    var opt = document.createElement('option');
-    opt.value = k;
-    opt.textContent = mainsMap.get(k);
-    mm.appendChild(opt);
-  });
-}
+  subOpts.innerHTML = subHtml;
 
-function syncMobileSubSelect() {
-  var groups = window.catProductGroups;
-  var ms = document.getElementById('mobile-sub-select');
-  var mm = document.getElementById('mobile-main-select');
-  if (!ms || !groups) return;
-  var main = window.catActiveMain;
-  if (mm && mm.value !== main) mm.value = main;
-  var subs = new Set();
-  Object.keys(groups).forEach(function(code) {
-    var data = groups[code];
-    var mk = catMainKey(data.mainCat);
-    if (main === 'all' || mk === main) subs.add(data.subCat || code);
+  var sizeKeys = Object.keys(sizesMap).sort(function(a, b) {
+    var ka = sizeSortKey(a), kb = sizeSortKey(b);
+    if (ka[0] !== kb[0]) return ka[0] - kb[0];
+    return ka[1].localeCompare(kb[1]);
   });
-  var subArr = Array.from(subs).sort(function(a, b) { return a.localeCompare(b); });
-  var prev = window.catActiveSub;
-  ms.innerHTML = '<option value="all">All types</option>';
-  subArr.forEach(function(sub) {
-    var opt = document.createElement('option');
-    opt.value = sub;
-    opt.textContent = sub;
-    ms.appendChild(opt);
+  var sizeHtml = '';
+  if (!sizeKeys.length) sizeHtml = '<div class="catalog-facet-empty">No sizes</div>';
+  sizeKeys.forEach(function(size) {
+    var checked = !!(window.catActiveSizes && window.catActiveSizes[size]);
+    sizeHtml += '<label class="catalog-check"><input type="checkbox" data-size="' + catEscAttr(size) + '" ' +
+      (checked ? 'checked' : '') +
+      ' onchange="toggleSizeFilter(\'' + String(size).replace(/'/g, "\\'") + '\', this.checked)"/><span>' +
+      catEscHtml(size) + ' <em>(' + sizesMap[size] + ')</em></span></label>';
   });
-  if (prev !== 'all' && subArr.indexOf(prev) !== -1) {
-    ms.value = prev;
-    window.catActiveSub = prev;
-    var subBar = document.getElementById('sub-filters');
-    if (subBar) {
-      subBar.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('on'); });
-      var bHit = null;
-      subBar.querySelectorAll('.filter-btn').forEach(function(b) {
-        if (b.getAttribute('data-cat-sub') === prev) bHit = b;
-      });
-      if (bHit) bHit.classList.add('on');
-    }
-  } else {
-    ms.value = 'all';
-    window.catActiveSub = 'all';
-  }
-}
-
-function onMobileMainChange(v) {
-  setCatMain(v, null);
-}
-
-function onMobileSubChange(v) {
-  setCatSub(v, null);
+  sizeOpts.innerHTML = sizeHtml;
 }
 
 function applyUrlCategoryFilter() {
-  const params = new URLSearchParams(window.location.search);
-  const mainParam = params.get('main');
-  const qParam = params.get('q');
-  if (qParam) {
-    var searchEl = document.getElementById('prod-search');
-    if (searchEl) searchEl.value = qParam;
-    var navInput = document.getElementById('nav-search-input');
-    if (navInput) navInput.value = qParam;
-  }
-  if (mainParam && window.catProductGroups) {
-    const groups = window.catProductGroups;
-    let matchedKey = null;
-    Object.keys(groups).forEach(function (code) {
-      const g = groups[code];
-      const lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
-      if (lab.toLowerCase() === mainParam.toLowerCase()) matchedKey = catMainKey(g.mainCat);
-    });
-    if (matchedKey) setCatMain(matchedKey, null);
-  } else {
-    applyCatalogFilters();
-  }
-  if (qParam) mcatOnSearch(qParam);
-}
-
-function catalogCacheKey() {
-  return 'apbs_catalog_v1_' + (isLoggedIn ? 'trade' : 'public');
+  try {
+    var params = new URLSearchParams(window.location.search || '');
+    var mainQ = (params.get('main') || '').trim();
+    var subQ = (params.get('sub') || '').trim();
+    var q = (params.get('q') || '').trim();
+    if (q) {
+      var searchEl = document.getElementById('prod-search');
+      if (searchEl && !searchEl.value) searchEl.value = q;
+    }
+    if (mainQ) {
+      var groups = window.catProductGroups || {};
+      var matchKey = null;
+      Object.keys(groups).forEach(function(code) {
+        var g = groups[code];
+        var lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
+        if (lab.toLowerCase() === mainQ.toLowerCase()) matchKey = catMainKey(g.mainCat);
+      });
+      if (matchKey) window.catActiveMain = matchKey;
+    }
+    if (subQ) window.catActiveSub = subQ;
+  } catch (_) {}
 }
 
 function rowsToGroups(rows) {
@@ -476,6 +436,41 @@ function rowsToGroups(rows) {
   return groups;
 }
 
+function groupsToSkuItems(groups) {
+  var items = [];
+  Object.keys(groups).forEach(function(code) {
+    var data = groups[code];
+    var mainKey = catMainKey(data.mainCat);
+    var mainLabel = (data.mainCat === '' || data.mainCat == null) ? 'Other' : String(data.mainCat);
+    var subLabel = data.subCat || code;
+    (data.rows || []).forEach(function(item) {
+      var sizeCanon = (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(item.size);
+      items.push({
+        code: code,
+        desc: data.desc || '',
+        image: data.image || 'images/logo.png',
+        mainKey: mainKey,
+        mainLabel: mainLabel,
+        sub: subLabel,
+        size: sizeCanon || String(item.size || ''),
+        sizeDisplay: item.size,
+        pack: item.pack,
+        qty: item.qty,
+        inStock: !!item.inStock,
+        price: item.price
+      });
+    });
+  });
+  items.sort(function(a, b) {
+    var c = a.desc.localeCompare(b.desc);
+    if (c) return c;
+    var ka = sizeSortKey(a.size), kb = sizeSortKey(b.size);
+    if (ka[0] !== kb[0]) return ka[0] - kb[0];
+    return ka[1].localeCompare(kb[1]);
+  });
+  return items;
+}
+
 function shopQtyControlsHtml(item, opts) {
   opts = opts || {};
   var isOOS = opts.isOOS;
@@ -494,7 +489,7 @@ function shopQtyControlsHtml(item, opts) {
   var cartonOnly = !!(sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess));
   var qtyLabel = cartonOnly ? 'Ctns' : 'Qty';
   var step = 1;
-  var btnLabel = isOOS ? 'Backorder' : 'Add';
+  var btnLabel = isOOS ? 'Backorder' : 'Add to cart';
   var btnClass = isOOS ? 'add-to-cart-btn shop-backorder-btn' : 'add-to-cart-btn';
   return '<div class="shop-buy">' +
     '<label class="shop-qty-wrap"><span class="shop-qty-label">' + qtyLabel + '</span>' +
@@ -509,90 +504,59 @@ function shopQtyControlsHtml(item, opts) {
 function paintCatalogGroups(groups) {
   const container = document.getElementById('prod-sections');
   if (!container) return;
-  container.innerHTML = '';
-  const sectionChunks = [];
-
-  for (const [code, data] of Object.entries(groups)) {
-      var mainKey = catMainKey(data.mainCat);
-      var subLabel = data.subCat || code;
-      const searchAttr = (code + ' ' + data.desc + ' ' + data.mainCat + ' ' + subLabel + ' ' + data.rows.map(function (r) { return r.size; }).join(' '))
-        .toLowerCase()
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;');
-
-      var sizeCount = data.rows.length;
-      var inStockCount = data.rows.filter(function (r) {
-        return isLoggedIn ? r.qty > 0 : !!r.inStock;
-      }).length;
-      var statsLabel = sizeCount + (sizeCount === 1 ? ' size' : ' sizes');
-      var oosCount = sizeCount - inStockCount;
-      if (inStockCount > 0) statsLabel += ' · ' + inStockCount + ' in stock';
-      if (oosCount > 0) statsLabel += ' · ' + oosCount + ' backorder';
-      if (inStockCount === 0 && oosCount === 0) statsLabel += ' · call';
-
-      let html = `
-        <div class="prod-section shop-list-item shop-tile open" id="${code.replace(/"/g, '')}" data-code="${code.replace(/"/g, '')}" data-main-key="${catEscAttr(mainKey)}" data-sub="${catEscAttr(subLabel)}" data-search="${searchAttr}">
-          <div class="prod-section-hdr shop-list-hdr">
-            <div class="prod-section-thumb" onclick="openLightbox('${data.image}','${data.desc.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')">
-              <img src="${data.image}" alt="${data.desc.replace(/"/g,"&quot;")}" class="cat-img" loading="lazy">
-            </div>
-            <div class="prod-section-meta">
-              <div class="prod-section-code">${catEscHtml(code)}</div>
-              <div class="prod-section-title">${catEscHtml(data.desc)}</div>
-              <div class="prod-section-stats">${catEscHtml(statsLabel)}</div>
-            </div>
-          </div>
-          <div class="prod-section-body">
-            <div class="shop-size-stack">
-      `;
-      
-      data.rows.forEach(item => {
-        let isOOS = isLoggedIn ? item.qty <= 0 : !item.inStock;
-        let availHtml = isOOS
-          ? `<span class="shop-stock shop-stock-out">Out of stock · backorder OK</span>`
-          : (isLoggedIn
-            ? `<span class="shop-stock shop-stock-in">In stock · ${item.qty}</span>`
-            : `<span class="shop-stock shop-stock-in">In stock</span>`);
-        let priceHtml = isLoggedIn
-          ? `<span class="shop-price">$${item.price.toFixed(2)}</span>`
-          : `<span class="price-locked">Login for price</span>`;
-        
-        let sizeCanon = (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(item.size);
-        let sizeAttr = sizeCanon.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-        let descClean = data.desc.replace(/"/g,"&quot;");
-        let buyHtml = shopQtyControlsHtml(item, {
-          isOOS: isOOS,
-          code: code,
-          sizeAttr: sizeAttr,
-          descClean: descClean
-        });
-        
-        html += `
-          <div class="shop-size-line ${isOOS ? 'shop-row-oos' : 'shop-row-ok'}" data-code="${code}">
-            <div class="shop-size-info">
-              <div class="shop-size-top">
-                <span class="shop-size">${catEscHtml(item.size)}</span>
-                <span class="qty-badge">${item.pack}/CTN</span>
-              </div>
-              ${availHtml}
-            </div>
-            <div class="shop-size-order">
-              ${priceHtml}
-              ${buyHtml}
-            </div>
-          </div>
-        `;
-      });
-      
-      html += `</div></div></div>`;
-      sectionChunks.push(html);
-  }
-
-  container.innerHTML = sectionChunks.join('');
   window.catProductGroups = groups;
-  buildMainFilters(groups);
+  var items = groupsToSkuItems(groups);
+  window.catSkuItems = items;
+  const chunks = [];
+
+  items.forEach(function(it) {
+    var isOOS = isLoggedIn ? it.qty <= 0 : !it.inStock;
+    var inStockFlag = isLoggedIn ? (it.qty > 0 ? '1' : '0') : (it.inStock ? '1' : '0');
+    var availHtml = isOOS
+      ? '<span class="shop-stock shop-stock-out">Out of stock · backorder OK</span>'
+      : (isLoggedIn
+        ? '<span class="shop-stock shop-stock-in">In stock · ' + it.qty + '</span>'
+        : '<span class="shop-stock shop-stock-in">In stock</span>');
+    var priceHtml = isLoggedIn
+      ? '<span class="shop-price">$' + Number(it.price).toFixed(2) + '</span>'
+      : '<span class="price-locked">Login for price</span>';
+    var sizeAttr = String(it.size).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    var descClean = String(it.desc).replace(/"/g,'&quot;');
+    var title = (it.desc + ' — ' + (it.sizeDisplay || it.size)).trim();
+    var searchAttr = (it.code + ' ' + it.desc + ' ' + it.mainLabel + ' ' + it.sub + ' ' + it.size + ' ' + (it.sizeDisplay || ''))
+      .toLowerCase().replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    var buyHtml = shopQtyControlsHtml(it, {
+      isOOS: isOOS,
+      code: it.code,
+      sizeAttr: sizeAttr,
+      descClean: descClean
+    });
+    var img = it.image || 'images/logo.png';
+    chunks.push(
+      '<article class="sku-card' + (isOOS ? ' sku-card-oos' : '') + '"' +
+      ' data-code="' + catEscAttr(it.code) + '"' +
+      ' data-main-key="' + catEscAttr(it.mainKey) + '"' +
+      ' data-sub="' + catEscAttr(it.sub) + '"' +
+      ' data-size="' + catEscAttr(it.size) + '"' +
+      ' data-instock="' + inStockFlag + '"' +
+      ' data-search="' + searchAttr + '">' +
+      '<button type="button" class="sku-card-img" onclick="openLightbox(\'' + catEscAttr(img).replace(/'/g, "\\'") + '\',\'' + catEscAttr(title).replace(/'/g, "\\'") + '\')">' +
+      '<img src="' + catEscAttr(img) + '" alt="" loading="lazy"/></button>' +
+      '<div class="sku-card-body">' +
+      '<div class="sku-card-code">' + catEscHtml(it.code) + '</div>' +
+      '<h3 class="sku-card-title">' + catEscHtml(title) + '</h3>' +
+      '<div class="sku-card-meta"><span class="qty-badge">' + catEscHtml(String(it.pack)) + '/CTN</span> ' + availHtml + '</div>' +
+      '<div class="sku-card-buy">' + priceHtml + buyHtml + '</div>' +
+      '</div></article>'
+    );
+  });
+
+  container.innerHTML = chunks.length
+    ? chunks.join('')
+    : '<div class="catalog-empty" style="grid-column:1/-1;">No products found.</div>';
   applyUrlCategoryFilter();
-  initMobileCatalog(groups);
+  rebuildFacetUI();
+  applyCatalogFilters();
 }
 
 async function fetchAndRenderProducts() {
@@ -630,287 +594,8 @@ async function fetchAndRenderProducts() {
   }
 }
 
-// ── Mobile glanceable catalog (category → type → product → sizes) ──
-window.mcatLevel = 'main';
-window.mcatMain = null;
-window.mcatSub = null;
-window.mcatCode = null;
-
-function isMobileCatalog() {
-  return window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-}
-
-function mcatCounts(groups) {
-  var mains = {};
-  Object.keys(groups).forEach(function (code) {
-    var g = groups[code];
-    var key = catMainKey(g.mainCat);
-    var lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
-    if (!mains[key]) mains[key] = { key: key, label: lab, products: 0, subs: {} };
-    mains[key].products += 1;
-    var sub = g.subCat || code;
-    if (!mains[key].subs[sub]) mains[key].subs[sub] = 0;
-    mains[key].subs[sub] += 1;
-  });
-  return mains;
-}
-
-function mcatShowPanel(id) {
-  ['mcat-panel-main', 'mcat-panel-sub', 'mcat-panel-list', 'mcat-panel-detail'].forEach(function (pid) {
-    var el = document.getElementById(pid);
-    if (el) el.hidden = (pid !== id);
-  });
-}
-
-function mcatRenderCrumb() {
-  var el = document.getElementById('mcat-crumb');
-  if (!el) return;
-  var parts = [];
-  parts.push('<button type="button" class="mcat-crumb-btn" onclick="mcatGoMain()">All</button>');
-  if (window.mcatMain) {
-    var mains = mcatCounts(window.catProductGroups || {});
-    var lab = (mains[window.mcatMain] && mains[window.mcatMain].label) || window.mcatMain;
-    parts.push('<span class="mcat-crumb-sep">›</span>');
-    parts.push('<button type="button" class="mcat-crumb-btn" onclick="mcatGoSub()">' + catEscHtml(lab) + '</button>');
-  }
-  if (window.mcatSub) {
-    parts.push('<span class="mcat-crumb-sep">›</span>');
-    parts.push('<button type="button" class="mcat-crumb-btn" onclick="mcatGoList()">' + catEscHtml(window.mcatSub) + '</button>');
-  }
-  if (window.mcatCode && window.catProductGroups && window.catProductGroups[window.mcatCode]) {
-    parts.push('<span class="mcat-crumb-sep">›</span>');
-    parts.push('<span class="mcat-crumb-now">' + catEscHtml(window.catProductGroups[window.mcatCode].desc || window.mcatCode) + '</span>');
-  }
-  el.innerHTML = parts.join('');
-  el.style.display = (window.mcatLevel === 'main' && !((document.getElementById('prod-search') || {}).value || '').trim()) ? 'none' : 'flex';
-}
-
-function mcatGoMain() {
-  window.mcatLevel = 'main';
-  window.mcatMain = null;
-  window.mcatSub = null;
-  window.mcatCode = null;
-  var s = document.getElementById('prod-search');
-  if (s) s.value = '';
-  mcatRenderMain();
-}
-
-function mcatGoSub() {
-  if (!window.mcatMain) return mcatGoMain();
-  window.mcatLevel = 'sub';
-  window.mcatSub = null;
-  window.mcatCode = null;
-  mcatRenderSub(window.mcatMain);
-}
-
-function mcatGoList() {
-  if (!window.mcatMain || !window.mcatSub) return mcatGoSub();
-  window.mcatLevel = 'list';
-  window.mcatCode = null;
-  mcatRenderList(window.mcatMain, window.mcatSub);
-}
-
-function mcatRenderMain() {
-  var panel = document.getElementById('mcat-panel-main');
-  if (!panel || !window.catProductGroups) return;
-  var mains = mcatCounts(window.catProductGroups);
-  var keys = Object.keys(mains).sort(function (a, b) {
-    if (a === '__EMPTY__') return 1;
-    if (b === '__EMPTY__') return -1;
-    return mains[a].label.localeCompare(mains[b].label);
-  });
-  var html = '<div class="mcat-title">Browse by department</div><div class="mcat-tile-grid">';
-  keys.forEach(function (k) {
-    var m = mains[k];
-    html += '<button type="button" class="mcat-tile" onclick="mcatOpenMain(\'' + catEscAttr(k).replace(/'/g, "\\'") + '\')">' +
-      '<span class="mcat-tile-name">' + catEscHtml(m.label) + '</span>' +
-      '<span class="mcat-tile-meta">' + m.products + ' product' + (m.products === 1 ? '' : 's') + '</span>' +
-      '<span class="mcat-tile-arr">→</span></button>';
-  });
-  html += '</div>';
-  panel.innerHTML = html;
-  mcatShowPanel('mcat-panel-main');
-  mcatRenderCrumb();
-  window.mcatLevel = 'main';
-}
-
-function mcatOpenMain(key) {
-  window.mcatMain = key;
-  window.mcatSub = null;
-  window.mcatCode = null;
-  var mains = mcatCounts(window.catProductGroups || {});
-  var m = mains[key];
-  if (m) {
-    var subs = Object.keys(m.subs);
-    if (subs.length === 1) {
-      window.mcatSub = subs[0];
-      window.mcatLevel = 'list';
-      mcatRenderList(key, subs[0]);
-      return;
-    }
-  }
-  window.mcatLevel = 'sub';
-  mcatRenderSub(key);
-}
-
-function mcatRenderSub(mainKey) {
-  var panel = document.getElementById('mcat-panel-sub');
-  if (!panel || !window.catProductGroups) return;
-  var mains = mcatCounts(window.catProductGroups);
-  var m = mains[mainKey];
-  if (!m) return mcatGoMain();
-  var subs = Object.keys(m.subs).sort(function (a, b) { return a.localeCompare(b); });
-  var html = '<div class="mcat-title">' + catEscHtml(m.label) + '</div><div class="mcat-row-list">';
-  subs.forEach(function (sub) {
-    html += '<button type="button" class="mcat-row" onclick="mcatOpenSub(\'' +
-      String(sub).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
-      '<span class="mcat-row-name">' + catEscHtml(sub) + '</span>' +
-      '<span class="mcat-row-meta">' + m.subs[sub] + '</span>' +
-      '<span class="mcat-tile-arr">→</span></button>';
-  });
-  html += '</div>';
-  panel.innerHTML = html;
-  mcatShowPanel('mcat-panel-sub');
-  mcatRenderCrumb();
-}
-
-function mcatOpenSub(sub) {
-  window.mcatSub = sub;
-  window.mcatCode = null;
-  window.mcatLevel = 'list';
-  mcatRenderList(window.mcatMain, sub);
-}
-
-function mcatProductsFor(mainKey, subLabel, query) {
-  var groups = window.catProductGroups || {};
-  var qt = (query || '').trim().toLowerCase();
-  var out = [];
-  Object.keys(groups).forEach(function (code) {
-    var g = groups[code];
-    var mk = catMainKey(g.mainCat);
-    var sub = g.subCat || code;
-    if (!qt) {
-      if (mainKey && mk !== mainKey) return;
-      if (subLabel && sub !== subLabel) return;
-    } else {
-      var hay = (code + ' ' + g.desc + ' ' + g.mainCat + ' ' + sub + ' ' + g.rows.map(function (r) { return r.size; }).join(' ')).toLowerCase();
-      if (hay.indexOf(qt) === -1) return;
-    }
-    out.push({ code: code, data: g });
-  });
-  out.sort(function (a, b) { return String(a.data.desc || '').localeCompare(String(b.data.desc || '')); });
-  return out;
-}
-
-function mcatRenderList(mainKey, subLabel, query) {
-  var panel = document.getElementById('mcat-panel-list');
-  if (!panel) return;
-  var items = mcatProductsFor(mainKey, subLabel, query);
-  var title = query ? ('Search results (' + items.length + ')') : catEscHtml(subLabel || 'Products');
-  var html = '<div class="mcat-title">' + title + '</div>';
-  if (!items.length) {
-    html += '<div class="mcat-empty">No products match. Try another search or go back.</div>';
-  } else {
-    html += '<div class="mcat-row-list">';
-    items.forEach(function (it) {
-      var sizes = it.data.rows.length;
-      html += '<button type="button" class="mcat-row mcat-row-prod" onclick="mcatOpenProduct(\'' +
-        String(it.code).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
-        '<img class="mcat-row-thumb" src="' + catEscAttr(it.data.image || 'images/logo.png') + '" alt="" loading="lazy"/>' +
-        '<span class="mcat-row-text"><span class="mcat-row-code">' + catEscHtml(it.code) + '</span>' +
-        '<span class="mcat-row-name">' + catEscHtml(it.data.desc || '') + '</span>' +
-        '<span class="mcat-row-meta">' + sizes + ' size' + (sizes === 1 ? '' : 's') + '</span></span>' +
-        '<span class="mcat-tile-arr">→</span></button>';
-    });
-    html += '</div>';
-  }
-  panel.innerHTML = html;
-  mcatShowPanel('mcat-panel-list');
-  mcatRenderCrumb();
-}
-
-function mcatOpenProduct(code) {
-  window.mcatCode = code;
-  window.mcatLevel = 'detail';
-  mcatRenderDetail(code);
-}
-
-function mcatRenderDetail(code) {
-  var panel = document.getElementById('mcat-panel-detail');
-  var g = window.catProductGroups && window.catProductGroups[code];
-  if (!panel || !g) return;
-  var html = '<div class="mcat-detail-head">' +
-    '<img class="mcat-detail-img" src="' + catEscAttr(g.image || 'images/logo.png') + '" alt="" onclick="openLightbox(\'' + catEscAttr(g.image || '') + '\',\'' + catEscAttr(g.desc || '').replace(/'/g, "\\'") + '\')"/>' +
-    '<div><div class="mcat-row-code">' + catEscHtml(code) + '</div>' +
-    '<div class="mcat-detail-title">' + catEscHtml(g.desc || '') + '</div></div></div>';
-  html += '<div class="mcat-size-list">';
-  g.rows.forEach(function (item) {
-    var isOOS = isLoggedIn ? item.qty <= 0 : !item.inStock;
-    var avail = isOOS
-      ? '<span class="mcat-oos">Out of stock · backorder OK</span>'
-      : (isLoggedIn
-        ? '<span class="mcat-in">In stock · ' + item.qty + '</span>'
-        : '<span class="mcat-in">In stock</span>');
-    var price = isLoggedIn
-      ? '<span class="mcat-price">$' + item.price.toFixed(2) + '</span>'
-      : '<span class="mcat-price locked">Login for price</span>';
-    var sizeCanon = (window.normalizeProductSize || function (s) { return String(s || '').trim().replace(/"/g, ''); })(item.size);
-    var sizeAttr = sizeCanon.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-    var descClean = String(g.desc || '').replace(/"/g, '&quot;');
-    var buy = shopQtyControlsHtml(item, {
-      isOOS: isOOS,
-      code: code,
-      sizeAttr: sizeAttr,
-      descClean: descClean
-    });
-    html += '<div class="mcat-size-row">' +
-      '<div class="mcat-size-left"><strong>' + catEscHtml(item.size) + '</strong>' +
-      '<div class="mcat-size-pack">' + item.pack + '/CTN</div>' + avail + '</div>' +
-      '<div class="mcat-size-right">' + price + buy + '</div></div>';
-  });
-  html += '</div>';
-  panel.innerHTML = html;
-  mcatShowPanel('mcat-panel-detail');
-  mcatRenderCrumb();
-}
-
-function initMobileCatalog(groups) {
-  if (!groups) return;
-  window.mcatMain = null;
-  window.mcatSub = null;
-  window.mcatCode = null;
-  // Honor ?main= from home category cards
-  var mainParam = new URLSearchParams(window.location.search).get('main');
-  if (mainParam) {
-    var matchedKey = null;
-    Object.keys(groups).forEach(function (code) {
-      var g = groups[code];
-      var lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
-      if (lab.toLowerCase() === mainParam.toLowerCase()) matchedKey = catMainKey(g.mainCat);
-    });
-    if (matchedKey) {
-      window.mcatMain = matchedKey;
-      window.mcatLevel = 'sub';
-      mcatRenderSub(matchedKey);
-      return;
-    }
-  }
-  mcatRenderMain();
-}
-
-function mcatOnSearch(qt) {
-  if (!isMobileCatalog()) return;
-  qt = (qt || '').trim();
-  if (!qt) {
-    if (window.mcatCode) return mcatRenderDetail(window.mcatCode);
-    if (window.mcatSub) return mcatRenderList(window.mcatMain, window.mcatSub);
-    if (window.mcatMain) return mcatRenderSub(window.mcatMain);
-    return mcatRenderMain();
-  }
-  window.mcatLevel = 'list';
-  window.mcatCode = null;
-  mcatRenderList(null, null, qt);
-}
+// Mobile uses the same SKU grid + filter drawer (Supply House–style).
+function mcatOnSearch(qt) { applyCatalogFilters(); }
 
 // Start catalog fetch immediately (layout already in DOM).
 fetchAndRenderProducts();
@@ -936,7 +621,6 @@ if(searchInput){
     clearTimeout(searchDebounce);
     searchDebounce = setTimeout(function(){
       applyCatalogFilters();
-      mcatOnSearch(self.value);
       try {
         var q = self.value.trim();
         var url = q ? ('products.html?q=' + encodeURIComponent(q)) : 'products.html';
