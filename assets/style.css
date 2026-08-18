@@ -1114,33 +1114,48 @@ h1.htitle strong { color: var(--gold); }
 }
 .sku-card:hover{border-color:rgba(200,152,31,.45)}
 .sku-card-img{
+  position:relative;
   display:block;
   width:100%;
   aspect-ratio:1 / 1;
-  padding:14px;
+  flex:0 0 auto;
+  padding:0;
+  margin:0;
   background:rgba(255,255,255,.03);
   border:none;
   border-bottom:1px solid rgba(139,160,178,.1);
   cursor:pointer;
+  overflow:hidden;
+  box-sizing:border-box;
 }
 .sku-card-img img{
-  width:100%;
-  height:100%;
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:calc(100% - 28px);
+  height:calc(100% - 28px);
+  max-width:calc(100% - 28px);
+  max-height:calc(100% - 28px);
+  transform:translate(-50%,-50%);
   object-fit:contain;
+  object-position:center;
   display:block;
+  pointer-events:none;
 }
 .sku-card-body{
   display:flex;
   flex-direction:column;
   gap:8px;
   padding:12px;
-  flex:1;
+  flex:1 1 auto;
+  min-height:0;
 }
 .sku-card-code{
   font-family:'DM Mono',monospace;
   font-size:11px;
   color:var(--gold);
   letter-spacing:.4px;
+  min-height:1.2em;
 }
 .sku-card-title{
   margin:0;
@@ -1153,7 +1168,8 @@ h1.htitle strong { color: var(--gold); }
   -webkit-line-clamp:3;
   -webkit-box-orient:vertical;
   overflow:hidden;
-  min-height:2.8em;
+  height:calc(1.25em * 3);
+  min-height:calc(1.25em * 3);
 }
 .sku-card-meta{
   display:flex;
@@ -1161,6 +1177,7 @@ h1.htitle strong { color: var(--gold); }
   align-items:center;
   gap:8px;
   font-size:12px;
+  min-height:2.4em;
 }
 .sku-card-buy{
   margin-top:auto;
