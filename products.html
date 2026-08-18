@@ -23,7 +23,7 @@
   <div class="page-hero-inner">
     <div class="page-breadcrumb"><a href="index.html">Home</a> › Products</div>
     <div class="page-title" data-r>Product <span>Catalog</span></div>
-    <p class="page-subtitle desktop-only-block" data-r>PVC, DWV, pipe &amp; fittings — tap a card for sizes. Call for bulk quotes.</p>
+    <p class="page-subtitle desktop-only-block" data-r>Search, set qty, add to cart — sizes stay open so you can shop the list fast.</p>
   </div>
 </div>
 
@@ -165,7 +165,9 @@ function applyCatalogFilters() {
     }
     var show = mainOk && subOk && searchOk;
     sec.style.display = show ? '' : 'none';
-    if (!qt) sec.classList.remove('open');
+    // Shop-list mode keeps rows expanded — never collapse on filter.
+    if (sec.classList.contains('shop-list-item')) sec.classList.add('open');
+    else if (!qt) sec.classList.remove('open');
     if (show) shown += 1;
   });
   updateCatalogCrumb();
@@ -474,6 +476,33 @@ function rowsToGroups(rows) {
   return groups;
 }
 
+function shopQtyControlsHtml(item, opts) {
+  opts = opts || {};
+  var isOOS = opts.isOOS;
+  var code = opts.code || '';
+  var sizeAttr = opts.sizeAttr || '';
+  var descClean = opts.descClean || '';
+  var pack = item.pack;
+  var price = item.price;
+  var stockQty = item.qty;
+  if (isOOS) {
+    return '<div class="shop-buy">' +
+      '<button class="add-to-cart-btn" disabled>Out of Stock</button></div>';
+  }
+  var sess = null;
+  try { sess = JSON.parse(sessionStorage.getItem('apbs_user')); } catch (e) {}
+  var cartonOnly = !!(sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess));
+  var qtyLabel = cartonOnly ? 'Ctns' : 'Qty';
+  var step = 1;
+  return '<div class="shop-buy">' +
+    '<label class="shop-qty-wrap"><span class="shop-qty-label">' + qtyLabel + '</span>' +
+    '<input class="shop-qty" type="number" min="1" step="' + step + '" value="1" inputmode="numeric" aria-label="' + qtyLabel + '"/></label>' +
+    '<button type="button" class="add-to-cart-btn" data-code="' + catEscAttr(code) + '" data-size="' + sizeAttr +
+      '" data-desc="' + descClean + '" data-pcs="' + pack + '" data-price="' + price +
+      '" data-qty="' + stockQty + '" data-carton-only="' + (cartonOnly ? '1' : '0') +
+      '" onclick="addToCart(this)">Add</button></div>';
+}
+
 function paintCatalogGroups(groups) {
   const container = document.getElementById('prod-sections');
   if (!container) return;
@@ -493,58 +522,64 @@ function paintCatalogGroups(groups) {
         return isLoggedIn ? r.qty > 0 : !!r.inStock;
       }).length;
       var statsLabel = sizeCount + (sizeCount === 1 ? ' size' : ' sizes');
-      if (inStockCount > 0) statsLabel += ' · ' + inStockCount + ' avail';
-      else statsLabel += ' · call';
+      if (inStockCount > 0) statsLabel += ' · ' + inStockCount + ' in stock';
+      else statsLabel += ' · call for availability';
 
       let html = `
-        <div class="prod-section" id="${code.replace(/"/g, '')}" data-code="${code.replace(/"/g, '')}" data-main-key="${catEscAttr(mainKey)}" data-sub="${catEscAttr(subLabel)}" data-search="${searchAttr}">
-          <div class="prod-section-hdr" onclick="toggleSection(this)">
-            <div class="prod-section-thumb" onclick="event.stopPropagation();openLightbox('${data.image}','${data.desc.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')">
+        <div class="prod-section shop-list-item open" id="${code.replace(/"/g, '')}" data-code="${code.replace(/"/g, '')}" data-main-key="${catEscAttr(mainKey)}" data-sub="${catEscAttr(subLabel)}" data-search="${searchAttr}">
+          <div class="prod-section-hdr shop-list-hdr">
+            <div class="prod-section-thumb" onclick="openLightbox('${data.image}','${data.desc.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')">
               <img src="${data.image}" alt="${data.desc.replace(/"/g,"&quot;")}" class="cat-img" loading="lazy">
             </div>
             <div class="prod-section-meta">
-              <div class="prod-section-code">${catEscHtml(subLabel)}</div>
+              <div class="prod-section-code">${catEscHtml(code)} · ${catEscHtml(subLabel)}</div>
               <div class="prod-section-title">${catEscHtml(data.desc)}</div>
               <div class="prod-section-stats">${catEscHtml(statsLabel)}</div>
             </div>
-            <span class="prod-section-chevron">&#9660;</span>
           </div>
           <div class="prod-section-body">
-            <table class="prod-inner-table">
-              <thead><tr><th>Size</th><th>Pieces / Carton</th><th>Availability</th><th class="price-col-hdr">${isLoggedIn ? 'Unit Price' : 'Unit Price &#128274;'}</th><th></th></tr></thead>
+            <table class="prod-inner-table shop-size-table">
+              <thead><tr>
+                <th>Size</th>
+                <th>Pack</th>
+                <th>Stock</th>
+                <th class="price-col-hdr">${isLoggedIn ? 'Unit Price' : 'Price'}</th>
+                <th class="shop-buy-hdr">Order</th>
+              </tr></thead>
               <tbody>
       `;
       
       data.rows.forEach(item => {
         let isOOS = isLoggedIn ? item.qty <= 0 : !item.inStock;
         let availHtml = isOOS
-          ? `<span style="color:var(--silver)">Call for Availability</span>`
+          ? `<span class="shop-stock shop-stock-out">Call</span>`
           : (isLoggedIn
-            ? `<span style="color:#4CAF50">&#9679; In Stock</span> <span class="qty-badge">${item.qty}</span>`
-            : `<span style="color:#4CAF50">&#9679; In Stock</span>`);
-        let priceHtml = isLoggedIn ? `<span style="color:var(--white);font-weight:500">$${item.price.toFixed(2)}</span>` : `<span class="price-locked">&#128274; Login to view</span>`;
-        let btnHtml = '';
+            ? `<span class="shop-stock shop-stock-in">In stock</span> <span class="qty-badge">${item.qty}</span>`
+            : `<span class="shop-stock shop-stock-in">In stock</span>`);
+        let priceHtml = isLoggedIn
+          ? `<span class="shop-price">$${item.price.toFixed(2)}</span>`
+          : `<span class="price-locked">Login</span>`;
         
         let sizeCanon = (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(item.size);
         let sizeAttr = sizeCanon.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
         let descClean = data.desc.replace(/"/g,"&quot;");
-        
-        if (isOOS) {
-           btnHtml = `<button class="add-to-cart-btn" disabled style="border-color:#555;color:#555;cursor:not-allowed;">Out of Stock</button>`;
-        } else {
-           btnHtml = `<button class="add-to-cart-btn" data-code="${code}" data-size="${sizeAttr}" data-desc="${descClean}" data-pcs="${item.pack}" data-price="${item.price}" data-qty="${item.qty}" onclick="addToCart(this)">+ Cart</button>`;
-        }
+        let buyHtml = shopQtyControlsHtml(item, {
+          isOOS: isOOS,
+          code: code,
+          sizeAttr: sizeAttr,
+          descClean: descClean
+        });
         
         html += `
-          <tr data-code="${code}">
+          <tr data-code="${code}" class="${isOOS ? 'shop-row-oos' : 'shop-row-ok'}">
             <td>
-              ${catEscHtml(item.size)}
+              <span class="shop-size">${catEscHtml(item.size)}</span>
               <div class="mobile-pack">${item.pack}/CTN</div>
             </td>
             <td><span class="qty-badge">${item.pack}/CTN</span></td>
             <td>${availHtml}</td>
             <td class="price">${priceHtml}</td>
-            <td>${btnHtml}</td>
+            <td class="shop-buy-cell">${buyHtml}</td>
           </tr>
         `;
       });
@@ -822,18 +857,16 @@ function mcatRenderDetail(code) {
     var sizeCanon = (window.normalizeProductSize || function (s) { return String(s || '').trim().replace(/"/g, ''); })(item.size);
     var sizeAttr = sizeCanon.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
     var descClean = String(g.desc || '').replace(/"/g, '&quot;');
-    var btn;
-    if (isOOS) {
-      btn = '<button class="add-to-cart-btn" disabled style="border-color:#555;color:#555;">Out of stock</button>';
-    } else {
-      btn = '<button class="add-to-cart-btn" data-code="' + catEscAttr(code) + '" data-size="' + sizeAttr +
-        '" data-desc="' + descClean + '" data-pcs="' + item.pack + '" data-price="' + item.price +
-        '" data-qty="' + item.qty + '" onclick="addToCart(this)">+ Cart</button>';
-    }
+    var buy = shopQtyControlsHtml(item, {
+      isOOS: isOOS,
+      code: code,
+      sizeAttr: sizeAttr,
+      descClean: descClean
+    });
     html += '<div class="mcat-size-row">' +
       '<div class="mcat-size-left"><strong>' + catEscHtml(item.size) + '</strong>' +
       '<div class="mcat-size-pack">' + item.pack + '/CTN</div>' + avail + '</div>' +
-      '<div class="mcat-size-right">' + price + btn + '</div></div>';
+      '<div class="mcat-size-right">' + price + buy + '</div></div>';
   });
   html += '</div>';
   panel.innerHTML = html;
@@ -964,24 +997,40 @@ function addToCart(btn){
      window.location.href = "login.html";
      return;
   }
+
+  var qtyInput = btn.parentElement && btn.parentElement.querySelector('.shop-qty');
+  var want = qtyInput ? parseInt(qtyInput.value, 10) : 1;
+  if (!Number.isFinite(want) || want < 1) want = 1;
+
+  var cartonOnly = btn.dataset.cartonOnly === '1' ||
+    (sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess));
+  var defaultUnit = cartonOnly ? 'carton' : 'piece';
+  // Cart stores piece counts; carton-only accounts enter carton count in the qty box.
+  var addPieces = cartonOnly ? (want * pcs) : want;
+  if (maxQty > 0) addPieces = Math.min(addPieces, maxQty);
+  if (addPieces < 1) {
+    alert('Not enough stock for that quantity.');
+    return;
+  }
   
   var cart  = getCart();
   var existing = cart.find(function(i){ return i.code===code && i.size===size; });
   if(existing){
-    existing.qty = Math.min(existing.qty+1, maxQty);
+    existing.qty = Math.min(existing.qty + addPieces, maxQty > 0 ? maxQty : existing.qty + addPieces);
+    existing.maxQty = maxQty || existing.maxQty;
+    if (!existing.unit) existing.unit = defaultUnit;
   } else {
-    var defaultUnit = (sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess)) ? 'carton' : 'piece';
-    var defaultQty  = defaultUnit==='carton' ? pcs : 1;
     cart.push({code:code, size:size, description:desc, pcsPerCtn:pcs,
-               unitPrice:price, qty:defaultQty, unit:defaultUnit, maxQty:maxQty});
+               unitPrice:price, qty:addPieces, unit:defaultUnit, maxQty:maxQty});
   }
   saveCart(cart);
+  var prev = btn.textContent;
   btn.textContent = 'Added!';
   btn.style.background = 'rgba(46,204,113,.15)';
   btn.style.borderColor = '#2ecc71';
   btn.style.color = '#2ecc71';
   setTimeout(function(){
-    btn.textContent = '+ Cart';
+    btn.textContent = prev || 'Add';
     btn.style.background = '';
     btn.style.borderColor = '';
     btn.style.color = '';
