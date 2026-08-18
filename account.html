@@ -22,9 +22,11 @@
   <div class="page-hero-inner">
     <div class="page-breadcrumb"><a href="index.html">Home</a> › My Account</div>
     <div class="page-title" data-r>Trade <span>Account</span></div>
-    <p class="page-subtitle" data-r>Manage your details and view your order history.</p>
+    <p class="page-subtitle" data-r>Reorder from past orders, manage addresses, and account details.</p>
   </div>
 </div>
+
+<div id="reorder-toast" class="reorder-toast" role="status" aria-live="polite" hidden></div>
 
 <section class="sec" style="background:var(--ink);padding-top:20px;">
   <div class="sec-inner">
@@ -51,12 +53,18 @@
       </div>
 
       <div class="acct-main">
-        <h2 class="acct-section-title">Saved Addresses</h2>
-        <p style="color:var(--silver);font-size:13px;margin-bottom:16px;">Choose these at checkout. Past order addresses are imported automatically.</p>
+        <h2 class="acct-section-title">Order History</h2>
+        <p class="acct-section-lead">Open an order to review lines, then reorder all or add individual items — live prices and stock apply.</p>
+        <div id="orders-list" class="order-hist-list">
+          <p class="order-hist-loading">Loading orders…</p>
+        </div>
+
+        <h2 class="acct-section-title acct-section-spaced">Saved Addresses</h2>
+        <p class="acct-section-lead">Choose these at checkout. Past order addresses are imported automatically.</p>
         <div id="acct-address-list" style="margin-bottom:20px;">
           <p style="color:var(--silver);">Loading addresses…</p>
         </div>
-        <div style="background:var(--ink2);border:1px solid rgba(200,152,31,.2);padding:20px;margin-bottom:40px;">
+        <div style="background:var(--ink);border:1px solid rgba(200,152,31,.2);padding:20px;margin-bottom:8px;">
           <div style="color:var(--gold);font-family:Oswald,sans-serif;letter-spacing:1px;margin-bottom:14px;font-size:15px;" id="acct-addr-form-title">Add Address</div>
           <input type="hidden" id="acct-addr-id" value="">
           <div class="form-row full" style="margin-bottom:10px;">
@@ -100,22 +108,6 @@
           </div>
           <p id="acct-addr-msg" style="display:none;margin-top:12px;font-size:13px;"></p>
         </div>
-
-        <h2 class="acct-section-title">Order History</h2>
-        <table class="orders-table">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Date Placed</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="orders-tbody">
-            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--silver);">Loading orders...</td></tr>
-          </tbody>
-        </table>
       </div>
 
     </div>
@@ -291,9 +283,199 @@ async function deleteAcctAddress(id) {
   }
 }
 
+var acctOrders = [];
+var catalogProducts = null;
+var catalogPromise = null;
+
+function getCart(){
+  try{ return JSON.parse(localStorage.getItem('apbs_cart')||'[]'); }catch(e){ return []; }
+}
+function saveCart(c){
+  localStorage.setItem('apbs_cart', JSON.stringify(c));
+  updateNavCount();
+}
+
+function showReorderToast(msg, ok){
+  var el = document.getElementById('reorder-toast');
+  if(!el) return;
+  el.hidden = false;
+  el.className = 'reorder-toast' + (ok ? ' is-ok' : ' is-err');
+  el.innerHTML = msg;
+  clearTimeout(showReorderToast._t);
+  showReorderToast._t = setTimeout(function(){ el.hidden = true; }, 5200);
+}
+
+async function loadCatalog(){
+  if (catalogProducts) return catalogProducts;
+  if (catalogPromise) return catalogPromise;
+  catalogPromise = (async function(){
+    try{
+      var r = await fetch(apiBase() + '/products', {
+        headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {}
+      });
+      if(!r.ok) throw new Error('catalog');
+      catalogProducts = await r.json();
+      if(!Array.isArray(catalogProducts)) catalogProducts = [];
+    }catch(e){
+      catalogProducts = [];
+    }
+    return catalogProducts;
+  })();
+  return catalogPromise;
+}
+
+function findLiveProduct(code, size){
+  if (window.apbsFindProduct) return window.apbsFindProduct(catalogProducts || [], code, size);
+  return null;
+}
+
+function buildCartLineFromOrderItem(item){
+  var norm = window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); };
+  var live = findLiveProduct(item.code, item.size);
+  var size = norm(live ? live.size : item.size);
+  var code = String((live && live.code) || item.code || '').trim();
+  var pcs = parseInt(live ? live.pack : item.pcsPerCtn, 10) || 1;
+  if (pcs < 1) pcs = 1;
+  var price = live != null
+    ? (parseFloat(live.price) || 0)
+    : (parseFloat(item.unitPrice) || 0);
+  var onHand = live != null ? (parseInt(live.qty, 10) || 0) : 0;
+  var desc = (live && live.description) || item.description || code;
+  var qty = parseInt(item.qty, 10) || 0;
+  if (qty < 1) return null;
+
+  var cartonOnly = currentUser && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(currentUser);
+  if (cartonOnly && pcs > 1) {
+    qty = Math.ceil(qty / pcs) * pcs;
+  }
+  var missing = !live;
+  return {
+    code: code,
+    size: size,
+    description: desc,
+    pcsPerCtn: pcs,
+    unitPrice: price,
+    qty: qty,
+    unit: cartonOnly ? 'carton' : 'piece',
+    maxQty: onHand,
+    backorder: missing || onHand <= 0 || qty > onHand,
+    _missing: missing
+  };
+}
+
+function mergeCartLine(cart, line){
+  if (!line) return { added: 0, missing: false };
+  var existing = cart.find(function(i){ return i.code === line.code && i.size === line.size; });
+  if (existing) {
+    existing.qty = (existing.qty || 0) + line.qty;
+    existing.unitPrice = line.unitPrice;
+    existing.pcsPerCtn = line.pcsPerCtn;
+    existing.description = line.description;
+    existing.maxQty = line.maxQty;
+    existing.backorder = !!line.backorder || existing.qty > (line.maxQty || 0);
+    if (!existing.unit) existing.unit = line.unit;
+  } else {
+    cart.push({
+      code: line.code,
+      size: line.size,
+      description: line.description,
+      pcsPerCtn: line.pcsPerCtn,
+      unitPrice: line.unitPrice,
+      qty: line.qty,
+      unit: line.unit,
+      maxQty: line.maxQty,
+      backorder: !!line.backorder
+    });
+  }
+  return { added: line.qty, missing: !!line._missing };
+}
+
+async function reorderOrder(orderId, btn){
+  await loadCatalog();
+  var order = acctOrders.find(function(o){ return String(o.id) === String(orderId); });
+  if (!order || !order.items || !order.items.length) {
+    showReorderToast('No items found on that order.', false);
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+  var cart = getCart();
+  var addedLines = 0;
+  var addedPcs = 0;
+  var missing = 0;
+  order.items.forEach(function(item){
+    var line = buildCartLineFromOrderItem(item);
+    if (!line) return;
+    var res = mergeCartLine(cart, line);
+    if (res.added) { addedLines += 1; addedPcs += res.added; }
+    if (res.missing) missing += 1;
+  });
+  saveCart(cart);
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = 'Reorder all →';
+  }
+  if (!addedLines) {
+    showReorderToast('Nothing could be added — products may no longer be in the catalog.', false);
+    return;
+  }
+  var msg = 'Added ' + addedLines + ' line' + (addedLines === 1 ? '' : 's')
+    + ' (' + addedPcs + ' pcs) to your cart.';
+  if (missing) msg += ' ' + missing + ' used last known price (not in live catalog).';
+  msg += ' <a href="cart.html">View cart →</a>';
+  showReorderToast(msg, true);
+}
+
+async function reorderOrderLine(orderId, itemIdx, btn){
+  await loadCatalog();
+  var order = acctOrders.find(function(o){ return String(o.id) === String(orderId); });
+  var item = order && order.items && order.items[itemIdx];
+  if (!item) {
+    showReorderToast('Item not found.', false);
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  var cart = getCart();
+  var line = buildCartLineFromOrderItem(item);
+  var res = mergeCartLine(cart, line);
+  saveCart(cart);
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = 'Add';
+  }
+  if (!res.added) {
+    showReorderToast('Could not add that item.', false);
+    return;
+  }
+  var msg = 'Added ' + res.added + ' pcs to cart.';
+  if (res.missing) msg += ' Used last known price.';
+  msg += ' <a href="cart.html">View cart →</a>';
+  showReorderToast(msg, true);
+}
+
+function toggleOrderDetails(orderId){
+  var card = document.querySelector('.order-hist-card[data-id="' + String(orderId).replace(/"/g, '') + '"]');
+  if (!card) return;
+  var open = card.classList.toggle('is-open');
+  var details = card.querySelector('.order-hist-details');
+  if (details) details.hidden = !open;
+  var btn = card.querySelector('.order-hist-toggle');
+  if (btn) {
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? 'Hide lines' : 'View lines';
+  }
+}
+
+function statusClassFor(status){
+  if (status === 'confirmed' || status === 'shipped' || status === 'completed') return 'status-confirmed';
+  if (status === 'cancelled') return 'status-cancelled';
+  return 'status-pending';
+}
+
 async function loadOrders() {
+  const list = document.getElementById('orders-list');
   try {
-    const api = (window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api') + '/customer-orders';
+    await loadCatalog();
+    const api = apiBase() + '/customer-orders';
     const r = await fetch(api, {
       method: 'POST',
       headers: window.apbsAuthHeaders({ 'Content-Type': 'application/json' }),
@@ -301,35 +483,60 @@ async function loadOrders() {
     });
     if (!r.ok) throw new Error('orders');
     let myOrders = await r.json();
+    if (!Array.isArray(myOrders)) myOrders = [];
     myOrders.sort((a, b) => new Date(b.placedAt) - new Date(a.placedAt));
-    
-    const tbody = document.getElementById('orders-tbody');
-    
+    acctOrders = myOrders;
+
     if (myOrders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--silver);">You have not placed any orders yet.</td></tr>';
+      list.innerHTML = '<div class="order-hist-empty">You have not placed any orders yet. <a href="products.html">Browse catalog →</a></div>';
       return;
     }
 
-    tbody.innerHTML = myOrders.map(o => {
-      let statusClass = 'status-pending';
-      if (o.status === 'confirmed') statusClass = 'status-confirmed';
-      if (o.status === 'cancelled') statusClass = 'status-cancelled';
-      
-      let itemsCount = o.items ? o.items.reduce((sum, i) => sum + i.qty, 0) : 0;
+    list.innerHTML = myOrders.map(function(o) {
+      var statusClass = statusClassFor(o.status);
+      var items = Array.isArray(o.items) ? o.items : [];
+      var itemsCount = items.reduce(function(sum, i){ return sum + (parseInt(i.qty, 10) || 0); }, 0);
+      var dateStr = o.placedAt ? new Date(o.placedAt).toLocaleDateString() : '—';
+      var total = Number(o.total) || 0;
+      var oid = esc(o.id);
+      var linesHtml = items.map(function(item, idx) {
+        var live = findLiveProduct(item.code, item.size);
+        var onHand = live != null ? (parseInt(live.qty, 10) || 0) : null;
+        var livePrice = live != null ? (parseFloat(live.price) || 0) : null;
+        var stockLabel = live == null
+          ? '<span class="order-hist-stock is-miss">Not in catalog</span>'
+          : (onHand <= 0
+            ? '<span class="order-hist-stock is-bo">Out of stock · backorder OK</span>'
+            : '<span class="order-hist-stock">' + onHand + ' on hand</span>');
+        var priceLabel = livePrice != null
+          ? '$' + livePrice.toFixed(2) + ' <span class="muted">live</span>'
+          : '$' + (parseFloat(item.unitPrice) || 0).toFixed(2) + ' <span class="muted">then</span>';
+        return '<div class="order-hist-line">'
+          + '<div class="order-hist-line-main">'
+          + '<strong>' + esc(item.description || item.code) + ' ' + esc(item.size) + '</strong>'
+          + '<div class="order-hist-line-meta">' + esc(item.code) + ' · ' + (parseInt(item.qty, 10) || 0) + ' pcs · ' + priceLabel + '</div>'
+          + stockLabel
+          + '</div>'
+          + '<button type="button" class="btn-ghost order-hist-add" onclick="reorderOrderLine(\'' + oid + '\',' + idx + ',this)">Add</button>'
+          + '</div>';
+      }).join('');
 
-      return `
-        <tr>
-          <td data-label="Order ID"><span style="color:var(--gold);font-family:'DM Mono',monospace;font-size:13px;">${o.id}</span></td>
-          <td data-label="Date Placed">${new Date(o.placedAt).toLocaleDateString()}</td>
-          <td data-label="Items">${itemsCount} pcs</td>
-          <td data-label="Total">$${(o.total || 0).toFixed(2)}</td>
-          <td data-label="Status"><span class="status-badge ${statusClass}">${o.status}</span></td>
-        </tr>
-      `;
+      return '<article class="order-hist-card" data-id="' + oid + '">'
+        + '<div class="order-hist-head">'
+        + '<div class="order-hist-id">' + oid + '</div>'
+        + '<div class="order-hist-meta">' + dateStr + ' · ' + itemsCount + ' pcs · $' + total.toFixed(2) + '</div>'
+        + '<span class="status-badge ' + statusClass + '">' + esc(o.status || 'pending') + '</span>'
+        + '</div>'
+        + '<div class="order-hist-actions">'
+        + '<button type="button" class="btn-gold order-hist-reorder" onclick="reorderOrder(\'' + oid + '\',this)">Reorder all →</button>'
+        + '<button type="button" class="btn-ghost order-hist-toggle" aria-expanded="false" onclick="toggleOrderDetails(\'' + oid + '\')">View lines</button>'
+        + '</div>'
+        + '<div class="order-hist-details" hidden>' + (linesHtml || '<p class="muted">No line items.</p>') + '</div>'
+        + '</article>';
     }).join('');
 
   } catch(e) {
-    document.getElementById('orders-tbody').innerHTML = '<tr><td colspan="5" style="color:#ff6b6b;padding:20px;">Failed to load order history.</td></tr>';
+    list.innerHTML = '<div class="order-hist-empty is-err">Failed to load order history.</div>';
   }
 }
 
@@ -348,7 +555,7 @@ function updateNavCount(){
     var cart = JSON.parse(localStorage.getItem('apbs_cart')||'[]');
     var total = cart.reduce(function(s,i){ return s+i.qty; }, 0);
     var el = document.getElementById('nav-cart-count');
-    if(el) el.textContent = total > 0 ? total : '';
+    if(el){ el.textContent = total; el.style.display = total ? 'inline' : 'none'; }
   }catch(e){}
 }
 updateNavCount();
