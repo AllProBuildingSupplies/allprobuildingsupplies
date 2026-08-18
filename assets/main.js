@@ -299,7 +299,10 @@ function loadGlobalLayout() {
     <div class="mobile-menu" id="mobile-menu">
       <button class="mobile-menu-close" id="mob-close" aria-label="Close" style="cursor:none;">&#10005;</button>
       <form class="mob-search" id="mob-search-form" action="products.html" method="get" role="search">
-        <input class="mob-search-input" id="mob-search-input" name="q" type="search" placeholder="Search code, size, or name…" autocomplete="off" enterkeyhint="search"/>
+        <div class="mob-search-field">
+          <input class="mob-search-input" id="mob-search-input" name="q" type="search" placeholder="Search code, size, or name…" autocomplete="off" enterkeyhint="search"/>
+          <div class="nav-search-suggest" id="mob-search-suggest" hidden></div>
+        </div>
         <button class="mob-search-btn" type="submit">Search catalog</button>
       </form>
       <a href="index.html" style="cursor:none;">Home</a>
@@ -487,130 +490,256 @@ function initGlobalScripts() {
   initNavSearch();
 }
 
-/** Header / mobile catalog search — Supply House style findability. */
+/** Header / mobile / page catalog search — live typeahead suggestions. */
 function initNavSearch() {
   var params = new URLSearchParams(window.location.search || '');
   var qParam = params.get('q') || '';
+  var page = (window.location.pathname.split('/').pop() || '').toLowerCase();
   var navInput = document.getElementById('nav-search-input');
   var mobInput = document.getElementById('mob-search-input');
-  var suggest = document.getElementById('nav-search-suggest');
-  var page = (window.location.pathname.split('/').pop() || '').toLowerCase();
-
   if (navInput && qParam && page === 'products.html') navInput.value = qParam;
   if (mobInput && qParam && page === 'products.html') mobInput.value = qParam;
 
+  ensureCatalogSuggestBoxes();
+  bindCatalogSuggestInput(document.getElementById('nav-search-input'), document.getElementById('nav-search-suggest'));
+  bindCatalogSuggestInput(document.getElementById('mob-search-input'), document.getElementById('mob-search-suggest'));
+  bindCatalogSuggestInput(document.getElementById('home-search-input'), document.getElementById('home-search-suggest'));
+  bindCatalogSuggestInput(document.getElementById('prod-search'), document.getElementById('prod-search-suggest'));
+
+  bindCatalogSearchForm(document.getElementById('nav-search-form'), page);
+  bindCatalogSearchForm(document.getElementById('mob-search-form'), page);
+  bindCatalogSearchForm(document.getElementById('home-search-form') || document.querySelector('form.home-search'), page);
+
+  // Always warm / refresh in-memory catalog for typeahead (don't wait for products page).
+  apbsLoadSuggestCatalog(true);
+}
+
+function ensureCatalogSuggestBoxes() {
+  function ensure(inputId, boxId, wrapSel) {
+    if (document.getElementById(boxId)) return;
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    var wrap = wrapSel ? input.closest(wrapSel) : input.parentElement;
+    if (!wrap) return;
+    if (window.getComputedStyle(wrap).position === 'static') wrap.style.position = 'relative';
+    var box = document.createElement('div');
+    box.className = 'nav-search-suggest';
+    box.id = boxId;
+    box.hidden = true;
+    wrap.appendChild(box);
+  }
+  ensure('home-search-input', 'home-search-suggest', '.home-search');
+  ensure('prod-search', 'prod-search-suggest', '.search-wrap');
+}
+
+window.__apbsSuggestCatalog = window.__apbsSuggestCatalog || null;
+window.__apbsSuggestCatalogPromise = window.__apbsSuggestCatalogPromise || null;
+window.__apbsSuggestActiveInput = null;
+
+function apbsCatalogCacheKey() {
+  var user = null;
+  try { user = JSON.parse(sessionStorage.getItem('apbs_user') || 'null'); } catch (_) {}
+  return (user && user.status === 'approved') ? 'apbs_catalog_v1_trade' : 'apbs_catalog_v1_public';
+}
+
+function apbsReadCachedCatalog() {
+  if (Array.isArray(window.__apbsSuggestCatalog) && window.__apbsSuggestCatalog.length) {
+    return window.__apbsSuggestCatalog;
+  }
+  try {
+    var raw = sessionStorage.getItem(apbsCatalogCacheKey())
+      || sessionStorage.getItem('apbs_catalog_v1_public')
+      || sessionStorage.getItem('apbs_catalog_v1_trade');
+    if (!raw) return null;
+    var rows = JSON.parse(raw);
+    if (Array.isArray(rows) && rows.length) {
+      window.__apbsSuggestCatalog = rows;
+      return rows;
+    }
+  } catch (_) {}
+  return null;
+}
+
+function apbsLoadSuggestCatalog(forceNetwork) {
+  var cached = apbsReadCachedCatalog();
+  if (cached && !forceNetwork) return Promise.resolve(cached);
+  if (window.__apbsSuggestCatalogPromise) return window.__apbsSuggestCatalogPromise;
+  if (!window.APBS_API_BASE) return Promise.resolve(cached || []);
+
+  window.__apbsSuggestCatalogPromise = fetch(window.APBS_API_BASE + '/products', {
+    headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {}
+  })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (rows) {
+      window.__apbsSuggestCatalogPromise = null;
+      if (!Array.isArray(rows) || !rows.length) return cached || [];
+      window.__apbsSuggestCatalog = rows;
+      try { sessionStorage.setItem(apbsCatalogCacheKey(), JSON.stringify(rows)); } catch (_) {}
+      // If user is mid-typing, refresh the open dropdown now that data arrived.
+      var active = window.__apbsSuggestActiveInput;
+      if (active && document.activeElement === active && active.__apbsRenderSuggest) {
+        active.__apbsRenderSuggest(active.value);
+      }
+      return rows;
+    })
+    .catch(function () {
+      window.__apbsSuggestCatalogPromise = null;
+      return cached || [];
+    });
+  return window.__apbsSuggestCatalogPromise;
+}
+
+function apbsCatalogHints(qt, rows) {
+  qt = String(qt || '').trim().toLowerCase();
+  if (qt.length < 1) return [];
+  rows = rows || apbsReadCachedCatalog() || [];
+  if (!rows.length) return [];
+  var seen = {};
+  var out = [];
+  for (var i = 0; i < rows.length && out.length < 8; i++) {
+    var r = rows[i];
+    var code = String(r.code || '').trim();
+    if (!code || seen[code]) continue;
+    var hay = (
+      code + ' ' + (r.description || '') + ' ' + (r.size || '') + ' ' +
+      (r.main_category || '') + ' ' + (r.sub_category || '')
+    ).toLowerCase();
+    if (hay.indexOf(qt) === -1) continue;
+    seen[code] = true;
+    out.push({
+      code: code,
+      desc: r.description || code,
+      main: r.main_category || '',
+      href: 'products.html?q=' + encodeURIComponent(code)
+    });
+  }
+  return out;
+}
+
+function bindCatalogSuggestInput(input, suggest) {
+  if (!input || !suggest || input.__apbsSuggestBound) return;
+  input.__apbsSuggestBound = true;
+  var timer = null;
+
   function hideSuggest() {
-    if (!suggest) return;
     suggest.hidden = true;
+    suggest.classList.remove('is-open');
     suggest.innerHTML = '';
   }
 
-  function catalogHints(qt) {
-    qt = String(qt || '').trim().toLowerCase();
-    if (qt.length < 2) return [];
-    var rows = null;
-    try {
-      var cached = sessionStorage.getItem('apbs_catalog_v1_public') || sessionStorage.getItem('apbs_catalog_v1_trade');
-      if (cached) rows = JSON.parse(cached);
-    } catch (_) {}
-    if (!Array.isArray(rows) || !rows.length) return [];
-    var seen = {};
-    var out = [];
-    for (var i = 0; i < rows.length && out.length < 8; i++) {
-      var r = rows[i];
-      var code = String(r.code || '').trim();
-      if (!code || seen[code]) continue;
-      var hay = (code + ' ' + (r.description || '') + ' ' + (r.size || '') + ' ' + (r.main_category || '') + ' ' + (r.sub_category || '')).toLowerCase();
-      if (hay.indexOf(qt) === -1) continue;
-      seen[code] = true;
-      out.push({
-        code: code,
-        desc: r.description || code,
-        main: r.main_category || '',
-        href: 'products.html?q=' + encodeURIComponent(code)
-      });
-    }
-    return out;
-  }
-
   function renderSuggest(qt) {
-    if (!suggest) return;
-    var items = catalogHints(qt);
-    if (!items.length) { hideSuggest(); return; }
+    var q = String(qt || '').trim();
+    if (!q.length) { hideSuggest(); return; }
+    var rows = apbsReadCachedCatalog();
+    if (!rows) {
+      suggest.innerHTML = '<div class="nav-search-hint">Loading catalog…</div>';
+      suggest.hidden = false;
+      suggest.classList.add('is-open');
+      apbsLoadSuggestCatalog(true);
+      return;
+    }
+    var items = apbsCatalogHints(q, rows);
+    if (!items.length) {
+      suggest.innerHTML = '<div class="nav-search-hint">No matches — press Enter to search</div>';
+      suggest.hidden = false;
+      suggest.classList.add('is-open');
+      return;
+    }
     suggest.innerHTML = items.map(function (it) {
-      return '<a class="nav-search-hit" href="' + it.href + '">' +
+      return '<button type="button" class="nav-search-hit" data-suggest-q="' +
+        window.apbsEscapeHtml(it.code).replace(/"/g, '&quot;') + '">' +
         '<span class="nav-search-hit-code">' + window.apbsEscapeHtml(it.code) + '</span>' +
         '<span class="nav-search-hit-desc">' + window.apbsEscapeHtml(it.desc) + '</span>' +
         (it.main ? '<span class="nav-search-hit-cat">' + window.apbsEscapeHtml(it.main) + '</span>' : '') +
-      '</a>';
+      '</button>';
     }).join('');
     suggest.hidden = false;
+    suggest.classList.add('is-open');
   }
 
-  var suggestTimer = null;
-  if (navInput && suggest) {
-    navInput.addEventListener('input', function () {
-      var v = navInput.value;
-      clearTimeout(suggestTimer);
-      suggestTimer = setTimeout(function () { renderSuggest(v); }, 120);
-    });
-    navInput.addEventListener('focus', function () {
-      if (navInput.value.trim().length >= 2) renderSuggest(navInput.value);
-    });
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest || !e.target.closest('.nav-search')) hideSuggest();
-    });
-  }
+  input.__apbsRenderSuggest = renderSuggest;
+  input.__apbsHideSuggest = hideSuggest;
 
-  function bindForm(form) {
-    if (!form || form.__apbsSearchBound) return;
-    form.__apbsSearchBound = true;
-    form.addEventListener('submit', function (e) {
-      var input = form.querySelector('input[name="q"]');
-      var q = input ? String(input.value || '').trim() : '';
-      // Stay on products page and filter in-place when already browsing catalog.
-      if (page === 'products.html') {
-        e.preventDefault();
-        hideSuggest();
-        var prodSearch = document.getElementById('prod-search');
-        if (prodSearch) {
-          prodSearch.value = q;
-          prodSearch.dispatchEvent(new Event('input', { bubbles: true }));
-          try { prodSearch.focus(); } catch (_) {}
-        }
-        try {
-          var url = q ? ('products.html?q=' + encodeURIComponent(q)) : 'products.html';
-          history.replaceState(null, '', url);
-        } catch (_) {}
-        var hamburger = document.querySelector('.hamburger');
-        var mobileMenu = document.querySelector('.mobile-menu');
-        if (hamburger && mobileMenu && mobileMenu.classList.contains('open')) {
-          hamburger.classList.remove('open');
-          mobileMenu.classList.remove('open');
-          document.body.style.overflow = '';
-        }
-      }
-    });
-  }
-  bindForm(document.getElementById('nav-search-form'));
-  bindForm(document.getElementById('mob-search-form'));
+  input.addEventListener('input', function () {
+    window.__apbsSuggestActiveInput = input;
+    clearTimeout(timer);
+    timer = setTimeout(function () { renderSuggest(input.value); }, 60);
+  });
+  input.addEventListener('focus', function () {
+    window.__apbsSuggestActiveInput = input;
+    if (input.value.trim().length >= 1) renderSuggest(input.value);
+    else apbsLoadSuggestCatalog(false);
+  });
 
-  // Warm catalog cache so header suggestions work from home/about/etc.
-  try {
-    var hasCache = sessionStorage.getItem('apbs_catalog_v1_public') || sessionStorage.getItem('apbs_catalog_v1_trade');
-    if (!hasCache && window.APBS_API_BASE) {
-      fetch(window.APBS_API_BASE + '/products', { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (rows) {
-          if (!Array.isArray(rows) || !rows.length) return;
-          var user = null;
-          try { user = JSON.parse(sessionStorage.getItem('apbs_user') || 'null'); } catch (_) {}
-          var key = (user && user.status === 'approved') ? 'apbs_catalog_v1_trade' : 'apbs_catalog_v1_public';
-          try { sessionStorage.setItem(key, JSON.stringify(rows)); } catch (_) {}
-        })
-        .catch(function () {});
+  suggest.addEventListener('mousedown', function (e) {
+    // Keep focus long enough to apply the pick (avoid input blur hiding first).
+    e.preventDefault();
+  });
+  suggest.addEventListener('click', function (e) {
+    var hit = e.target.closest ? e.target.closest('[data-suggest-q]') : null;
+    if (!hit) return;
+    var q = hit.getAttribute('data-suggest-q') || '';
+    input.value = q;
+    hideSuggest();
+    var form = input.form || input.closest('form');
+    if (form) {
+      if (typeof form.requestSubmit === 'function') form.requestSubmit();
+      else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    } else {
+      // products.html page search (no form) — filter in place
+      input.dispatchEvent(new Event('input', { bubbles: true }));
     }
-  } catch (_) {}
+  });
+
+  if (!window.__apbsSuggestDocClickBound) {
+    window.__apbsSuggestDocClickBound = true;
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && (
+        e.target.closest('.nav-search') ||
+        e.target.closest('.home-search') ||
+        e.target.closest('.search-wrap') ||
+        e.target.closest('.mob-search-field')
+      )) return;
+      document.querySelectorAll('.nav-search-suggest.is-open').forEach(function (el) {
+        el.hidden = true;
+        el.classList.remove('is-open');
+        el.innerHTML = '';
+      });
+    });
+  }
+}
+
+function bindCatalogSearchForm(form, page) {
+  if (!form || form.__apbsSearchBound) return;
+  form.__apbsSearchBound = true;
+  form.addEventListener('submit', function (e) {
+    var input = form.querySelector('input[name="q"], input[type="search"]');
+    var q = input ? String(input.value || '').trim() : '';
+    document.querySelectorAll('.nav-search-suggest').forEach(function (el) {
+      el.hidden = true;
+      el.classList.remove('is-open');
+    });
+    if (page === 'products.html') {
+      e.preventDefault();
+      var prodSearch = document.getElementById('prod-search');
+      if (prodSearch) {
+        prodSearch.value = q;
+        prodSearch.dispatchEvent(new Event('input', { bubbles: true }));
+        try { prodSearch.focus(); } catch (_) {}
+      }
+      try {
+        var url = q ? ('products.html?q=' + encodeURIComponent(q)) : 'products.html';
+        history.replaceState(null, '', url);
+      } catch (_) {}
+      var hamburger = document.querySelector('.hamburger');
+      var mobileMenu = document.querySelector('.mobile-menu');
+      if (hamburger && mobileMenu && mobileMenu.classList.contains('open')) {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
+  });
 }
 
 // Auto-run when DOM is ready

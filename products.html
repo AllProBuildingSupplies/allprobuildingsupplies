@@ -580,8 +580,12 @@ async function fetchAndRenderProducts() {
     if (!Array.isArray(rows)) throw new Error(rows.error || 'Invalid catalog response');
     try {
       sessionStorage.setItem(catalogCacheKey(), JSON.stringify(rows));
+      window.__apbsSuggestCatalog = rows;
     } catch (_) {}
     paintCatalogGroups(rowsToGroups(rows));
+    if (typeof initNavSearch === 'function') {
+      try { initNavSearch(); } catch (_) {}
+    }
   } catch (e) {
     if (!window.catProductGroups) {
       document.getElementById('prod-sections').innerHTML =

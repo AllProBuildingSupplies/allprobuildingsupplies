@@ -24,10 +24,11 @@
     <div class="hero-tag"><span class="blink"></span><span class="tag-line"></span>Available Now · Fast Turnaround · NJ</div>
     <h1 class="htitle">Building Supplies<br><em>That Keep</em><strong>Jobs Moving.</strong></h1>
     <p class="hero-sub">Find parts fast — search by code, size, or name.</p>
-    <form class="home-search" action="products.html" method="get" role="search">
+    <form class="home-search" id="home-search-form" action="products.html" method="get" role="search">
       <label class="home-search-label" for="home-search-input">Search catalog</label>
       <input class="home-search-input" id="home-search-input" name="q" type="search" placeholder="Search code, size, or name…" autocomplete="off" enterkeyhint="search"/>
       <button class="home-search-btn" type="submit">Search</button>
+      <div class="nav-search-suggest" id="home-search-suggest" hidden></div>
     </form>
     <div class="hero-btns">
       <a href="products.html" class="btn-gold" style="cursor:none;">Browse Catalog →</a>
