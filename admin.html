@@ -2513,7 +2513,8 @@ async function saveUserModal(e) {
         password: hashedPw
       };
       const r = await fetch(API_BASE + '/admin/users', { method:'POST', headers: getAdminHeaders(), body: JSON.stringify(newUser) });
-      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(data.error || data.detail || ('HTTP ' + r.status));
       showStatus('User created securely in D1!', false);
     }
     closeUserModal({ target: { id: 'user-modal-overlay' } });
