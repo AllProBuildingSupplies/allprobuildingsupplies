@@ -55,14 +55,23 @@
       </div>
     </div>
 
-    <div class="search-wrap">
-      <span class="search-icon">&#128269;</span>
-      <input class="search-input" type="text" id="prod-search" placeholder="Search code, size, or name…"/>
-    </div>
-    
-    <div class="mobile-filter-wrap">
-      <select class="mobile-filter-sel" id="mobile-main-select" aria-label="Main category" onchange="onMobileMainChange(this.value)"></select>
-      <select class="mobile-filter-sel" id="mobile-sub-select" aria-label="Sub category" onchange="onMobileSubChange(this.value)"></select>
+    <div class="catalog-toolbar" id="catalog-toolbar">
+      <nav class="catalog-crumb" id="catalog-crumb" aria-label="Catalog breadcrumb">
+        <a href="products.html">All products</a>
+      </nav>
+      <div class="search-wrap">
+        <span class="search-icon">&#128269;</span>
+        <input class="search-input" type="search" id="prod-search" placeholder="Search code, size, or name…" autocomplete="off" enterkeyhint="search"/>
+      </div>
+      <div class="mobile-filter-wrap">
+        <select class="mobile-filter-sel" id="mobile-main-select" aria-label="Main category" onchange="onMobileMainChange(this.value)"></select>
+        <select class="mobile-filter-sel" id="mobile-sub-select" aria-label="Sub category" onchange="onMobileSubChange(this.value)"></select>
+      </div>
+      <div class="filter-stack" id="filter-stack">
+        <div class="filter-bar" id="main-filters" role="toolbar" aria-label="Main categories"></div>
+        <div class="filter-bar" id="sub-filters" role="toolbar" aria-label="Sub categories"></div>
+      </div>
+      <p class="catalog-result-meta" id="catalog-result-meta" aria-live="polite"></p>
     </div>
 
     <!-- Mobile glanceable drill-down (phone only; desktop uses accordion below) -->
@@ -72,11 +81,6 @@
       <div id="mcat-panel-sub" class="mcat-panel" hidden></div>
       <div id="mcat-panel-list" class="mcat-panel" hidden></div>
       <div id="mcat-panel-detail" class="mcat-panel" hidden></div>
-    </div>
-
-    <div class="filter-stack" id="filter-stack">
-      <div class="filter-bar" id="main-filters" role="toolbar" aria-label="Main categories"></div>
-      <div class="filter-bar" id="sub-filters" role="toolbar" aria-label="Sub categories"></div>
     </div>
     
     <div id="prod-sections" class="prod-sections-desktop">
@@ -148,6 +152,7 @@ function applyCatalogFilters() {
   var qt = (searchEl && searchEl.value) ? searchEl.value.trim().toLowerCase() : '';
   var main = window.catActiveMain;
   var sub = window.catActiveSub;
+  var shown = 0;
   document.querySelectorAll('.prod-section').forEach(function(sec) {
     var mk = sec.getAttribute('data-main-key') || '__EMPTY__';
     var sk = sec.getAttribute('data-sub') || '';
@@ -161,7 +166,69 @@ function applyCatalogFilters() {
     var show = mainOk && subOk && searchOk;
     sec.style.display = show ? '' : 'none';
     if (!qt) sec.classList.remove('open');
+    if (show) shown += 1;
   });
+  updateCatalogCrumb();
+  updateCatalogResultMeta(shown, qt);
+}
+
+function catalogMainLabel(mainKey) {
+  if (!mainKey || mainKey === 'all') return '';
+  if (mainKey === '__EMPTY__') return 'Other';
+  var groups = window.catProductGroups || {};
+  var codes = Object.keys(groups);
+  for (var i = 0; i < codes.length; i++) {
+    var g = groups[codes[i]];
+    if (catMainKey(g.mainCat) === mainKey) {
+      return (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
+    }
+  }
+  return mainKey;
+}
+
+function updateCatalogCrumb() {
+  var el = document.getElementById('catalog-crumb');
+  if (!el) return;
+  var parts = ['<a href="products.html" onclick="event.preventDefault();clearCatalogPath();">All products</a>'];
+  var main = window.catActiveMain;
+  var sub = window.catActiveSub;
+  var qtEl = document.getElementById('prod-search');
+  var qt = qtEl && qtEl.value ? qtEl.value.trim() : '';
+  if (main && main !== 'all') {
+    var lab = catalogMainLabel(main);
+    parts.push('<span class="catalog-crumb-sep">›</span>');
+    parts.push('<a href="products.html?main=' + encodeURIComponent(lab) + '" onclick="event.preventDefault();setCatMain(\'' + String(main).replace(/'/g, "\\'") + '\', null);">' + catEscHtml(lab) + '</a>');
+  }
+  if (sub && sub !== 'all') {
+    parts.push('<span class="catalog-crumb-sep">›</span>');
+    parts.push('<span class="catalog-crumb-now">' + catEscHtml(sub) + '</span>');
+  }
+  if (qt) {
+    parts.push('<span class="catalog-crumb-sep">›</span>');
+    parts.push('<span class="catalog-crumb-now">Search “' + catEscHtml(qt) + '”</span>');
+  }
+  el.innerHTML = parts.join('');
+}
+
+function updateCatalogResultMeta(shown, qt) {
+  var el = document.getElementById('catalog-result-meta');
+  if (!el) return;
+  if (!window.catProductGroups) {
+    el.textContent = '';
+    return;
+  }
+  var total = Object.keys(window.catProductGroups).length;
+  var bits = [shown + ' of ' + total + ' products'];
+  if (qt) bits.push('matching “' + qt + '”');
+  el.textContent = bits.join(' · ');
+}
+
+function clearCatalogPath() {
+  var searchEl = document.getElementById('prod-search');
+  if (searchEl) searchEl.value = '';
+  setCatMain('all', null);
+  try { history.replaceState(null, '', 'products.html'); } catch (_) {}
+  mcatOnSearch('');
 }
 
 function rebuildSubFilters() {
@@ -351,16 +418,28 @@ function onMobileSubChange(v) {
 }
 
 function applyUrlCategoryFilter() {
-  const mainParam = new URLSearchParams(window.location.search).get('main');
-  if (!mainParam || !window.catProductGroups) return;
-  const groups = window.catProductGroups;
-  let matchedKey = null;
-  Object.keys(groups).forEach(function (code) {
-    const g = groups[code];
-    const lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
-    if (lab.toLowerCase() === mainParam.toLowerCase()) matchedKey = catMainKey(g.mainCat);
-  });
-  if (matchedKey) setCatMain(matchedKey, null);
+  const params = new URLSearchParams(window.location.search);
+  const mainParam = params.get('main');
+  const qParam = params.get('q');
+  if (qParam) {
+    var searchEl = document.getElementById('prod-search');
+    if (searchEl) searchEl.value = qParam;
+    var navInput = document.getElementById('nav-search-input');
+    if (navInput) navInput.value = qParam;
+  }
+  if (mainParam && window.catProductGroups) {
+    const groups = window.catProductGroups;
+    let matchedKey = null;
+    Object.keys(groups).forEach(function (code) {
+      const g = groups[code];
+      const lab = (g.mainCat === '' || g.mainCat == null) ? 'Other' : String(g.mainCat);
+      if (lab.toLowerCase() === mainParam.toLowerCase()) matchedKey = catMainKey(g.mainCat);
+    });
+    if (matchedKey) setCatMain(matchedKey, null);
+  } else {
+    applyCatalogFilters();
+  }
+  if (qParam) mcatOnSearch(qParam);
 }
 
 function catalogCacheKey() {
@@ -821,6 +900,17 @@ if(searchInput){
     searchDebounce = setTimeout(function(){
       applyCatalogFilters();
       mcatOnSearch(self.value);
+      try {
+        var q = self.value.trim();
+        var url = q ? ('products.html?q=' + encodeURIComponent(q)) : 'products.html';
+        var main = window.catActiveMain;
+        if (!q && main && main !== 'all') {
+          url = 'products.html?main=' + encodeURIComponent(catalogMainLabel(main));
+        }
+        history.replaceState(null, '', url);
+      } catch (_) {}
+      var navInput = document.getElementById('nav-search-input');
+      if (navInput && document.activeElement !== navInput) navInput.value = self.value;
     }, 160);
   });
 }
