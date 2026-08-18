@@ -213,23 +213,36 @@ async function renderCart(){
     var sizeKey = norm(item.size);
     if (item.size !== sizeKey) { item.size = sizeKey; }
     var invKey = item.code + '|' + sizeKey;
-    var maxQty = liveInventory[invKey] !== undefined ? liveInventory[invKey] : (item.maxQty || 9999);
-    // Cap qty at available stock
-    if(item.qty > maxQty){ item.qty = maxQty; saveCart(cart); }
+    var onHand = liveInventory[invKey] !== undefined ? liveInventory[invKey] : (item.maxQty != null ? item.maxQty : 9999);
+    if (!Number.isFinite(onHand) || onHand < 0) onHand = 0;
+    var isBackorder = !!item.backorder || onHand <= 0 || item.qty > onHand;
+    item.backorder = isBackorder;
+    item.maxQty = onHand;
+    // Do not cap backorders to on-hand — customer may order beyond stock.
 
     var unitPrice = parseFloat(item.unitPrice)||0;
     var lineTotal = unitPrice * item.qty;
     subtotal += lineTotal;
     totalItems += item.qty;
 
-    var stockWarn = (maxQty > 0 && item.qty >= maxQty)
-      ? '<div class="stock-warn">⚠ Max available: '+maxQty+'</div>' : '';
+    var stockWarn = '';
+    if (isBackorder) {
+      if (onHand <= 0) {
+        stockWarn = '<div class="stock-warn stock-backorder">Backorder — currently out of stock</div>';
+      } else if (item.qty > onHand) {
+        stockWarn = '<div class="stock-warn stock-backorder">Backorder — ' + onHand + ' on hand, ' + (item.qty - onHand) + ' to follow</div>';
+      }
+    } else if (onHand > 0 && item.qty >= onHand) {
+      stockWarn = '<div class="stock-warn">On-hand available: '+onHand+'</div>';
+    }
 
     var tr = document.createElement('tr');
     var esc = window.apbsEscapeHtml || function(s){ return String(s); };
     tr.innerHTML =
       '<td><div class="cart-prod-name">'+esc(item.description)+' '+esc(item.size)+'</div>'
-      +'<div class="cart-prod-sub">'+esc(item.code)+' &nbsp;|&nbsp; '+item.pcsPerCtn+' pcs/ctn</div></td>'
+      +'<div class="cart-prod-sub">'+esc(item.code)+' &nbsp;|&nbsp; '+item.pcsPerCtn+' pcs/ctn'
+      +(isBackorder ? ' &nbsp;|&nbsp; <span class="cart-bo-tag">BACKORDER</span>' : '')
+      +'</div></td>'
       +'<td class="cart-price">$'+unitPrice.toFixed(2)+'</td>'
       +'<td><div class="unit-toggle">'
       +(canOrderPieces !== false ? '<label><input type="radio" name="unit-'+idx+'" value="piece" '+(item.unit==='piece'?'checked':'')+' onchange="setUnit('+idx+',\'piece\')"> Piece</label>' : '')
@@ -238,8 +251,8 @@ async function renderCart(){
       +'</div></td>'
       +'<td><div class="qty-wrap">'
       +'<button class="qty-btn" onclick="changeQty('+idx+',-1)">−</button>'
-      +'<input class="qty-input" type="number" min="1" max="'+maxQty+'" value="'+item.qty+'" onchange="setQty('+idx+',this.value,'+maxQty+')">'
-      +'<button class="qty-btn" onclick="changeQty('+idx+',1,'+maxQty+')">+</button>'
+      +'<input class="qty-input" type="number" min="1" value="'+item.qty+'" onchange="setQty('+idx+',this.value)">'
+      +'<button class="qty-btn" onclick="changeQty('+idx+',1)">+</button>'
       +'</div>'
       +'<div class="qty-unit">'+(item.unit==='carton'?Math.ceil(item.qty/item.pcsPerCtn)+' ctn':item.qty+' pcs')+'</div>'
       +stockWarn+'</td>'
@@ -255,21 +268,19 @@ async function renderCart(){
 
 }
 
-function changeQty(idx, delta, maxQty){
+function changeQty(idx, delta){
   var cart = getCart();
   var newQty = (cart[idx].qty||1) + delta;
   if(newQty < 1) newQty = 1;
-  if(maxQty !== undefined && newQty > maxQty) newQty = maxQty;
   cart[idx].qty = newQty;
   saveCart(cart);
   renderCart();
 }
 
-function setQty(idx, val, maxQty){
+function setQty(idx, val){
   var cart = getCart();
   var newQty = parseInt(val)||1;
   if(newQty < 1) newQty = 1;
-  if(maxQty && newQty > maxQty) newQty = maxQty;
   cart[idx].qty = newQty;
   saveCart(cart);
   renderCart();

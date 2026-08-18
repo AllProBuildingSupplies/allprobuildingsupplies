@@ -485,22 +485,25 @@ function shopQtyControlsHtml(item, opts) {
   var pack = item.pack;
   var price = item.price;
   var stockQty = item.qty;
-  if (isOOS) {
+  if (isOOS && !isLoggedIn) {
     return '<div class="shop-buy">' +
-      '<button class="add-to-cart-btn" disabled>Out of Stock</button></div>';
+      '<a class="add-to-cart-btn shop-backorder-login" href="login.html">Login to backorder</a></div>';
   }
   var sess = null;
   try { sess = JSON.parse(sessionStorage.getItem('apbs_user')); } catch (e) {}
   var cartonOnly = !!(sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess));
   var qtyLabel = cartonOnly ? 'Ctns' : 'Qty';
   var step = 1;
+  var btnLabel = isOOS ? 'Backorder' : 'Add';
+  var btnClass = isOOS ? 'add-to-cart-btn shop-backorder-btn' : 'add-to-cart-btn';
   return '<div class="shop-buy">' +
     '<label class="shop-qty-wrap"><span class="shop-qty-label">' + qtyLabel + '</span>' +
     '<input class="shop-qty" type="number" min="1" step="' + step + '" value="1" inputmode="numeric" aria-label="' + qtyLabel + '"/></label>' +
-    '<button type="button" class="add-to-cart-btn" data-code="' + catEscAttr(code) + '" data-size="' + sizeAttr +
+    '<button type="button" class="' + btnClass + '" data-code="' + catEscAttr(code) + '" data-size="' + sizeAttr +
       '" data-desc="' + descClean + '" data-pcs="' + pack + '" data-price="' + price +
       '" data-qty="' + stockQty + '" data-carton-only="' + (cartonOnly ? '1' : '0') +
-      '" onclick="addToCart(this)">Add</button></div>';
+      '" data-backorder="' + (isOOS ? '1' : '0') +
+      '" onclick="addToCart(this)">' + btnLabel + '</button></div>';
 }
 
 function paintCatalogGroups(groups) {
@@ -522,8 +525,10 @@ function paintCatalogGroups(groups) {
         return isLoggedIn ? r.qty > 0 : !!r.inStock;
       }).length;
       var statsLabel = sizeCount + (sizeCount === 1 ? ' size' : ' sizes');
+      var oosCount = sizeCount - inStockCount;
       if (inStockCount > 0) statsLabel += ' · ' + inStockCount + ' in stock';
-      else statsLabel += ' · call for availability';
+      if (oosCount > 0) statsLabel += ' · ' + oosCount + ' backorder';
+      if (inStockCount === 0 && oosCount === 0) statsLabel += ' · call';
 
       let html = `
         <div class="prod-section shop-list-item shop-tile open" id="${code.replace(/"/g, '')}" data-code="${code.replace(/"/g, '')}" data-main-key="${catEscAttr(mainKey)}" data-sub="${catEscAttr(subLabel)}" data-search="${searchAttr}">
@@ -544,7 +549,7 @@ function paintCatalogGroups(groups) {
       data.rows.forEach(item => {
         let isOOS = isLoggedIn ? item.qty <= 0 : !item.inStock;
         let availHtml = isOOS
-          ? `<span class="shop-stock shop-stock-out">Call for availability</span>`
+          ? `<span class="shop-stock shop-stock-out">Out of stock · backorder OK</span>`
           : (isLoggedIn
             ? `<span class="shop-stock shop-stock-in">In stock · ${item.qty}</span>`
             : `<span class="shop-stock shop-stock-in">In stock</span>`);
@@ -842,7 +847,7 @@ function mcatRenderDetail(code) {
   g.rows.forEach(function (item) {
     var isOOS = isLoggedIn ? item.qty <= 0 : !item.inStock;
     var avail = isOOS
-      ? '<span class="mcat-oos">Call for availability</span>'
+      ? '<span class="mcat-oos">Out of stock · backorder OK</span>'
       : (isLoggedIn
         ? '<span class="mcat-in">In stock · ' + item.qty + '</span>'
         : '<span class="mcat-in">In stock</span>');
@@ -983,7 +988,9 @@ function addToCart(btn){
   var desc  = btn.dataset.desc;
   var pcs   = parseInt(btn.dataset.pcs)||1;
   var price = parseFloat(btn.dataset.price)||0;
-  var maxQty= parseInt(btn.dataset.qty)||0;
+  var onHand = parseInt(btn.dataset.qty, 10);
+  if (!Number.isFinite(onHand) || onHand < 0) onHand = 0;
+  var isBackorderBtn = btn.dataset.backorder === '1' || onHand <= 0;
   var sess  = null;
   try{ sess = JSON.parse(sessionStorage.getItem('apbs_user')); }catch(e){}
   
@@ -1002,30 +1009,33 @@ function addToCart(btn){
   var defaultUnit = cartonOnly ? 'carton' : 'piece';
   // Cart stores piece counts; carton-only accounts enter carton count in the qty box.
   var addPieces = cartonOnly ? (want * pcs) : want;
-  if (maxQty > 0) addPieces = Math.min(addPieces, maxQty);
   if (addPieces < 1) {
-    alert('Not enough stock for that quantity.');
+    alert('Enter a quantity of at least 1.');
     return;
   }
   
   var cart  = getCart();
   var existing = cart.find(function(i){ return i.code===code && i.size===size; });
   if(existing){
-    existing.qty = Math.min(existing.qty + addPieces, maxQty > 0 ? maxQty : existing.qty + addPieces);
-    existing.maxQty = maxQty || existing.maxQty;
+    existing.qty = existing.qty + addPieces;
+    existing.maxQty = onHand;
+    existing.backorder = isBackorderBtn || existing.qty > onHand;
     if (!existing.unit) existing.unit = defaultUnit;
   } else {
-    cart.push({code:code, size:size, description:desc, pcsPerCtn:pcs,
-               unitPrice:price, qty:addPieces, unit:defaultUnit, maxQty:maxQty});
+    cart.push({
+      code:code, size:size, description:desc, pcsPerCtn:pcs,
+      unitPrice:price, qty:addPieces, unit:defaultUnit, maxQty:onHand,
+      backorder: isBackorderBtn || addPieces > onHand
+    });
   }
   saveCart(cart);
   var prev = btn.textContent;
-  btn.textContent = 'Added!';
+  btn.textContent = isBackorderBtn ? 'Backordered!' : 'Added!';
   btn.style.background = 'rgba(46,204,113,.15)';
   btn.style.borderColor = '#2ecc71';
   btn.style.color = '#2ecc71';
   setTimeout(function(){
-    btn.textContent = prev || 'Add';
+    btn.textContent = prev || (isBackorderBtn ? 'Backorder' : 'Add');
     btn.style.background = '';
     btn.style.borderColor = '';
     btn.style.color = '';
