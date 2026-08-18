@@ -419,6 +419,7 @@ footer{background:var(--ink);border-top:1px solid rgba(200,152,31,.12)}
 }
 #hero.home-hero-find {
   min-height: clamp(420px, 62vh, 680px);
+  overflow: visible;
 }
 .home-search {
   width: min(640px, 100%);
@@ -504,6 +505,7 @@ footer{background:var(--ink);border-top:1px solid rgba(200,152,31,.12)}
   flex: 1;
   justify-content: center;
   padding: clamp(48px, 8vh, 96px) var(--page-pad) clamp(40px, 6vh, 72px);
+  overflow: visible;
   background:
     radial-gradient(ellipse 70% 60% at 50% 0%, rgba(200,152,31,.14), transparent 55%),
     linear-gradient(160deg, #1a2430 0%, var(--apbs-dark-blue) 45%, #0a0e13 100%);
