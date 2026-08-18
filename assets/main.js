@@ -268,12 +268,17 @@ function loadGlobalLayout() {
     </div>
 
     <nav>
-      <div class="nav-logo">
+      <a href="index.html" class="nav-logo" style="cursor:none;">
         <img src="images/logo.png" alt="All Pro Building Supplies" onerror="this.style.display='none'"/>
         <div class="nav-brand-text">All Pro Building Supplies <span>LLC</span></div>
-      </div>
+      </a>
+      <form class="nav-search" id="nav-search-form" action="products.html" method="get" role="search">
+        <label class="nav-search-label" for="nav-search-input">Search catalog</label>
+        <input class="nav-search-input" id="nav-search-input" name="q" type="search" placeholder="Search code, size, or name…" autocomplete="off" enterkeyhint="search"/>
+        <button class="nav-search-btn" type="submit" aria-label="Search products">Search</button>
+        <div class="nav-search-suggest" id="nav-search-suggest" hidden></div>
+      </form>
       <ul class="nav-links">
-        <li><a href="index.html" style="cursor:none;">Home</a></li>
         <li><a href="products.html" style="cursor:none;">Products</a></li>
         <li><a href="about.html" style="cursor:none;">About</a></li>
         <li><a href="contact.html" style="cursor:none;">Contact</a></li>
@@ -282,8 +287,8 @@ function loadGlobalLayout() {
         <a href="tel:17327341123" class="nav-tel" style="cursor:none;"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--gold)"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.22 1.12.45 2.32.68 3.58.68.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H8c.55 0 1 .45 1 1 0 1.27.2 2.48.57 3.62.1.32.03.68-.22.96L6.6 10.8z"/></svg>732-734-1123</a>
         <span id="auth-buttons" style="display:inline-flex; align-items:center; gap:8px;">
           <a href="login.html" class="nav-cta" id="nav-login-btn" style="background:transparent;border:1px solid var(--gold);color:var(--gold);cursor:none;">Login</a>
-          <a href="account.html" class="nav-cta" id="nav-account-btn" style="display:none;background:var(--ink3);border:1px solid rgba(200,152,31,.3);flex-direction:column;align-items:flex-start;padding:6px 12px;line-height:1.3;gap:2px;cursor:none;"><span style="font-size:9px;color:var(--silver);letter-spacing:1px;font-family:'DM Mono',monospace;">LOGGED IN AS</span><span id="nav-logged-in-name" style="font-size:12px;color:var(--white);">My Account</span></a>
-          <a href="cart.html" class="nav-cta" id="nav-cart-btn" style="background:var(--gold);color:var(--ink);border:none;cursor:none;">🛒 Cart <span id="nav-cart-count" class="cart-nav-badge"></span></a>
+          <a href="account.html" class="nav-cta" id="nav-account-btn" style="display:none;background:var(--ink3);border:1px solid rgba(200,152,31,.3);flex-direction:column;align-items:flex-start;padding:6px 12px;line-height:1.3;gap:2px;cursor:none;"><span style="font-size:9px;color:var(--silver);letter-spacing:1px;font-family:'DM Mono',monospace;">ACCOUNT</span><span id="nav-logged-in-name" style="font-size:12px;color:var(--white);">My Account</span></a>
+          <a href="cart.html" class="nav-cta" id="nav-cart-btn" style="background:var(--gold);color:var(--ink);border:none;cursor:none;">Cart <span id="nav-cart-count" class="cart-nav-badge"></span></a>
         </span>
       </div>
       <button class="hamburger" id="hamburger" aria-label="Menu" style="cursor:none;">
@@ -293,12 +298,20 @@ function loadGlobalLayout() {
 
     <div class="mobile-menu" id="mobile-menu">
       <button class="mobile-menu-close" id="mob-close" aria-label="Close" style="cursor:none;">&#10005;</button>
+      <form class="mob-search" id="mob-search-form" action="products.html" method="get" role="search">
+        <div class="mob-search-field">
+          <input class="mob-search-input" id="mob-search-input" name="q" type="search" placeholder="Search code, size, or name…" autocomplete="off" enterkeyhint="search"/>
+          <div class="nav-search-suggest" id="mob-search-suggest" hidden></div>
+        </div>
+        <button class="mob-search-btn" type="submit">Search catalog</button>
+      </form>
       <a href="index.html" style="cursor:none;">Home</a>
       <a href="products.html" style="cursor:none;">Products</a>
       <a href="about.html" style="cursor:none;">About</a>
       <a href="contact.html" style="cursor:none;">Contact</a>
-      <a href="tel:17327341123" class="mob-tel" style="cursor:none;">📞 732-734-1123</a>
-      <a href="cart.html" class="mob-cta" style="cursor:none;">🛒 Cart →</a>
+      <a href="account.html" style="cursor:none;">Account</a>
+      <a href="tel:17327341123" class="mob-tel" style="cursor:none;">732-734-1123</a>
+      <a href="cart.html" class="mob-cta" style="cursor:none;">Cart →</a>
       <a href="login.html" class="mob-cta" style="margin-top:10px;background:transparent;border:1px solid var(--gold);color:var(--gold);cursor:none;">Login / Register</a>
     </div>
   `;
@@ -318,10 +331,10 @@ function loadGlobalLayout() {
         <div class="ft-col">
           <h4>Products</h4>
           <ul>
-            <li><a href="products.html">Building Materials</a></li>
-            <li><a href="products.html">Plumbing</a></li>
-            <li><a href="products.html">Hardware</a></li>
-            <li><a href="products.html">Contractor Supplies</a></li>
+            <li><a href="products.html?main=Building%20Materials">Building Materials</a></li>
+            <li><a href="products.html?main=Plumbing">Plumbing</a></li>
+            <li><a href="products.html?main=Hardware">Hardware</a></li>
+            <li><a href="products.html?main=Contractor%20Supplies">Contractor Supplies</a></li>
           </ul>
         </div>
         <div class="ft-col">
@@ -349,6 +362,8 @@ function loadGlobalLayout() {
   if(!window.__apbsGlobalScriptsInit){
     initGlobalScripts();
     window.__apbsGlobalScriptsInit = true;
+  } else {
+    initNavSearch();
   }
 }
 
@@ -471,6 +486,260 @@ function initGlobalScripts() {
     var el = document.getElementById('nav-cart-count');
     if(el) el.textContent = total > 0 ? total : '';
   } catch(e) {}
+
+  initNavSearch();
+}
+
+/** Header / mobile / page catalog search — live typeahead suggestions. */
+function initNavSearch() {
+  var params = new URLSearchParams(window.location.search || '');
+  var qParam = params.get('q') || '';
+  var page = (window.location.pathname.split('/').pop() || '').toLowerCase();
+  var navInput = document.getElementById('nav-search-input');
+  var mobInput = document.getElementById('mob-search-input');
+  if (navInput && qParam && page === 'products.html') navInput.value = qParam;
+  if (mobInput && qParam && page === 'products.html') mobInput.value = qParam;
+
+  ensureCatalogSuggestBoxes();
+  bindCatalogSuggestInput(document.getElementById('nav-search-input'), document.getElementById('nav-search-suggest'));
+  bindCatalogSuggestInput(document.getElementById('mob-search-input'), document.getElementById('mob-search-suggest'));
+  bindCatalogSuggestInput(document.getElementById('home-search-input'), document.getElementById('home-search-suggest'));
+  bindCatalogSuggestInput(document.getElementById('prod-search'), document.getElementById('prod-search-suggest'));
+
+  bindCatalogSearchForm(document.getElementById('nav-search-form'), page);
+  bindCatalogSearchForm(document.getElementById('mob-search-form'), page);
+  bindCatalogSearchForm(document.getElementById('home-search-form') || document.querySelector('form.home-search'), page);
+
+  // Always warm / refresh in-memory catalog for typeahead (don't wait for products page).
+  apbsLoadSuggestCatalog(true);
+}
+
+function ensureCatalogSuggestBoxes() {
+  function ensure(inputId, boxId, wrapSel) {
+    if (document.getElementById(boxId)) return;
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    var wrap = wrapSel ? input.closest(wrapSel) : input.parentElement;
+    if (!wrap) return;
+    if (window.getComputedStyle(wrap).position === 'static') wrap.style.position = 'relative';
+    var box = document.createElement('div');
+    box.className = 'nav-search-suggest';
+    box.id = boxId;
+    box.hidden = true;
+    wrap.appendChild(box);
+  }
+  ensure('home-search-input', 'home-search-suggest', '.home-search');
+  ensure('prod-search', 'prod-search-suggest', '.search-wrap');
+}
+
+window.__apbsSuggestCatalog = window.__apbsSuggestCatalog || null;
+window.__apbsSuggestCatalogPromise = window.__apbsSuggestCatalogPromise || null;
+window.__apbsSuggestActiveInput = null;
+
+function apbsCatalogCacheKey() {
+  var user = null;
+  try { user = JSON.parse(sessionStorage.getItem('apbs_user') || 'null'); } catch (_) {}
+  return (user && user.status === 'approved') ? 'apbs_catalog_v1_trade' : 'apbs_catalog_v1_public';
+}
+
+function apbsReadCachedCatalog() {
+  if (Array.isArray(window.__apbsSuggestCatalog) && window.__apbsSuggestCatalog.length) {
+    return window.__apbsSuggestCatalog;
+  }
+  try {
+    var raw = sessionStorage.getItem(apbsCatalogCacheKey())
+      || sessionStorage.getItem('apbs_catalog_v1_public')
+      || sessionStorage.getItem('apbs_catalog_v1_trade');
+    if (!raw) return null;
+    var rows = JSON.parse(raw);
+    if (Array.isArray(rows) && rows.length) {
+      window.__apbsSuggestCatalog = rows;
+      return rows;
+    }
+  } catch (_) {}
+  return null;
+}
+
+function apbsLoadSuggestCatalog(forceNetwork) {
+  var cached = apbsReadCachedCatalog();
+  if (cached && !forceNetwork) return Promise.resolve(cached);
+  if (window.__apbsSuggestCatalogPromise) return window.__apbsSuggestCatalogPromise;
+  if (!window.APBS_API_BASE) return Promise.resolve(cached || []);
+
+  window.__apbsSuggestCatalogPromise = fetch(window.APBS_API_BASE + '/products', {
+    headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {}
+  })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (rows) {
+      window.__apbsSuggestCatalogPromise = null;
+      if (!Array.isArray(rows) || !rows.length) return cached || [];
+      window.__apbsSuggestCatalog = rows;
+      try { sessionStorage.setItem(apbsCatalogCacheKey(), JSON.stringify(rows)); } catch (_) {}
+      // If user is mid-typing, refresh the open dropdown now that data arrived.
+      var active = window.__apbsSuggestActiveInput;
+      if (active && document.activeElement === active && active.__apbsRenderSuggest) {
+        active.__apbsRenderSuggest(active.value);
+      }
+      return rows;
+    })
+    .catch(function () {
+      window.__apbsSuggestCatalogPromise = null;
+      return cached || [];
+    });
+  return window.__apbsSuggestCatalogPromise;
+}
+
+function apbsCatalogHints(qt, rows) {
+  qt = String(qt || '').trim().toLowerCase();
+  if (qt.length < 1) return [];
+  rows = rows || apbsReadCachedCatalog() || [];
+  if (!rows.length) return [];
+  var seen = {};
+  var out = [];
+  for (var i = 0; i < rows.length && out.length < 8; i++) {
+    var r = rows[i];
+    var code = String(r.code || '').trim();
+    if (!code || seen[code]) continue;
+    var hay = (
+      code + ' ' + (r.description || '') + ' ' + (r.size || '') + ' ' +
+      (r.main_category || '') + ' ' + (r.sub_category || '')
+    ).toLowerCase();
+    if (hay.indexOf(qt) === -1) continue;
+    seen[code] = true;
+    out.push({
+      code: code,
+      desc: r.description || code,
+      main: r.main_category || '',
+      href: 'products.html?q=' + encodeURIComponent(code)
+    });
+  }
+  return out;
+}
+
+function bindCatalogSuggestInput(input, suggest) {
+  if (!input || !suggest || input.__apbsSuggestBound) return;
+  input.__apbsSuggestBound = true;
+  var timer = null;
+
+  function hideSuggest() {
+    suggest.hidden = true;
+    suggest.classList.remove('is-open');
+    suggest.innerHTML = '';
+  }
+
+  function renderSuggest(qt) {
+    var q = String(qt || '').trim();
+    if (!q.length) { hideSuggest(); return; }
+    var rows = apbsReadCachedCatalog();
+    if (!rows) {
+      suggest.innerHTML = '<div class="nav-search-hint">Loading catalog…</div>';
+      suggest.hidden = false;
+      suggest.classList.add('is-open');
+      apbsLoadSuggestCatalog(true);
+      return;
+    }
+    var items = apbsCatalogHints(q, rows);
+    if (!items.length) {
+      suggest.innerHTML = '<div class="nav-search-hint">No matches — press Enter to search</div>';
+      suggest.hidden = false;
+      suggest.classList.add('is-open');
+      return;
+    }
+    suggest.innerHTML = items.map(function (it) {
+      return '<button type="button" class="nav-search-hit" data-suggest-q="' +
+        window.apbsEscapeHtml(it.code).replace(/"/g, '&quot;') + '">' +
+        '<span class="nav-search-hit-code">' + window.apbsEscapeHtml(it.code) + '</span>' +
+        '<span class="nav-search-hit-desc">' + window.apbsEscapeHtml(it.desc) + '</span>' +
+        (it.main ? '<span class="nav-search-hit-cat">' + window.apbsEscapeHtml(it.main) + '</span>' : '') +
+      '</button>';
+    }).join('');
+    suggest.hidden = false;
+    suggest.classList.add('is-open');
+  }
+
+  input.__apbsRenderSuggest = renderSuggest;
+  input.__apbsHideSuggest = hideSuggest;
+
+  input.addEventListener('input', function () {
+    window.__apbsSuggestActiveInput = input;
+    clearTimeout(timer);
+    timer = setTimeout(function () { renderSuggest(input.value); }, 60);
+  });
+  input.addEventListener('focus', function () {
+    window.__apbsSuggestActiveInput = input;
+    if (input.value.trim().length >= 1) renderSuggest(input.value);
+    else apbsLoadSuggestCatalog(false);
+  });
+
+  suggest.addEventListener('mousedown', function (e) {
+    // Keep focus long enough to apply the pick (avoid input blur hiding first).
+    e.preventDefault();
+  });
+  suggest.addEventListener('click', function (e) {
+    var hit = e.target.closest ? e.target.closest('[data-suggest-q]') : null;
+    if (!hit) return;
+    var q = hit.getAttribute('data-suggest-q') || '';
+    input.value = q;
+    hideSuggest();
+    var form = input.form || input.closest('form');
+    if (form) {
+      if (typeof form.requestSubmit === 'function') form.requestSubmit();
+      else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    } else {
+      // products.html page search (no form) — filter in place
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  });
+
+  if (!window.__apbsSuggestDocClickBound) {
+    window.__apbsSuggestDocClickBound = true;
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && (
+        e.target.closest('.nav-search') ||
+        e.target.closest('.home-search') ||
+        e.target.closest('.search-wrap') ||
+        e.target.closest('.mob-search-field')
+      )) return;
+      document.querySelectorAll('.nav-search-suggest.is-open').forEach(function (el) {
+        el.hidden = true;
+        el.classList.remove('is-open');
+        el.innerHTML = '';
+      });
+    });
+  }
+}
+
+function bindCatalogSearchForm(form, page) {
+  if (!form || form.__apbsSearchBound) return;
+  form.__apbsSearchBound = true;
+  form.addEventListener('submit', function (e) {
+    var input = form.querySelector('input[name="q"], input[type="search"]');
+    var q = input ? String(input.value || '').trim() : '';
+    document.querySelectorAll('.nav-search-suggest').forEach(function (el) {
+      el.hidden = true;
+      el.classList.remove('is-open');
+    });
+    if (page === 'products.html') {
+      e.preventDefault();
+      var prodSearch = document.getElementById('prod-search');
+      if (prodSearch) {
+        prodSearch.value = q;
+        prodSearch.dispatchEvent(new Event('input', { bubbles: true }));
+        try { prodSearch.focus(); } catch (_) {}
+      }
+      try {
+        var url = q ? ('products.html?q=' + encodeURIComponent(q)) : 'products.html';
+        history.replaceState(null, '', url);
+      } catch (_) {}
+      var hamburger = document.querySelector('.hamburger');
+      var mobileMenu = document.querySelector('.mobile-menu');
+      if (hamburger && mobileMenu && mobileMenu.classList.contains('open')) {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
+  });
 }
 
 // Auto-run when DOM is ready

@@ -18,18 +18,24 @@
 
 <div id="global-header"></div>
 
-<div class="page-hero">
+<div class="page-hero page-hero-compact">
   <div class="page-hero-inner">
     <div class="page-breadcrumb"><a href="index.html">Home</a> › <a href="cart.html">Cart</a> › Checkout</div>
     <div class="page-title" data-r>Check<span>out</span></div>
-    <p class="page-subtitle" data-r>Complete your order details below.</p>
+    <p class="page-subtitle" data-r>Confirm delivery, PO, and place your order.</p>
   </div>
 </div>
-<div class="ticker" aria-hidden="true"><div class="ticker-track">
-  <div class="t-item g">Building Materials <span class="t-dia">◆</span></div><div class="t-item">Plumbing Supplies <span class="t-dia">◆</span></div>
-  <div class="t-item g">PVC Pipe &amp; Fittings <span class="t-dia">◆</span></div><div class="t-item">Fast Response <span class="t-dia">◆</span></div>
-  <div class="t-item g">Building Materials <span class="t-dia">◆</span></div><div class="t-item">Plumbing Supplies <span class="t-dia">◆</span></div>
-</div></div>
+
+<div class="shop-flow-steps" aria-label="Order progress">
+  <div class="sec-inner shop-flow-inner">
+    <a class="shop-flow-step" data-step="1" href="cart.html">1 · Cart</a>
+    <span class="shop-flow-sep">→</span>
+    <span class="shop-flow-step is-active" data-step="2">2 · Checkout</span>
+    <span class="shop-flow-sep">→</span>
+    <span class="shop-flow-step" data-step="3">3 · Done</span>
+  </div>
+</div>
+
 <div class="section">
   <div class="container">
 
@@ -40,36 +46,67 @@
 
     <div id="empty-gate" style="display:none;text-align:center;padding:60px;">
       <p style="color:var(--silver);margin-bottom:20px;">Your cart is empty.</p>
-      <a href="products.html" class="btn-gold" style="background:var(--gold);color:var(--ink);font-family:Oswald,sans-serif;font-size:13px;letter-spacing:2px;padding:12px 28px;text-decoration:none;">Browse Products →</a>
+      <a href="products.html" class="btn-gold">Browse Catalog →</a>
     </div>
 
     <div id="success-screen">
-      <div class="success-icon">✅</div>
-      <h2 class="success-title">Order Placed!</h2>
-      <div class="success-order-num" id="success-order-num"></div>
-      <p class="success-sub">Thank you! Your order has been received. Baruch will review and confirm it shortly. You'll be contacted at <strong id="success-email"></strong> with confirmation details.</p>
-      <a href="products.html" style="background:var(--gold);color:var(--ink);font-family:Oswald,sans-serif;font-size:13px;letter-spacing:2px;padding:14px 32px;text-decoration:none;display:inline-block;">Continue Shopping</a>
+      <div class="success-card">
+        <div class="success-kicker">Order received</div>
+        <h2 class="success-title">You're all set</h2>
+        <div class="success-order-num" id="success-order-num"></div>
+        <p class="success-sub">We'll review and confirm shortly. Updates go to <strong id="success-email"></strong>.</p>
+        <div class="success-actions">
+          <a href="account.html" class="btn-gold">View my orders</a>
+          <a href="products.html" class="btn-ghost">Keep shopping →</a>
+        </div>
+      </div>
     </div>
 
     <div id="checkout-wrap">
-      <div id="global-err"></div>
+      <div id="global-err" class="global-err"></div>
       <div class="checkout-grid">
 
-        <div>
-          <div class="checkout-form-wrap" style="margin-bottom:24px;">
-            <div class="checkout-section-title">Delivery Method</div>
+        <div class="checkout-main">
+          <div class="checkout-form-wrap">
+            <div class="checkout-section-title">1 · Contact</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Contact Name *</label>
+                <input class="form-input" id="f-name" placeholder="Your name" type="text"/>
+                <span class="err-msg" id="e-name">Required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone *</label>
+                <input class="form-input" id="f-phone" placeholder="(732) 000-0000" type="tel"/>
+                <span class="err-msg" id="e-phone">Required</span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Company</label>
+                <input class="form-input" id="f-company" type="text" readonly style="opacity:.6;"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" id="f-email" type="text" readonly style="opacity:.6;"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="checkout-form-wrap">
+            <div class="checkout-section-title">2 · Delivery</div>
             <div class="delivery-toggle">
-              <div class="del-opt active" id="opt-delivery" onclick="setDelivery('delivery')">🚚 Delivery</div>
-              <div class="del-opt" id="opt-pickup" onclick="setDelivery('pickup')">🏭 Pickup</div>
+              <div class="del-opt active" id="opt-delivery" onclick="setDelivery('delivery')">Delivery</div>
+              <div class="del-opt" id="opt-pickup" onclick="setDelivery('pickup')">Pickup</div>
             </div>
             <div id="delivery-fields">
-              <div class="form-row full" id="saved-address-row" style="display:none;">
-                <div class="form-group">
-                  <label class="form-label">Saved Address</label>
-                  <select class="form-input" id="f-saved-address" onchange="applyCheckoutAddress()">
-                    <option value="">— Enter a new address —</option>
-                  </select>
-                </div>
+              <div id="saved-address-row" class="saved-address-block" style="display:none;">
+                <label class="form-label">Saved addresses</label>
+                <div class="saved-address-list" id="saved-address-list" role="listbox" aria-label="Saved addresses"></div>
+                <button type="button" class="btn-ghost saved-address-new" id="btn-new-address" onclick="useNewCheckoutAddress()">Enter a new address</button>
+                <select class="form-input" id="f-saved-address" onchange="applyCheckoutAddress()" hidden>
+                  <option value="">— Enter a new address —</option>
+                </select>
               </div>
               <div class="form-row full"><div class="form-group">
                 <label class="form-label">Delivery Address *</label>
@@ -88,57 +125,35 @@
                   <span class="err-msg" id="e-statzip">Required</span>
                 </div>
               </div>
-              <label style="display:flex;align-items:center;gap:8px;color:var(--silver);font-size:12px;margin-top:8px;cursor:pointer;">
+              <label class="checkout-check">
                 <input type="checkbox" id="f-save-address" checked>
-                Save this address to my account for future orders
+                Save this address for next time
               </label>
             </div>
-            <div id="pickup-note" style="display:none;background:rgba(200,152,31,.06);border:1px solid rgba(200,152,31,.2);padding:14px 16px;font-size:13px;color:var(--silver);">
-              📍 Pickup at our warehouse. We'll contact you to confirm a pickup time.
+            <div id="pickup-note" class="pickup-note" style="display:none;">
+              Pickup at our warehouse — we'll confirm a time with you.
             </div>
           </div>
 
-          <div class="checkout-form-wrap" style="margin-bottom:24px;">
-            <div class="checkout-section-title">Contact &amp; Company</div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Contact Name *</label>
-                <input class="form-input" id="f-name" placeholder="Your name" type="text"/>
-                <span class="err-msg" id="e-name">Required</span>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Phone *</label>
-                <input class="form-input" id="f-phone" placeholder="(732) 000-0000" type="tel"/>
-                <span class="err-msg" id="e-phone">Required</span>
-              </div>
-            </div>
+          <div class="checkout-form-wrap">
+            <div class="checkout-section-title">3 · PO &amp; notes <span class="checkout-optional">(optional)</span></div>
             <div class="form-row full">
               <div class="form-group">
-                <label class="form-label">Company</label>
-                <input class="form-input" id="f-company" type="text" readonly style="opacity:.6;"/>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">PO Number <span style="color:var(--silver);font-size:10px;">(optional)</span></label>
+                <label class="form-label">PO Number</label>
                 <input class="form-input" id="f-po" placeholder="PO-0000" type="text"/>
               </div>
-              <div class="form-group">
-                <label class="form-label">Email</label>
-                <input class="form-input" id="f-email" type="text" readonly style="opacity:.6;"/>
-              </div>
             </div>
             <div class="form-row full">
               <div class="form-group">
-                <label class="form-label">Special Notes <span style="color:var(--silver);font-size:10px;">(optional)</span></label>
-                <textarea class="form-textarea" id="f-notes" placeholder="Delivery instructions, special requirements, etc."></textarea>
+                <label class="form-label">Special Notes</label>
+                <textarea class="form-textarea" id="f-notes" placeholder="Delivery instructions, gate codes, etc."></textarea>
               </div>
             </div>
           </div>
         </div>
 
         <div>
-          <div class="order-summary">
+          <div class="order-summary checkout-summary-sticky">
             <div class="order-summary-title">Order Summary</div>
             <div id="order-lines"></div>
             <div class="order-total-row">
@@ -148,7 +163,8 @@
             <button class="place-order-btn" id="place-btn" onclick="placeOrder()">
               Place Order →
             </button>
-            <p style="font-size:11px;color:var(--silver);margin-top:12px;text-align:center;font-family:'DM Mono',monospace;line-height:1.6;">By placing this order you agree to our standard trade terms. Payment due on delivery.</p>
+            <a href="cart.html" class="checkout-back-cart">← Edit cart</a>
+            <p class="checkout-terms">Trade terms apply. Payment due on delivery unless otherwise arranged.</p>
           </div>
         </div>
 
@@ -170,6 +186,51 @@ function saveCart(c){ localStorage.setItem('apbs_cart', JSON.stringify(c)); }
 
 function apiBase(){ return window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api'; }
 
+function escHtml(s){
+  return (window.apbsEscapeHtml || function(t){ return String(t||'').replace(/</g,'&lt;'); })(s);
+}
+
+function syncAddressCardSelection(){
+  var sel = document.getElementById('f-saved-address');
+  var id = sel ? sel.value : '';
+  document.querySelectorAll('.saved-address-card').forEach(function(btn){
+    var active = id && String(btn.getAttribute('data-id')) === String(id);
+    btn.classList.toggle('is-selected', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+}
+
+function renderSavedAddressCards(){
+  var list = document.getElementById('saved-address-list');
+  if(!list) return;
+  if(!savedAddresses.length){
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = savedAddresses.map(function(a){
+    var label = a.label || 'Address';
+    var street = a.line1 || '';
+    var cityLine = [a.city, a.stateZip].filter(Boolean).join(', ');
+    if(!street && a.fullAddress){
+      street = a.fullAddress;
+      cityLine = '';
+    }
+    var def = a.isDefault ? ' · Default' : '';
+    return '<button type="button" class="saved-address-card" role="option" data-id="'+escHtml(String(a.id))+'" aria-pressed="false">'
+      +'<strong>'+escHtml(label)+escHtml(def)+'</strong>'
+      +(street ? '<span>'+escHtml(street)+'</span>' : '')
+      +(cityLine ? '<span>'+escHtml(cityLine)+'</span>' : '')
+      +'</button>';
+  }).join('');
+  list.querySelectorAll('.saved-address-card').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var sel = document.getElementById('f-saved-address');
+      if(sel) sel.value = btn.getAttribute('data-id') || '';
+      applyCheckoutAddress();
+    });
+  });
+}
+
 async function loadSavedAddresses(){
   try{
     var r = await fetch(apiBase() + '/addresses?import=1', {
@@ -185,6 +246,7 @@ async function loadSavedAddresses(){
     var sel = document.getElementById('f-saved-address');
     if(!savedAddresses.length){
       if(row) row.style.display = 'none';
+      renderSavedAddressCards();
       return;
     }
     if(row) row.style.display = 'block';
@@ -194,21 +256,25 @@ async function loadSavedAddresses(){
       html += '<option value="' + String(a.id).replace(/"/g,'&quot;') + '">' + label.replace(/</g,'&lt;') + '</option>';
     });
     sel.innerHTML = html;
+    renderSavedAddressCards();
     var def = savedAddresses.find(function(a){ return a.isDefault; }) || savedAddresses[0];
     if(def){
-      sel.value = def.id;
+      sel.value = String(def.id);
       applyCheckoutAddress();
+    } else {
+      syncAddressCardSelection();
     }
   }catch(e){ console.warn('Could not load saved addresses', e); }
 }
 
 function applyCheckoutAddress(){
   var id = document.getElementById('f-saved-address').value;
+  syncAddressCardSelection();
   if(!id){
     document.getElementById('f-save-address').checked = true;
     return;
   }
-  var a = savedAddresses.find(function(x){ return x.id === id; });
+  var a = savedAddresses.find(function(x){ return String(x.id) === String(id); });
   if(!a) return;
   if(a.line1){
     document.getElementById('f-address').value = a.line1;
@@ -223,6 +289,18 @@ function applyCheckoutAddress(){
   }
   if(a.phone) document.getElementById('f-phone').value = a.phone;
   document.getElementById('f-save-address').checked = false;
+}
+
+function useNewCheckoutAddress(){
+  var sel = document.getElementById('f-saved-address');
+  if(sel) sel.value = '';
+  syncAddressCardSelection();
+  document.getElementById('f-address').value = '';
+  document.getElementById('f-city').value = '';
+  document.getElementById('f-statzip').value = '';
+  document.getElementById('f-save-address').checked = true;
+  var street = document.getElementById('f-address');
+  if(street) street.focus();
 }
 
 (function init(){
@@ -274,6 +352,7 @@ function setDelivery(method){
 function renderSummary(cart){
   var linesEl = document.getElementById('order-lines');
   var total = 0;
+  var boCount = 0;
   linesEl.innerHTML = '';
   cart.forEach(function(item){
     var lineTotal = parseFloat(item.unitPrice) * item.qty;
@@ -282,13 +361,19 @@ function renderSummary(cart){
       ? Math.ceil(item.qty/item.pcsPerCtn)+' ctn ('+item.qty+' pcs)'
       : item.qty+' pcs';
     var esc = window.apbsEscapeHtml || function(s){ return String(s); };
+    var bo = !!item.backorder;
+    if(bo) boCount += 1;
+    var boTag = bo ? ' <span class="cart-bo-tag">BACKORDER</span>' : '';
     linesEl.innerHTML +=
       '<div class="order-line">'
-      +'<div><div class="order-line-name">'+esc(item.description)+' '+esc(item.size)+'</div>'
+      +'<div><div class="order-line-name">'+esc(item.description)+' '+esc(item.size)+boTag+'</div>'
       +'<div class="order-line-sub">'+unitLabel+' × $'+parseFloat(item.unitPrice).toFixed(2)+'</div></div>'
       +'<div class="order-line-price">$'+lineTotal.toFixed(2)+'</div>'
       +'</div>';
   });
+  if(boCount){
+    linesEl.innerHTML += '<div class="checkout-bo-note">'+boCount+' backorder line'+(boCount===1?'':'s')+' — confirmed after review</div>';
+  }
   document.getElementById('order-total').textContent = '$'+total.toFixed(2);
 }
 
@@ -370,7 +455,8 @@ async function placeOrder(){
         unit: item.unit,
         pcsPerCtn: item.pcsPerCtn,
         unitPrice: parseFloat(item.unitPrice),
-        lineTotal: parseFloat(item.unitPrice)*item.qty
+        lineTotal: parseFloat(item.unitPrice)*item.qty,
+        backorder: !!item.backorder
       };
     }),
     total: total,
@@ -424,6 +510,10 @@ async function placeOrder(){
     document.getElementById('success-screen').style.display = 'block';
     document.getElementById('success-order-num').textContent = orderId;
     document.getElementById('success-email').textContent = currentUser.email;
+    document.querySelectorAll('.shop-flow-step').forEach(function(el){
+      el.classList.remove('is-active');
+      if(el.getAttribute('data-step') === '3') el.classList.add('is-active');
+    });
   }catch(e){
     console.error(e);
     document.getElementById('global-err').textContent = 'Something went wrong — please try again or call 732-734-1123.';

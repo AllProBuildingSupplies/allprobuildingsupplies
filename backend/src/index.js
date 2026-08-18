@@ -1530,8 +1530,8 @@ function validateAndPriceItems(allProds, items) {
     if (!qty || qty < 1) return { error: `Invalid quantity for ${i.code || 'item'}` };
     const match = findProduct(allProds, i.code, i.size);
     if (!match) return { error: `Product not found: ${i.code} ${i.size}` };
+    // Customer orders may backorder when qty exceeds on-hand (stock floored at 0 on deduct).
     const stock = parseInt(match.qty, 10) || 0;
-    if (qty > stock) return { error: `Insufficient stock for ${match.description} ${match.size} (max ${stock})` };
     const unitPrice = parseFloat(match.price) || 0;
     const lineTotal = unitPrice * qty;
     total += lineTotal;
@@ -1543,6 +1543,8 @@ function validateAndPriceItems(allProds, items) {
       unitPrice,
       lineTotal,
       pcsPerCtn: match.pack,
+      onHand: stock,
+      backorder: qty > stock,
     });
   }
   return { validated, total };
