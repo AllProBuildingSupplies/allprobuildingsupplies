@@ -18,18 +18,24 @@
 
 <div id="global-header"></div>
 
-<div class="page-hero">
+<div class="page-hero page-hero-compact">
   <div class="page-hero-inner">
     <div class="page-breadcrumb"><a href="index.html">Home</a> › <a href="products.html">Products</a> › Cart</div>
     <div class="page-title" data-r>Your <span>Cart</span></div>
-    <p class="page-subtitle" data-r>Review your items and quantities before checking out.</p>
+    <p class="page-subtitle" data-r>Adjust qty, then checkout. Backorders are labeled clearly.</p>
   </div>
 </div>
-<div class="ticker" aria-hidden="true"><div class="ticker-track">
-  <div class="t-item g">Building Materials <span class="t-dia">◆</span></div><div class="t-item">Plumbing Supplies <span class="t-dia">◆</span></div>
-  <div class="t-item g">Hardware <span class="t-dia">◆</span></div><div class="t-item">PVC Pipe &amp; Fittings <span class="t-dia">◆</span></div>
-  <div class="t-item g">Building Materials <span class="t-dia">◆</span></div><div class="t-item">Plumbing Supplies <span class="t-dia">◆</span></div>
-</div></div>
+
+<div class="shop-flow-steps" aria-label="Order progress">
+  <div class="sec-inner shop-flow-inner">
+    <span class="shop-flow-step is-active">1 · Cart</span>
+    <span class="shop-flow-sep">→</span>
+    <span class="shop-flow-step">2 · Checkout</span>
+    <span class="shop-flow-sep">→</span>
+    <span class="shop-flow-step">3 · Done</span>
+  </div>
+</div>
+
 <div class="section">
   <div class="container">
     <div class="cart-wrap">
@@ -44,53 +50,55 @@
       </div>
 
       <div id="cart-empty" style="display:none;" class="cart-empty">
-        <div class="cart-empty-icon">🛒</div>
         <h2>Your cart is empty</h2>
-        <p>Browse our product catalog and add items to get started.</p>
-        <a href="products.html" class="btn-gold">Browse Products →</a>
+        <p>Browse the catalog, set qty, and add items — including backorders.</p>
+        <a href="products.html" class="btn-gold">Browse Catalog →</a>
       </div>
 
-      <div id="cart-contents" style="display:none;">
-        <table class="cart-table" id="cart-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Unit Price</th>
-              <th>Unit</th>
-              <th>Quantity</th>
-              <th>Line Total</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="cart-tbody"></tbody>
-        </table>
-
-        <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
-          <div style="flex:1;min-width:280px;">
-            <a href="products.html" class="btn-ghost" style="margin-bottom:0;">← Continue Shopping</a>
-          </div>
-          <div style="min-width:320px;" id="cart-summary-wrap">
-            <div class="cart-summary">
-              <div class="cart-summary-row">
-                <span>Subtotal</span>
-                <span id="summary-subtotal" class="cart-price">$0.00</span>
-              </div>
-              <div class="cart-summary-row">
-                <span>Items</span>
-                <span id="summary-items" style="font-family:'DM Mono',monospace;font-size:13px;">0</span>
-              </div>
-              <div class="cart-summary-row" style="padding-top:16px;margin-top:4px;">
-                <span class="cart-summary-total">Order Total</span>
-                <span class="cart-summary-total-val" id="summary-total">$0.00</span>
-              </div>
-              <div class="cart-actions">
-                <button class="btn-ghost" style="flex:1;justify-content:center;" onclick="clearCart()">Clear Cart</button>
-                <a href="checkout.html" class="btn-gold" style="flex:2;justify-content:center;" id="checkout-btn">Checkout →</a>
-              </div>
-              <p style="font-size:11px;color:var(--silver);margin-top:14px;text-align:center;font-family:'DM Mono',monospace;">Prices shown are your approved trade pricing.</p>
-            </div>
-          </div>
+      <div id="cart-contents" style="display:none;" class="cart-layout">
+        <div class="cart-main">
+          <table class="cart-table" id="cart-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Unit Price</th>
+                <th>Unit</th>
+                <th>Quantity</th>
+                <th>Line Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cart-tbody"></tbody>
+          </table>
+          <a href="products.html" class="btn-ghost cart-continue">← Continue Shopping</a>
         </div>
+
+        <aside class="cart-summary-wrap" id="cart-summary-wrap">
+          <div class="cart-summary">
+            <div class="cart-summary-title">Order summary</div>
+            <div class="cart-summary-row">
+              <span>Subtotal</span>
+              <span id="summary-subtotal" class="cart-price">$0.00</span>
+            </div>
+            <div class="cart-summary-row">
+              <span>Pieces</span>
+              <span id="summary-items" style="font-family:'DM Mono',monospace;font-size:13px;">0</span>
+            </div>
+            <div class="cart-summary-row" id="summary-bo-row" style="display:none;">
+              <span>Backorder lines</span>
+              <span id="summary-bo" style="font-family:'DM Mono',monospace;font-size:13px;color:#e67e22;">0</span>
+            </div>
+            <div class="cart-summary-row cart-summary-total-row">
+              <span class="cart-summary-total">Total</span>
+              <span class="cart-summary-total-val" id="summary-total">$0.00</span>
+            </div>
+            <div class="cart-actions">
+              <a href="checkout.html" class="btn-gold cart-checkout-btn" id="checkout-btn">Checkout →</a>
+              <button type="button" class="btn-ghost cart-clear-btn" onclick="clearCart()">Clear</button>
+            </div>
+            <p class="cart-summary-note">Trade pricing · backorders ship when stock arrives</p>
+          </div>
+        </aside>
       </div>
 
     </div>
@@ -200,13 +208,14 @@ async function renderCart(){
     emptyEl.style.display    = 'block';
     return;
   }
-  contentsEl.style.display = 'block';
+  contentsEl.style.display = '';
   emptyEl.style.display    = 'none';
 
   var tbody = document.getElementById('cart-tbody');
   tbody.innerHTML = '';
   var subtotal = 0;
   var totalItems = 0;
+  var boLines = 0;
 
   cart.forEach(function(item, idx){
     var norm = window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); };
@@ -218,6 +227,7 @@ async function renderCart(){
     var isBackorder = !!item.backorder || onHand <= 0 || item.qty > onHand;
     item.backorder = isBackorder;
     item.maxQty = onHand;
+    if (isBackorder) boLines += 1;
     // Do not cap backorders to on-hand — customer may order beyond stock.
 
     var unitPrice = parseFloat(item.unitPrice)||0;
@@ -264,6 +274,13 @@ async function renderCart(){
   document.getElementById('summary-subtotal').textContent = '$'+subtotal.toFixed(2);
   document.getElementById('summary-total').textContent    = '$'+subtotal.toFixed(2);
   document.getElementById('summary-items').textContent    = totalItems+' pcs';
+  var boRow = document.getElementById('summary-bo-row');
+  var boEl = document.getElementById('summary-bo');
+  if (boRow && boEl) {
+    boRow.style.display = boLines > 0 ? 'flex' : 'none';
+    boEl.textContent = String(boLines);
+  }
+  saveCart(cart);
   updateNavCount();
 
 }
