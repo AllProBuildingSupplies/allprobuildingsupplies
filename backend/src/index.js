@@ -719,14 +719,21 @@ async function ensureProductCategoryColumns(env) {
 
 /**
  * Preview/legacy D1 may use password_hash / can_order_pieces / registered_at.
- * Add the camelCase columns this Worker writes so admin create/update works.
+ * Add the camelCase columns this Worker writes so admin create/update works,
+ * plus snake_case twins required by older NOT NULL schemas.
  */
 async function ensureUsersCompatColumns(env) {
   const cols = [
     'password TEXT',
+    'password_hash TEXT',
+    "password_algo TEXT DEFAULT 'sha256'",
     'canOrderPieces INTEGER DEFAULT 1',
+    'can_order_pieces INTEGER DEFAULT 1',
     'registeredAt TEXT',
+    'registered_at TEXT',
     'approvedAt TEXT',
+    'approved_at TEXT',
+    'added_by_admin INTEGER DEFAULT 0',
   ];
   for (const col of cols) {
     try {
@@ -743,10 +750,78 @@ async function ensureUsersCompatColumns(env) {
   } catch (_) {}
   try {
     await env.DB.prepare(
+      `UPDATE users SET password_hash = password
+       WHERE (password_hash IS NULL OR TRIM(password_hash) = '')
+         AND password IS NOT NULL AND TRIM(password) != ''`
+    ).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(
       `UPDATE users SET canOrderPieces = COALESCE(canOrderPieces, can_order_pieces, 1)
        WHERE canOrderPieces IS NULL`
     ).run();
   } catch (_) {}
+}
+
+/** Insert a user row compatible with both modern and legacy D1 user schemas. */
+async function insertUserRow(env, fields) {
+  const id = String(fields.id || Date.now());
+  const fname = String(fields.fname || '');
+  const lname = String(fields.lname || '');
+  const company = String(fields.company || '');
+  const email = String(fields.email || '').trim().toLowerCase();
+  const phone = String(fields.phone || '');
+  const storedPw = String(fields.password || '');
+  const status = String(fields.status || 'pending');
+  const canPieces = fields.canOrderPieces ? 1 : 0;
+  const nowIso = String(fields.registeredAt || new Date().toISOString());
+  const approvedIso = status === 'approved' ? String(fields.approvedAt || nowIso) : '';
+  const addedByAdmin = fields.addedByAdmin ? 1 : 0;
+
+  // Prefer full legacy+modern insert (password_hash NOT NULL on some D1s).
+  try {
+    await env.DB.prepare(
+      `INSERT INTO users (
+         id, fname, lname, company, email, phone,
+         password, password_hash, password_algo,
+         status, canOrderPieces, can_order_pieces,
+         registeredAt, registered_at, approvedAt, approved_at, added_by_admin
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+      .bind(
+        id,
+        fname,
+        lname,
+        company,
+        email,
+        phone,
+        storedPw,
+        storedPw,
+        'sha256',
+        status,
+        canPieces,
+        canPieces,
+        nowIso,
+        nowIso,
+        approvedIso,
+        approvedIso,
+        addedByAdmin
+      )
+      .run();
+    return id;
+  } catch (e) {
+    const msg = e && e.message ? String(e.message) : '';
+    // Missing legacy columns → fall back to core schema insert.
+    if (!/no such column/i.test(msg)) throw e;
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO users (id, fname, lname, company, email, phone, password, status, canOrderPieces, registeredAt, approvedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(id, fname, lname, company, email, phone, storedPw, status, canPieces, nowIso, approvedIso)
+    .run();
+  return id;
 }
 
 async function tableColumns(env, table) {
@@ -1866,11 +1941,18 @@ export default {
         }
         const storedPw = await ensureStoredPassword(body.password);
         try {
-          await env.DB.prepare(
-            `INSERT INTO users (id, fname, lname, company, email, phone, password, status, canOrderPieces, registeredAt) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 1, ?)`
-          )
-            .bind(body.id, body.fname, body.lname, body.company, body.email.trim().toLowerCase(), body.phone, storedPw, new Date().toISOString())
-            .run();
+          await insertUserRow(env, {
+            id: body.id || String(Date.now()),
+            fname: body.fname,
+            lname: body.lname,
+            company: body.company,
+            email: body.email,
+            phone: body.phone,
+            password: storedPw,
+            status: 'pending',
+            canOrderPieces: true,
+            addedByAdmin: false,
+          });
         } catch (e) {
           const msg = e && e.message ? String(e.message) : '';
           if (msg.includes('UNIQUE') || msg.includes('constraint')) {
@@ -2180,41 +2262,29 @@ export default {
       if (path === '/api/admin/users' && request.method === 'POST') {
         const u = await request.json();
         const storedPw = await ensureStoredPassword(u.password);
-        const id = String(u.id || Date.now());
         const email = String(u.email || '').trim().toLowerCase();
-        const status = u.status || 'pending';
-        const canPieces = u.canOrderPieces ? 1 : 0;
-        const nowIso = new Date().toISOString();
-        // Preview/legacy D1 requires password_hash + password_algo (NOT NULL).
-        await env.DB.prepare(
-          `INSERT INTO users (
-             id, fname, lname, company, email, phone,
-             password, password_hash, password_algo,
-             status, canOrderPieces, can_order_pieces,
-             registeredAt, registered_at, approvedAt, approved_at, added_by_admin
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        )
-          .bind(
-            id,
-            u.fname || '',
-            u.lname || '',
-            u.company || '',
+        if (!email) return jsonResponse({ error: 'Email is required' }, 400);
+        try {
+          const id = await insertUserRow(env, {
+            id: u.id || Date.now(),
+            fname: u.fname,
+            lname: u.lname,
+            company: u.company,
             email,
-            u.phone || '',
-            storedPw,
-            storedPw,
-            'sha256',
-            status,
-            canPieces,
-            canPieces,
-            nowIso,
-            nowIso,
-            status === 'approved' ? nowIso : null,
-            status === 'approved' ? nowIso : null,
-            1
-          )
-          .run();
-        return jsonResponse({ success: true, id });
+            phone: u.phone,
+            password: storedPw,
+            status: u.status || 'pending',
+            canOrderPieces: !!u.canOrderPieces,
+            addedByAdmin: true,
+          });
+          return jsonResponse({ success: true, id });
+        } catch (e) {
+          const msg = e && e.message ? String(e.message) : '';
+          if (msg.includes('UNIQUE') || msg.includes('constraint')) {
+            return jsonResponse({ error: 'An account with this email already exists.' }, 409);
+          }
+          throw e;
+        }
       }
 
       if (path === '/api/admin/users' && request.method === 'PUT') {
