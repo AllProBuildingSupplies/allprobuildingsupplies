@@ -1689,7 +1689,7 @@ async function renderFinancePaymentMethods() {
     const m = await getPaymentMethods(true);
     const bits = [];
     if (m.card) {
-      const pct = Number.isFinite(Number(m.card.feePercent)) ? Number(m.card.feePercent) : 3.5;
+      const pct = Number.isFinite(Number(m.card.feePercent)) ? Number(m.card.feePercent) : 3;
       bits.push('<div><strong>Card:</strong> ' + pct + '% convenience fee on invoices' +
         (m.card.url
           ? (' · <a href="' + escAttr(m.card.url) + '" target="_blank" rel="noopener" style="color:var(--gold);">pay link</a>')
@@ -1821,7 +1821,7 @@ function openPayMarkModal(orderId, method) {
   if (sub) {
     const o = (masterOrders || []).find(function (x) { return x.id === orderId; });
     const amt = o ? (' · $' + (Number(o.total) || 0).toFixed(2)) : '';
-    sub.textContent = 'Order ' + orderId + amt + ' — sets payment status to Paid. For card, charge invoice + 3.5% convenience fee, then confirm here.';
+    sub.textContent = 'Order ' + orderId + amt + ' — sets payment status to Paid. For card, charge invoice + 3% convenience fee, then confirm here.';
   }
   if (note) note.value = '';
   document.querySelectorAll('#pay-mark-methods .pay-method-btn').forEach(function (btn) {
@@ -4506,9 +4506,18 @@ function buildDeliveredEmail(order, note) {
   return wrapOrderEmail('ORDER DELIVERED', '#3498db', '#FFFFFF', rows);
 }
 
+// Fallback remittance address if API has not yet returned BUSINESS_MAILING_ADDRESS.
+// Prefer the value from /api/admin/payment-methods (Worker env BUSINESS_MAILING_ADDRESS).
+const APBS_BUSINESS_ADDRESS_FALLBACK = '35 Hope Hill Lane\nLakewood NJ 08701';
+
+function invoiceBusinessAddress(methods) {
+  const fromApi = methods && methods.businessAddress != null ? String(methods.businessAddress).trim() : '';
+  return fromApi || String(APBS_BUSINESS_ADDRESS_FALLBACK || '').trim();
+}
+
 function invoiceCardFee(baseTotal, methods) {
   const pctRaw = methods && methods.card && methods.card.feePercent;
-  const pct = Number.isFinite(Number(pctRaw)) ? Number(pctRaw) : 3.5;
+  const pct = Number.isFinite(Number(pctRaw)) ? Number(pctRaw) : 3;
   const base = Math.round((Number(baseTotal) || 0) * 100) / 100;
   const fee = Math.round(base * (pct / 100) * 100) / 100;
   const cardTotal = Math.round((base + fee) * 100) / 100;
@@ -4607,7 +4616,14 @@ function buildInvoiceEmail(order, note, paymentMethods) {
     dueBlock +
     payBlock +
     '<tr><td class="email-pad" style="padding:0 ' + pad + ';"><hr style="border:none;border-top:1px solid #eee;margin:0;"/></td></tr>' +
-    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 24px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about this invoice?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p></td></tr>';
+    '<tr><td class="email-pad" style="padding:20px ' + pad + ' 24px;"><p style="margin:0;font-size:14px;color:#444;line-height:1.7;">Questions about this invoice?</p><p style="margin:10px 0 0;font-size:14px;color:#444;">📞 <a href="tel:17327341123" style="color:#C8981F;text-decoration:none;font-weight:600;">732-734-1123</a></p><p style="margin:4px 0 0;font-size:14px;color:#444;">✉️ <a href="mailto:info@allprobuildingsupplies.com" style="color:#C8981F;text-decoration:none;">info@allprobuildingsupplies.com</a></p>' +
+    (function () {
+      const addr = invoiceBusinessAddress(methods);
+      if (!addr) return '';
+      return '<p style="margin:8px 0 0;font-size:14px;color:#444;line-height:1.55;white-space:pre-line;">' + emailEscape(addr) + '</p>' +
+        '<p style="margin:4px 0 0;font-size:12px;color:#7f8c8d;">Mail checks / payment to the address above. Include your Order ID in the memo.</p>';
+    })() +
+    '</td></tr>';
   return wrapOrderEmail('INVOICE', '#C8981F', '#0C1117', rows);
 }
 

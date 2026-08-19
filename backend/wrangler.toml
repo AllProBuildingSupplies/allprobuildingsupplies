@@ -16,7 +16,8 @@ compatibility_date = "2024-04-21"
 #
 # Invoice payment methods (optional; sensible defaults exist in code):
 #   PAYMENT_CC_LINK or PAYMENT_STRIPE_LINK — optional hosted card pay URL (Chase pay-by-link, etc.)
-#   PAYMENT_CC_FEE_PERCENT — card convenience fee % shown on invoices (default 3.5)
+#   PAYMENT_CC_FEE_PERCENT — card convenience fee % shown on invoices (default 3)
+#   BUSINESS_MAILING_ADDRESS — remittance / mail-to address shown on invoices
 #   PAYMENT_ZELLE_EMAIL, PAYMENT_ZELLE_HANDLE, PAYMENT_ZELLE_QR_URL
 #   PAYMENT_WIRE_INSTRUCTIONS, PAYMENT_ACH_INSTRUCTIONS (multi-line text OK as secret)
 #   STRIPE_WEBHOOK_SECRET — optional; only if you later use Stripe for auto mark-paid
@@ -35,7 +36,9 @@ compatibility_date = "2024-04-21"
 [vars]
 PAYMENT_ZELLE_EMAIL = "payments@allprobuildingsupplies.com"
 PAYMENT_ZELLE_HANDLE = "allprobuildingsupplies"
-PAYMENT_CC_FEE_PERCENT = "3.5"
+PAYMENT_CC_FEE_PERCENT = "3"
+# Remittance address for mailed payments (shown on invoices under info@…).
+BUSINESS_MAILING_ADDRESS = "35 Hope Hill Lane\nLakewood NJ 08701"
 PAYMENT_WIRE_INSTRUCTIONS = "Wire transfer to All Pro Building Supplies. Email payments@allprobuildingsupplies.com or call 732-734-1123 for routing & account numbers. Include your Order ID in the wire memo."
 PAYMENT_ACH_INSTRUCTIONS = "ACH / bank transfer to All Pro Building Supplies. Email payments@allprobuildingsupplies.com for ACH details. Include your Order ID in the payment memo."
 
@@ -56,7 +59,8 @@ name = "allpro-api-test"
 [env.test.vars]
 PAYMENT_ZELLE_EMAIL = "payments@allprobuildingsupplies.com"
 PAYMENT_ZELLE_HANDLE = "allprobuildingsupplies"
-PAYMENT_CC_FEE_PERCENT = "3.5"
+PAYMENT_CC_FEE_PERCENT = "3"
+BUSINESS_MAILING_ADDRESS = "35 Hope Hill Lane\nLakewood NJ 08701"
 PAYMENT_WIRE_INSTRUCTIONS = "Wire transfer to All Pro Building Supplies. Email payments@allprobuildingsupplies.com or call 732-734-1123 for routing & account numbers. Include your Order ID in the wire memo."
 PAYMENT_ACH_INSTRUCTIONS = "ACH / bank transfer to All Pro Building Supplies. Email payments@allprobuildingsupplies.com for ACH details. Include your Order ID in the payment memo."
 

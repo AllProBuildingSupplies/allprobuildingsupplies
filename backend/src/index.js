@@ -1099,7 +1099,8 @@ function paymentMethodsFromEnv(env) {
   const zelleQr = String(env.PAYMENT_ZELLE_QR_URL || 'https://allprobuildingsupplies.com/assets/zelle-qr.png').trim();
   const ccLink = String(env.PAYMENT_CC_LINK || env.PAYMENT_STRIPE_LINK || '').trim();
   const feeRaw = parseFloat(env.PAYMENT_CC_FEE_PERCENT);
-  const feePercent = Number.isFinite(feeRaw) && feeRaw >= 0 ? feeRaw : 3.5;
+  const feePercent = Number.isFinite(feeRaw) && feeRaw >= 0 ? feeRaw : 3;
+  const businessAddress = String(env.BUSINESS_MAILING_ADDRESS || '').trim();
   const wireDefault =
     'Wire transfer to All Pro Building Supplies.\n' +
     'Email payments@allprobuildingsupplies.com or call 732-734-1123 for bank routing & account numbers.\n' +
@@ -1138,6 +1139,8 @@ function paymentMethodsFromEnv(env) {
       label: 'ACH / Bank Transfer',
       instructions: ach,
     },
+    // Remittance / mail-to address for check or mailed payments (invoice footer).
+    businessAddress: businessAddress || null,
   };
 }
 
