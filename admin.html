@@ -620,6 +620,7 @@
         <button type="button" class="btn-save oms-qa" id="oms-qa-ship" onclick="omsQuickShipRemaining()">📦 Ship remaining</button>
         <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-pack" onclick="omsQuickEmail('packing')">Packing slip</button>
         <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-inv" onclick="omsQuickEmail('invoice')">Invoice</button>
+        <button type="button" class="btn-view oms-qa" id="oms-qa-inv-pdf" onclick="omsQuickPdf('invoice')" style="border-color:var(--gold);color:var(--gold);">⬇ Invoice PDF</button>
         <button type="button" class="btn-save oms-qa" id="oms-qa-paid" onclick="omsQuickMarkPaid()">✓ Mark paid</button>
       </div>
     </div>
@@ -690,9 +691,9 @@
 <div id="email-modal-overlay" onclick="closeEmailModal(event)">
   <div id="email-modal" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeEmailModal(event)">&times;</button>
-    <div class="modal-title" style="color:#3498db; border-color:rgba(52,152,219,.3);">Email Command Center</div>
+    <div class="modal-title" style="color:#3498db; border-color:rgba(52,152,219,.3);">Invoice / Email Command Center</div>
     
-    <div class="modal-lbl" style="color:var(--white)">1. Select Email Format</div>
+    <div class="modal-lbl" style="color:var(--white)">1. Select Format</div>
     <select id="email-format-sel" class="data-input" style="margin-bottom:16px; border-color:#3498db;" onchange="onEmailFormatChange()">
       <option value="confirm">Order Confirmation / Update</option>
       <option value="packing">Packing Slip (No Pricing)</option>
@@ -702,12 +703,20 @@
     <p id="email-format-hint" style="display:none;color:var(--silver);font-size:12px;margin:-4px 0 16px;line-height:1.5;"></p>
 
     <div id="email-shipment-wrap" style="display:none;margin-bottom:20px;">
-      <div class="modal-lbl" style="color:var(--white)">Shipment for this email</div>
+      <div class="modal-lbl" style="color:var(--white)">Shipment for this document</div>
       <select id="email-shipment-sel" class="data-input" style="border-color:#2ecc71;"></select>
-      <p style="font-size:11px;color:var(--silver);margin:8px 0 0;line-height:1.4;">Packing slip / invoice / delivery emails use the selected shipment quantities and totals (not the full order).</p>
+      <p style="font-size:11px;color:var(--silver);margin:8px 0 0;line-height:1.4;">Packing slip / invoice / delivery use the selected shipment quantities and totals (not the full order).</p>
     </div>
 
-    <div class="modal-lbl" style="color:var(--white)">2. Select Recipients</div>
+    <div class="modal-lbl" style="color:var(--white)">2. Choose action</div>
+    <div class="email-action-toggle" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      <button type="button" class="btn-view email-action-btn on" id="email-action-email" onclick="setEmailActionMode('email')" style="border-color:#3498db;color:#3498db;">✉ Email</button>
+      <button type="button" class="btn-view email-action-btn" id="email-action-pdf" onclick="setEmailActionMode('pdf')" style="border-color:var(--gold);color:var(--gold);">⬇ Download PDF</button>
+    </div>
+    <p id="email-action-hint" style="color:var(--silver);font-size:12px;margin:-8px 0 16px;line-height:1.5;">Send the document by email, or download the same layout as a PDF.</p>
+
+    <div id="email-recipients-wrap">
+    <div class="modal-lbl" style="color:var(--white)">3. Select Recipients</div>
     <div style="background:var(--ink2); padding:16px; border:1px solid rgba(139,160,178,.2); margin-bottom:24px;">
       <label class="chk-row">
         <input type="checkbox" id="chk-cust" checked> 
@@ -743,15 +752,16 @@
         </div>
       </div>
     </div>
+    </div>
     
-    <div class="modal-lbl" style="color:var(--white)">3. Add Note to Email (Optional)</div>
-    <textarea id="email-custom-note" class="data-input" style="margin-bottom:24px; resize:vertical; min-height:80px;" placeholder="Type a custom message to include in the email (e.g., Backorders, substitutes, delivery timing...)"></textarea>
+    <div class="modal-lbl" style="color:var(--white)" id="email-note-lbl">4. Add Note (Optional)</div>
+    <textarea id="email-custom-note" class="data-input" style="margin-bottom:24px; resize:vertical; min-height:80px;" placeholder="Type a custom message to include (e.g., Backorders, substitutes, delivery timing...)"></textarea>
 
     <div id="email-send-msg" style="font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;display:none;"></div>
 
-    <div style="display:flex;gap:12px;">
-      <button class="btn-add" style="flex:1;text-align:center;" onclick="closeEmailModal()">Cancel</button>
-      <button class="btn-save" id="btn-execute-send" style="flex:2;background:#3498db;color:#fff;" onclick="executeSendEmail()">🚀 Send Email(s)</button>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn-add" style="flex:1;text-align:center;min-width:110px;" onclick="closeEmailModal()">Cancel</button>
+      <button class="btn-save" id="btn-execute-send" style="flex:2;background:#3498db;color:#fff;min-width:160px;" onclick="executeEmailOrPdfAction()">🚀 Send Email(s)</button>
     </div>
 
   </div>
@@ -1759,7 +1769,8 @@ function renderFinanceQueue() {
             (ps !== 'paid'
               ? '<button type="button" class="btn-save" onclick="markOrderPaid(\'' + escAttr(o.id) + '\')">Mark paid</button>'
               : '') +
-            '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Invoice</button>' +
+            '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Email invoice</button>' +
+            '<button type="button" class="btn-view" style="border-color:var(--gold);color:var(--gold);" onclick="omsPdfOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">PDF</button>' +
           '</div>' +
         '</div>'
       );
@@ -1781,7 +1792,8 @@ function renderFinanceQueue() {
           '<td class="order-row-actions">' +
             '<button type="button" class="btn-view" onclick="openOrderModal(\'' + escAttr(o.id) + '\')">Edit</button>' +
             (ps !== 'paid' ? '<button type="button" class="btn-save" onclick="markOrderPaid(\'' + escAttr(o.id) + '\')">Paid</button>' : '') +
-            '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Invoice</button>' +
+            '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Email invoice</button>' +
+            '<button type="button" class="btn-view" style="border-color:var(--gold);color:var(--gold);" onclick="omsPdfOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">PDF</button>' +
           '</td>' +
         '</tr>'
       );
@@ -3210,11 +3222,28 @@ async function omsQuickShipRemaining() {
 function omsQuickEmail(format) {
   if (!activeOrderObj) return;
   openEmailModal();
+  setEmailActionMode('email');
   const sel = document.getElementById('email-format-sel');
   if (sel) {
     sel.value = format || 'confirm';
     onEmailFormatChange();
   }
+}
+
+function omsQuickPdf(format) {
+  if (!activeOrderObj) return;
+  openEmailModal();
+  setEmailActionMode('pdf');
+  const sel = document.getElementById('email-format-sel');
+  if (sel) {
+    sel.value = format || 'invoice';
+    onEmailFormatChange();
+  }
+}
+
+async function omsPdfOrderId(orderId, format) {
+  await omsEmailOrderId(orderId, format || 'invoice');
+  setEmailActionMode('pdf');
 }
 
 function updateOmsQuickBar() {
@@ -4071,8 +4100,46 @@ function openEmailModal(e) {
   btn.disabled = false; btn.innerHTML = '🚀 Send Email(s)'; btn.style.background = '#3498db';
 
   populateEmailShipmentSelect();
+  setEmailActionMode('email');
   onEmailFormatChange();
   document.getElementById('email-modal-overlay').style.display = 'flex';
+}
+
+window.emailActionMode = 'email';
+
+function setEmailActionMode(mode) {
+  window.emailActionMode = mode === 'pdf' ? 'pdf' : 'email';
+  const emailBtn = document.getElementById('email-action-email');
+  const pdfBtn = document.getElementById('email-action-pdf');
+  const recipWrap = document.getElementById('email-recipients-wrap');
+  const actionHint = document.getElementById('email-action-hint');
+  const noteLbl = document.getElementById('email-note-lbl');
+  const execBtn = document.getElementById('btn-execute-send');
+  if (emailBtn) emailBtn.classList.toggle('on', window.emailActionMode === 'email');
+  if (pdfBtn) pdfBtn.classList.toggle('on', window.emailActionMode === 'pdf');
+  if (recipWrap) recipWrap.style.display = window.emailActionMode === 'email' ? '' : 'none';
+  if (noteLbl) {
+    noteLbl.textContent = window.emailActionMode === 'pdf'
+      ? '3. Add Note on PDF (Optional)'
+      : '4. Add Note (Optional)';
+  }
+  if (actionHint) {
+    actionHint.textContent = window.emailActionMode === 'pdf'
+      ? 'Downloads the same document layout as a PDF (print dialog → choose “Save as PDF”). Recipients are not needed.'
+      : 'Send the document by email. Use Download PDF if you only need a file copy.';
+  }
+  if (execBtn) {
+    if (window.emailActionMode === 'pdf') {
+      execBtn.innerHTML = '⬇ Download PDF';
+      execBtn.style.background = '#C8981F';
+      execBtn.style.color = '#0C1117';
+    } else {
+      execBtn.innerHTML = '🚀 Send Email(s)';
+      execBtn.style.background = '#3498db';
+      execBtn.style.color = '#fff';
+    }
+    execBtn.disabled = false;
+  }
 }
 
 function onEmailFormatChange() {
@@ -4087,7 +4154,7 @@ function onEmailFormatChange() {
     hint.innerHTML = 'Packing slip columns: <strong style="color:var(--gold);">Ordered</strong>, <strong style="color:var(--gold);">Prev. shipped</strong>, <strong style="color:var(--gold);">This shipment</strong>, <strong style="color:var(--gold);">Still due</strong> — no prices. Full-width US Letter print layout.';
   } else if (sel.value === 'invoice') {
     hint.style.display = 'block';
-    hint.innerHTML = 'Invoice bills <strong style="color:var(--gold);">only the selected shipment</strong> quantities and amount due. Full-width US Letter print layout.';
+    hint.innerHTML = 'Invoice bills <strong style="color:var(--gold);">only the selected shipment</strong> quantities and amount due. Same layout for email or PDF download.';
   } else if (sel.value === 'deliver') {
     hint.style.display = 'block';
     hint.innerHTML = 'Delivery thank-you can reference the selected shipment. Full-width US Letter print layout.';
@@ -4095,6 +4162,8 @@ function onEmailFormatChange() {
     hint.style.display = 'block';
     hint.innerHTML = 'Confirmation shows the <strong style="color:var(--gold);">full order</strong> (all lines + pricing). Full-width US Letter print layout.';
   }
+  // Keep action button label in sync if mode already set
+  if (typeof setEmailActionMode === 'function') setEmailActionMode(window.emailActionMode || 'email');
 }
 
 function populateEmailShipmentSelect() {
@@ -4542,15 +4611,129 @@ function buildInvoiceEmail(order, note, paymentMethods) {
   return wrapOrderEmail('INVOICE', '#C8981F', '#0C1117', rows);
 }
 
+async function buildSelectedOrderDocument() {
+  if (!activeOrderObj) throw new Error('No order selected');
+  const type = document.getElementById('email-format-sel').value;
+  const customNote = document.getElementById('email-custom-note').value.trim();
+  const shipment = (type === 'packing' || type === 'invoice' || type === 'deliver') ? getSelectedShipment() : null;
+  if ((type === 'packing' || type === 'invoice') && !shipment) {
+    throw new Error('Record a shipment on this order first, then select it for packing slip / invoice.');
+  }
+  const shipView = shipment
+    ? orderViewForShipment(activeOrderObj, shipment, getSelectedShipmentIndex())
+    : activeOrderObj;
+
+  let htmlBody = '';
+  let subject = '';
+  let fileLabel = 'Document';
+  if (type === 'confirm') {
+    htmlBody = buildConfirmEmail(activeOrderObj, customNote);
+    subject = 'Order Update — Confirmation — ' + activeOrderObj.id;
+    fileLabel = 'Order-Confirmation';
+  } else if (type === 'packing') {
+    htmlBody = buildPackingSlipEmail(shipView, customNote);
+    subject = 'Packing Slip — ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies';
+    fileLabel = 'Packing-Slip';
+  } else if (type === 'deliver') {
+    htmlBody = buildDeliveredEmail(shipView, customNote);
+    subject = 'Order Delivered — Thank You! — All Pro Building Supplies';
+    fileLabel = 'Delivery-Confirmation';
+  } else if (type === 'invoice') {
+    let payMethods = cachedPaymentMethods;
+    try { payMethods = await getPaymentMethods(); } catch (_) {}
+    htmlBody = buildInvoiceEmail(shipView, customNote, payMethods);
+    subject = 'Invoice — Order ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies';
+    fileLabel = 'Invoice';
+  } else {
+    throw new Error('Unknown document format');
+  }
+
+  htmlBody = minifyEmailHtml(htmlBody);
+  const shipSuffix = shipment && shipment.id
+    ? ('-' + String(shipment.id).replace(/[^\w.-]+/g, '_'))
+    : '';
+  const filename = fileLabel + '-' + String(activeOrderObj.id).replace(/[^\w.-]+/g, '_') + shipSuffix + '.pdf';
+  return { type, htmlBody, subject, filename, shipment };
+}
+
+function openOrderDocumentPrintWindow(htmlBody, filename, subject) {
+  const w = window.open('', '_blank');
+  if (!w) {
+    throw new Error('Pop-up blocked. Allow pop-ups for this site to download the PDF.');
+  }
+  const safeTitle = String(filename || subject || 'All-Pro-Document.pdf').replace(/\.pdf$/i, '');
+  const printChrome =
+    '<div id="apbs-print-bar" style="position:sticky;top:0;z-index:9999;background:#0C1117;color:#fff;font-family:Arial,sans-serif;padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:2px solid #C8981F;">' +
+    '<div style="font-size:13px;line-height:1.4;"><strong style="color:#C8981F;">Download PDF</strong> — in the print dialog choose <strong>Save as PDF</strong> / <strong>Microsoft Print to PDF</strong>.</div>' +
+    '<div style="display:flex;gap:8px;flex-shrink:0;">' +
+    '<button type="button" onclick="window.print()" style="background:#C8981F;color:#0C1117;border:none;padding:8px 14px;font-weight:700;cursor:pointer;">Print / Save PDF</button>' +
+    '<button type="button" onclick="window.close()" style="background:transparent;color:#fff;border:1px solid #666;padding:8px 14px;cursor:pointer;">Close</button>' +
+    '</div></div>' +
+    '<style>@media print{#apbs-print-bar{display:none!important}}</style>';
+
+  // Inject toolbar after <body ...>
+  let docHtml = String(htmlBody || '');
+  if (/<title>.*?<\/title>/i.test(docHtml)) {
+    docHtml = docHtml.replace(/<title>.*?<\/title>/i, '<title>' + emailEscape(safeTitle) + '</title>');
+  } else {
+    docHtml = docHtml.replace(/<head([^>]*)>/i, '<head$1><title>' + emailEscape(safeTitle) + '</title>');
+  }
+  if (/<body([^>]*)>/i.test(docHtml)) {
+    docHtml = docHtml.replace(/<body([^>]*)>/i, '<body$1>' + printChrome);
+  } else {
+    docHtml = printChrome + docHtml;
+  }
+
+  w.document.open();
+  w.document.write(docHtml);
+  w.document.close();
+  try { w.document.title = safeTitle; } catch (_) {}
+  // Give images (Zelle QR etc.) a moment, then open print dialog
+  setTimeout(function () {
+    try { w.focus(); w.print(); } catch (_) {}
+  }, 350);
+  return w;
+}
+
+async function executeEmailOrPdfAction() {
+  if ((window.emailActionMode || 'email') === 'pdf') {
+    return executeDownloadPdf();
+  }
+  return executeSendEmail();
+}
+
+async function executeDownloadPdf() {
+  if (!activeOrderObj) return;
+  const msgEl = document.getElementById('email-send-msg');
+  const btn = document.getElementById('btn-execute-send');
+  msgEl.style.display = 'block';
+  msgEl.style.color = '#3498db';
+  msgEl.textContent = 'Preparing PDF…';
+  btn.disabled = true;
+  try {
+    const doc = await buildSelectedOrderDocument();
+    openOrderDocumentPrintWindow(doc.htmlBody, doc.filename, doc.subject);
+    msgEl.style.color = '#2ecc71';
+    msgEl.textContent = 'Print dialog opened — choose “Save as PDF”. File name suggestion: ' + doc.filename;
+    btn.disabled = false;
+    btn.innerHTML = '⬇ Download PDF';
+    btn.style.background = '#C8981F';
+    btn.style.color = '#0C1117';
+  } catch (e) {
+    msgEl.style.color = '#ff6b6b';
+    msgEl.textContent = e.message || 'Could not prepare PDF.';
+    btn.disabled = false;
+    setEmailActionMode('pdf');
+  }
+}
+
 async function executeSendEmail() {
   if(!activeOrderObj) return;
 
-  const type = document.getElementById('email-format-sel').value;
   const sendCust = document.getElementById('chk-cust').checked;
   const sendAdmin = document.getElementById('chk-admin').checked;
   const sendCustom = document.getElementById('chk-custom').checked;
   const sendCc = document.getElementById('chk-cc') && document.getElementById('chk-cc').checked;
-  const customNote = document.getElementById('email-custom-note').value.trim();
   
   let recipients = [];
   if(sendCust && activeOrderObj.customer.email) recipients.push(activeOrderObj.customer.email);
@@ -4574,28 +4757,18 @@ async function executeSendEmail() {
     msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b'; msgEl.textContent = 'Please select at least one To recipient (customer, admin, or separate).'; return;
   }
 
-  let htmlBody = '', subject = '';
-  const shipment = (type === 'packing' || type === 'invoice' || type === 'deliver') ? getSelectedShipment() : null;
-  if ((type === 'packing' || type === 'invoice') && !shipment) {
+  let doc;
+  try {
+    doc = await buildSelectedOrderDocument();
+  } catch (e) {
     msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b';
-    msgEl.textContent = 'Record a shipment on this order first, then select it for packing slip / invoice.';
+    msgEl.textContent = e.message || 'Could not build email.';
     return;
   }
-  const shipView = shipment
-    ? orderViewForShipment(activeOrderObj, shipment, getSelectedShipmentIndex())
-    : activeOrderObj;
-  if(type === 'confirm') { htmlBody = buildConfirmEmail(activeOrderObj, customNote); subject = 'Order Update — Confirmation — ' + activeOrderObj.id; }
-  else if(type === 'packing') { htmlBody = buildPackingSlipEmail(shipView, customNote); subject = 'Packing Slip — ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies'; }
-  else if(type === 'deliver') { htmlBody = buildDeliveredEmail(shipView, customNote); subject = 'Order Delivered — Thank You! — All Pro Building Supplies'; }
-  else if(type === 'invoice') {
-    let payMethods = cachedPaymentMethods;
-    try { payMethods = await getPaymentMethods(); } catch (_) {}
-    htmlBody = buildInvoiceEmail(shipView, customNote, payMethods);
-    subject = 'Invoice — Order ' + activeOrderObj.id + (shipment && shipment.id ? ' — ' + shipment.id : '') + ' — All Pro Building Supplies';
-  }
+  const htmlBody = doc.htmlBody;
+  const subject = doc.subject;
 
   // EmailJS hard-caps template variables at 50KB — minify and refuse early with a clear message.
-  htmlBody = minifyEmailHtml(htmlBody);
   const emailBytes = emailVarsByteSize(subject, htmlBody);
   if (emailBytes > 48000) {
     msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b';
