@@ -165,6 +165,7 @@ window.catActiveMaterial = 'all';
 window.catActiveSizes = {};
 
 window.catCollapsedMaterials = window.catCollapsedMaterials || {};
+var MATERIAL_ORDER = ['Copper', 'PVC', 'CPVC', 'PEX', 'INSULATION'];
 
 function toggleMaterialSection(material) {
   var key = String(material || '');
