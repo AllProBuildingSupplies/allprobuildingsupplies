@@ -3,15 +3,15 @@
  * Lesso suffix → catalog size; pipe SKUs assigned in catalog size order.
  */
 export const FACTORY_CODE_SEED = [
-  // PIPE-SOLID sizes: 2, 3, 4
-  { code: 'PIPE-SOLID', size: '2', tommur_code: 'A01P01-SCH40', lesso_code: 'PIPE-SOLID' },
-  { code: 'PIPE-SOLID', size: '3', tommur_code: 'A01P01-SCH40', lesso_code: 'PIPE-SOLID' },
-  { code: 'PIPE-SOLID', size: '4', tommur_code: 'A01P01-SCH40', lesso_code: 'PIPE-SOLID' },
-  // PIPE-FOAM sizes: 1-1/2, 2, 3, 4
-  { code: 'PIPE-FOAM', size: '1-1/2', tommur_code: 'A100P01-', lesso_code: 'PIPE-FOAM' },
-  { code: 'PIPE-FOAM', size: '2', tommur_code: 'A100P01-', lesso_code: 'PIPE-FOAM' },
-  { code: 'PIPE-FOAM', size: '3', tommur_code: 'A100P01-', lesso_code: 'PIPE-FOAM' },
-  { code: 'PIPE-FOAM', size: '4', tommur_code: 'A100P01-', lesso_code: 'PIPE-FOAM' },
+  // PVC-PIPE-SOLID sizes: 2, 3, 4
+  { code: 'PVC-PIPE-SOLID', size: '2', tommur_code: 'A01P01-SCH40', lesso_code: 'PIPE-SOLID' },
+  { code: 'PVC-PIPE-SOLID', size: '3', tommur_code: 'A01P01-SCH40', lesso_code: 'PIPE-SOLID' },
+  { code: 'PVC-PIPE-SOLID', size: '4', tommur_code: 'A01P01-SCH40', lesso_code: 'PIPE-SOLID' },
+  // PVC-PIPE-FOAM sizes: 1-1/2, 2, 3, 4
+  { code: 'PVC-PIPE-FOAM', size: '1-1/2', tommur_code: 'A100P01-', lesso_code: 'PIPE-FOAM' },
+  { code: 'PVC-PIPE-FOAM', size: '2', tommur_code: 'A100P01-', lesso_code: 'PIPE-FOAM' },
+  { code: 'PVC-PIPE-FOAM', size: '3', tommur_code: 'A100P01-', lesso_code: 'PIPE-FOAM' },
+  { code: 'PVC-PIPE-FOAM', size: '4', tommur_code: 'A100P01-', lesso_code: 'PIPE-FOAM' },
   { code: 'PVC-1/16HH', size: '1-1/2', tommur_code: 'D057', lesso_code: 'LP324-015' },
   { code: 'PVC-1/16HH', size: '2', tommur_code: 'D057', lesso_code: 'LP324-020' },
   { code: 'PVC-1/16HH', size: '3', tommur_code: 'D057', lesso_code: 'LP324-030' },

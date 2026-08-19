@@ -314,8 +314,11 @@
           <th>Category Code</th>
           <th>Tommur Code</th>
           <th>Lesso Code</th>
+          <th>Material</th>
           <th>Main category</th>
           <th>Sub category</th>
+          <th>Sub-sub</th>
+          <th>Type</th>
           <th>Description</th>
           <th>Size</th>
           <th>Pieces / Carton</th>
@@ -1227,11 +1230,14 @@ async function loadProducts() {
     if (!Array.isArray(data)) throw new Error(data.error || 'Invalid products response');
 
     masterProducts = data.map(p => ({
-        code: (p.code || '').trim(),
+        code: (window.normalizeProductCode ? window.normalizeProductCode(p.code) : (p.code || '').trim()),
         tommur_code: p.tommur_code || '',
         lesso_code: p.lesso_code || '',
+        material: p.material || '',
         main_category: p.main_category || '',
         sub_category: p.sub_category || '',
+        sub_sub_category: p.sub_sub_category || '',
+        sub_sub_sub_category: p.sub_sub_sub_category || '',
         description: p.description || '',
         size: window.apbsSizeToCatalog
           ? window.apbsSizeToCatalog(p.size)
@@ -1248,8 +1254,11 @@ async function loadProducts() {
         <td data-label="Category Code"><input class="data-input" data-field="code" value="${escAttr(p.code)}"></td>
         <td data-label="Tommur Code"><input class="data-input" data-field="tommur_code" value="${escAttr(p.tommur_code)}" placeholder="e.g. D057"></td>
         <td data-label="Lesso Code"><input class="data-input" data-field="lesso_code" value="${escAttr(p.lesso_code)}" placeholder="e.g. LP324-015"></td>
+        <td data-label="Material"><input class="data-input" data-field="material" value="${escAttr(p.material)}"></td>
         <td data-label="Main category"><input class="data-input" data-field="main_category" value="${escAttr(p.main_category)}"></td>
         <td data-label="Sub category"><input class="data-input" data-field="sub_category" value="${escAttr(p.sub_category)}"></td>
+        <td data-label="Sub-sub"><input class="data-input" data-field="sub_sub_category" value="${escAttr(p.sub_sub_category)}"></td>
+        <td data-label="Type"><input class="data-input" data-field="sub_sub_sub_category" value="${escAttr(p.sub_sub_sub_category)}"></td>
         <td data-label="Description"><input class="data-input" data-field="description" value="${escAttr(p.description)}"></td>
         <td data-label="Size"><input class="data-input" data-field="size" value="${escAttr(p.size)}"></td>
         <td data-label="Pieces / Carton"><input type="number" class="data-input" data-field="pack" value="${escAttr(p.pack)}"></td>
@@ -1259,7 +1268,7 @@ async function loadProducts() {
         <td data-label="Action"><button class="btn-del" onclick="this.closest('tr').remove()">Delete Row</button></td>
       </tr>`;
     });
-    tbody.innerHTML = html || '<tr><td colspan="12" style="text-align:center;color:var(--silver);padding:24px;">No products in database. Add rows or upload a CSV.</td></tr>';
+    tbody.innerHTML = html || '<tr><td colspan="15" style="text-align:center;color:var(--silver);padding:24px;">No products in database. Add rows or upload a CSV.</td></tr>';
     populateProductDropdown();
     updateAdminGlanceCounts();
   } catch(e) {
@@ -1919,8 +1928,11 @@ function addProductRow() {
     <td data-label="Category Code"><input class="data-input" data-field="code" value=""></td>
     <td data-label="Tommur Code"><input class="data-input" data-field="tommur_code" value="" placeholder="e.g. D057"></td>
     <td data-label="Lesso Code"><input class="data-input" data-field="lesso_code" value="" placeholder="e.g. LP324-015"></td>
+    <td data-label="Material"><input class="data-input" data-field="material" value=""></td>
     <td data-label="Main category"><input class="data-input" data-field="main_category" value=""></td>
     <td data-label="Sub category"><input class="data-input" data-field="sub_category" value=""></td>
+    <td data-label="Sub-sub"><input class="data-input" data-field="sub_sub_category" value=""></td>
+    <td data-label="Type"><input class="data-input" data-field="sub_sub_sub_category" value=""></td>
     <td data-label="Description"><input class="data-input" data-field="description" value=""></td>
     <td data-label="Size"><input class="data-input" data-field="size" value=""></td>
     <td data-label="Pieces / Carton"><input type="number" class="data-input" data-field="pack" value=""></td>
@@ -1957,11 +1969,14 @@ async function saveProducts() {
     const code = field('code');
     if(code !== '') {
         payload.push({
-            code: code,
+            code: window.normalizeProductCode ? window.normalizeProductCode(code) : code,
             tommur_code: field('tommur_code'),
             lesso_code: field('lesso_code'),
+            material: field('material'),
             main_category: field('main_category'),
             sub_category: field('sub_category'),
+            sub_sub_category: field('sub_sub_category'),
+            sub_sub_sub_category: field('sub_sub_sub_category'),
             description: field('description'),
             size: norm(field('size')),
             pack: parseInt(field('pack'), 10) || 1,
@@ -2001,6 +2016,9 @@ function productsCsvHeaderMap(headerRow) {
     else if (key === 'image' || key === 'imageurl') map.image = i;
     else if (key === 'maincategory' || key === 'main') map.main_category = i;
     else if (key === 'subcategory' || key === 'sub') map.sub_category = i;
+    else if (key === 'subsubcategory' || key === 'subsub') map.sub_sub_category = i;
+    else if (key === 'subsubsubcategory' || key === 'subsubsub' || key === 'type' || key === 'producttype') map.sub_sub_sub_category = i;
+    else if (key === 'material') map.material = i;
   });
   return map;
 }
@@ -2017,12 +2035,13 @@ function exportProductsCsv() {
     return;
   }
   const headers = [
-    'Code', 'Tommur-Code', 'Lesso-Code', 'Description', 'Size', 'Pack', 'Qty', 'AddQty',
-    'Price', 'Image', 'Main category', 'Sub category'
+    'Material', 'Code', 'Tommur-Code', 'Lesso-Code', 'Description', 'Size', 'Pack', 'Qty', 'AddQty',
+    'Price', 'Image', 'main_category', 'sub_category', 'sub_sub_category', 'sub_sub_sub_category'
   ];
   const lines = [headers.join(',')];
   masterProducts.forEach(function (p) {
     lines.push([
+      csvEscape(p.material || ''),
       csvEscape(p.code),
       csvEscape(p.tommur_code || ''),
       csvEscape(p.lesso_code || ''),
@@ -2034,7 +2053,9 @@ function exportProductsCsv() {
       csvEscape(p.price != null ? p.price : ''),
       csvEscape(p.image || ''),
       csvEscape(p.main_category || ''),
-      csvEscape(p.sub_category || '')
+      csvEscape(p.sub_category || ''),
+      csvEscape(p.sub_sub_category || ''),
+      csvEscape(p.sub_sub_sub_category || '')
     ].join(','));
   });
   const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/csv;charset=utf-8' });
@@ -2234,15 +2255,18 @@ function processCSVUpload(event) {
       const code = cleanText(cell(cols, map.code));
       if (!code) continue;
       payload.push({
-        code: code,
+        code: window.normalizeProductCode ? window.normalizeProductCode(code) : code,
         description: cleanText(cell(cols, map.description)),
         size: cleanCsvSize(cell(cols, map.size)),
         pack: parseInt(cell(cols, map.pack), 10) || 1,
         qty: parseInt(cell(cols, map.qty), 10) || 0,
-        price: parseFloat(cell(cols, map.price)) || 0,
+        price: Math.round(((parseFloat(cell(cols, map.price)) || 0) + Number.EPSILON) * 100) / 100,
         image: cleanText(cell(cols, map.image)) || 'images/logo.png',
+        material: cleanText(cell(cols, map.material)),
         main_category: cleanText(cell(cols, map.main_category)),
         sub_category: cleanText(cell(cols, map.sub_category)),
+        sub_sub_category: cleanText(cell(cols, map.sub_sub_category)),
+        sub_sub_sub_category: cleanText(cell(cols, map.sub_sub_sub_category)),
         tommur_code: cleanText(cell(cols, map.tommur_code)),
         lesso_code: cleanText(cell(cols, map.lesso_code))
       });

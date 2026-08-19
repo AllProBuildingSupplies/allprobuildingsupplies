@@ -35,6 +35,70 @@ function normalizeSize(size) {
     .replace(/\s+/g, ' ');
 }
 
+/** Legacy sheet codes → current catalog codes. */
+const PRODUCT_CODE_ALIASES = {
+  'PIPE-FOAM': 'PVC-PIPE-FOAM',
+  'PIPE-SOLID': 'PVC-PIPE-SOLID',
+  'PVC-PIPEFOAM': 'PVC-PIPE-FOAM',
+};
+
+function normalizeProductCode(code) {
+  const c = String(code || '').trim();
+  if (!c) return '';
+  return PRODUCT_CODE_ALIASES[c] || PRODUCT_CODE_ALIASES[c.toUpperCase()] || c;
+}
+
+/** Display size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2" */
+function formatSizeDisplay(size) {
+  const raw = normalizeSize(size);
+  if (!raw) return '';
+  const sep = /\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/;
+  const parts = raw.split(sep).filter(Boolean);
+  if (!parts.length) return raw;
+  return parts.map((p) => (/["″]$/.test(p) ? p : `${p}"`)).join(' x ');
+}
+
+function roundMoney(n) {
+  const v = parseFloat(n);
+  if (!Number.isFinite(v)) return 0;
+  return Math.round((v + Number.EPSILON) * 100) / 100;
+}
+
+function productCategoryFields(p) {
+  return {
+    material: p.material != null ? String(p.material).trim() : '',
+    main_category: p.main_category != null ? String(p.main_category).trim() : '',
+    sub_category: p.sub_category != null ? String(p.sub_category).trim() : '',
+    sub_sub_category: p.sub_sub_category != null ? String(p.sub_sub_category).trim() : '',
+    sub_sub_sub_category:
+      p.sub_sub_sub_category != null ? String(p.sub_sub_sub_category).trim() : '',
+  };
+}
+
+const PRODUCT_INSERT_COLS =
+  'code, description, size, pack, qty, price, image, material, main_category, sub_category, sub_sub_category, sub_sub_sub_category, tommur_code, lesso_code';
+const PRODUCT_INSERT_PLACEHOLDERS = '?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?';
+
+function productInsertBinds(p, sizeOverride) {
+  const cats = productCategoryFields(p);
+  return [
+    normalizeProductCode(p.code),
+    p.description,
+    sizeOverride != null ? sizeOverride : canonicalizeSize(p.size),
+    p.pack,
+    p.qty == null || p.qty === '' ? 0 : p.qty,
+    roundMoney(p.price),
+    p.image,
+    cats.material,
+    cats.main_category,
+    cats.sub_category,
+    cats.sub_sub_category,
+    cats.sub_sub_sub_category,
+    factoryCode(p.tommur_code ?? p.tommurCode),
+    factoryCode(p.lesso_code ?? p.lessoCode),
+  ];
+}
+
 /** One size segment → catalog form (1.5 → 1-1/2, 1 1/2 → 1-1/2). */
 function sizeSegmentToCatalog(seg) {
   let s = String(seg == null ? '' : seg).trim().replace(/_/g, ' ');
@@ -132,12 +196,13 @@ function sizeMatchCandidates(size) {
 
 function findProduct(prods, code, size) {
   if (!Array.isArray(prods) || !prods.length) return null;
-  const c = String(code || '').trim();
+  const c = normalizeProductCode(code);
   const want = canonicalizeSize(size);
   if (!c || !want) return null;
   return (
-    prods.find((p) => String(p.code || '').trim() === c && canonicalizeSize(p.size) === want) ||
-    null
+    prods.find(
+      (p) => normalizeProductCode(p.code) === c && canonicalizeSize(p.size) === want
+    ) || null
   );
 }
 
@@ -218,22 +283,11 @@ async function repairProductSizeAliases(env, options = {}) {
   for (const item of finalRows) {
     const p = item.row;
     stmts.push(
-      env.DB.prepare(
-        `INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(
-        String(p.code || '').trim(),
-        p.description,
-        item.canon,
-        p.pack,
-        p.qty,
-        p.price,
-        p.image,
-        p.main_category != null ? String(p.main_category) : '',
-        p.sub_category != null ? String(p.sub_category) : '',
-        factoryCode(p.tommur_code),
-        factoryCode(p.lesso_code)
-      )
+      env.DB
+        .prepare(
+          `INSERT INTO products (${PRODUCT_INSERT_COLS}) VALUES (${PRODUCT_INSERT_PLACEHOLDERS})`
+        )
+        .bind(...productInsertBinds(p, item.canon))
     );
   }
   await env.DB.batch(stmts);
@@ -420,10 +474,14 @@ function toPublicProduct(p) {
     code: p.code,
     description: p.description,
     size: p.size,
+    size_display: formatSizeDisplay(p.size),
     pack: p.pack,
     image: p.image,
+    material: p.material || '',
     main_category: p.main_category,
     sub_category: p.sub_category,
+    sub_sub_category: p.sub_sub_category || '',
+    sub_sub_sub_category: p.sub_sub_sub_category || '',
     inStock: qty > 0,
   };
 }
@@ -640,17 +698,20 @@ async function ensureAddressesTable(env) {
 async function ensureCoreSchema(env) {
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS products (
-      code          TEXT NOT NULL,
-      description   TEXT,
-      size          TEXT NOT NULL DEFAULT '',
-      pack          INTEGER,
-      qty           INTEGER,
-      price         REAL,
-      image         TEXT,
-      main_category TEXT DEFAULT '',
-      sub_category  TEXT DEFAULT '',
-      tommur_code   TEXT DEFAULT '',
-      lesso_code    TEXT DEFAULT '',
+      code                   TEXT NOT NULL,
+      description            TEXT,
+      size                   TEXT NOT NULL DEFAULT '',
+      pack                   INTEGER,
+      qty                    INTEGER,
+      price                  REAL,
+      image                  TEXT,
+      material               TEXT DEFAULT '',
+      main_category          TEXT DEFAULT '',
+      sub_category           TEXT DEFAULT '',
+      sub_sub_category       TEXT DEFAULT '',
+      sub_sub_sub_category   TEXT DEFAULT '',
+      tommur_code            TEXT DEFAULT '',
+      lesso_code             TEXT DEFAULT '',
       PRIMARY KEY (code, size)
     )
   `).run();
@@ -714,6 +775,17 @@ async function ensureProductCategoryColumns(env) {
   } catch (_) {}
   try {
     await env.DB.prepare(`ALTER TABLE products ADD COLUMN sub_category TEXT DEFAULT ''`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE products ADD COLUMN material TEXT DEFAULT ''`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE products ADD COLUMN sub_sub_category TEXT DEFAULT ''`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(
+      `ALTER TABLE products ADD COLUMN sub_sub_sub_category TEXT DEFAULT ''`
+    ).run();
   } catch (_) {}
 }
 
@@ -1075,13 +1147,21 @@ async function ensureRuntimeSchema(env) {
 }
 
 const PRODUCTS_SELECT =
-  'SELECT code, description, size, pack, qty, price, image, main_category, sub_category FROM products';
+  `SELECT code, description, size, pack, qty, price, image, material,
+          main_category, sub_category, sub_sub_category, sub_sub_sub_category
+   FROM products`;
+const PRODUCTS_SELECT_ADMIN =
+  `SELECT code, description, size, pack, qty, price, image, material,
+          main_category, sub_category, sub_sub_category, sub_sub_sub_category,
+          tommur_code, lesso_code
+   FROM products`;
 
 async function productsCatalogResponse(env, auth) {
-  const { results } = await env.DB.prepare(PRODUCTS_SELECT).all();
   if (auth.admin) {
+    const { results } = await env.DB.prepare(PRODUCTS_SELECT_ADMIN).all();
     return jsonResponse(results, 200, { 'Cache-Control': 'private, no-store' });
   }
+  const { results } = await env.DB.prepare(PRODUCTS_SELECT).all();
   if (auth.user && auth.user.status === 'approved') {
     return jsonResponse(results.map(toTradeProduct), 200, {
       'Cache-Control': 'private, max-age=15',
@@ -1373,12 +1453,16 @@ function toTradeProduct(p) {
     code: p.code,
     description: p.description,
     size: p.size,
+    size_display: formatSizeDisplay(p.size),
     pack: p.pack,
     qty: p.qty,
     price: p.price,
     image: p.image,
+    material: p.material || '',
     main_category: p.main_category,
     sub_category: p.sub_category,
+    sub_sub_category: p.sub_sub_category || '',
+    sub_sub_sub_category: p.sub_sub_sub_category || '',
   };
 }
 
@@ -2455,31 +2539,18 @@ export default {
         const stmts = [env.DB.prepare('DELETE FROM products')];
         const seen = new Set();
         for (const p of products) {
-          const code = String(p.code || '').trim();
+          const code = normalizeProductCode(p.code);
           const size = canonicalizeSize(p.size);
           if (!code || !size) continue;
           const key = code + '\0' + size;
           if (seen.has(key)) continue;
           seen.add(key);
-          const mainCat = p.main_category != null ? String(p.main_category) : '';
-          const subCat = p.sub_category != null ? String(p.sub_category) : '';
           stmts.push(
-            env.DB.prepare(
-              `INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-            ).bind(
-              code,
-              p.description,
-              size,
-              p.pack,
-              p.qty,
-              p.price,
-              p.image,
-              mainCat,
-              subCat,
-              factoryCode(p.tommur_code ?? p.tommurCode),
-              factoryCode(p.lesso_code ?? p.lessoCode)
-            )
+            env.DB
+              .prepare(
+                `INSERT INTO products (${PRODUCT_INSERT_COLS}) VALUES (${PRODUCT_INSERT_PLACEHOLDERS})`
+              )
+              .bind(...productInsertBinds({ ...p, code }, size))
           );
         }
         await env.DB.batch(stmts);
@@ -2493,19 +2564,23 @@ export default {
 
         const incoming = new Map();
         for (const p of products) {
-          const code = String(p.code || '').trim();
+          const code = normalizeProductCode(p.code);
           const size = canonicalizeSize(p.size);
           if (!code || !size) continue;
+          const cats = productCategoryFields(p);
           incoming.set(code + '\0' + size, {
             code,
             description: p.description,
             size,
             pack: p.pack,
-            qty: p.qty,
-            price: p.price,
+            qty: p.qty == null || p.qty === '' ? 0 : p.qty,
+            price: roundMoney(p.price),
             image: p.image,
-            main_category: p.main_category != null ? String(p.main_category) : '',
-            sub_category: p.sub_category != null ? String(p.sub_category) : '',
+            material: cats.material,
+            main_category: cats.main_category,
+            sub_category: cats.sub_category,
+            sub_sub_category: cats.sub_sub_category,
+            sub_sub_sub_category: cats.sub_sub_sub_category,
             tommur_code: factoryCode(p.tommur_code ?? p.tommurCode),
             lesso_code: factoryCode(p.lesso_code ?? p.lessoCode),
           });
@@ -2515,22 +2590,11 @@ export default {
           const stmts = [env.DB.prepare('DELETE FROM products')];
           for (const p of incoming.values()) {
             stmts.push(
-              env.DB.prepare(
-                `INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-              ).bind(
-                p.code,
-                p.description,
-                p.size,
-                p.pack,
-                p.qty,
-                p.price,
-                p.image,
-                p.main_category,
-                p.sub_category,
-                p.tommur_code,
-                p.lesso_code
-              )
+              env.DB
+                .prepare(
+                  `INSERT INTO products (${PRODUCT_INSERT_COLS}) VALUES (${PRODUCT_INSERT_PLACEHOLDERS})`
+                )
+                .bind(...productInsertBinds(p, p.size))
             );
           }
           await env.DB.batch(stmts);
@@ -2542,7 +2606,7 @@ export default {
         // Remove alias rows that will be replaced by canonical upserts
         for (const p of incoming.values()) {
           for (const row of existing || []) {
-            if (String(row.code || '').trim() !== p.code) continue;
+            if (normalizeProductCode(row.code) !== p.code) continue;
             if (canonicalizeSize(row.size) !== p.size) continue;
             if (normalizeSize(row.size) === p.size) continue;
             stmts.push(
@@ -2551,27 +2615,18 @@ export default {
           }
           stmts.push(
             env.DB.prepare(`
-            INSERT INTO products (code, description, size, pack, qty, price, image, main_category, sub_category, tommur_code, lesso_code)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO products (${PRODUCT_INSERT_COLS})
+            VALUES (${PRODUCT_INSERT_PLACEHOLDERS})
             ON CONFLICT(code, size) DO UPDATE SET
               description=excluded.description, pack=excluded.pack,
               qty=excluded.qty, price=excluded.price, image=excluded.image,
+              material=excluded.material,
               main_category=excluded.main_category, sub_category=excluded.sub_category,
+              sub_sub_category=excluded.sub_sub_category,
+              sub_sub_sub_category=excluded.sub_sub_sub_category,
               tommur_code=CASE WHEN excluded.tommur_code = '' THEN products.tommur_code ELSE excluded.tommur_code END,
               lesso_code=CASE WHEN excluded.lesso_code = '' THEN products.lesso_code ELSE excluded.lesso_code END
-          `).bind(
-              p.code,
-              p.description,
-              p.size,
-              p.pack,
-              p.qty,
-              p.price,
-              p.image,
-              p.main_category,
-              p.sub_category,
-              p.tommur_code,
-              p.lesso_code
-            )
+          `).bind(...productInsertBinds(p, p.size))
           );
         }
         if (stmts.length) await env.DB.batch(stmts);

@@ -68,6 +68,30 @@ window.normalizeProductSize = function normalizeProductSize(size) {
     .replace(/\s+/g, ' ');
 };
 
+/** Legacy sheet / cart codes → current catalog codes. */
+window.APBS_PRODUCT_CODE_ALIASES = {
+  'PIPE-FOAM': 'PVC-PIPE-FOAM',
+  'PIPE-SOLID': 'PVC-PIPE-SOLID',
+  'PVC-PIPEFOAM': 'PVC-PIPE-FOAM'
+};
+window.normalizeProductCode = function normalizeProductCode(code) {
+  var c = String(code || '').trim();
+  if (!c) return '';
+  var map = window.APBS_PRODUCT_CODE_ALIASES || {};
+  return map[c] || map[c.toUpperCase()] || c;
+};
+
+/** Front-facing size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2" */
+window.apbsSizeToDisplay = function apbsSizeToDisplay(size) {
+  var raw = window.normalizeProductSize(size);
+  if (!raw) return '';
+  var parts = raw.split(/\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/).filter(Boolean);
+  if (!parts.length) return raw;
+  return parts.map(function (p) {
+    return /["″]$/.test(p) ? p : (p + '"');
+  }).join(' x ');
+};
+
 /** Convert one size segment for Excel-safe decimals / spaced fractions → catalog form. */
 window.apbsSizeSegmentToCatalog = function apbsSizeSegmentToCatalog(seg) {
   var s = String(seg == null ? '' : seg).trim();
@@ -171,19 +195,25 @@ window.apbsSizeToExcelSafe = function apbsSizeToExcelSafe(size) {
 };
 
 window.apbsProductKey = function apbsProductKey(code, size) {
+  var c = window.normalizeProductCode ? window.normalizeProductCode(code) : String(code || '').trim();
   var sz = window.apbsSizeToCatalog ? window.apbsSizeToCatalog(size) : window.normalizeProductSize(size);
-  return String(code || '').trim() + '|' + sz;
+  return c + '|' + sz;
 };
 
 window.apbsFindProduct = function apbsFindProduct(products, code, size) {
   if (!Array.isArray(products)) return null;
-  const c = String(code || '').trim();
+  const c = window.normalizeProductCode
+    ? window.normalizeProductCode(code)
+    : String(code || '').trim();
   const want = window.apbsSizeToCatalog
     ? window.apbsSizeToCatalog(size)
     : window.normalizeProductSize(size);
   if (!c || !want) return null;
   return products.find(function (p) {
-    if (String(p.code || '').trim() !== c) return false;
+    var pc = window.normalizeProductCode
+      ? window.normalizeProductCode(p.code)
+      : String(p.code || '').trim();
+    if (pc !== c) return false;
     const ps = window.apbsSizeToCatalog
       ? window.apbsSizeToCatalog(p.size)
       : window.normalizeProductSize(p.size);
