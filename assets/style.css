@@ -2166,6 +2166,10 @@ a.shop-flow-step:hover{color:var(--gold);}
 /* Checkboxes & Multi-Emails */
 .chk-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:14px;color:var(--smoke);}
 .chk-row input[type="checkbox"]{accent-color:var(--gold);width:16px;height:16px;}
+.email-action-btn.on{
+  background:rgba(200,152,31,.14) !important;
+  box-shadow:inset 0 0 0 1px currentColor;
+}
 .custom-email-row{display:flex; gap:8px; margin-bottom:8px;}
 
 /* Admin Auth Gate */
