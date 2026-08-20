@@ -1307,6 +1307,7 @@ h1.htitle strong { color: var(--gold); }
 }
 .sku-card-img img{
   position:absolute;
+  inset:0;
   top:50%;
   left:50%;
   width:calc(100% - 28px);
@@ -1314,10 +1315,27 @@ h1.htitle strong { color: var(--gold); }
   max-width:calc(100% - 28px);
   max-height:calc(100% - 28px);
   transform:translate(-50%,-50%);
-  object-fit:contain;
+  object-fit:contain !important;
   object-position:center;
   display:block;
   pointer-events:none;
+}
+/* Classic tile thumbs also stay square */
+.classic-tiles .prod-section-thumb,
+.classic-tiles .shop-list-item .prod-section-thumb{
+  width:72px !important;
+  height:72px !important;
+  min-width:72px;
+  min-height:72px;
+  flex:0 0 72px;
+  overflow:hidden;
+}
+.classic-tiles .prod-section-thumb .cat-img,
+.classic-tiles .prod-section-thumb img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center;
 }
 .sku-card-body{
   display:flex;

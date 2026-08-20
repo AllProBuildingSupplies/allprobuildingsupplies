@@ -1231,7 +1231,7 @@ function paymentMethodsFromEnv(env) {
       url: cardUrl,
       feePercent,
       note: cardUrl
-        ? `Pay by card online (${feeLabel} is included in the card total). Zelle / wire / ACH stay at the invoice amount.`
+        ? `Pay by card online. The amount on Banquest already includes the ${feeLabel} — Zelle / wire / ACH stay at the invoice amount.`
         : `Pay by card — call 732-734-1123 or email payments@allprobuildingsupplies.com. A ${feeLabel} applies to card payments.`,
     },
     wire: {
