@@ -1173,10 +1173,32 @@ async function productsCatalogResponse(env, auth) {
   });
 }
 
+function banquestPayPageBase(env) {
+  return String(
+    env.BANQUEST_PAY_PAGE_URL ||
+      env.PAYMENT_CC_LINK ||
+      env.PAYMENT_STRIPE_LINK ||
+      'https://pay.banquest.com/allprobuilding'
+  ).trim();
+}
+
+/** Hosted Banquest pay URL with amount locked to invoice + CC fee and order id in description. */
+function buildBanquestPayUrl(env, orderId, cardTotal) {
+  const base = banquestPayPageBase(env);
+  if (!base) return '';
+  const amt = Math.round((Number(cardTotal) || 0) * 100) / 100;
+  const ref = String(orderId || '').trim();
+  const u = new URL(base);
+  if (amt > 0) u.searchParams.set('amount', amt.toFixed(2));
+  if (ref) u.searchParams.set('description', ref);
+  return u.toString();
+}
+
 function paymentMethodsFromEnv(env) {
   const zelleEmail = String(env.PAYMENT_ZELLE_EMAIL || 'payments@allprobuildingsupplies.com').trim();
   const zelleHandle = String(env.PAYMENT_ZELLE_HANDLE || 'allprobuildingsupplies').trim();
   const zelleQr = String(env.PAYMENT_ZELLE_QR_URL || 'https://allprobuildingsupplies.com/assets/zelle-qr.png').trim();
+  const banquestBase = banquestPayPageBase(env);
   const ccLink = String(env.PAYMENT_CC_LINK || env.PAYMENT_STRIPE_LINK || '').trim();
   const feeRaw = parseFloat(env.PAYMENT_CC_FEE_PERCENT);
   const feePercent = Number.isFinite(feeRaw) && feeRaw >= 0 ? feeRaw : 3;
@@ -1192,6 +1214,8 @@ function paymentMethodsFromEnv(env) {
   const wire = String(env.PAYMENT_WIRE_INSTRUCTIONS || wireDefault).trim();
   const ach = String(env.PAYMENT_ACH_INSTRUCTIONS || achDefault).trim();
   const feeLabel = feePercent > 0 ? `${feePercent}% convenience fee` : 'no convenience fee';
+  const cardUrl = banquestBase || ccLink;
+  const isBanquest = /pay\.banquest\.com/i.test(cardUrl) || !!String(env.BANQUEST_PAY_PAGE_URL || '').trim();
   return {
     zelle: {
       enabled: true,
@@ -1203,10 +1227,11 @@ function paymentMethodsFromEnv(env) {
     card: {
       enabled: true,
       label: 'Credit / Debit Card',
-      url: ccLink,
+      provider: isBanquest ? 'banquest' : 'link',
+      url: cardUrl,
       feePercent,
-      note: ccLink
-        ? `Pay by card (${feeLabel} applies to the invoice total). Include your Order ID if prompted.`
+      note: cardUrl
+        ? `Pay by card online (${feeLabel} is included in the card total). Zelle / wire / ACH stay at the invoice amount.`
         : `Pay by card — call 732-734-1123 or email payments@allprobuildingsupplies.com. A ${feeLabel} applies to card payments.`,
     },
     wire: {
@@ -1374,6 +1399,140 @@ async function handleStripeWebhook(request, env) {
   });
   if (result.error) {
     return jsonResponse({ received: true, error: result.error, orderId }, result.status || 400);
+  }
+  return jsonResponse({ received: true, markedPaid: true, orderId, previousStatus: result.previousStatus });
+}
+
+async function verifyBanquestSignature(rawBody, signatureHeader, secret) {
+  if (!rawBody || !signatureHeader || !secret) return false;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const mac = await crypto.subtle.sign('HMAC', key, enc.encode(rawBody));
+  const hex = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  const incoming = String(signatureHeader || '').trim().toLowerCase();
+  return timingSafeEqualHex(hex, incoming);
+}
+
+/** Pull order id from Banquest / Accept.Blue webhook payload (description / invoice fields). */
+function orderIdFromBanquestEvent(event) {
+  if (!event || typeof event !== 'object') return '';
+  const tx = (event.data && event.data.transaction) || event.transaction || event.data || {};
+  const details = tx.transaction_details || {};
+  const custom = tx.custom_fields || {};
+  const candidates = [
+    details.description,
+    details.invoice_number,
+    details.invoice,
+    tx.description,
+    tx.invoice_number,
+    tx.invoice,
+    custom.custom1,
+    custom.description,
+    custom.invoice,
+    event.description,
+    event.invoice_number,
+  ];
+  for (const c of candidates) {
+    const raw = String(c || '').trim();
+    if (!raw) continue;
+    // Prefer an APBS-… / ORD-… style token if present.
+    const m = raw.match(/\b(APBS-[A-Z0-9-]+|ORD-[A-Z0-9-]+|ord_[A-Za-z0-9_-]+)\b/i);
+    if (m) return m[1];
+    // Otherwise first whitespace-separated token that looks like an id.
+    const first = raw.split(/[\s,/|]+/)[0];
+    if (first && /[A-Za-z0-9_-]{4,}/.test(first) && !/^\$?\d/.test(first)) return first;
+  }
+  return '';
+}
+
+function banquestEventIsSuccessfulCharge(event) {
+  if (!event || typeof event !== 'object') return false;
+  const type = String(event.type || '').toLowerCase();
+  const subType = String(event.subType || event.subtype || '').toLowerCase();
+  const evt = String(event.event || '').toLowerCase();
+  const status = String(
+    (event.data && event.data.status) ||
+      event.status ||
+      (event.data && event.data.status_details && event.data.status_details.status) ||
+      ''
+  ).toLowerCase();
+  if (evt === 'batch') return false;
+  if (type === 'declined' || type === 'error') return false;
+  if (subType && subType !== 'charge' && subType !== 'sale') {
+    // Still allow status=settled on charge-like events
+    if (!(type === 'succeeded' || type === 'status')) return false;
+  }
+  if (type === 'succeeded' || type === 'status') {
+    if (!status || status === 'approved' || status === 'settled' || status === 'captured' || status === 'pending') {
+      return true;
+    }
+  }
+  // Some Banquest portal webhooks send a flatter payload
+  if (status === 'approved' || status === 'settled' || status === 'captured') return true;
+  if (String(event.status_code || (event.data && event.data.status_code) || '').toUpperCase() === 'A') return true;
+  return false;
+}
+
+async function handleBanquestWebhook(request, env) {
+  const secret = String(env.BANQUEST_WEBHOOK_SECRET || '').trim();
+  const rawBody = await request.text();
+  const sig =
+    request.headers.get('X-Signature') ||
+    request.headers.get('x-signature') ||
+    request.headers.get('X-Accept-Blue-Signature') ||
+    '';
+
+  if (secret) {
+    const ok = await verifyBanquestSignature(rawBody, sig, secret);
+    if (!ok) return jsonResponse({ error: 'Invalid Banquest signature' }, 400);
+  }
+
+  let event;
+  try {
+    event = JSON.parse(rawBody);
+  } catch (_) {
+    return jsonResponse({ error: 'Invalid JSON' }, 400);
+  }
+
+  if (!banquestEventIsSuccessfulCharge(event)) {
+    return jsonResponse({
+      received: true,
+      ignored: true,
+      type: event && event.type,
+      subType: event && (event.subType || event.subtype),
+      event: event && event.event,
+    });
+  }
+
+  const orderId = orderIdFromBanquestEvent(event);
+  if (!orderId) {
+    return jsonResponse({
+      received: true,
+      ignored: 'no order id in Banquest description/invoice fields',
+    });
+  }
+
+  const tx = (event.data && event.data.transaction) || event.transaction || {};
+  const txId = tx.id || event.id || (event.data && event.data.reference_number) || '';
+  const noteBits = ['Banquest card'];
+  if (txId) noteBits.push(String(txId));
+  if (event.type) noteBits.push(String(event.type));
+
+  const result = await setOrderPaymentStatus(env, orderId, {
+    paymentStatus: 'paid',
+    paymentMethod: 'card',
+    paymentNote: noteBits.join(' · ').slice(0, 500),
+    paidAt: new Date().toISOString(),
+  });
+  if (result.error) {
+    // Order id parsed but not in DB — still ACK so Banquest does not retry forever.
+    return jsonResponse({ received: true, error: result.error, orderId }, 200);
   }
   return jsonResponse({ received: true, markedPaid: true, orderId, previousStatus: result.previousStatus });
 }
@@ -1898,6 +2057,10 @@ export default {
       // Stripe Payment Link / Checkout → auto mark order paid (uses client_reference_id).
       if (path === '/api/webhooks/stripe' && request.method === 'POST') {
         return handleStripeWebhook(request, env);
+      }
+      // Banquest / Accept.Blue hosted pay page → auto mark order paid.
+      if (path === '/api/webhooks/banquest' && request.method === 'POST') {
+        return handleBanquestWebhook(request, env);
       }
 
       if (path === '/api/admin/login' && request.method === 'POST') {
