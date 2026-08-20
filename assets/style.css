@@ -1120,22 +1120,98 @@ h1.htitle strong { color: var(--gold); }
 }
 .catalog-view-switch strong{color:var(--smoke);font-weight:500;margin-right:4px}
 
-/* Classic grouped product tiles — fixed card height, sizes scroll inside */
+/* Classic grouped product tiles — fixed top (meta+square image) so dividers align */
 #prod-sections.classic-tiles{
   display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-  gap:14px;
-  align-items:start;
+  grid-template-columns:repeat(auto-fill, minmax(248px, 1fr));
+  gap:16px;
+  align-items:stretch;
 }
 .classic-tiles .prod-section.shop-list-item,
 .classic-tiles .prod-section.shop-tile,
-.classic-tiles .prod-section.shop-list-item.open{
-  height:320px;
-  max-height:320px;
+.classic-tiles .prod-section.shop-list-item.open,
+.classic-tiles .classic-tile{
+  height:auto;
+  max-height:none;
+  min-height:0;
   display:flex;
   flex-direction:column;
+  overflow:hidden;
 }
-.classic-tiles .shop-list-item .prod-section-body{
+/* Fixed-height top block → divider lines line up across every card in a row */
+.classic-tiles .classic-tile-top{
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:14px 14px 12px;
+  height:248px;
+  box-sizing:border-box;
+  border-bottom:1px solid rgba(139,160,178,.18);
+  background:transparent;
+}
+.classic-tiles .classic-tile-meta{
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-height:58px;
+  min-width:0;
+}
+.classic-tiles .classic-tile-meta .prod-section-code{
+  font-size:10px;
+  letter-spacing:1.2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.classic-tiles .classic-tile-meta .prod-section-title{
+  font-size:15px;
+  line-height:1.25;
+  height:2.5em;
+  max-height:2.5em;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.classic-tiles .classic-tile-meta .prod-section-stats{
+  font-size:10px;
+  color:var(--silver);
+  margin-top:0;
+}
+/* Uniform square image well — image always contained, never overlaps text */
+.classic-tiles .classic-tile-img{
+  flex:1 1 auto;
+  position:relative;
+  display:block;
+  width:100%;
+  min-height:0;
+  margin:0;
+  padding:0;
+  border:1px solid rgba(139,160,178,.12);
+  background:rgba(255,255,255,.03);
+  cursor:pointer;
+  overflow:hidden;
+  box-sizing:border-box;
+}
+.classic-tiles .classic-tile-img .cat-img,
+.classic-tiles .classic-tile-img img{
+  position:absolute;
+  inset:0;
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
+  object-fit:contain !important;
+  object-position:center;
+  display:block;
+  padding:10px;
+  box-sizing:border-box;
+  pointer-events:none;
+}
+.classic-tiles .shop-list-item .prod-section-body,
+.classic-tiles .classic-tile .prod-section-body{
   display:flex !important;
   flex-direction:column;
   flex:1 1 auto;
@@ -1144,10 +1220,14 @@ h1.htitle strong { color: var(--gold); }
   border-top:none;
   padding:0;
 }
+.classic-tiles .classic-tile-guest .prod-section-body{
+  overflow:visible;
+  padding:12px 14px 14px;
+}
 .classic-tiles .shop-size-stack{
   flex:1 1 auto;
   min-height:0;
-  max-height:none;
+  max-height:160px;
   overflow-y:auto;
   overscroll-behavior:contain;
   scrollbar-width:thin;
@@ -1158,21 +1238,25 @@ h1.htitle strong { color: var(--gold); }
   background:rgba(200,152,31,.4);
   border-radius:3px;
 }
+.classic-tiles .classic-tile-logged{
+  min-height:400px;
+}
+.classic-tiles .classic-tile-logged .prod-section-body{
+  flex:1 1 auto;
+  min-height:140px;
+}
 @media (max-width:700px){
-  .classic-tiles .prod-section.shop-list-item,
-  .classic-tiles .prod-section.shop-tile,
-  .classic-tiles .prod-section.shop-list-item.open{
-    height:300px;
-    max-height:300px;
+  #prod-sections.classic-tiles{
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:12px;
   }
-}
-.classic-tiles .classic-tile-guest{
-  height:auto;
-  max-height:none;
-}
-.classic-tiles .classic-tile-guest .prod-section-body{
-  overflow:visible;
-  padding:10px 12px 14px;
+  .classic-tiles .classic-tile-top{
+    height:220px;
+    padding:12px 12px 10px;
+  }
+  .classic-tiles .classic-tile-meta{min-height:52px}
+  .classic-tiles .classic-tile-img .cat-img,
+  .classic-tiles .classic-tile-img img{padding:8px}
 }
 .classic-guest-sizes{
   display:flex;
@@ -1320,20 +1404,13 @@ h1.htitle strong { color: var(--gold); }
   display:block;
   pointer-events:none;
 }
-/* Classic tile thumbs also stay square */
+/* Legacy classic thumb rules (sku squares page may share classes) — keep contained */
 .classic-tiles .prod-section-thumb,
 .classic-tiles .shop-list-item .prod-section-thumb{
-  width:72px !important;
-  height:72px !important;
-  min-width:72px;
-  min-height:72px;
-  flex:0 0 72px;
   overflow:hidden;
 }
 .classic-tiles .prod-section-thumb .cat-img,
 .classic-tiles .prod-section-thumb img{
-  width:100% !important;
-  height:100% !important;
   object-fit:contain !important;
   object-position:center;
 }

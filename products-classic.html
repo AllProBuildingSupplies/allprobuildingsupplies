@@ -735,21 +735,23 @@ function paintCatalogGroups(groups) {
     }
 
     chunks.push(
-      '<div class="prod-section shop-list-item shop-tile classic-tile' + (isLoggedIn ? ' open' : ' classic-tile-guest') + '" data-code="' + catEscAttr(code) + '"' +
+      '<div class="prod-section shop-list-item shop-tile classic-tile' + (isLoggedIn ? ' open classic-tile-logged' : ' classic-tile-guest') + '" data-code="' + catEscAttr(code) + '"' +
       ' data-material="' + catEscAttr(mat) + '"' +
       ' data-sub="' + catEscAttr(data.subCat || '') + '"' +
       ' data-subsub="' + catEscAttr(data.subSubCat || '') + '"' +
       ' data-type="' + catEscAttr(data.typeCat || '') + '"' +
       ' data-instock="' + anyInStock + '"' +
       ' data-search="' + searchAttr + '">' +
-      '<div class="prod-section-hdr shop-list-hdr">' +
-      '<div class="prod-section-thumb" onclick="openLightbox(\'' + catEscAttr(img).replace(/'/g, "\\'") + '\',\'' + catEscAttr(data.desc || '').replace(/'/g, "\\'") + '\')">' +
-      '<img src="' + catEscAttr(img) + '" alt="" class="cat-img" loading="lazy"/></div>' +
-      '<div class="prod-section-meta">' +
+      '<div class="classic-tile-top">' +
+      '<div class="classic-tile-meta">' +
       '<div class="prod-section-code">' + catEscHtml(code) + '</div>' +
       '<div class="prod-section-title">' + catEscHtml(data.desc || '') + '</div>' +
       '<div class="prod-section-stats">' + catEscHtml(statsLabel) + '</div>' +
-      '</div></div>' +
+      '</div>' +
+      '<button type="button" class="classic-tile-img" aria-label="View image"' +
+      ' onclick="openLightbox(\'' + catEscAttr(img).replace(/'/g, "\\'") + '\',\'' + catEscAttr(data.desc || '').replace(/'/g, "\\'") + '\')">' +
+      '<img src="' + catEscAttr(img) + '" alt="" class="cat-img" loading="lazy"/></button>' +
+      '</div>' +
       '<div class="prod-section-body">' + sizeBody + '</div></div>'
     );
   });
