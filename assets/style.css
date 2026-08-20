@@ -1019,7 +1019,184 @@ h1.htitle strong { color: var(--gold); }
 .filter-btn{font-family:"Oswald",sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border:1px solid rgba(139,160,178,.2);color:var(--silver);background:transparent;cursor:none;transition:all .2s}
 .filter-btn:hover,.filter-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(200,152,31,.07)}
 
-/* Supply House–style: sidebar filters + one square per size/SKU */
+.catalog-type-filters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:10px 0 4px;
+  max-height:120px;
+  overflow:auto;
+  padding-bottom:4px;
+}
+.catalog-type-chip{
+  font-family:'Oswald',sans-serif;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:7px 12px;
+  border:1px solid rgba(139,160,178,.25);
+  color:var(--silver);
+  background:transparent;
+  cursor:pointer;
+  transition:border-color .2s, color .2s, background .2s;
+}
+.catalog-type-chip em{
+  font-style:normal;
+  opacity:.65;
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:0;
+  text-transform:none;
+  margin-left:4px;
+}
+.catalog-type-chip:hover,
+.catalog-type-chip.on{
+  border-color:var(--gold);
+  color:var(--gold);
+  background:rgba(200,152,31,.08);
+}
+.catalog-material-hdr{
+  margin:8px 0 4px;
+  padding:0;
+  border-bottom:1px solid rgba(200,152,31,.28);
+}
+.catalog-material-toggle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+  padding:10px 0 6px;
+  background:transparent;
+  border:none;
+  color:inherit;
+  cursor:pointer;
+  text-align:left;
+}
+.catalog-material-label{
+  font-family:'Oswald',sans-serif;
+  font-size:16px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--white);
+}
+.catalog-material-chevron{
+  font-size:12px;
+  color:var(--gold);
+  transition:transform .2s;
+}
+.catalog-material-hdr.is-collapsed .catalog-material-chevron{
+  transform:rotate(-90deg);
+}
+.catalog-material-hdr.is-collapsed{
+  border-bottom-color:rgba(139,160,178,.2);
+  margin-bottom:0;
+}
+.catalog-view-switch{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  margin:0 0 14px;
+  padding:10px 12px;
+  border:1px solid rgba(200,152,31,.25);
+  background:rgba(200,152,31,.06);
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+  color:var(--silver);
+}
+.catalog-view-switch a{
+  color:var(--gold);
+  text-decoration:none;
+  border:1px solid rgba(200,152,31,.35);
+  padding:6px 10px;
+  letter-spacing:.4px;
+}
+.catalog-view-switch a:hover{background:rgba(200,152,31,.12)}
+.catalog-view-switch a.on{
+  background:rgba(200,152,31,.18);
+  color:var(--white);
+  border-color:var(--gold);
+}
+.catalog-view-switch strong{color:var(--smoke);font-weight:500;margin-right:4px}
+
+/* Classic grouped product tiles — fixed card height, sizes scroll inside */
+#prod-sections.classic-tiles{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+  gap:14px;
+  align-items:start;
+}
+.classic-tiles .prod-section.shop-list-item,
+.classic-tiles .prod-section.shop-tile,
+.classic-tiles .prod-section.shop-list-item.open{
+  height:320px;
+  max-height:320px;
+  display:flex;
+  flex-direction:column;
+}
+.classic-tiles .shop-list-item .prod-section-body{
+  display:flex !important;
+  flex-direction:column;
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  border-top:none;
+  padding:0;
+}
+.classic-tiles .shop-size-stack{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:none;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(200,152,31,.45) transparent;
+}
+.classic-tiles .shop-size-stack::-webkit-scrollbar{width:6px}
+.classic-tiles .shop-size-stack::-webkit-scrollbar-thumb{
+  background:rgba(200,152,31,.4);
+  border-radius:3px;
+}
+@media (max-width:700px){
+  .classic-tiles .prod-section.shop-list-item,
+  .classic-tiles .prod-section.shop-tile,
+  .classic-tiles .prod-section.shop-list-item.open{
+    height:300px;
+    max-height:300px;
+  }
+}
+.classic-tiles .classic-tile-guest{
+  height:auto;
+  max-height:none;
+}
+.classic-tiles .classic-tile-guest .prod-section-body{
+  overflow:visible;
+  padding:10px 12px 14px;
+}
+.classic-guest-sizes{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+}
+.classic-guest-size{
+  display:inline-block;
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+  color:var(--gold);
+  border:1px solid rgba(200,152,31,.35);
+  background:rgba(200,152,31,.08);
+  padding:4px 8px;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.classic-guest-size.is-oos{
+  opacity:.45;
+  color:var(--silver);
+  border-color:rgba(139,160,178,.3);
+  background:transparent;
+}
 .catalog-toolbar-row{
   display:flex;
   align-items:center;
@@ -1130,6 +1307,7 @@ h1.htitle strong { color: var(--gold); }
 }
 .sku-card-img img{
   position:absolute;
+  inset:0;
   top:50%;
   left:50%;
   width:calc(100% - 28px);
@@ -1137,10 +1315,27 @@ h1.htitle strong { color: var(--gold); }
   max-width:calc(100% - 28px);
   max-height:calc(100% - 28px);
   transform:translate(-50%,-50%);
-  object-fit:contain;
+  object-fit:contain !important;
   object-position:center;
   display:block;
   pointer-events:none;
+}
+/* Classic tile thumbs also stay square */
+.classic-tiles .prod-section-thumb,
+.classic-tiles .shop-list-item .prod-section-thumb{
+  width:72px !important;
+  height:72px !important;
+  min-width:72px;
+  min-height:72px;
+  flex:0 0 72px;
+  overflow:hidden;
+}
+.classic-tiles .prod-section-thumb .cat-img,
+.classic-tiles .prod-section-thumb img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center;
 }
 .sku-card-body{
   display:flex;

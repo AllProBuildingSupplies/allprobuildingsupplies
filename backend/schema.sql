@@ -4,17 +4,20 @@
 --   npx wrangler d1 execute allpro-db --local --file schema.sql
 
 CREATE TABLE IF NOT EXISTS products (
-  code          TEXT NOT NULL,
-  description   TEXT,
-  size          TEXT NOT NULL DEFAULT '',
-  pack          INTEGER,
-  qty           INTEGER,
-  price         REAL,
-  image         TEXT,
-  main_category TEXT DEFAULT '',
-  sub_category  TEXT DEFAULT '',
-  tommur_code   TEXT DEFAULT '',
-  lesso_code    TEXT DEFAULT '',
+  code                   TEXT NOT NULL,
+  description            TEXT,
+  size                   TEXT NOT NULL DEFAULT '',
+  pack                   INTEGER,
+  qty                    INTEGER,
+  price                  REAL,
+  image                  TEXT,
+  material               TEXT DEFAULT '',
+  main_category          TEXT DEFAULT '',
+  sub_category           TEXT DEFAULT '',
+  sub_sub_category       TEXT DEFAULT '',
+  sub_sub_sub_category   TEXT DEFAULT '',
+  tommur_code            TEXT DEFAULT '',
+  lesso_code             TEXT DEFAULT '',
   PRIMARY KEY (code, size)
 );
 

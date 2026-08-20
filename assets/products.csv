@@ -1,80 +1,249 @@
-Code,Description,Size,Pack,Qty,Price,Image,main_category,sub_category,Tommur-Code,Lesso-Code
-PVC-1/16HH,1/16 BEND (H x H),1-1/2,200,200,1.36,images/225Elbow.png,Plumbing,Fittings,D057,LP324-015
-PVC-1/16HH,1/16 BEND (H x H),2,100,400,0.91,images/225Elbow.png,Plumbing,Fittings,D057,LP324-020
-PVC-1/16HH,1/16 BEND (H x H),3,25,100,2.65,images/225Elbow.png,Plumbing,Fittings,D057,LP324-030
-PVC-1/16HS,"1/16 BEND, STREET (H x S)",1-1/2,200,200,2.05,images/225Elbow.png,Plumbing,Fittings,D059,LP326-015
-PVC-1/16HS,"1/16 BEND, STREET (H x S)",2,100,200,2.2579,images/225Elbow.png,Plumbing,Fittings,D059,LP326-020
-PVC-1/16HS,"1/16 BEND, STREET (H x S)",3,25,100,7.46,images/225Elbow.png,Plumbing,Fittings,D059,LP326-030
-PVC-1/4HH,1/4 BEND (H x H),1-1/2,100,0,0.531,images/90Elbow.png,Plumbing,Fittings,D035,LP300-015
-PVC-1/4HH,1/4 BEND (H x H),2,50,0,0.8595,images/90Elbow.png,Plumbing,Fittings,D035,LP300-020
-PVC-1/4HH,1/4 BEND (H x H),3,25,0,2.65,images/90Elbow.png,Plumbing,Fittings,D035,LP300-030
-PVC-1/4HH,1/4 BEND (H x H),4,10,0,4.9866,images/90Elbow.png,Plumbing,Fittings,D035,LP300-040
-PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),2,60,1200,1.34,images/90ElbowLong.png,Plumbing,Fittings,D043,LP304-020
-PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),3,10,600,3.17,images/90ElbowLong.png,Plumbing,Fittings,D043,LP304-030
-PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),4,5,20,6.4688,images/90ElbowLong.png,Plumbing,Fittings,D043,LP304-040
-PVC-1/4HS,"1/4 BEND, STREET (H x S)",1-1/2,180,180,0.7,images/90Elbow.png,Plumbing,Fittings,D040,LP302-015
-PVC-1/4HS,"1/4 BEND, STREET (H x S)",2,50,200,0.99,images/90Elbow.png,Plumbing,Fittings,D040,LP302-020
-PVC-1/4HS,"1/4 BEND, STREET (H x S)",3,20,100,2.95,images/90Elbow.png,Plumbing,Fittings,D040,LP302-030
-PVC-1/4HS,"1/4 BEND, STREET (H x S)",4,10,20,4.86,images/90Elbow.png,Plumbing,Fittings,D040,LP302-040
-PVC-1/4LOWHEEL,1/4 BEND W/ LOW HEEL INLET (H x H x H),3x3x2,25,300,4.11,images/90Elbow.png,Plumbing,Fittings,D050,LP303-338
-PVC-1/8HH,1/8 BEND (H x H),1-1/2,100,1000,0.52,images/45Elbow.png,Plumbing,Fittings,D053,LP321-015
-PVC-1/8HH,1/8 BEND (H x H),2,50,0,0.7923,images/45Elbow.png,Plumbing,Fittings,D053,LP321-020
-PVC-1/8HH,1/8 BEND (H x H),3,25,0,2.16,images/45Elbow.png,Plumbing,Fittings,D053,LP321-030
-PVC-1/8HH,1/8 BEND (H x H),4,15,105,4.11,images/45Elbow.png,Plumbing,Fittings,D053,LP321-040
-PVC-1/8HS,1/8 BEND STREET (H x S),1-1/2,100,800,0.49,images/45Elbow.png,Plumbing,Fittings,D055,LP323-015
-PVC-1/8HS,1/8 BEND STREET (H x S),2,50,0,0.82,images/45Elbow.png,Plumbing,Fittings,D055,LP323-020
-PVC-1/8HS,1/8 BEND STREET (H x S),3,25,0,2.22,images/45Elbow.png,Plumbing,Fittings,D055,LP323-030
-PVC-1/8HS,1/8 BEND STREET (H x S),4,9,126,3.8728,images/45Elbow.png,Plumbing,Fittings,D055,LP323-040
-PVC-BUSHINGHS,FLUSH BUSHING (H x S),2x1-1/2,200,200,0.85,images/Bushing.png,Plumbing,Fittings,D019,LP107-251
-PVC-BUSHINGHS,FLUSH BUSHING (H x S),3x2,120,240,1.1475,images/Bushing.png,Plumbing,Fittings,D019,LP107-338
-PVC-BUSHINGHS,FLUSH BUSHING (H x S),4x3,30,90,2.0109,images/Bushing.png,Plumbing,Fittings,D019,LP107-422
-PVC-CAPSOC,CAP (SOC),1-1/2,240,240,0.65,images/CapSOC.png,Plumbing,Fittings,D025,LP116-015
-PVC-CAPSOC,CAP (SOC),2,180,360,1.48,images/CapSOC.png,Plumbing,Fittings,D025,LP116-020
-PVC-CAPSOC,CAP (SOC),3,60,60,5.42,images/CapSOC.png,Plumbing,Fittings,D025,LP116-030
-PVC-CAPSOC,CAP (SOC),4,20,20,10.5,images/CapSOC.png,Plumbing,Fittings,D025,LP116-040
-PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),2,60,600,2.87,images/CleanoutTeewPlug.png,Plumbing,Fittings,D078,LP444X-020
-PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),3,20,120,5.25,images/CleanoutTeewPlug.png,Plumbing,Fittings,D078,LP444X-030
-PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),4,10,20,9.05,images/CleanoutTeewPlug.png,Plumbing,Fittings,D078,LP444X-040
-PVC-CLSTFLNGH,CLOSET FLANGE W/TEST PLATE (H),4x3,20,0,2.59,images/Flange.png,Plumbing,Fittings,D121,LP800T-422
-PVC-CPLNG,COUPLING (H x H),1-1/2,400,400,0.25,images/Coupling.png,Plumbing,Fittings,D004,LP100-015
-PVC-CPLNG,COUPLING (H x H),2,100,1000,0.34,images/Coupling.png,Plumbing,Fittings,D004,LP100-020
-PVC-CPLNG,COUPLING (H x H),3,60,600,1.15,images/Coupling.png,Plumbing,Fittings,D004,LP100-030
-PVC-CPLNG,COUPLING (H x H),4,25,200,2.1263,images/Coupling.png,Plumbing,Fittings,D004,LP100-040
-PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),2x1-1/2,100,400,1.6,images/IncreaserReducer.png,Plumbing,Fittings,D007,LP102-251
-PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),3x2,80,240,1.8436,images/IncreaserReducer.png,Plumbing,Fittings,D007,LP102-338
-PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),4x3,20,160,3.85,images/IncreaserReducer.png,Plumbing,Fittings,D007,LP102-422
-PVC-MADPTR,MALE ADAPTER (MPT x H),1-1/2,300,600,0.55,images/MaleAdapter.png,Plumbing,Fittings,D021,LP109-015
-PVC-MADPTR,MALE ADAPTER (MPT x H),2,200,200,0.65,images/MaleAdapter.png,Plumbing,Fittings,D021,LP109-020
-PVC-PTRAP,P-TRAP (H x H),1-1/2,25,0,3.89,images/Ptrap.png,Plumbing,Fittings,D103,LP706X-015
-PVC-PTRAP,P-TRAP (H x H),2,15,30,2.35,images/Ptrap.png,Plumbing,Fittings,D103,LP706X-020
-PVC-PTRAP,P-TRAP (H x H),3,10,20,15.05,images/Ptrap.png,Plumbing,Fittings,D103,LP706X-030
-PVC-PTRAP,P-TRAP (H x H),4,4,4,26.75,images/Ptrap.png,Plumbing,Fittings,D103,LP706X-040
-PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)",1-1/2,25,300,1.215,images/Ptrap.png,Plumbing,Fittings,A 062,LP710-015
-PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)",2,15,360,5.25,images/Ptrap.png,Plumbing,Fittings,A 062,LP710-020
-PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)",3,10,200,16.25,images/Ptrap.png,Plumbing,Fittings,A 062,LP710-030
-PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)",4,4,40,38.0,images/Ptrap.png,Plumbing,Fittings,A 062,LP710-040
-PVC-SANTEE,SANITARY TEE (ALL HUB),1-1/2,60,180,0.9056,images/SanTee.png,Plumbing,Fittings,D065,LP400-015
-PVC-SANTEE,SANITARY TEE (ALL HUB),2,35,280,1.32,images/SanTee.png,Plumbing,Fittings,D065,LP400-020
-PVC-SANTEE,SANITARY TEE (ALL HUB),3,15,0,6.99,images/SanTee.png,Plumbing,Fittings,D065,LP400-030
-PVC-SANTEE,SANITARY TEE (ALL HUB),4,5,0,14.75,images/SanTee.png,Plumbing,Fittings,D065,LP400-040
-PVC-SANTEEDBL,"DOUBLE SANITARY TEE, REDUCING(ALL HUB)",2x2x1-1/2x1-1/2,25,100,4.25,images/DoubleSanTee.png,Plumbing,Fittings,D073,LP429-251
-PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB),2x1-1/2x1-1/2,60,600,1.15,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-241
-PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB),2x1-1/2x2,60,600,1.532,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-251
-PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB),2x2x1-1/2,50,600,1.16,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-257
-PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),3x3x2,15,0,5.75,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-338
-PVC-SANTEERED,REDUCING SANITARY TEE(ALL HUB),4x4x3,10,20,9.65,images/RedSanTee.png,Plumbing,Fittings,D066,LP401-422
-PVC-WYEDBL,REDUCING DOUBLE WYE(ALL HUB),3x3x2x2,15,150,6.55,images/RedDoubleWye.png,Plumbing,Fittings,D097,LP612-338
-PVC-WYEHUB,WYE (ALL HUB),1-1/2,50,0,1.7156,images/Wye.png,Plumbing,Fittings,D090,LP600-015
-PVC-WYEHUB,WYE (ALL HUB),2,25,150,3.6,images/Wye.png,Plumbing,Fittings,D090,LP600-020
-PVC-WYEHUB,WYE (ALL HUB),3,15,150,4.8645,images/Wye.png,Plumbing,Fittings,D090,LP600-030
-PVC-WYEHUB,WYE (ALL HUB),4,8,0,8.36,images/Wye.png,Plumbing,Fittings,D090,LP600-040
-PVC-WYERED,REDUCING WYE(ALL HUB),3x3x2,12,480,7.05,images/RedWye.png,Plumbing,Fittings,D092,LP601-338
-PVC-WYERED,REDUCING WYE(ALL HUB),4x4x2,10,40,5.3,images/RedWye.png,Plumbing,Fittings,D092,LP601-420
-PVC-WYERED,REDUCING WYE(ALL HUB),4x4x3,10,40,6.71,images/RedWye.png,Plumbing,Fittings,D092,LP601-422
-PIPE-FOAM,ASTM  F891 PVC Foam Core DWV Pipe,1-1/2,1,3080,9.25,images/Sch40Foam.png,Plumbing,Pipes,A100P01-,PIPE-FOAM
-PIPE-FOAM,ASTM  F891 PVC Foam Core DWV Pipe,2,1,3080,11.0,images/Sch40Foam.png,Plumbing,Pipes,A100P01-,PIPE-FOAM
-PIPE-FOAM,ASTM  F891 PVC Foam Core DWV Pipe,3,1,3080,19.0,images/Sch40Foam.png,Plumbing,Pipes,A100P01-,PIPE-FOAM
-PIPE-FOAM,ASTM  F891 PVC Foam Core DWV Pipe,4,1,1480,27.6,images/Sch40Foam.png,Plumbing,Pipes,A100P01-,PIPE-FOAM
-PIPE-SOLID,ASTM D 1785 SCH40 PVC,2,1,1132,14.75,images/Sch40Solid.png,Plumbing,Pipes,A01P01-SCH40,PIPE-SOLID
-PIPE-SOLID,ASTM D 1785 SCH40 PVC,3,1,1132,27.5,images/Sch40Solid.png,Plumbing,Pipes,A01P01-SCH40,PIPE-SOLID
-PIPE-SOLID,ASTM D 1785 SCH40 PVC,4,1,433,50.0,images/Sch40Solid.png,Plumbing,Pipes,A01P01-SCH40,PIPE-SOLID
+Material,Code,Description,Size,Pack,Qty,Price,Image,main_category,sub_category,sub_sub_category,sub_sub_sub_category,Tommur-Code,Lesso-Code
+Copper,COPPER-K-90,ELBOW 90,"1""",100,0,9.72,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type K Soft - ELBOW 90,
+Copper,COPPER-K-90,ELBOW 90,"1/2""",100,0,2.45,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type K Soft - ELBOW 90,
+Copper,COPPER-K-90,ELBOW 90,"1-1/2""",100,0,20.80,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type K Soft - ELBOW 90,
+Copper,COPPER-K-90,ELBOW 90,"1-1/4""",100,0,13.49,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type K Soft - ELBOW 90,
+Copper,COPPER-K-90,ELBOW 90,"2""",100,0,40.37,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type K Soft - ELBOW 90,
+Copper,COPPER-K-90,ELBOW 90,"3""",100,0,124.67,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type K Soft - ELBOW 90,
+Copper,COPPER-K-90,ELBOW 90,"3/4""",100,0,5.44,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type K Soft - ELBOW 90,
+Copper,COPPER-K-90,ELBOW 90,"4""",100,0,245.23,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type K Soft - ELBOW 90,
+Copper,COPPER-K-PIPE,COPPER PIPE K,"1/2""",1,0,34.20,images/CopperPipe.png,Plumbing,Pipes,Copper Pipes,Copper Pipe,Copper Type K Soft - Pipe - COPPER PIPE K,
+Copper,COPPER-K-REDUCER,REDUCER,"1"" x 3/4""",100,0,5.44,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type K Soft - REDUCER,
+Copper,COPPER-K-REDUCER,REDUCER,"1-1/2"" x 1-1/4""",100,0,12.96,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type K Soft - REDUCER,
+Copper,COPPER-K-REDUCER,REDUCER,"1-1/4"" x 3/4""",100,0,12.96,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type K Soft - REDUCER,
+Copper,COPPER-K-REDUCER,REDUCER,"2"" x 1-1/2""",100,0,23.47,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type K Soft - REDUCER,
+Copper,COPPER-K-REDUCER,REDUCER,"2-1/2"" x 2""",100,0,113.07,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type K Soft - REDUCER,
+Copper,COPPER-K-REDUCER,REDUCER,"3"" x 2-1/2""",100,0,66.46,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type K Soft - REDUCER,
+Copper,COPPER-K-REDUCER,REDUCER,"3/4"" x 1/2""",100,0,2.83,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type K Soft - REDUCER,
+Copper,COPPER-K-REDUCER,REDUCER,"4"" x 3""",100,0,327.31,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type K Soft - REDUCER,
+Copper,COPPER-K-TEE,TEE,"1""",100,0,17.06,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type K Soft - TEE,
+Copper,COPPER-K-TEE,TEE,"1"" x 3/4""",100,0,14.56,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type K Soft - TEE,
+Copper,COPPER-K-TEE,TEE,"1/2""",100,0,4.43,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type K Soft - TEE,
+Copper,COPPER-K-TEE,TEE,"3/4""",100,0,9.60,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type K Soft - TEE,
+Copper,COPPER-K-TEE,TEE,"3/4"" x 1/2"" x 1/2""",100,0,7.47,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type K Soft - TEE,
+Copper,COPPER-K-TEE,TEE,"3/4"" x 3/4"" x 1/2""",100,0,7.47,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type K Soft - TEE,
+Copper,COPPER-L-90,ELBOW 90,"1/2""",100,0,2.59,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type L Hard - ELBOW 90,
+Copper,COPPER-L-90,ELBOW 90,"1-1/2""",100,0,21.96,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type L Hard - ELBOW 90,
+Copper,COPPER-L-90,ELBOW 90,"1-1/4""",100,0,14.25,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type L Hard - ELBOW 90,
+Copper,COPPER-L-90,ELBOW 90,"2""",100,0,42.62,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type L Hard - ELBOW 90,
+Copper,COPPER-L-90,ELBOW 90,"3/4""",100,0,5.74,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type L Hard - ELBOW 90,
+Copper,COPPER-L-90,ELBOW 90,"4""",100,0,245.23,images/Copper90.png,Plumbing,Fittings,Copper Fittings,90 Elbow,Copper Type L Hard - ELBOW 90,
+Copper,COPPER-L-CPLNG,COUPLING,"1-1/2""",100,0,14.17,images/CopperCplng.png,Plumbing,Fittings,Copper Fittings,Coupling,Copper Type L Hard - COUPLING,
+Copper,COPPER-L-CPLNG,COUPLING,"1-1/4""",100,0,9.27,images/CopperCplng.png,Plumbing,Fittings,Copper Fittings,Coupling,Copper Type L Hard - COUPLING,
+Copper,COPPER-L-CPLNG,COUPLING,"2""",100,0,25.73,images/CopperCplng.png,Plumbing,Fittings,Copper Fittings,Coupling,Copper Type L Hard - COUPLING,
+Copper,COPPER-L-CPLNG,COUPLING,"2-1/2""",100,0,41.38,images/CopperCplng.png,Plumbing,Fittings,Copper Fittings,Coupling,Copper Type L Hard - COUPLING,
+Copper,COPPER-L-CPLNG,COUPLING,"3""",50,0,61.48,images/CopperCplng.png,Plumbing,Fittings,Copper Fittings,Coupling,Copper Type L Hard - COUPLING,
+Copper,COPPER-L-CPLNG,COUPLING,"4""",50,0,132.53,images/CopperCplng.png,Plumbing,Fittings,Copper Fittings,Coupling,Copper Type L Hard - COUPLING,
+Copper,COPPER-L-PEXADPTR,Adapter (Copper to Pex),"1-1/2""",1,0,50.67,images/CopperAdaptertoPEX.png,Plumbing,Fittings,Copper Fittings,Copper to PEX Adapter,Copper Type L Hard - Adapter (Copper to Pex),
+Copper,COPPER-L-PEXADPTR,Adapter (Copper to Pex),"2""",1,0,74.67,images/CopperAdaptertoPEX.png,Plumbing,Fittings,Copper Fittings,Copper to PEX Adapter,Copper Type L Hard - Adapter (Copper to Pex),
+Copper,COPPER-L-PEXADPTR,Adapter (Copper to Pex),"2-1/2""",1,0,152.00,images/CopperAdaptertoPEX.png,Plumbing,Fittings,Copper Fittings,Copper to PEX Adapter,Copper Type L Hard - Adapter (Copper to Pex),
+Copper,COPPER-L-PEXADPTR,Adapter (Copper to Pex),"3/4""",1,0,11.26,images/CopperAdaptertoPEX.png,Plumbing,Fittings,Copper Fittings,Copper to PEX Adapter,Copper Type L Hard - Adapter (Copper to Pex),
+Copper,COPPER-L-PIPE,COPPER PIPE L,"1""",1,0,63.42,images/CopperPipe.png,Plumbing,Pipes,Copper Pipes,Copper Pipe,Copper Type L Hard - COPPER PIPE L,
+Copper,COPPER-L-PIPE,COPPER PIPE L,"1/2""",1,0,27.70,images/CopperPipe.png,Plumbing,Pipes,Copper Pipes,Copper Pipe,Copper Type L Hard - COPPER PIPE L,
+Copper,COPPER-L-PIPE,COPPER PIPE L,"1-1/2""",1,0,104.69,images/CopperPipe.png,Plumbing,Pipes,Copper Pipes,Copper Pipe,Copper Type L Hard - COPPER PIPE L,
+Copper,COPPER-L-PIPE,COPPER PIPE L,"1-1/4""",1,0,81.32,images/CopperPipe.png,Plumbing,Pipes,Copper Pipes,Copper Pipe,Copper Type L Hard - COPPER PIPE L,
+Copper,COPPER-L-PIPE,COPPER PIPE L,"2""",1,0,160.92,images/CopperPipe.png,Plumbing,Pipes,Copper Pipes,Copper Pipe,Copper Type L Hard - COPPER PIPE L,
+Copper,COPPER-L-PIPE,COPPER PIPE L,"2-1/2""",1,0,227.34,images/CopperPipe.png,Plumbing,Pipes,Copper Pipes,Copper Pipe,Copper Type L Hard - COPPER PIPE L,
+Copper,COPPER-L-PIPE,COPPER PIPE L,"3/4""",1,0,43.97,images/CopperPipe.png,Plumbing,Pipes,Copper Pipes,Copper Pipe,Copper Type L Hard - COPPER PIPE L,
+Copper,COPPER-L-REDTEE,RED TEE,"1"" x 3/4""",100,0,15.35,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"1/2"" x 1/2"" x 3/4""",100,0,8.44,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"1-1/2"" x 1-1/2"" x 1/2""",100,0,27.59,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"1-1/2"" x 1-1/2"" x 1-1/4""",100,0,38.49,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"1-1/2"" x 1-1/2"" x 3/4""",100,0,29.67,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"1-1/4"" x 1-1/4"" x 3/4""",100,0,20.38,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2"" x 2"" x 1-1/2""",100,0,66.99,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2"" x 2"" x 1-1/4""",100,0,70.56,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2"" x 2"" x 3/4""",100,0,49.54,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2"" x 3/4""",100,0,49.55,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2"" x 3/4"" x 2""",100,0,70.56,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 1-1/2""",100,0,102.28,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2""",100,0,113.08,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2"" x 2-1/2""",100,0,113.07,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2-1/2"" x 1-1/2""",100,0,102.29,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2-1/2"" x 2""",100,0,113.07,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2-1/2"" x 3/4""",100,0,73.97,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 3/4""",100,0,73.98,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3"" x 1-1/2""",100,0,134.93,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3"" x 2""",100,0,179.64,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3"" x 3"" x 1/2""",100,0,107.57,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3"" x 3"" x 2""",100,0,126.51,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3"" x 3"" x 3/4""",100,0,152.75,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3"" x 3/4""",100,0,179.64,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3/4"" x 1"" x 3/4""",100,0,20.27,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3/4"" x 1/2"" x 3/4""",100,0,7.88,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"3/4"" x 3/4"" x 1/2""",100,0,7.88,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"4"" x 1-1/2""",100,0,383.80,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"4"" x 2""",100,0,383.80,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"4"" x 3"" x 2-1/2""",100,0,383.79,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"4"" x 4"" x 1-1/2""",100,0,327.31,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"4"" x 4"" x 2""",100,0,327.31,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"4"" x 4"" x 3""",100,0,327.31,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDTEE,RED TEE,"4"" x 4"" x 3/4""",100,0,383.79,images/CopperRedTee.png,Plumbing,Fittings,Copper Fittings,Reducing Tee,Copper Type L Hard - RED TEE,
+Copper,COPPER-L-REDUCER,REDUCER,"1"" x 3/4""",100,0,5.74,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-REDUCER,REDUCER,"1-1/2"" x 1-1/4""",100,0,13.68,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-REDUCER,REDUCER,"2"" x 1-1/2""",100,0,24.78,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-REDUCER,REDUCER,"2-1/2"" x 2""",100,0,46.06,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-REDUCER,REDUCER,"3"" x 2""",100,0,67.20,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-REDUCER,REDUCER,"3"" x 2-1/2""",100,0,70.15,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-REDUCER,REDUCER,"3/4"" x 1/2""",100,0,3.00,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-REDUCER,REDUCER,"4"" x 2""",100,0,144.11,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-REDUCER,REDUCER,"4"" x 3""",100,0,151.85,images/CopperReducer.png,Plumbing,Fittings,Copper Fittings,Reducer,Copper Type L Hard - REDUCER,
+Copper,COPPER-L-STUB,Copper Elbow Stub out,"1/2""",1,0,19.00,images/CopperStub.png,Plumbing,Fittings,Copper Fittings,Stub Out,Copper Type L Hard - Copper Elbow Stub out,
+Copper,COPPER-L-TEE,TEE,"1""",100,0,18.01,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type L Hard - TEE,
+Copper,COPPER-L-TEE,TEE,"1/2""",100,0,4.67,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type L Hard - TEE,
+Copper,COPPER-L-TEE,TEE,"1-1/2""",100,0,40.93,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type L Hard - TEE,
+Copper,COPPER-L-TEE,TEE,"2""",100,0,70.56,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type L Hard - TEE,
+Copper,COPPER-L-TEE,TEE,"3/4""",100,0,10.15,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type L Hard - TEE,
+Copper,COPPER-L-TEE,TEE,"4""",100,0,383.80,images/CopperTee.png,Plumbing,Fittings,Copper Fittings,Tee,Copper Type L Hard - TEE,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"1""",1,0,1.56,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"1/2""",1,0,1.23,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"1-1/2""",1,0,2.61,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"1-1/4""",1,0,2.15,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"2""",1,0,5.66,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"2-1/2""",1,0,5.50,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"3""",1,0,11.14,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"3/4""",1,0,1.57,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SCH80,ASTM CPVC SCH80 Pipe,"4""",1,0,16.10,images/CPVC-SCH80.png,Plumbing,Pipes,CPVC Pipes,CPVC Pipes,A0202P,
+CPVC,CPVC-PIPE-SDR11,CPVC ASTM 2846 PIPE SDR-11,"1"" x 2.6""",1,0,3.96,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-11,CPVC ASTM 2846 PIPE SDR-11,
+CPVC,CPVC-PIPE-SDR11,CPVC ASTM 2846 PIPE SDR-11,"1/2"" x 1.73""",1,0,1.42,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-11,CPVC ASTM 2846 PIPE SDR-11,
+CPVC,CPVC-PIPE-SDR11,CPVC ASTM 2846 PIPE SDR-11,"1-1/2"" x 3.76""",1,0,8.26,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-11,CPVC ASTM 2846 PIPE SDR-11,
+CPVC,CPVC-PIPE-SDR11,CPVC ASTM 2846 PIPE SDR-11,"1-1/4"" x 3.18""",1,0,5.93,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-11,CPVC ASTM 2846 PIPE SDR-11,
+CPVC,CPVC-PIPE-SDR11,CPVC ASTM 2846 PIPE SDR-11,"2"" x 4.9""",1,0,14.11,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-11,CPVC ASTM 2846 PIPE SDR-11,
+CPVC,CPVC-PIPE-SDR11,CPVC ASTM 2846 PIPE SDR-11,"3/4"" x 2.03""",1,0,2.37,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-11,CPVC ASTM 2846 PIPE SDR-11,
+CPVC,CPVC-PIPE-SDR13.5,CPVC ASTM 2846 PIPE SDR-13.5,"1"" x 2.03""",1,0,3.16,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-13.5,CPVC ASTM 2846 PIPE SDR-13.5,
+CPVC,CPVC-PIPE-SDR13.5,CPVC ASTM 2846 PIPE SDR-13.5,"1/2"" x 1.51""",1,0,1.27,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-13.5,CPVC ASTM 2846 PIPE SDR-13.5,
+CPVC,CPVC-PIPE-SDR13.5,CPVC ASTM 2846 PIPE SDR-13.5,"1-1/2"" x 3.06""",1,0,6.85,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-13.5,CPVC ASTM 2846 PIPE SDR-13.5,
+CPVC,CPVC-PIPE-SDR13.5,CPVC ASTM 2846 PIPE SDR-13.5,"1-1/4"" x 2.59""",1,0,4.87,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-13.5,CPVC ASTM 2846 PIPE SDR-13.5,
+CPVC,CPVC-PIPE-SDR13.5,CPVC ASTM 2846 PIPE SDR-13.5,"2"" x 4.0""",1,0,11.72,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-13.5,CPVC ASTM 2846 PIPE SDR-13.5,
+CPVC,CPVC-PIPE-SDR13.5,CPVC ASTM 2846 PIPE SDR-13.5,"3/4"" x 1.73""",1,0,2.07,images/SDRPipe.png,Plumbing,Pipes,CPVC Pipes,CPVC ASTM 2846 PIPE SDR-13.5,CPVC ASTM 2846 PIPE SDR-13.5,
+PEX,PEX-B PIPE,PEX-B PIPE,"1""",100,0,1.18,images/PEX-B.png,Plumbing,Pipes,PEX Pipes,PEX-B Pipe,4B100H,
+PEX,PEX-B PIPE,PEX-B PIPE,"1/2""",100,0,0.37,images/PEX-B.png,Plumbing,Pipes,PEX Pipes,PEX-B Pipe,4B100H,
+PEX,PEX-B PIPE,PEX-B PIPE,"1-1/2""",100,0,3.94,images/PEX-B.png,Plumbing,Pipes,PEX Pipes,PEX-B Pipe,4B100H,
+PEX,PEX-B PIPE,PEX-B PIPE,"1-1/4""",100,0,2.47,images/PEX-B.png,Plumbing,Pipes,PEX Pipes,PEX-B Pipe,4B100H,
+PEX,PEX-B PIPE,PEX-B PIPE,"2""",100,0,7.88,images/PEX-B.png,Plumbing,Pipes,PEX Pipes,PEX-B Pipe,4B100H,
+PEX,PEX-B PIPE,PEX-B PIPE,"3/4""",100,0,0.69,images/PEX-B.png,Plumbing,Pipes,PEX Pipes,PEX-B Pipe,4B100H,
+PEX,PEX-ELBOW,ELBOW,"1/2""",100,0,1.86,images/PEXElbow.png,Plumbing,Fittings,PEX Fittings,90 Elbow,PEXB,
+PEX,PEX-ELBOW,ELBOW,"1-1/2""",100,0,16.97,images/PEXElbow.png,Plumbing,Fittings,PEX Fittings,90 Elbow,PEXB,
+PEX,PEX-ELBOW,ELBOW,"1-1/4""",100,0,9.96,images/PEXElbow.png,Plumbing,Fittings,PEX Fittings,90 Elbow,PEXB,
+PEX,PEX-ELBOW,ELBOW,"2""",100,0,34.15,images/PEXElbow.png,Plumbing,Fittings,PEX Fittings,90 Elbow,PEXB,
+PEX,PEX-ELBOW,ELBOW,"3/4""",100,0,3.16,images/PEXElbow.png,Plumbing,Fittings,PEX Fittings,90 Elbow,PEXB,
+PEX,PEX-REDUCER,REDUCER,"1"" x 1/2""",100,0,3.13,images/PEXReducer.png,Plumbing,Fittings,PEX Fittings,Reducer,PEXB,
+PEX,PEX-REDUCER,REDUCER,"1-1/2"" x 3/4""",100,0,6.94,images/PEXReducer.png,Plumbing,Fittings,PEX Fittings,Reducer,PEXB,
+PEX,PEX-REDUCER,REDUCER,"2"" x 3/4""",100,0,11.81,images/PEXReducer.png,Plumbing,Fittings,PEX Fittings,Reducer,PEXB,
+PEX,PEX-REDUCER,REDUCER,"3/4"" x 1/2""",100,0,2.00,images/PEXReducer.png,Plumbing,Fittings,PEX Fittings,Reducer,PEXB,
+PVC,PVC-1/16HH,1/16 BEND (H x H),"1-1/2""",200,200,1.36,images/225Elbow.png,Plumbing,Fittings,PVC Fittings,22.5 Elbow,D057,LP324-015
+PVC,PVC-1/16HH,1/16 BEND (H x H),"2""",100,400,0.91,images/225Elbow.png,Plumbing,Fittings,PVC Fittings,22.5 Elbow,D057,LP324-020
+PVC,PVC-1/16HH,1/16 BEND (H x H),"3""",25,100,2.65,images/225Elbow.png,Plumbing,Fittings,PVC Fittings,22.5 Elbow,D057,LP324-030
+PVC,PVC-1/16HS,"1/16 BEND, STREET (H x S)","1-1/2""",200,200,2.05,images/225Elbow.png,Plumbing,Fittings,PVC Fittings,22.5 Elbow Street,D059,LP326-015
+PVC,PVC-1/16HS,"1/16 BEND, STREET (H x S)","2""",100,200,2.26,images/225Elbow.png,Plumbing,Fittings,PVC Fittings,22.5 Elbow Street,D059,LP326-020
+PVC,PVC-1/16HS,"1/16 BEND, STREET (H x S)","3""",25,100,7.46,images/225Elbow.png,Plumbing,Fittings,PVC Fittings,22.5 Elbow Street,D059,LP326-030
+PVC,PVC-1/4HH,1/4 BEND (H x H),"1-1/2""",100,0,0.53,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow,D035,LP300-015
+PVC,PVC-1/4HH,1/4 BEND (H x H),"2""",50,0,0.86,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow,D035,LP300-020
+PVC,PVC-1/4HH,1/4 BEND (H x H),"3""",25,0,2.65,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow,D035,LP300-030
+PVC,PVC-1/4HH,1/4 BEND (H x H),"4""",10,0,4.99,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow,D035,LP300-040
+PVC,PVC-1/4HH,1/4 BEND (H × H),"6""",4,0,22.84,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow,D035,
+PVC,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"2""",60,1200,1.34,images/90ElbowLong.png,Plumbing,Fittings,PVC Fittings,90 Elbow Long Sweep,D043,LP304-020
+PVC,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"3""",10,600,3.17,images/90ElbowLong.png,Plumbing,Fittings,PVC Fittings,90 Elbow Long Sweep,D043,LP304-030
+PVC,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"4""",5,20,6.47,images/90ElbowLong.png,Plumbing,Fittings,PVC Fittings,90 Elbow Long Sweep,D043,LP304-040
+PVC,PVC-1/4HS,"1/4 BEND, STREET (H x S)","1-1/2""",180,180,0.70,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow Street,D040,LP302-015
+PVC,PVC-1/4HS,"1/4 BEND, STREET (H x S)","2""",50,200,0.99,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow Street,D040,LP302-020
+PVC,PVC-1/4HS,"1/4 BEND, STREET (H x S)","3""",20,100,2.95,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow Street,D040,LP302-030
+PVC,PVC-1/4HS,"1/4 BEND, STREET (H x S)","4""",10,20,4.86,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow Street,D040,LP302-040
+PVC,PVC-1/4LOWHEEL,1/4 BEND W/ LOW HEEL INLET (H x H x H),"3"" x 3"" x 2""",25,300,4.11,images/90Elbow.png,Plumbing,Fittings,PVC Fittings,90 Elbow w/ Low Heel Inlet,D050,LP303-338
+PVC,PVC-1/8HH,1/8 BEND (H x H),"1-1/2""",100,1000,0.52,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow,D053,LP321-015
+PVC,PVC-1/8HH,1/8 BEND (H x H),"2""",50,0,0.79,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow,D053,LP321-020
+PVC,PVC-1/8HH,1/8 BEND (H x H),"3""",25,0,2.16,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow,D053,LP321-030
+PVC,PVC-1/8HH,1/8 BEND (H x H),"4""",15,105,4.11,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow,D053,LP321-040
+PVC,PVC-1/8HH,1/8 BEND (H × H),"6""",5,0,14.04,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow,D053,
+PVC,PVC-1/8HH,1/8 BEND (H × H),"8""",4,0,26.94,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow,D053,
+PVC,PVC-1/8HS,1/8 BEND STREET (H x S),"1-1/2""",100,800,0.49,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow Street,D055,LP323-015
+PVC,PVC-1/8HS,1/8 BEND STREET (H x S),"2""",50,0,0.82,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow Street,D055,LP323-020
+PVC,PVC-1/8HS,1/8 BEND STREET (H x S),"3""",25,0,2.22,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow Street,D055,LP323-030
+PVC,PVC-1/8HS,1/8 BEND STREET (H x S),"4""",9,126,3.87,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow Street,D055,LP323-040
+PVC,PVC-45ELLSOC,45° ELL (SOC × SOC),"10""",4,0,68.59,images/45Elbow.png,Plumbing,Fittings,PVC Fittings,45 Elbow Elongated,A 023,
+PVC,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"2"" x 1-1/2""",200,200,0.85,images/Bushing.png,Plumbing,Fittings,PVC Fittings,Bushing,D019,LP107-251
+PVC,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"3"" x 2""",120,240,1.15,images/Bushing.png,Plumbing,Fittings,PVC Fittings,Bushing,D019,LP107-338
+PVC,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"4"" x 3""",30,90,2.01,images/Bushing.png,Plumbing,Fittings,PVC Fittings,Bushing,D019,LP107-422
+PVC,PVC-CAPSOC,CAP (SOC),"1-1/2""",240,240,0.65,images/CapSOC.png,Plumbing,Fittings,PVC Fittings,Cap (SOC),D025,LP116-015
+PVC,PVC-CAPSOC,CAP (SOC),"2""",180,360,1.48,images/CapSOC.png,Plumbing,Fittings,PVC Fittings,Cap (SOC),D025,LP116-020
+PVC,PVC-CAPSOC,CAP (SOC),"3""",60,60,5.42,images/CapSOC.png,Plumbing,Fittings,PVC Fittings,Cap (SOC),D025,LP116-030
+PVC,PVC-CAPSOC,CAP (SOC),"4""",20,20,10.50,images/CapSOC.png,Plumbing,Fittings,PVC Fittings,Cap (SOC),D025,LP116-040
+PVC,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"2""",60,600,2.87,images/CleanoutTeewPlug.png,Plumbing,Fittings,PVC Fittings,Cleanout Tee,D078,LP444X-020
+PVC,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"3""",20,120,5.25,images/CleanoutTeewPlug.png,Plumbing,Fittings,PVC Fittings,Cleanout Tee,D078,LP444X-030
+PVC,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"4""",10,20,9.05,images/CleanoutTeewPlug.png,Plumbing,Fittings,PVC Fittings,Cleanout Tee,D078,LP444X-040
+PVC,PVC-CLSTFLNGH,CLOSET FLANGE W/TEST PLATE (H),"4"" x 3""",20,0,2.59,images/Flange.png,Plumbing,Fittings,PVC Fittings,Closet Flange,D121,LP800T-422
+PVC,PVC-CPLNG,COUPLING (H x H),"1-1/2""",400,400,0.25,images/Coupling.png,Plumbing,Fittings,PVC Fittings,Coupling,D004,LP100-015
+PVC,PVC-CPLNG,COUPLING (H x H),"2""",100,1000,0.34,images/Coupling.png,Plumbing,Fittings,PVC Fittings,Coupling,D004,LP100-020
+PVC,PVC-CPLNG,COUPLING (H x H),"3""",60,600,1.15,images/Coupling.png,Plumbing,Fittings,PVC Fittings,Coupling,D004,LP100-030
+PVC,PVC-CPLNG,COUPLING (H x H),"4""",25,200,2.13,images/Coupling.png,Plumbing,Fittings,PVC Fittings,Coupling,D004,LP100-040
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"10"" x 6""",8,0,35.82,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"10"" x 8""",8,0,35.82,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"2"" x 1-1/2""",100,400,1.60,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,LP102-251
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"3"" x 2""",80,240,1.84,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,LP102-338
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"4"" x 2""",16,0,3.01,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"4"" x 3""",20,160,3.85,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,LP102-422
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"6"" x 3""",15,0,12.08,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"6"" x 4""",6,0,7.78,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,
+PVC,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"8"" x 6""",12,0,16.46,images/IncreaserReducer.png,Plumbing,Fittings,PVC Fittings,Reducer,D007,
+PVC,PVC-MADPTR,MALE ADAPTER (MPT x H),"1-1/2""",300,600,0.55,images/MaleAdapter.png,Plumbing,Fittings,PVC Fittings,Male Adapter,D021,LP109-015
+PVC,PVC-MADPTR,MALE ADAPTER (MPT x H),"2""",200,200,0.65,images/MaleAdapter.png,Plumbing,Fittings,PVC Fittings,Male Adapter,D021,LP109-020
+PVC,PVC-PIPE-FOAM,ASTM  F891 PVC Foam Core DWV Pipe,"1-1/2""",1,3080,9.25,images/Sch40Foam.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A100P01-,PIPE-FOAM
+PVC,PVC-PIPE-FOAM,ASTM  F891 PVC Foam Core DWV Pipe,"2""",1,3080,11.00,images/Sch40Foam.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A100P01-,PIPE-FOAM
+PVC,PVC-PIPE-FOAM,ASTM  F891 PVC Foam Core DWV Pipe,"3""",1,3080,19.00,images/Sch40Foam.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A100P01-,PIPE-FOAM
+PVC,PVC-PIPE-FOAM,ASTM  F891 PVC Foam Core DWV Pipe,"4""",1,1480,27.60,images/Sch40Foam.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A100P01-,PIPE-FOAM
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"1""",1,0,7.79,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"1/2""",1,0,3.82,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"1-1/2""",1,0,12.87,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"1-1/4""",1,0,10.67,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"2""",1,0,17.62,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"2-1/2""",1,0,27.43,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"3""",1,0,36.03,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"3/4""",1,0,5.16,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+INSULATION,PVC-PIPE-INSLTN,PIPE INSULATION COLD WATER SUPPLY,"4""",1,0,52.87,images/Insulation.png,Plumbing,Insulation,Insulation,Insulation,PIPE INSULATION COLD WATER SUPPLY,
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"1""",1,0,0.64,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"1/2""",1,0,0.32,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"10""",1,0,16.12,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"1-1/2""",1,0,1.03,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"1-1/4""",1,0,0.86,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D 1785 SCH40 PVC,"2""",1,1132,14.75,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"2-1/2""",1,0,2.20,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D 1785 SCH40 PVC,"3""",1,1132,27.50,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"3/4""",1,0,0.43,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D 1785 SCH40 PVC,"4""",1,433,50.00,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"6""",1,0,8.69,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PIPE-SOLID,ASTM D1785 SCH40 PVC,"8""",1,0,11.37,images/Sch40Solid.png,Plumbing,Pipes,PVC Pipes,PVC Pipe,A01P01-SCH40-01,PIPE-SOLID
+PVC,PVC-PTRAP,P-TRAP (H x H),"1-1/2""",25,0,3.89,images/Ptrap.png,Plumbing,Fittings,PVC Fittings,P-Trap,D103,LP706X-015
+PVC,PVC-PTRAP,P-TRAP (H x H),"2""",15,30,2.35,images/Ptrap.png,Plumbing,Fittings,PVC Fittings,P-Trap,D103,LP706X-020
+PVC,PVC-PTRAP,P-TRAP (H x H),"3""",10,20,15.05,images/Ptrap.png,Plumbing,Fittings,PVC Fittings,P-Trap,D103,LP706X-030
+PVC,PVC-PTRAP,P-TRAP (H x H),"4""",4,4,26.75,images/Ptrap.png,Plumbing,Fittings,PVC Fittings,P-Trap,D103,LP706X-040
+PVC,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","1-1/2""",25,300,1.22,images/Ptrap.png,Plumbing,Fittings,PVC Fittings,P-Trap,A 062,LP710-015
+PVC,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","2""",15,360,5.25,images/Ptrap.png,Plumbing,Fittings,PVC Fittings,P-Trap,A 062,LP710-020
+PVC,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","3""",10,200,16.25,images/Ptrap.png,Plumbing,Fittings,PVC Fittings,P-Trap,A 062,LP710-030
+PVC,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","4""",4,40,38.00,images/Ptrap.png,Plumbing,Fittings,PVC Fittings,P-Trap,A 062,LP710-040
+PVC,PVC-SANTEE,SANITARY TEE (ALL HUB),"1-1/2""",60,180,0.91,images/SanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D065,LP400-015
+PVC,PVC-SANTEE,SANITARY TEE (ALL HUB),"2""",35,280,1.32,images/SanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D065,LP400-020
+PVC,PVC-SANTEE,SANITARY TEE (ALL HUB),"3""",15,0,6.99,images/SanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D065,LP400-030
+PVC,PVC-SANTEE,SANITARY TEE (ALL HUB),"4""",5,0,14.75,images/SanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D065,LP400-040
+PVC,PVC-SANTEEDBL,"DOUBLE SANITARY TEE, REDUCING (ALL HUB)","2"" x 2"" x 1-1/2"" x 1-1/2""",25,100,4.25,images/DoubleSanTee.png,Plumbing,Fittings,PVC Fittings,Double Sanitary Tee,D073,LP429-251
+PVC,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2"" x 1-1/2""",60,0,1.68,images/RedSanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D066,
+PVC,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2"" x 1-1/2"" x 1-1/2""",60,600,1.15,images/RedSanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D066,LP401-241
+PVC,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2"" x 1-1/2"" x 2""",60,600,1.53,images/RedSanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D066,LP401-251
+PVC,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2"" x 2"" x 1-1/2""",50,600,1.16,images/RedSanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D066,LP401-257
+PVC,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"3"" x 2""",15,0,4.20,images/RedSanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D066,
+PVC,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"3"" x 3"" x 2""",15,0,5.75,images/RedSanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D066,LP401-338
+PVC,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"4"" x 4"" x 2""",10,0,5.59,images/RedSanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D066,
+PVC,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"4"" x 4"" x 3""",10,20,9.65,images/RedSanTee.png,Plumbing,Fittings,PVC Fittings,Sanitary Tee,D066,LP401-422
+PVC,PVC-WYEDBL,REDUCING DOUBLE WYE (ALL HUB),"3"" x 3"" x 2"" x 2""",15,150,6.55,images/RedDoubleWye.png,Plumbing,Fittings,PVC Fittings,Double Wye,D097,LP612-338
+PVC,PVC-WYEHUB,WYE (ALL HUB),"1-1/2""",50,0,1.72,images/Wye.png,Plumbing,Fittings,PVC Fittings,Wye,D090,LP600-015
+PVC,PVC-WYEHUB,WYE (ALL HUB),"2""",25,0,3.60,images/Wye.png,Plumbing,Fittings,PVC Fittings,Wye,D090,LP600-020
+PVC,PVC-WYEHUB,WYE (ALL HUB),"3""",15,0,7.19,images/Wye.png,Plumbing,Fittings,PVC Fittings,Wye,D090,
+PVC,PVC-WYEHUB,WYE (ALL HUB),"4""",8,0,13.10,images/Wye.png,Plumbing,Fittings,PVC Fittings,Wye,D090,
+PVC,PVC-WYEHUB,WYE (ALL HUB),"6""",2,0,30.26,images/Wye.png,Plumbing,Fittings,PVC Fittings,Wye,D090,
+PVC,PVC-WYERED,REDUCING WYE (ALL HUB),"3"" x 3"" x 2""",12,480,7.05,images/RedWye.png,Plumbing,Fittings,PVC Fittings,Wye,D092,LP601-338
+PVC,PVC-WYERED,REDUCING WYE (ALL HUB),"4"" x 4"" x 2""",10,40,5.30,images/RedWye.png,Plumbing,Fittings,PVC Fittings,Wye,D092,LP601-420
+PVC,PVC-WYERED,REDUCING WYE (ALL HUB),"4"" x 4"" x 3""",10,40,6.71,images/RedWye.png,Plumbing,Fittings,PVC Fittings,Wye,D092,LP601-422
+PVC,PVC-WYERED,REDUCING WYE (ALL HUB),"6"" x 6"" x 2""",5,0,18.22,images/RedWye.png,Plumbing,Fittings,PVC Fittings,Wye,D092,
+PVC,PVC-WYERED,REDUCING WYE (ALL HUB),"6"" x 6"" x 3""",3,0,19.24,images/RedWye.png,Plumbing,Fittings,PVC Fittings,Wye,D092,
+PVC,PVC-WYERED,REDUCING WYE (ALL HUB),"6"" x 6"" x 4""",4,0,21.39,images/RedWye.png,Plumbing,Fittings,PVC Fittings,Wye,D092,
+PVC,PVC-WYERED,REDUCING WYE (ALL HUB),"8"" x 8"" x 4""",4,0,35.97,images/RedWye.png,Plumbing,Fittings,PVC Fittings,Wye,D092,
+PVC,PVC-WYERED,REDUCING WYE (ALL HUB),"8"" x 8"" x 6""",2,0,46.77,images/RedWye.png,Plumbing,Fittings,PVC Fittings,Wye,D092,
