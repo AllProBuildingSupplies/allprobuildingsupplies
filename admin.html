@@ -3358,16 +3358,14 @@ async function updatePayInvoiceCcButton() {
 
 function currentOrderInvoiceTotal() {
   if (!activeOrderObj) return 0;
-  // Prefer live line math from the modal so unsaved edits are included.
-  let sum = 0;
-  const rows = document.querySelectorAll('#m-items-tbody tr');
-  if (rows && rows.length) {
-    rows.forEach(function (tr) {
-      const pcs = parseFloat((tr.querySelector('.edit-pcs') || {}).value);
-      const price = parseFloat((tr.querySelector('.edit-price') || {}).value);
-      if (Number.isFinite(pcs) && Number.isFinite(price)) sum += pcs * price;
-    });
-    if (sum > 0 || rows.length) return Math.round(sum * 100) / 100;
+  const pcs = document.querySelectorAll('#m-items-tbody .edit-pcs');
+  const prices = document.querySelectorAll('#m-items-tbody .edit-price');
+  if (pcs.length && pcs.length === prices.length) {
+    let sum = 0;
+    for (let i = 0; i < pcs.length; i++) {
+      sum += (parseInt(pcs[i].value, 10) || 0) * (parseFloat(prices[i].value) || 0);
+    }
+    return Math.round(sum * 100) / 100;
   }
   return Math.round((Number(activeOrderObj.total) || 0) * 100) / 100;
 }
