@@ -47,8 +47,8 @@
     </div>
     
     <div id="login-banner" class="login-banner" style="display:none;">
-      <div class="login-banner-text desktop-only-block" style="font-size:14px;color:var(--smoke)"><strong style="color:var(--white)">&#128274; Pricing visible to approved trade accounts only</strong><br/><span style="font-size:13px;color:var(--silver)">Log in or request access to see wholesale pricing and order online.</span></div>
-      <div class="login-banner-text mobile-only-block"><strong>Trade pricing</strong> — log in to see prices</div>
+      <div class="login-banner-text desktop-only-block" style="font-size:14px;color:var(--smoke)"><strong style="color:var(--white)">Log in for pricing &amp; ordering</strong><br/><span style="font-size:13px;color:var(--silver)">Browse sizes below. Wholesale prices, stock counts, and cart are available to approved trade accounts.</span></div>
+      <div class="login-banner-text mobile-only-block"><strong>Log in for pricing &amp; ordering</strong></div>
       <div class="login-banner-acts">
         <a href="login.html" class="btn-gold" style="padding:10px 22px;font-size:12px;letter-spacing:1.5px">LOG IN &rarr;</a>
         <a href="register.html" class="btn-ghost desktop-only-inline" style="padding:10px 22px;font-size:12px;letter-spacing:1.5px">REQUEST ACCESS</a>
@@ -298,7 +298,7 @@ function applyCatalogFilters() {
     }
 
     var visibleSizes = 0;
-    tile.querySelectorAll('.shop-size-line').forEach(function(line) {
+    tile.querySelectorAll('.shop-size-line, .classic-guest-size').forEach(function(line) {
       var size = line.getAttribute('data-size') || '';
       var lineStock = line.getAttribute('data-instock') === '1';
       var sizeOk = !sizeKeys.length || sizeKeys.indexOf(size) !== -1;
@@ -676,8 +676,10 @@ function paintCatalogGroups(groups) {
     }).length;
     var oosCount = sizeCount - inStockCount;
     var statsLabel = sizeCount + (sizeCount === 1 ? ' size' : ' sizes');
-    if (inStockCount > 0) statsLabel += ' · ' + inStockCount + ' in stock';
-    if (oosCount > 0) statsLabel += ' · ' + oosCount + ' backorder';
+    if (isLoggedIn) {
+      if (inStockCount > 0) statsLabel += ' · ' + inStockCount + ' in stock';
+      if (oosCount > 0) statsLabel += ' · ' + oosCount + ' backorder';
+    }
 
     var sizesForSearch = rows.map(function(r) {
       return [r.size, r.sizeDisplay || catDisplaySize(r.size)].join(' ');
@@ -687,41 +689,53 @@ function paintCatalogGroups(groups) {
       .toLowerCase().replace(/&/g, '&amp;').replace(/"/g, '&quot;');
     var anyInStock = inStockCount > 0 ? '1' : '0';
     var img = data.image || 'images/logo.png';
-    var sizeLines = '';
+    var sizeBody = '';
 
-    rows.forEach(function(item) {
-      var isOOS = isLoggedIn ? item.qty <= 0 : !item.inStock;
-      var availHtml = isOOS
-        ? '<span class="shop-stock shop-stock-out">Out of stock · backorder OK</span>'
-        : (isLoggedIn
-          ? '<span class="shop-stock shop-stock-in">In stock · ' + item.qty + '</span>'
-          : '<span class="shop-stock shop-stock-in">In stock</span>');
-      var priceHtml = isLoggedIn
-        ? '<span class="shop-price">$' + Number(item.price).toFixed(2) + '</span>'
-        : '<span class="price-locked">Login for price</span>';
-      var sizeCanon = window.apbsSizeToCatalog
-        ? window.apbsSizeToCatalog(item.size)
-        : (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(item.size);
-      var sizeAttr = String(sizeCanon).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-      var sizeShow = item.sizeDisplay || catDisplaySize(sizeCanon || item.size);
-      var descClean = String(data.desc || '').replace(/"/g, '&quot;');
-      var buyHtml = shopQtyControlsHtml(item, {
-        isOOS: isOOS,
-        code: code,
-        sizeAttr: sizeAttr,
-        descClean: descClean
+    if (!isLoggedIn) {
+      // Guest catalog: size chips only — no prices, stock, backorder, or cart per size.
+      var chips = rows.map(function(item) {
+        var isOOS = !item.inStock;
+        var sizeCanon = window.apbsSizeToCatalog
+          ? window.apbsSizeToCatalog(item.size)
+          : (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(item.size);
+        var sizeShow = item.sizeDisplay || catDisplaySize(sizeCanon || item.size);
+        return '<span class="classic-guest-size' + (isOOS ? ' is-oos' : '') + '" data-size="' + catEscAttr(sizeCanon) + '" data-instock="' + (isOOS ? '0' : '1') + '">' +
+          catEscHtml(sizeShow) + '</span>';
+      }).join('');
+      sizeBody = '<div class="classic-guest-sizes" aria-label="Available sizes">' + chips + '</div>';
+    } else {
+      var sizeLines = '';
+      rows.forEach(function(item) {
+        var isOOS = item.qty <= 0;
+        var availHtml = isOOS
+          ? '<span class="shop-stock shop-stock-out">Out of stock · backorder OK</span>'
+          : '<span class="shop-stock shop-stock-in">In stock · ' + item.qty + '</span>';
+        var priceHtml = '<span class="shop-price">$' + Number(item.price).toFixed(2) + '</span>';
+        var sizeCanon = window.apbsSizeToCatalog
+          ? window.apbsSizeToCatalog(item.size)
+          : (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(item.size);
+        var sizeAttr = String(sizeCanon).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+        var sizeShow = item.sizeDisplay || catDisplaySize(sizeCanon || item.size);
+        var descClean = String(data.desc || '').replace(/"/g, '&quot;');
+        var buyHtml = shopQtyControlsHtml(item, {
+          isOOS: isOOS,
+          code: code,
+          sizeAttr: sizeAttr,
+          descClean: descClean
+        });
+        sizeLines +=
+          '<div class="shop-size-line ' + (isOOS ? 'shop-row-oos' : 'shop-row-ok') + '" data-size="' + catEscAttr(sizeCanon) + '" data-instock="' + (isOOS ? '0' : '1') + '">' +
+          '<div class="shop-size-info"><div class="shop-size-top">' +
+          '<span class="shop-size">' + catEscHtml(sizeShow) + '</span>' +
+          '<span class="qty-badge">' + catEscHtml(String(item.pack)) + '/CTN</span></div>' +
+          availHtml + '</div>' +
+          '<div class="shop-size-order">' + priceHtml + buyHtml + '</div></div>';
       });
-      sizeLines +=
-        '<div class="shop-size-line ' + (isOOS ? 'shop-row-oos' : 'shop-row-ok') + '" data-size="' + catEscAttr(sizeCanon) + '" data-instock="' + (isOOS ? '0' : '1') + '">' +
-        '<div class="shop-size-info"><div class="shop-size-top">' +
-        '<span class="shop-size">' + catEscHtml(sizeShow) + '</span>' +
-        '<span class="qty-badge">' + catEscHtml(String(item.pack)) + '/CTN</span></div>' +
-        availHtml + '</div>' +
-        '<div class="shop-size-order">' + priceHtml + buyHtml + '</div></div>';
-    });
+      sizeBody = '<div class="shop-size-stack">' + sizeLines + '</div>';
+    }
 
     chunks.push(
-      '<div class="prod-section shop-list-item shop-tile classic-tile open" data-code="' + catEscAttr(code) + '"' +
+      '<div class="prod-section shop-list-item shop-tile classic-tile' + (isLoggedIn ? ' open' : ' classic-tile-guest') + '" data-code="' + catEscAttr(code) + '"' +
       ' data-material="' + catEscAttr(mat) + '"' +
       ' data-sub="' + catEscAttr(data.subCat || '') + '"' +
       ' data-subsub="' + catEscAttr(data.subSubCat || '') + '"' +
@@ -736,7 +750,7 @@ function paintCatalogGroups(groups) {
       '<div class="prod-section-title">' + catEscHtml(data.desc || '') + '</div>' +
       '<div class="prod-section-stats">' + catEscHtml(statsLabel) + '</div>' +
       '</div></div>' +
-      '<div class="prod-section-body"><div class="shop-size-stack">' + sizeLines + '</div></div></div>'
+      '<div class="prod-section-body">' + sizeBody + '</div></div>'
     );
   });
 

@@ -1166,6 +1166,38 @@ h1.htitle strong { color: var(--gold); }
     max-height:300px;
   }
 }
+.classic-tiles .classic-tile-guest{
+  height:auto;
+  max-height:none;
+}
+.classic-tiles .classic-tile-guest .prod-section-body{
+  overflow:visible;
+  padding:10px 12px 14px;
+}
+.classic-guest-sizes{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+}
+.classic-guest-size{
+  display:inline-block;
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+  color:var(--gold);
+  border:1px solid rgba(200,152,31,.35);
+  background:rgba(200,152,31,.08);
+  padding:4px 8px;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.classic-guest-size.is-oos{
+  opacity:.45;
+  color:var(--silver);
+  border-color:rgba(139,160,178,.3);
+  background:transparent;
+}
+.catalog-toolbar-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
