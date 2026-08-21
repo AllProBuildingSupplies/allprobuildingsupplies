@@ -1729,6 +1729,10 @@ async function renderFinancePaymentMethods() {
     if (m.ach) {
       bits.push('<div><strong>ACH:</strong> ' + escAttr(String(m.ach.instructions || '').split('\n')[0]) + '</div>');
     }
+    bits.push('<div style="margin-top:10px;padding:10px 12px;border:1px solid rgba(200,152,31,.35);background:rgba(200,152,31,.08);color:#f0e0a0;line-height:1.45;">' +
+      '<strong style="color:var(--gold);">Invoice PDF attachments (EmailJS one-time setup):</strong> In EmailJS → your template → <em>Attachments</em> → add <strong>Variable Attachment</strong>. ' +
+      'Parameter name: <code style="color:var(--gold);">invoice_pdf</code>, Content type: PDF, Filename: <code style="color:var(--gold);">{{invoice_filename}}</code> (or Invoice.pdf). ' +
+      'Until that slot exists, customers still get the View/Download PDF button in the email body.</div>');
     box.innerHTML = bits.join('') || 'Payment methods unavailable.';
   } catch (e) {
     box.innerHTML = escAttr(e.message || 'Could not load payment methods');
@@ -4273,7 +4277,7 @@ function onEmailFormatChange() {
     hint.innerHTML = 'Packing slip columns: <strong style="color:var(--gold);">Ordered</strong>, <strong style="color:var(--gold);">Prev. shipped</strong>, <strong style="color:var(--gold);">This shipment</strong>, <strong style="color:var(--gold);">Still due</strong> — no prices. Full-width US Letter print layout.';
   } else if (sel.value === 'invoice') {
     hint.style.display = 'block';
-    hint.innerHTML = 'Email = short payment notice with <strong style="color:var(--gold);">View / Download Invoice PDF</strong> + Banquest / Zelle. PDF uses Ordered / Shipped / Invoice qty columns. Bills the selected shipment only.';
+    hint.innerHTML = 'Email = payment notice + <strong style="color:var(--gold);">PDF attachment</strong> + View/Download link + Banquest/Zelle. Requires EmailJS template Variable Attachment named <code style="color:var(--gold);">invoice_pdf</code> (one-time). PDF columns: Ordered / Shipped / Invoice.';
   } else if (sel.value === 'deliver') {
     hint.style.display = 'block';
     hint.innerHTML = 'Delivery thank-you can reference the selected shipment. Full-width US Letter print layout.';
@@ -4668,10 +4672,10 @@ function buildInvoiceCoverEmail(order, note, paymentMethods, invoiceViewUrl) {
   const pad = '24px';
   const viewUrl = String(invoiceViewUrl || '').trim();
   const viewBtn = viewUrl
-    ? ('<a href="' + emailEscape(viewUrl) + '" style="display:inline-block;margin-top:12px;margin-right:10px;padding:12px 18px;background:#0C1117;color:#fff;text-decoration:none;font-weight:700;font-size:14px;border-radius:4px;">View / Download Invoice PDF</a>')
+    ? ('<a href="' + emailEscape(viewUrl) + '" style="display:inline-block;margin-top:12px;margin-right:10px;padding:12px 18px;background:#C8981F;color:#0C1117;text-decoration:none;font-weight:800;font-size:14px;border-radius:4px;border:2px solid #0C1117;">View / Download Invoice PDF</a>')
     : '';
   const payBtn = built.url
-    ? ('<a href="' + emailEscape(built.url) + '" style="display:inline-block;margin-top:12px;padding:12px 18px;background:#C8981F;color:#0C1117;text-decoration:none;font-weight:800;font-size:14px;border-radius:4px;letter-spacing:0.3px;">Pay by Card — $' + fee.cardTotal.toFixed(2) + '</a>' +
+    ? ('<a href="' + emailEscape(built.url) + '" style="display:inline-block;margin-top:12px;padding:12px 18px;background:#0C1117;color:#fff;text-decoration:none;font-weight:800;font-size:14px;border-radius:4px;letter-spacing:0.3px;">Pay by Card — $' + fee.cardTotal.toFixed(2) + '</a>' +
        (fee.pct > 0 ? ('<div style="font-size:12px;color:#666;margin-top:8px;">Includes ' + fee.pct + '% card convenience fee ($' + fee.fee.toFixed(2) + '). Zelle / wire / ACH stay at $' + fee.base.toFixed(2) + '.</div>') : ''))
     : ('<div style="font-size:13px;color:#444;margin-top:12px;">Call <a href="tel:17327341123" style="color:#C8981F;font-weight:700;text-decoration:none;">732-734-1123</a> to pay by card.</div>');
 
@@ -4695,7 +4699,7 @@ function buildInvoiceCoverEmail(order, note, paymentMethods, invoiceViewUrl) {
       '<p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(custName) + '</strong>,</p>' +
       '<p style="margin:14px 0 0;font-size:15px;color:#444;line-height:1.6;">Your invoice is ready' +
         (order.shipmentId ? ' for shipment <strong>' + emailEscape(order.shipmentId) + '</strong>' : '') +
-        '. Open the PDF invoice below, then pay online when you are ready.</p>' +
+        '. The PDF invoice is attached to this email — you can also open it online below, then pay when you are ready.</p>' +
     '</td></tr>' +
     emailNoteRow(note) +
     '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;">' +
@@ -5069,6 +5073,189 @@ async function executeEmailOrPdfAction() {
   return executeSendEmail();
 }
 
+async function ensurePdfLibLoaded() {
+  if (window.PDFLib && window.PDFLib.PDFDocument) return window.PDFLib;
+  await new Promise(function (resolve, reject) {
+    const existing = document.querySelector('script[data-apbs-pdf-lib]');
+    if (existing) {
+      existing.addEventListener('load', resolve);
+      existing.addEventListener('error', reject);
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+    s.async = true;
+    s.dataset.apbsPdfLib = '1';
+    s.onload = resolve;
+    s.onerror = function () { reject(new Error('Could not load PDF library')); };
+    document.head.appendChild(s);
+  });
+  if (!window.PDFLib) throw new Error('PDF library unavailable');
+  return window.PDFLib;
+}
+
+function pdfMoney(n) {
+  return '$' + (Math.round((Number(n) || 0) * 100) / 100).toFixed(2);
+}
+
+/** Compact text PDF of the formal invoice (small enough for EmailJS attachments). */
+async function buildInvoicePdfBase64(order, paymentMethods) {
+  const PDFLib = await ensurePdfLibLoaded();
+  const methods = paymentMethods || cachedPaymentMethods || {};
+  const fee = invoiceCardFee(order.total, methods);
+  const cust = order.customer || {};
+  const invNo = order.shipmentId ? (order.id + ' / ' + order.shipmentId) : String(order.id || '');
+  const invDate = new Date(order.shipmentDate || order.placedAt || Date.now()).toLocaleDateString();
+  const bizAddr = String(invoiceBusinessAddress(methods) || '35 Hope Hill Lane\nLakewood NJ 08701');
+  const doc = await PDFLib.PDFDocument.create();
+  const font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const fontBold = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  const pageSize = PDFLib.PageSizes.Letter;
+  let page = doc.addPage(pageSize);
+  const pageW = page.getWidth();
+  const margin = 40;
+  let y = page.getHeight() - margin;
+
+  function ensureSpace(need) {
+    if (y - need < margin) {
+      page = doc.addPage(pageSize);
+      y = page.getHeight() - margin;
+    }
+  }
+  function drawText(text, x, yy, size, bold, color) {
+    page.drawText(String(text || ''), {
+      x: x,
+      y: yy,
+      size: size || 10,
+      font: bold ? fontBold : font,
+      color: color || PDFLib.rgb(0.05, 0.07, 0.09)
+    });
+  }
+  function line(yy) {
+    page.drawLine({
+      start: { x: margin, y: yy },
+      end: { x: pageW - margin, y: yy },
+      thickness: 1,
+      color: PDFLib.rgb(0.78, 0.59, 0.12)
+    });
+  }
+
+  drawText('ALL PRO BUILDING SUPPLIES LLC', margin, y, 14, true);
+  drawText('732-734-1123', pageW - margin - 160, y, 10, true);
+  y -= 14;
+  drawText('Invoice', margin, y, 11, true, PDFLib.rgb(0.78, 0.59, 0.12));
+  const addrLines = bizAddr.split(/\n/).filter(Boolean);
+  addrLines.forEach(function (al, i) {
+    drawText(al, pageW - margin - 160, y - (i * 11), 9, false, PDFLib.rgb(0.3, 0.3, 0.3));
+  });
+  y -= 22;
+  line(y);
+  y -= 18;
+
+  drawText('Invoice #: ' + invNo, margin, y, 10, true); y -= 13;
+  drawText('Date: ' + invDate, margin, y, 10, false); y -= 13;
+  drawText('PO #: ' + (order.po || '—'), margin, y, 10, false); y -= 13;
+  drawText('Amount due: ' + pdfMoney(fee.base), margin, y, 11, true); y -= 18;
+
+  drawText('Bill To', margin, y, 9, true, PDFLib.rgb(0.45, 0.45, 0.45)); y -= 12;
+  drawText(cust.company || cust.name || '', margin, y, 11, true); y -= 12;
+  if (cust.company && cust.name) { drawText(cust.name, margin, y, 10, false); y -= 12; }
+  if (cust.email) { drawText(cust.email, margin, y, 9, false, PDFLib.rgb(0.35, 0.35, 0.35)); y -= 11; }
+  if (cust.phone) { drawText(cust.phone, margin, y, 9, false, PDFLib.rgb(0.35, 0.35, 0.35)); y -= 11; }
+  const shipTo = order.delivery && order.delivery.address ? String(order.delivery.address) : '';
+  if (shipTo) {
+    y -= 6;
+    drawText('Ship To', margin, y, 9, true, PDFLib.rgb(0.45, 0.45, 0.45)); y -= 12;
+    shipTo.split(/\n/).forEach(function (al) {
+      drawText(al, margin, y, 9, false); y -= 11;
+    });
+  }
+  if (order.notes) {
+    y -= 4;
+    drawText('Notes: ' + String(order.notes).replace(/\s+/g, ' ').slice(0, 140), margin, y, 9, false);
+    y -= 14;
+  }
+
+  y -= 6;
+  ensureSpace(30);
+  // Header row
+  page.drawRectangle({
+    x: margin,
+    y: y - 4,
+    width: pageW - margin * 2,
+    height: 16,
+    color: PDFLib.rgb(0.05, 0.07, 0.09)
+  });
+  const cols = [
+    { label: 'Product', x: margin + 4, w: 220 },
+    { label: 'Ord', x: margin + 230, w: 36 },
+    { label: 'Ship', x: margin + 270, w: 36 },
+    { label: 'Inv', x: margin + 310, w: 36 },
+    { label: 'Unit', x: margin + 360, w: 50 },
+    { label: 'Amount', x: margin + 420, w: 70 }
+  ];
+  cols.forEach(function (c) {
+    drawText(c.label, c.x, y, 8, true, PDFLib.rgb(0.78, 0.59, 0.12));
+  });
+  y -= 18;
+
+  (order.items || []).forEach(function (item, idx) {
+    ensureSpace(28);
+    if (idx % 2) {
+      page.drawRectangle({
+        x: margin,
+        y: y - 4,
+        width: pageW - margin * 2,
+        height: 24,
+        color: PDFLib.rgb(0.95, 0.96, 0.97)
+      });
+    }
+    const ordered = parseInt(item.qtyOrdered != null ? item.qtyOrdered : item.qty, 10) || 0;
+    const shipped = parseInt(
+      item.qtyShipped != null
+        ? item.qtyShipped
+        : ((parseInt(item.qtyPrevShipped, 10) || 0) + (parseInt(item.qtyThisShip, 10) || 0)),
+      10
+    ) || 0;
+    const invQty = parseInt(
+      item.qtyThisShip != null ? item.qtyThisShip : (item.qtyDelivered != null ? item.qtyDelivered : item.qty),
+      10
+    ) || 0;
+    const unit = Number(item.unitPrice) || 0;
+    const amount = Number.isFinite(Number(item.lineTotal)) ? Number(item.lineTotal) : unit * invQty;
+    const desc = String((item.description || '') + (item.size ? (' ' + item.size) : '')).slice(0, 42);
+    drawText(desc, cols[0].x, y + 6, 8, true);
+    if (item.code) drawText(String(item.code).slice(0, 28), cols[0].x, y - 5, 7, false, PDFLib.rgb(0.45, 0.45, 0.45));
+    drawText(String(ordered), cols[1].x, y, 8, false);
+    drawText(String(shipped), cols[2].x, y, 8, false);
+    drawText(String(invQty), cols[3].x, y, 8, true);
+    drawText(pdfMoney(unit), cols[4].x, y, 8, false);
+    drawText(pdfMoney(amount), cols[5].x, y, 8, true);
+    y -= 26;
+  });
+
+  y -= 8;
+  ensureSpace(50);
+  drawText('Invoice total', pageW - margin - 160, y, 10, false, PDFLib.rgb(0.35, 0.35, 0.35));
+  drawText(pdfMoney(fee.base), pageW - margin - 70, y, 12, true);
+  y -= 14;
+  if (fee.pct > 0) {
+    drawText('Card fee (' + fee.pct + '%)', pageW - margin - 160, y, 9, false, PDFLib.rgb(0.45, 0.45, 0.45));
+    drawText(pdfMoney(fee.fee), pageW - margin - 70, y, 9, false);
+    y -= 14;
+    drawText('Card total', pageW - margin - 160, y, 10, true);
+    drawText(pdfMoney(fee.cardTotal), pageW - margin - 70, y, 11, true);
+  }
+
+  const bytes = await doc.save();
+  let bin = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(bin);
+}
+
 async function executeDownloadPdf() {
   if (!activeOrderObj) return;
   const msgEl = document.getElementById('email-send-msg');
@@ -5134,35 +5321,50 @@ async function executeSendEmail() {
   }
   let htmlBody = doc.htmlBody;
   const subject = doc.subject;
+  let invoicePdfBase64 = '';
+  let invoicePdfUrl = '';
+  let invoiceFilename = doc.filename || 'Invoice.pdf';
 
-  // Invoice emails: publish formal PDF HTML and include a View/Download link in the cover.
+  // Invoice emails: generate PDF attachment + publish view link for the cover email.
   if (doc.type === 'invoice' && doc.pdfHtml) {
     try {
       msgEl.style.display = 'block'; msgEl.style.color = '#3498db';
-      msgEl.textContent = 'Publishing invoice PDF link…';
+      msgEl.textContent = 'Generating invoice PDF…';
+      let payMethods = cachedPaymentMethods;
+      try { payMethods = await getPaymentMethods(); } catch (_) {}
+      try {
+        invoicePdfBase64 = await buildInvoicePdfBase64(doc.shipView || activeOrderObj, payMethods);
+      } catch (pdfErr) {
+        console.warn('PDF generate failed', pdfErr);
+        invoicePdfBase64 = '';
+      }
+      msgEl.textContent = 'Publishing invoice + attaching PDF…';
       const pub = await adminFetch('/admin/invoices', {
         method: 'POST',
         body: JSON.stringify({
           html: doc.pdfHtml,
+          pdfBase64: invoicePdfBase64 || undefined,
           orderId: activeOrderObj.id,
           shipmentId: (doc.shipment && doc.shipment.id) || '',
-          filename: doc.filename
+          filename: invoiceFilename
         })
       });
       const pubData = await pub.json().catch(function () { return {}; });
       if (!pub.ok) throw new Error(pubData.error || ('HTTP ' + pub.status));
       const viewUrl = (location.origin.replace(/\/$/, '') + (pubData.viewPath || ('/invoice-view.html?id=' + encodeURIComponent(pubData.id))));
-      let payMethods = cachedPaymentMethods;
-      try { payMethods = await getPaymentMethods(); } catch (_) {}
+      invoicePdfUrl = pubData.pdfUrl || ((window.APBS_API_BASE || '').replace(/\/api\/?$/, '') + (pubData.pdfPath || ''));
       htmlBody = minifyEmailHtml(buildInvoiceCoverEmail(doc.shipView || activeOrderObj, doc.customNote || '', payMethods, viewUrl));
+      if (!invoicePdfBase64 && pubData.hasPdf === false) {
+        // Keep going with view link; attachment may be URL-only if PDF gen failed.
+      }
     } catch (e) {
       msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b';
-      msgEl.textContent = 'Could not publish invoice PDF link: ' + (e.message || e);
+      msgEl.textContent = 'Could not prepare invoice PDF: ' + (e.message || e);
       return;
     }
   }
 
-  // EmailJS hard-caps template variables at 50KB — minify and refuse early with a clear message.
+  // EmailJS hard-caps non-attachment template variables at 50KB.
   const emailBytes = emailVarsByteSize(subject, htmlBody);
   if (emailBytes > 48000) {
     msgEl.style.display = 'block'; msgEl.style.color = '#ff6b6b';
@@ -5178,21 +5380,32 @@ async function executeSendEmail() {
     : ('Sending separately to ' + recipients.length + '…');
 
   try {
+    const payload = { recipients, cc: ccFiltered, subject, htmlBody };
+    if (doc.type === 'invoice') {
+      if (invoicePdfBase64) payload.invoicePdfBase64 = 'data:application/pdf;base64,' + invoicePdfBase64;
+      if (invoicePdfUrl) payload.invoicePdfUrl = invoicePdfUrl;
+      payload.invoiceFilename = invoiceFilename;
+    }
     const r = await fetch(API_BASE + '/admin/email/send', {
       method: 'POST',
       headers: getAdminHeaders(),
-      body: JSON.stringify({ recipients, cc: ccFiltered, subject, htmlBody })
+      body: JSON.stringify(payload)
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Send failed');
     const successCount = data.sentCount || 0;
     if (successCount > 0) {
       const ccNote = (data.cc && data.cc.length) ? (' (CC: ' + data.cc.join(', ') + ')') : '';
+      const attachNote = doc.type === 'invoice'
+        ? (data.attached
+          ? ' PDF attached.'
+          : ' Sent with View/Download PDF link (add EmailJS Variable Attachment named invoice_pdf for file attach).')
+        : '';
       msgEl.style.color = '#2ecc71';
-      msgEl.textContent = data.mode === 'shared'
+      msgEl.textContent = (data.mode === 'shared'
         ? ('Sent 1 email to ' + (data.sent || recipients).join(', ') + ccNote)
-        : ('Sent separately to ' + successCount + ' recipient(s).');
-      btn.style.background = '#2ecc71'; btn.innerHTML = '✔ Done'; setTimeout(closeEmailModal, 1800);
+        : ('Sent separately to ' + successCount + ' recipient(s).')) + attachNote;
+      btn.style.background = '#2ecc71'; btn.innerHTML = '✔ Done'; setTimeout(closeEmailModal, 2200);
     } else {
       const detail = (data && data.error) ||
         (data && data.errors && data.errors[0] && data.errors[0].error) ||

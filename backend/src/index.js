@@ -1117,7 +1117,7 @@ async function ensureStockMovementsTable(env) {
   } catch (_) {}
 }
 
-/** Published invoice HTML docs for customer view/download links in cover emails. */
+/** Published invoice HTML + PDF docs for customer emails. */
 async function ensureInvoiceDocsTable(env) {
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS invoice_docs (
@@ -1133,11 +1133,37 @@ async function ensureInvoiceDocsTable(env) {
   try {
     await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_invoice_docs_order ON invoice_docs(order_id)`).run();
   } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE invoice_docs ADD COLUMN pdf_base64 TEXT DEFAULT ''`).run();
+  } catch (_) {}
 }
 
 function newInvoiceDocId() {
   const rand = Math.random().toString(36).slice(2, 10);
   return 'INV-' + Date.now().toString(36).toUpperCase() + '-' + rand.toUpperCase();
+}
+
+/** EmailJS attachment params are excluded from the 50KB dynamic-variable cap. */
+function emailJsAttachmentParamNames(env) {
+  const custom = String(env.EMAILJS_ATTACHMENT_PARAM || '')
+    .split(/[,;\s]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  // Try common names so a Variable Attachment slot matches without guessing.
+  return Array.from(new Set(custom.concat(['invoice_pdf', 'content', 'attachment', 'pdf'])));
+}
+
+function base64ToBytes(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+function stripDataUrlBase64(value) {
+  const s = String(value || '').trim();
+  const m = s.match(/^data:[^;]+;base64,(.+)$/i);
+  return m ? m[1] : s;
 }
 
 /**
@@ -1986,7 +2012,7 @@ async function sendEmailJs(env, templateParams, toEmail, options = {}) {
     params.email_subject = sanitizeEmailSubject(params.email_subject);
   }
   if (params.email_body != null) {
-    // EmailJS caps all template variables at 50KB — strip comment/whitespace bloat.
+    // EmailJS caps non-attachment template variables at 50KB — strip comment/whitespace bloat.
     params.email_body = String(params.email_body)
       .replace(/<!--[\s\S]*?-->/g, '')
       .replace(/>\s+</g, '><')
@@ -1998,6 +2024,32 @@ async function sendEmailJs(env, templateParams, toEmail, options = {}) {
   const toJoined = toList.join(', ');
   const ccJoined = ccList.join(', ');
   const primaryTo = toList[0] || String(toEmail || '').trim();
+
+  // Attachments: EmailJS Variable Attachment params (excluded from 50KB body cap by plan).
+  const attachNames = emailJsAttachmentParamNames(env);
+  const attachRaw =
+    options.invoicePdfBase64 ||
+    params.invoice_pdf ||
+    params.content ||
+    params.attachment ||
+    params.pdf ||
+    '';
+  const attachUrl = String(options.invoicePdfUrl || params.invoice_pdf_url || '').trim();
+  const attachFilename = String(options.invoiceFilename || params.invoice_filename || 'Invoice.pdf').trim();
+  if (attachRaw || attachUrl) {
+    // Prefer public PDF URL (EmailJS fetches it). Fall back to data-URI/base64.
+    const payload = attachUrl
+      ? attachUrl
+      : (String(attachRaw).startsWith('data:')
+          ? String(attachRaw)
+          : 'data:application/pdf;base64,' + stripDataUrlBase64(attachRaw));
+    for (const name of attachNames) {
+      params[name] = payload;
+    }
+    params.invoice_filename = attachFilename;
+    params.filename = attachFilename;
+  }
+
   const body = {
     service_id: serviceId,
     template_id: templateId,
@@ -2013,7 +2065,12 @@ async function sendEmailJs(env, templateParams, toEmail, options = {}) {
     },
   };
   if (env.EMAILJS_PRIVATE_KEY) body.accessToken = env.EMAILJS_PRIVATE_KEY;
-  const approxBytes = JSON.stringify(body.template_params).length;
+
+  // 50KB applies to dynamic variables EXCEPT attachment variables.
+  const sizeCheck = { ...body.template_params };
+  for (const name of attachNames) delete sizeCheck[name];
+  delete sizeCheck.invoice_pdf_url;
+  const approxBytes = JSON.stringify(sizeCheck).length;
   if (approxBytes > 50000) {
     throw new Error(
       'Email too large for EmailJS (' + Math.round(approxBytes / 1024) + 'KB / 50KB limit). Reduce line items or split the send.'
@@ -2028,7 +2085,7 @@ async function sendEmailJs(env, templateParams, toEmail, options = {}) {
     const txt = await res.text();
     throw new Error(txt || `EmailJS HTTP ${res.status}`);
   }
-  return { ok: true, to: toList, cc: ccList };
+  return { ok: true, to: toList, cc: ccList, attached: !!(attachRaw || attachUrl) };
 }
 
 function normalizeEmailList(value) {
@@ -2061,26 +2118,47 @@ export default {
         return jsonResponse({ status: 'ok' });
       }
 
-      // Public printable invoice HTML (linked from invoice cover emails).
+      // Public printable invoice HTML / PDF (linked + attached from invoice emails).
       if (path.startsWith('/api/public/invoice/') && request.method === 'GET') {
         await ensureRuntimeSchema(env);
-        const id = decodeURIComponent(path.slice('/api/public/invoice/'.length).split('/')[0] || '').trim();
+        const rest = path.slice('/api/public/invoice/'.length);
+        const parts = rest.split('/').filter(Boolean);
+        const id = decodeURIComponent(parts[0] || '').trim();
+        const asPdf = (parts[1] || '').toLowerCase() === 'pdf' || (url.searchParams.get('format') || '') === 'pdf';
         if (!id) return jsonResponse({ error: 'Invoice id required' }, 400);
         const row = await env.DB.prepare(
-          'SELECT id, html, filename, expires_at FROM invoice_docs WHERE id = ?'
+          'SELECT id, html, filename, expires_at, pdf_base64 FROM invoice_docs WHERE id = ?'
         )
           .bind(id)
           .first();
-        if (!row || !row.html) return jsonResponse({ error: 'Invoice not found' }, 404);
+        if (!row) return jsonResponse({ error: 'Invoice not found' }, 404);
         if (row.expires_at && Date.parse(row.expires_at) < Date.now()) {
           return jsonResponse({ error: 'Invoice link expired' }, 410);
         }
+        if (asPdf) {
+          const b64 = stripDataUrlBase64(row.pdf_base64 || '');
+          if (!b64) return jsonResponse({ error: 'PDF not available for this invoice' }, 404);
+          const bin = base64ToBytes(b64);
+          const fname = String(row.filename || 'Invoice.pdf').replace(/[^\w.\-]+/g, '_');
+          return new Response(bin, {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': 'inline; filename="' + fname + '"',
+              'Cache-Control': 'private, max-age=300',
+              'X-Robots-Tag': 'noindex',
+            },
+          });
+        }
+        if (!row.html) return jsonResponse({ error: 'Invoice not found' }, 404);
         const wantsJson = (url.searchParams.get('format') || '') === 'json';
         if (wantsJson) {
           return jsonResponse({
             id: row.id,
             filename: row.filename || 'Invoice.pdf',
             html: row.html,
+            hasPdf: !!(row.pdf_base64 && String(row.pdf_base64).length > 20),
           });
         }
         return new Response(String(row.html), {
@@ -3176,25 +3254,39 @@ export default {
 
       if (path === '/api/admin/email/send' && request.method === 'POST') {
         if (!auth.admin) return jsonResponse({ error: 'Unauthorized' }, 401);
-        const { recipients, cc, subject, htmlBody } = await request.json();
+        const bodyIn = await request.json();
+        const recipients = bodyIn && bodyIn.recipients;
+        const cc = bodyIn && bodyIn.cc;
+        const subject = bodyIn && bodyIn.subject;
+        const htmlBody = bodyIn && bodyIn.htmlBody;
+        const invoicePdfBase64 = bodyIn && bodyIn.invoicePdfBase64;
+        const invoicePdfUrl = bodyIn && bodyIn.invoicePdfUrl;
+        const invoiceFilename = bodyIn && bodyIn.invoiceFilename;
         const toList = normalizeEmailList(recipients);
         const ccList = normalizeEmailList(cc);
         if (!toList.length) {
           return jsonResponse({ error: 'At least one To recipient is required' }, 400);
         }
         const params = { email_subject: subject, email_body: htmlBody };
+        const sendOptsBase = {
+          invoicePdfBase64,
+          invoicePdfUrl,
+          invoiceFilename: invoiceFilename || 'Invoice.pdf',
+        };
 
         // No CC → one separate send per To (recipients don't see each other).
         if (!ccList.length) {
           const sent = [];
           const errors = [];
+          let attached = false;
           for (const email of toList) {
             try {
-              const result = await sendEmailJs(env, params, email);
+              const result = await sendEmailJs(env, params, email, sendOptsBase);
               if (result && result.skipped) {
                 errors.push({ email, error: result.reason || 'Email not configured' });
                 continue;
               }
+              if (result && result.attached) attached = true;
               sent.push(email);
             } catch (e) {
               errors.push({
@@ -3218,6 +3310,7 @@ export default {
             sentCount: sent.length,
             sent,
             cc: [],
+            attached,
             errors: errors.length ? errors : undefined,
           });
         }
@@ -3225,13 +3318,14 @@ export default {
         // With CC → one shared email so To + CC can see each other.
         const ccOnly = ccList.filter((e) => !toList.includes(e));
         try {
-          await sendEmailJs(env, params, toList, { cc: ccOnly });
+          const result = await sendEmailJs(env, params, toList, { ...sendOptsBase, cc: ccOnly });
           return jsonResponse({
             success: true,
             mode: 'shared',
             sentCount: 1,
             sent: toList,
             cc: ccOnly,
+            attached: !!(result && result.attached),
           });
         } catch (e) {
           const msg = e && e.message ? String(e.message) : 'Send failed';
@@ -3249,29 +3343,39 @@ export default {
         if (html.length > 900000) {
           return jsonResponse({ error: 'Invoice HTML too large' }, 413);
         }
+        let pdfBase64 = stripDataUrlBase64(body && body.pdfBase64);
+        if (pdfBase64 && pdfBase64.length > 2500000) {
+          return jsonResponse({ error: 'PDF too large to store' }, 413);
+        }
         const id = newInvoiceDocId();
         const now = new Date();
         const expires = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 120); // 120 days
+        const filename = String((body && body.filename) || 'Invoice.pdf').trim() || 'Invoice.pdf';
         await env.DB.prepare(
-          `INSERT INTO invoice_docs (id, order_id, shipment_id, filename, html, created_at, expires_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO invoice_docs (id, order_id, shipment_id, filename, html, created_at, expires_at, pdf_base64)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
         )
           .bind(
             id,
             String((body && body.orderId) || '').trim(),
             String((body && body.shipmentId) || '').trim(),
-            String((body && body.filename) || 'Invoice.pdf').trim(),
+            filename,
             html,
             now.toISOString(),
-            expires.toISOString()
+            expires.toISOString(),
+            pdfBase64 || ''
           )
           .run();
+        const origin = new URL(request.url).origin;
         return jsonResponse({
           success: true,
           id,
           expiresAt: expires.toISOString(),
           viewPath: '/invoice-view.html?id=' + encodeURIComponent(id),
           apiPath: '/api/public/invoice/' + encodeURIComponent(id),
+          pdfPath: '/api/public/invoice/' + encodeURIComponent(id) + '/pdf',
+          pdfUrl: origin + '/api/public/invoice/' + encodeURIComponent(id) + '/pdf',
+          hasPdf: !!pdfBase64,
         });
       }
 
