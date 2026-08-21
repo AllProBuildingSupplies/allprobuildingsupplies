@@ -791,6 +791,8 @@ function forceAdminRelogin(msg) {
   const hadToken = !!(sessionStorage.getItem('apbs_admin_token') || sessionStorage.getItem('apbs_admin_auth'));
   sessionStorage.removeItem('apbs_admin_token');
   sessionStorage.removeItem('apbs_admin_auth');
+  sessionStorage.removeItem('apbs_admin_ms_access');
+  sessionStorage.removeItem('apbs_admin_ms_refresh');
   const main = document.getElementById('main-admin-content');
   const gate = document.getElementById('admin-auth-gate');
   if (main) main.style.display = 'none';
@@ -856,6 +858,8 @@ async function checkAdminAuth() {
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Login failed');
     sessionStorage.setItem('apbs_admin_token', data.token);
+    sessionStorage.removeItem('apbs_admin_ms_access');
+    sessionStorage.removeItem('apbs_admin_ms_refresh');
     unlockAdmin();
   } catch (e) {
     document.getElementById('admin-auth-err').style.display = 'block';
@@ -867,8 +871,23 @@ document.getElementById('admin-pin').addEventListener('keypress', function (e) {
 });
 
 // --- Microsoft SSO (PKCE) — password login remains as backup ---
+// Mail.Send lets invoice emails attach a real PDF via Microsoft Graph (no EmailJS slot).
 const ADMIN_MS_PKCE_KEY = 'apbs_admin_ms_pkce';
+const ADMIN_MS_SCOPES = 'openid profile email offline_access Mail.Send';
 let adminMsConfig = null;
+
+function getMsAccessToken() {
+  return String(sessionStorage.getItem('apbs_admin_ms_access') || '').trim();
+}
+
+function storeMsTokens(tokens) {
+  if (tokens && tokens.access_token) {
+    sessionStorage.setItem('apbs_admin_ms_access', tokens.access_token);
+  }
+  if (tokens && tokens.refresh_token) {
+    sessionStorage.setItem('apbs_admin_ms_refresh', tokens.refresh_token);
+  }
+}
 
 function adminMsRedirectUri() {
   // Always use /admin.html so Entra redirect URIs stay stable even if the
@@ -916,7 +935,7 @@ async function loadMicrosoftAdminConfig() {
     adminMsConfig = data;
     if (data && data.enabled && data.clientId && data.tenantId) {
       if (btn) btn.disabled = false;
-      setAdminMsHint('Use your Microsoft work account (baruch@allprobuildingsupplies.com).');
+      setAdminMsHint('Use your Microsoft work account (baruch@…). Invoice PDF attachments send via Graph when Mail.Send is consented.');
     } else {
       if (btn) btn.disabled = true;
       setAdminMsHint('Microsoft sign-in is not configured on this API yet. Use password for now.');
@@ -951,7 +970,7 @@ async function startMicrosoftAdminLogin() {
       response_type: 'code',
       redirect_uri: adminMsRedirectUri(),
       response_mode: 'query',
-      scope: 'openid profile email',
+      scope: ADMIN_MS_SCOPES,
       state: state,
       nonce: nonce,
       code_challenge: challenge,
@@ -1006,7 +1025,7 @@ async function finishMicrosoftAdminLoginFromCallback() {
       '/oauth2/v2.0/token';
     const form = new URLSearchParams({
       client_id: pkce.clientId || (adminMsConfig && adminMsConfig.clientId) || '',
-      scope: 'openid profile email',
+      scope: ADMIN_MS_SCOPES,
       code: code,
       redirect_uri: pkce.redirectUri || adminMsRedirectUri(),
       grant_type: 'authorization_code',
@@ -1022,6 +1041,7 @@ async function finishMicrosoftAdminLoginFromCallback() {
       const desc = tokens.error_description || tokens.error || ('HTTP ' + tokenRes.status);
       throw new Error('Microsoft token exchange failed: ' + desc);
     }
+    storeMsTokens(tokens);
 
     const r = await fetch(API_BASE + '/admin/login/microsoft', {
       method: 'POST',
@@ -1730,9 +1750,11 @@ async function renderFinancePaymentMethods() {
       bits.push('<div><strong>ACH:</strong> ' + escAttr(String(m.ach.instructions || '').split('\n')[0]) + '</div>');
     }
     bits.push('<div style="margin-top:10px;padding:10px 12px;border:1px solid rgba(200,152,31,.35);background:rgba(200,152,31,.08);color:#f0e0a0;line-height:1.45;">' +
-      '<strong style="color:var(--gold);">Invoice PDF attachments (EmailJS one-time setup):</strong> In EmailJS → your template → <em>Attachments</em> → add <strong>Variable Attachment</strong>. ' +
-      'Parameter name: <code style="color:var(--gold);">invoice_pdf</code>, Content type: PDF, Filename: <code style="color:var(--gold);">{{invoice_filename}}</code> (or Invoice.pdf). ' +
-      'Until that slot exists, customers still get the View/Download PDF button in the email body.</div>');
+      '<strong style="color:var(--gold);">Invoice PDF attachments (Microsoft Graph — recommended):</strong> ' +
+      'No EmailJS attachment slot needed. Sign in to admin with <strong>Microsoft</strong> after adding Graph delegated permission <code style="color:var(--gold);">Mail.Send</code> ' +
+      '(Entra → App registration → API permissions → Grant admin consent). Invoice PDFs then attach from your mailbox. ' +
+      'Optional app-only: set Worker secrets <code style="color:var(--gold);">MICROSOFT_CLIENT_SECRET</code> + <code style="color:var(--gold);">MAIL_FROM</code> (orders@…) with Application <code>Mail.Send</code>. ' +
+      'EmailJS still sends plain notify emails.</div>');
     box.innerHTML = bits.join('') || 'Payment methods unavailable.';
   } catch (e) {
     box.innerHTML = escAttr(e.message || 'Could not load payment methods');
@@ -4277,7 +4299,8 @@ function onEmailFormatChange() {
     hint.innerHTML = 'Packing slip columns: <strong style="color:var(--gold);">Ordered</strong>, <strong style="color:var(--gold);">Prev. shipped</strong>, <strong style="color:var(--gold);">This shipment</strong>, <strong style="color:var(--gold);">Still due</strong> — no prices. Full-width US Letter print layout.';
   } else if (sel.value === 'invoice') {
     hint.style.display = 'block';
-    hint.innerHTML = 'Email = payment notice + <strong style="color:var(--gold);">PDF attachment</strong> + View/Download link + Banquest/Zelle. Requires EmailJS template Variable Attachment named <code style="color:var(--gold);">invoice_pdf</code> (one-time). PDF columns: Ordered / Shipped / Invoice.';
+    hint.innerHTML = 'Email = payment notice + <strong style="color:var(--gold);">PDF attachment via Microsoft Graph</strong> + View/Download link + Banquest/Zelle. ' +
+      'Sign in with Microsoft (Mail.Send). PDF columns: Ordered / Shipped / Invoice.';
   } else if (sel.value === 'deliver') {
     hint.style.display = 'block';
     hint.innerHTML = 'Delivery thank-you can reference the selected shipment. Full-width US Letter print layout.';
@@ -5386,6 +5409,8 @@ async function executeSendEmail() {
       if (invoicePdfUrl) payload.invoicePdfUrl = invoicePdfUrl;
       payload.invoiceFilename = invoiceFilename;
     }
+    const msTok = getMsAccessToken();
+    if (msTok) payload.msAccessToken = msTok;
     const r = await fetch(API_BASE + '/admin/email/send', {
       method: 'POST',
       headers: getAdminHeaders(),
@@ -5396,10 +5421,13 @@ async function executeSendEmail() {
     const successCount = data.sentCount || 0;
     if (successCount > 0) {
       const ccNote = (data.cc && data.cc.length) ? (' (CC: ' + data.cc.join(', ') + ')') : '';
+      const via = data.transport ? (' via ' + data.transport) : '';
       const attachNote = doc.type === 'invoice'
         ? (data.attached
-          ? ' PDF attached.'
-          : ' Sent with View/Download PDF link (add EmailJS Variable Attachment named invoice_pdf for file attach).')
+          ? ' PDF attached' + via + '.'
+          : (msTok
+            ? ' Sent' + via + ' but PDF was not attached (check Mail.Send consent / re-login with Microsoft).'
+            : ' Sent with View/Download link only — sign in with Microsoft (Mail.Send) or set MICROSOFT_CLIENT_SECRET + MAIL_FROM for real PDF attachments.'))
         : '';
       msgEl.style.color = '#2ecc71';
       msgEl.textContent = (data.mode === 'shared'

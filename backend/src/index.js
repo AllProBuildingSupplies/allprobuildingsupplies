@@ -2000,6 +2000,148 @@ function sanitizeEmailSubject(subject) {
   return s.replace(/\s+/g, ' ').trim();
 }
 
+function mailFromAddress(env) {
+  return String(env.MAIL_FROM || env.GRAPH_MAIL_FROM || env.NOTIFY_EMAIL || 'orders@allprobuildingsupplies.com')
+    .trim()
+    .toLowerCase();
+}
+
+function graphMailConfigured(env) {
+  const sso = microsoftSsoConfig(env);
+  const secret = String(env.MICROSOFT_CLIENT_SECRET || env.AZURE_CLIENT_SECRET || '').trim();
+  return !!(sso.enabled && secret);
+}
+
+/** App-only Graph token (Mail.Send application permission + client secret). */
+async function getGraphAppAccessToken(env) {
+  const sso = microsoftSsoConfig(env);
+  const secret = String(env.MICROSOFT_CLIENT_SECRET || env.AZURE_CLIENT_SECRET || '').trim();
+  if (!sso.enabled || !secret) return null;
+  const tokenUrl = `https://login.microsoftonline.com/${sso.tenantId}/oauth2/v2.0/token`;
+  const res = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: sso.clientId,
+      client_secret: secret,
+      scope: 'https://graph.microsoft.com/.default',
+      grant_type: 'client_credentials',
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.access_token) {
+    const desc = data.error_description || data.error || `HTTP ${res.status}`;
+    throw new Error('Microsoft Graph token failed: ' + desc);
+  }
+  return String(data.access_token);
+}
+
+/**
+ * Send email via Microsoft Graph with real MIME file attachments (no EmailJS template slot).
+ * Prefers app credentials (send as MAIL_FROM); falls back to delegated admin access token (/me).
+ */
+async function sendGraphMail(env, { toEmail, cc, subject, htmlBody, pdfBase64, filename, msAccessToken }) {
+  const toList = normalizeEmailList(toEmail);
+  const ccList = normalizeEmailList(cc || '');
+  if (!toList.length) throw new Error('At least one To recipient is required');
+
+  let accessToken = String(msAccessToken || '').trim();
+  let sendUrl = 'https://graph.microsoft.com/v1.0/me/sendMail';
+  let transport = 'graph-delegated';
+
+  if (!accessToken && graphMailConfigured(env)) {
+    accessToken = await getGraphAppAccessToken(env);
+    const from = mailFromAddress(env);
+    sendUrl = `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(from)}/sendMail`;
+    transport = 'graph-app';
+  }
+  if (!accessToken) {
+    return { skipped: true, reason: 'Microsoft Graph mail not configured' };
+  }
+
+  const attachments = [];
+  const b64 = stripDataUrlBase64(pdfBase64 || '');
+  if (b64 && b64.length > 20) {
+    attachments.push({
+      '@odata.type': '#microsoft.graph.fileAttachment',
+      name: String(filename || 'Invoice.pdf').replace(/[^\w.\-]+/g, '_') || 'Invoice.pdf',
+      contentType: 'application/pdf',
+      contentBytes: b64,
+    });
+  }
+
+  const message = {
+    subject: sanitizeEmailSubject(subject || 'All Pro Building Supplies'),
+    body: {
+      contentType: 'HTML',
+      content: String(htmlBody || ''),
+    },
+    toRecipients: toList.map((address) => ({ emailAddress: { address } })),
+  };
+  if (ccList.length) {
+    message.ccRecipients = ccList.map((address) => ({ emailAddress: { address } }));
+  }
+  if (attachments.length) message.attachments = attachments;
+
+  const res = await fetch(sendUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + accessToken,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message, saveToSentItems: true }),
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    let detail = txt || `Graph HTTP ${res.status}`;
+    try {
+      const j = JSON.parse(txt);
+      detail = (j.error && (j.error.message || j.error.code)) || detail;
+    } catch (_) {}
+    throw new Error('Microsoft Graph send failed: ' + detail);
+  }
+  return {
+    ok: true,
+    to: toList,
+    cc: ccList,
+    attached: attachments.length > 0,
+    transport,
+  };
+}
+
+/**
+ * Prefer Graph (real PDF attachments) when available; otherwise EmailJS.
+ * Invoice PDFs attach reliably via Graph — EmailJS needs a dashboard Variable Attachment slot.
+ */
+async function sendOutboundEmail(env, templateParams, toEmail, options = {}) {
+  const subject = templateParams && templateParams.email_subject;
+  const htmlBody = templateParams && templateParams.email_body;
+  const pdfRaw = options.invoicePdfBase64 || '';
+  const wantsPdf = !!(pdfRaw && String(pdfRaw).length > 40);
+  const msToken = String(options.msAccessToken || '').trim();
+
+  if (wantsPdf || msToken || graphMailConfigured(env)) {
+    try {
+      const graphResult = await sendGraphMail(env, {
+        toEmail,
+        cc: options.cc || options.ccEmail,
+        subject,
+        htmlBody,
+        pdfBase64: pdfRaw,
+        filename: options.invoiceFilename,
+        msAccessToken: msToken,
+      });
+      if (graphResult && !graphResult.skipped) return graphResult;
+    } catch (e) {
+      // If Graph was explicitly requested via token/credentials, surface the error
+      // when we also have a PDF (caller expects a real attachment).
+      if (wantsPdf && (msToken || graphMailConfigured(env))) throw e;
+      // Otherwise fall through to EmailJS for plain notifies.
+    }
+  }
+  return sendEmailJs(env, templateParams, toEmail, options);
+}
+
 async function sendEmailJs(env, templateParams, toEmail, options = {}) {
   const serviceId = env.EMAILJS_SERVICE_ID;
   const templateId = env.EMAILJS_TEMPLATE_ID;
@@ -2037,15 +2179,17 @@ async function sendEmailJs(env, templateParams, toEmail, options = {}) {
   const attachUrl = String(options.invoicePdfUrl || params.invoice_pdf_url || '').trim();
   const attachFilename = String(options.invoiceFilename || params.invoice_filename || 'Invoice.pdf').trim();
   if (attachRaw || attachUrl) {
-    // Prefer public PDF URL (EmailJS fetches it). Fall back to data-URI/base64.
-    const payload = attachUrl
-      ? attachUrl
-      : (String(attachRaw).startsWith('data:')
-          ? String(attachRaw)
-          : 'data:application/pdf;base64,' + stripDataUrlBase64(attachRaw));
+    // Prefer base64 data-URI (reliable). URL only as extra param for templates that fetch.
+    const b64Payload = String(attachRaw).startsWith('data:')
+      ? String(attachRaw)
+      : attachRaw
+        ? 'data:application/pdf;base64,' + stripDataUrlBase64(attachRaw)
+        : '';
+    const payload = b64Payload || attachUrl;
     for (const name of attachNames) {
       params[name] = payload;
     }
+    if (attachUrl) params.invoice_pdf_url = attachUrl;
     params.invoice_filename = attachFilename;
     params.filename = attachFilename;
   }
@@ -2085,7 +2229,15 @@ async function sendEmailJs(env, templateParams, toEmail, options = {}) {
     const txt = await res.text();
     throw new Error(txt || `EmailJS HTTP ${res.status}`);
   }
-  return { ok: true, to: toList, cc: ccList, attached: !!(attachRaw || attachUrl) };
+  return {
+    ok: true,
+    to: toList,
+    cc: ccList,
+    // EmailJS only attaches if the template has a Variable Attachment slot — report intent, not guarantee.
+    attached: false,
+    attachmentAttempted: !!(attachRaw || attachUrl),
+    transport: 'emailjs',
+  };
 }
 
 function normalizeEmailList(value) {
@@ -3252,6 +3404,21 @@ export default {
         return jsonResponse({ success: true, deletedId: id });
       }
 
+      if (path === '/api/admin/email/transport' && request.method === 'GET') {
+        if (!auth.admin) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const emailjs = !!(env.EMAILJS_SERVICE_ID && env.EMAILJS_TEMPLATE_ID && env.EMAILJS_PUBLIC_KEY);
+        const graphApp = graphMailConfigured(env);
+        return jsonResponse({
+          emailjs,
+          graphApp,
+          mailFrom: graphApp ? mailFromAddress(env) : '',
+          // Delegated Graph works when the admin signs in with Microsoft + Mail.Send consent.
+          graphDelegatedHint:
+            'Sign in with Microsoft (Mail.Send). Or set MICROSOFT_CLIENT_SECRET + MAIL_FROM for app send.',
+          preferredForPdf: graphApp ? 'graph-app' : 'graph-delegated-or-emailjs',
+        });
+      }
+
       if (path === '/api/admin/email/send' && request.method === 'POST') {
         if (!auth.admin) return jsonResponse({ error: 'Unauthorized' }, 401);
         const bodyIn = await request.json();
@@ -3262,6 +3429,7 @@ export default {
         const invoicePdfBase64 = bodyIn && bodyIn.invoicePdfBase64;
         const invoicePdfUrl = bodyIn && bodyIn.invoicePdfUrl;
         const invoiceFilename = bodyIn && bodyIn.invoiceFilename;
+        const msAccessToken = bodyIn && bodyIn.msAccessToken;
         const toList = normalizeEmailList(recipients);
         const ccList = normalizeEmailList(cc);
         if (!toList.length) {
@@ -3272,6 +3440,7 @@ export default {
           invoicePdfBase64,
           invoicePdfUrl,
           invoiceFilename: invoiceFilename || 'Invoice.pdf',
+          msAccessToken: msAccessToken || '',
         };
 
         // No CC → one separate send per To (recipients don't see each other).
@@ -3279,14 +3448,16 @@ export default {
           const sent = [];
           const errors = [];
           let attached = false;
+          let transport = '';
           for (const email of toList) {
             try {
-              const result = await sendEmailJs(env, params, email, sendOptsBase);
+              const result = await sendOutboundEmail(env, params, email, sendOptsBase);
               if (result && result.skipped) {
                 errors.push({ email, error: result.reason || 'Email not configured' });
                 continue;
               }
               if (result && result.attached) attached = true;
+              if (result && result.transport) transport = result.transport;
               sent.push(email);
             } catch (e) {
               errors.push({
@@ -3298,7 +3469,7 @@ export default {
           if (!sent.length) {
             const detail =
               (errors[0] && errors[0].error) ||
-              'Email send failed. Check Worker EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, and EMAILJS_PUBLIC_KEY.';
+              'Email send failed. For PDF invoices use Microsoft Graph (sign in with Microsoft, or set MICROSOFT_CLIENT_SECRET + MAIL_FROM). EmailJS remains available for plain emails.';
             return jsonResponse(
               { error: detail, success: false, sentCount: 0, sent: [], errors },
               502
@@ -3311,6 +3482,7 @@ export default {
             sent,
             cc: [],
             attached,
+            transport,
             errors: errors.length ? errors : undefined,
           });
         }
@@ -3318,7 +3490,7 @@ export default {
         // With CC → one shared email so To + CC can see each other.
         const ccOnly = ccList.filter((e) => !toList.includes(e));
         try {
-          const result = await sendEmailJs(env, params, toList, { ...sendOptsBase, cc: ccOnly });
+          const result = await sendOutboundEmail(env, params, toList, { ...sendOptsBase, cc: ccOnly });
           return jsonResponse({
             success: true,
             mode: 'shared',
@@ -3326,6 +3498,7 @@ export default {
             sent: toList,
             cc: ccOnly,
             attached: !!(result && result.attached),
+            transport: (result && result.transport) || '',
           });
         } catch (e) {
           const msg = e && e.message ? String(e.message) : 'Send failed';

@@ -15,6 +15,12 @@ compatibility_date = "2024-04-21"
 #     https://allprobuildingsupplies.com/admin.html
 #     https://www.allprobuildingsupplies.com/admin.html  (if used)
 #     https://allpro-test.pages.dev/admin.html
+#   Invoice PDF attachments (recommended — bypasses EmailJS attachment limits):
+#     Add Microsoft Graph delegated permission Mail.Send + admin consent.
+#     Admin signs in with Microsoft → Worker sends via Graph with real PDF attach.
+#     Optional app-only send-as mailbox (works with password login too):
+#       MICROSOFT_CLIENT_SECRET, MAIL_FROM=orders@allprobuildingsupplies.com
+#       + Application permission Mail.Send + admin consent
 #
 # Invoice payment methods (optional; sensible defaults exist in code):
 #   BANQUEST_PAY_PAGE_URL — hosted Banquest pay page (Plan A)
