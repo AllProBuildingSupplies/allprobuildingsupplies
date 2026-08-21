@@ -2086,6 +2086,7 @@ export default {
         return new Response(String(row.html), {
           status: 200,
           headers: {
+            ...corsHeaders,
             'Content-Type': 'text/html; charset=utf-8',
             'Cache-Control': 'private, max-age=300',
             'X-Robots-Tag': 'noindex',
