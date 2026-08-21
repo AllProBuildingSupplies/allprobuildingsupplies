@@ -1117,6 +1117,29 @@ async function ensureStockMovementsTable(env) {
   } catch (_) {}
 }
 
+/** Published invoice HTML docs for customer view/download links in cover emails. */
+async function ensureInvoiceDocsTable(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS invoice_docs (
+      id TEXT PRIMARY KEY,
+      order_id TEXT NOT NULL,
+      shipment_id TEXT DEFAULT '',
+      filename TEXT DEFAULT '',
+      html TEXT NOT NULL,
+      created_at TEXT,
+      expires_at TEXT
+    )
+  `).run();
+  try {
+    await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_invoice_docs_order ON invoice_docs(order_id)`).run();
+  } catch (_) {}
+}
+
+function newInvoiceDocId() {
+  const rand = Math.random().toString(36).slice(2, 10);
+  return 'INV-' + Date.now().toString(36).toUpperCase() + '-' + rand.toUpperCase();
+}
+
 /**
  * One-time (per isolate) schema + legacy backfill. Previously ran on every request and
  * added multi-second latency to public catalog loads.
@@ -1132,6 +1155,7 @@ async function ensureRuntimeSchema(env) {
       await ensureOrderShipmentColumns(env);
       await ensureOrderPaymentColumns(env);
       await ensureStockMovementsTable(env);
+      await ensureInvoiceDocsTable(env);
       try {
         await backfillLegacyOrderShipments(env);
       } catch (_) {}
@@ -2035,6 +2059,38 @@ export default {
       // Fast public routes: skip schema/migration boot (was ~3–4s of D1 round-trips).
       if (path === '/api/health' && request.method === 'GET') {
         return jsonResponse({ status: 'ok' });
+      }
+
+      // Public printable invoice HTML (linked from invoice cover emails).
+      if (path.startsWith('/api/public/invoice/') && request.method === 'GET') {
+        await ensureRuntimeSchema(env);
+        const id = decodeURIComponent(path.slice('/api/public/invoice/'.length).split('/')[0] || '').trim();
+        if (!id) return jsonResponse({ error: 'Invoice id required' }, 400);
+        const row = await env.DB.prepare(
+          'SELECT id, html, filename, expires_at FROM invoice_docs WHERE id = ?'
+        )
+          .bind(id)
+          .first();
+        if (!row || !row.html) return jsonResponse({ error: 'Invoice not found' }, 404);
+        if (row.expires_at && Date.parse(row.expires_at) < Date.now()) {
+          return jsonResponse({ error: 'Invoice link expired' }, 410);
+        }
+        const wantsJson = (url.searchParams.get('format') || '') === 'json';
+        if (wantsJson) {
+          return jsonResponse({
+            id: row.id,
+            filename: row.filename || 'Invoice.pdf',
+            html: row.html,
+          });
+        }
+        return new Response(String(row.html), {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'private, max-age=300',
+            'X-Robots-Tag': 'noindex',
+          },
+        });
       }
 
       if (path === '/api/products' && request.method === 'GET') {
@@ -3118,6 +3174,7 @@ export default {
       }
 
       if (path === '/api/admin/email/send' && request.method === 'POST') {
+        if (!auth.admin) return jsonResponse({ error: 'Unauthorized' }, 401);
         const { recipients, cc, subject, htmlBody } = await request.json();
         const toList = normalizeEmailList(recipients);
         const ccList = normalizeEmailList(cc);
@@ -3179,6 +3236,42 @@ export default {
           const msg = e && e.message ? String(e.message) : 'Send failed';
           return jsonResponse({ error: msg, success: false, sentCount: 0 }, 502);
         }
+      }
+
+      if (path === '/api/admin/invoices' && request.method === 'POST') {
+        if (!auth.admin) return jsonResponse({ error: 'Unauthorized' }, 401);
+        const body = await request.json().catch(() => ({}));
+        const html = body && body.html != null ? String(body.html) : '';
+        if (!html || html.length < 40) {
+          return jsonResponse({ error: 'Invoice HTML is required' }, 400);
+        }
+        if (html.length > 900000) {
+          return jsonResponse({ error: 'Invoice HTML too large' }, 413);
+        }
+        const id = newInvoiceDocId();
+        const now = new Date();
+        const expires = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 120); // 120 days
+        await env.DB.prepare(
+          `INSERT INTO invoice_docs (id, order_id, shipment_id, filename, html, created_at, expires_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`
+        )
+          .bind(
+            id,
+            String((body && body.orderId) || '').trim(),
+            String((body && body.shipmentId) || '').trim(),
+            String((body && body.filename) || 'Invoice.pdf').trim(),
+            html,
+            now.toISOString(),
+            expires.toISOString()
+          )
+          .run();
+        return jsonResponse({
+          success: true,
+          id,
+          expiresAt: expires.toISOString(),
+          viewPath: '/invoice-view.html?id=' + encodeURIComponent(id),
+          apiPath: '/api/public/invoice/' + encodeURIComponent(id),
+        });
       }
 
       return jsonResponse({ error: 'Route Not Found' }, 404);
