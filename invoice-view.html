@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Invoice — All Pro Building Supplies</title>
+<meta name="robots" content="noindex,nofollow"/>
+<style>
+  html,body{margin:0;padding:0;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#0C1117}
+  #bar{position:sticky;top:0;z-index:20;background:#0C1117;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:2px solid #C8981F}
+  #bar strong{color:#C8981F}
+  #bar button{background:#C8981F;color:#0C1117;border:none;padding:8px 14px;font-weight:700;cursor:pointer}
+  #bar a{color:#fff;font-size:13px}
+  #status{padding:40px 20px;text-align:center;color:#555}
+  #frame-wrap{background:#fff}
+  @media print{#bar{display:none!important} html,body,#frame-wrap{background:#fff!important}}
+</style>
+<script src="assets/main.js"></script>
+</head>
+<body>
+  <div id="bar">
+    <div style="font-size:13px;line-height:1.4;"><strong>Invoice</strong> — use Print / Save as PDF to download a copy.</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button type="button" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </div>
+  <div id="status">Loading invoice…</div>
+  <div id="frame-wrap" hidden></div>
+  <script>
+(function () {
+  var statusEl = document.getElementById('status');
+  var wrap = document.getElementById('frame-wrap');
+  var params = new URLSearchParams(location.search || '');
+  var id = String(params.get('id') || '').trim();
+  if (!id) {
+    statusEl.textContent = 'Missing invoice id.';
+    return;
+  }
+  var base = (window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api').replace(/\/$/, '');
+  fetch(base + '/public/invoice/' + encodeURIComponent(id) + '?format=json')
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+    .then(function (res) {
+      if (!res.ok) throw new Error((res.d && res.d.error) || ('Could not load invoice (' + res.status + ')'));
+      var html = res.d && res.d.html;
+      if (!html) throw new Error('Invoice HTML missing');
+      if (res.d.filename) {
+        try { document.title = String(res.d.filename).replace(/\.pdf$/i, ''); } catch (_) {}
+      }
+      // Render invoice HTML into the page body (printable). Keep toolbar outside print.
+      var tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      var bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+      var inner = bodyMatch ? bodyMatch[1] : html;
+      var styleMatch = html.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
+      if (styleMatch) {
+        styleMatch.forEach(function (block) {
+          var s = document.createElement('div');
+          s.innerHTML = block;
+          var st = s.querySelector('style');
+          if (st) document.head.appendChild(st);
+        });
+      }
+      wrap.innerHTML = inner;
+      wrap.hidden = false;
+      statusEl.style.display = 'none';
+      if (params.get('print') === '1') {
+        setTimeout(function () { try { window.print(); } catch (_) {} }, 400);
+      }
+    })
+    .catch(function (e) {
+      statusEl.textContent = e.message || 'Invoice not found.';
+    });
+})();
+  </script>
+</body>
+</html>
