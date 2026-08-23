@@ -4299,8 +4299,7 @@ function onEmailFormatChange() {
     hint.innerHTML = 'Packing slip columns: <strong style="color:var(--gold);">Ordered</strong>, <strong style="color:var(--gold);">Prev. shipped</strong>, <strong style="color:var(--gold);">This shipment</strong>, <strong style="color:var(--gold);">Still due</strong> — no prices. Full-width US Letter print layout.';
   } else if (sel.value === 'invoice') {
     hint.style.display = 'block';
-    hint.innerHTML = 'Email = payment notice + <strong style="color:var(--gold);">PDF attachment via Microsoft Graph</strong> + View/Download link + Banquest/Zelle. ' +
-      'Sign in with Microsoft (Mail.Send). PDF columns: Ordered / Shipped / Invoice.';
+    hint.innerHTML = 'Email = payment notice + <strong style="color:var(--gold);">PDF attachment</strong> + Banquest pay button + Zelle/wire. PDF columns: Ordered / Shipped / Invoice.';
   } else if (sel.value === 'deliver') {
     hint.style.display = 'block';
     hint.innerHTML = 'Delivery thank-you can reference the selected shipment. Full-width US Letter print layout.';
