@@ -4684,7 +4684,8 @@ function buildInvoicePdfDocument(order, note, paymentMethods) {
 }
 
 /**
- * QuickBooks-style cover email: amount due + payment CTA + link to formal invoice PDF view.
+ * QuickBooks-style cover email: amount due + Banquest pay CTA.
+ * Formal line items live in the attached PDF (no View/Download link).
  */
 function buildInvoiceCoverEmail(order, note, paymentMethods, invoiceViewUrl) {
   const methods = paymentMethods || cachedPaymentMethods || {};
@@ -4693,12 +4694,10 @@ function buildInvoiceCoverEmail(order, note, paymentMethods, invoiceViewUrl) {
   const custName = (order.customer && order.customer.name) ? order.customer.name : 'there';
   const invNo = order.shipmentId ? (order.id + ' / ' + order.shipmentId) : String(order.id || '');
   const pad = '24px';
-  const viewUrl = String(invoiceViewUrl || '').trim();
-  const viewBtn = viewUrl
-    ? ('<a href="' + emailEscape(viewUrl) + '" style="display:inline-block;margin-top:12px;margin-right:10px;padding:12px 18px;background:#C8981F;color:#0C1117;text-decoration:none;font-weight:800;font-size:14px;border-radius:4px;border:2px solid #0C1117;">View / Download Invoice PDF</a>')
-    : '';
+  // invoiceViewUrl kept for callers; PDF is attached so we do not show a download link.
+  void invoiceViewUrl;
   const payBtn = built.url
-    ? ('<a href="' + emailEscape(built.url) + '" style="display:inline-block;margin-top:12px;padding:12px 18px;background:#0C1117;color:#fff;text-decoration:none;font-weight:800;font-size:14px;border-radius:4px;letter-spacing:0.3px;">Pay by Card — $' + fee.cardTotal.toFixed(2) + '</a>' +
+    ? ('<a href="' + emailEscape(built.url) + '" style="display:inline-block;margin-top:14px;padding:14px 22px;background:#C8981F;color:#0C1117;text-decoration:none;font-weight:800;font-size:15px;border-radius:4px;letter-spacing:0.3px;border:2px solid #0C1117;">Pay by Card — $' + fee.cardTotal.toFixed(2) + '</a>' +
        (fee.pct > 0 ? ('<div style="font-size:12px;color:#666;margin-top:8px;">Includes ' + fee.pct + '% card convenience fee ($' + fee.fee.toFixed(2) + '). Zelle / wire / ACH stay at $' + fee.base.toFixed(2) + '.</div>') : ''))
     : ('<div style="font-size:13px;color:#444;margin-top:12px;">Call <a href="tel:17327341123" style="color:#C8981F;font-weight:700;text-decoration:none;">732-734-1123</a> to pay by card.</div>');
 
@@ -4722,7 +4721,7 @@ function buildInvoiceCoverEmail(order, note, paymentMethods, invoiceViewUrl) {
       '<p style="margin:0;font-size:16px;color:#222;">Hi <strong>' + emailEscape(custName) + '</strong>,</p>' +
       '<p style="margin:14px 0 0;font-size:15px;color:#444;line-height:1.6;">Your invoice is ready' +
         (order.shipmentId ? ' for shipment <strong>' + emailEscape(order.shipmentId) + '</strong>' : '') +
-        '. The PDF invoice is attached to this email — you can also open it online below, then pay when you are ready.</p>' +
+        '. The PDF invoice is attached — use the button below to pay by card when you are ready.</p>' +
     '</td></tr>' +
     emailNoteRow(note) +
     '<tr><td class="email-pad" style="padding:20px ' + pad + ' 0;">' +
@@ -4732,7 +4731,7 @@ function buildInvoiceCoverEmail(order, note, paymentMethods, invoiceViewUrl) {
           '<div style="font-size:15px;font-weight:700;color:#0C1117;font-family:Consolas,monospace;">' + emailEscape(invNo) + '</div>' +
           '<div style="margin-top:16px;font-size:11px;color:#888;letter-spacing:1.5px;text-transform:uppercase;">Amount due</div>' +
           '<div style="font-size:28px;font-weight:900;color:#0C1117;margin-top:4px;">$' + fee.base.toFixed(2) + '</div>' +
-          viewBtn + payBtn +
+          payBtn +
         '</td></tr>' +
       '</table>' +
     '</td></tr>' +

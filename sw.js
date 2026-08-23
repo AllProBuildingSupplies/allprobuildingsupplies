@@ -1,5 +1,5 @@
 /* All Pro Building Supplies — service worker (PWA) */
-const CACHE_VERSION = 'apbs-pwa-v55';
+const CACHE_VERSION = 'apbs-pwa-v56';
 const SHELL = [
   './',
   './index.html',
