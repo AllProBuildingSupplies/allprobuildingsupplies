@@ -100,31 +100,43 @@
 
   <div id="admin-mobile-home" class="admin-mobile-home" aria-label="Admin at a glance">
     <div class="admin-glance-title">At a glance</div>
-    <button type="button" class="admin-glance-card" onclick="adminMobileOpenOrders('open')">
-      <span class="admin-glance-label">Orders</span>
-      <span class="admin-glance-meta" id="glance-orders-count">Open →</span>
-    </button>
-    <div class="admin-glance-order-chips" id="glance-order-chips">
-      <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('pending')">Pending <span id="glance-pending-n">0</span></button>
-      <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('confirmed')">Confirmed <span id="glance-confirmed-n">0</span></button>
-      <button type="button" class="oms-chip" onclick="adminMobileOpenOrders('partially_shipped')">Partially shipped <span id="glance-partial-n">0</span></button>
+    <div class="admin-mobile-kpi" id="admin-mobile-kpi" role="navigation" aria-label="Key counts">
+      <button type="button" class="admin-mkpi" onclick="adminMobileOpenOrders('open')">
+        <span class="admin-mkpi-label">Open</span>
+        <span class="admin-mkpi-value" id="m-kpi-open">—</span>
+        <span class="admin-mkpi-sub">orders</span>
+      </button>
+      <button type="button" class="admin-mkpi" onclick="adminMobileOpenOrders('pending')">
+        <span class="admin-mkpi-label">Pending</span>
+        <span class="admin-mkpi-value" id="m-kpi-pending">—</span>
+        <span class="admin-mkpi-sub">confirm</span>
+      </button>
+      <button type="button" class="admin-mkpi" onclick="adminMobileOpenOrders('partially_shipped')">
+        <span class="admin-mkpi-label">Partial</span>
+        <span class="admin-mkpi-value" id="m-kpi-partial">—</span>
+        <span class="admin-mkpi-sub">ship</span>
+      </button>
+      <button type="button" class="admin-mkpi" onclick="adminMobileOpenFinance('open')">
+        <span class="admin-mkpi-label">AR</span>
+        <span class="admin-mkpi-value" id="m-kpi-ar">—</span>
+        <span class="admin-mkpi-sub" id="m-kpi-ar-sub">due</span>
+      </button>
+      <button type="button" class="admin-mkpi" onclick="adminMobileOpen('stock')" title="Out-of-stock SKUs (stock editing is desktop)">
+        <span class="admin-mkpi-label">Low stock</span>
+        <span class="admin-mkpi-value" id="m-kpi-lowstock">—</span>
+        <span class="admin-mkpi-sub">at 0 pcs</span>
+      </button>
+      <button type="button" class="admin-mkpi" onclick="adminMobileOpenUsers('pending')">
+        <span class="admin-mkpi-label">Users</span>
+        <span class="admin-mkpi-value" id="m-kpi-users">—</span>
+        <span class="admin-mkpi-sub">pending</span>
+      </button>
     </div>
-    <button type="button" class="admin-glance-card" onclick="adminMobileOpen('stock')">
-      <span class="admin-glance-label">Stock</span>
-      <span class="admin-glance-meta" id="glance-stock-count">Receive / adjust →</span>
-    </button>
-    <button type="button" class="admin-glance-card" onclick="adminMobileOpenFinance('open')">
-      <span class="admin-glance-label">Finance</span>
-      <span class="admin-glance-meta" id="glance-finance-count">Accounts receivable →</span>
-    </button>
-    <button type="button" class="admin-glance-card" onclick="adminMobileOpen('products')">
-      <span class="admin-glance-label">Products</span>
-      <span class="admin-glance-meta" id="glance-products-count">Open →</span>
-    </button>
-    <button type="button" class="admin-glance-card" onclick="adminMobileOpen('users')">
-      <span class="admin-glance-label">Users</span>
-      <span class="admin-glance-meta" id="glance-users-count">Open →</span>
-    </button>
+    <div class="admin-mobile-nav">
+      <button type="button" class="admin-mnav" onclick="adminMobileOpenOrders('open')">Orders →</button>
+      <button type="button" class="admin-mnav" onclick="adminMobileOpenFinance('open')">Finance →</button>
+      <button type="button" class="admin-mnav" onclick="adminMobileOpenUsers('')">Users →</button>
+    </div>
   </div>
   <button type="button" id="admin-mobile-back" class="admin-mobile-back" onclick="adminMobileBack()">← Back to glance</button>
 
@@ -359,6 +371,13 @@
 
   <div id="tab-users" class="admin-panel">
     <p class="admin-users-intro" style="color:var(--silver);font-size:14px;margin-bottom:20px;">Approve or reject trade accounts. Only 'approved' users can view pricing and place orders.</p>
+    <div class="oms-status-chips users-status-chips" id="users-status-chips" role="toolbar" aria-label="User status filter">
+      <button type="button" class="oms-chip active" data-user-status="">All</button>
+      <button type="button" class="oms-chip" data-user-status="pending">Pending</button>
+      <button type="button" class="oms-chip" data-user-status="approved">Approved</button>
+      <button type="button" class="oms-chip" data-user-status="rejected">Rejected</button>
+    </div>
+    <div class="oms-queue-meta" id="users-queue-meta"></div>
     <div id="users-cards" class="users-cards" aria-live="polite"></div>
     <div class="admin-users-wrap admin-users-desktop-table">
     <table class="data-table" id="users-table">
@@ -771,7 +790,7 @@
 
     <div id="email-send-msg" style="font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;display:none;"></div>
 
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div class="email-modal-footer" style="display:flex;gap:12px;flex-wrap:wrap;">
       <button class="btn-add" style="flex:1;text-align:center;min-width:110px;" onclick="closeEmailModal()">Cancel</button>
       <button class="btn-save" id="btn-execute-send" style="flex:2;background:#3498db;color:#fff;min-width:160px;" onclick="executeEmailOrPdfAction()">🚀 Send Email(s)</button>
     </div>
@@ -1136,6 +1155,29 @@ function adminMobileOpenFinance(payFilter) {
   initFinanceTab();
 }
 
+function adminMobileOpenUsers(statusFilter) {
+  window.usersStatusFilter = statusFilter == null ? '' : String(statusFilter);
+  syncUsersStatusChips();
+  adminMobileOpen('users');
+  renderUsersList();
+}
+
+function syncUsersStatusChips() {
+  const cur = window.usersStatusFilter == null ? '' : String(window.usersStatusFilter);
+  document.querySelectorAll('#users-status-chips .oms-chip').forEach(function (btn) {
+    const v = btn.getAttribute('data-user-status');
+    btn.classList.toggle('active', (v || '') === cur);
+  });
+}
+
+document.addEventListener('click', function (e) {
+  const chip = e.target && e.target.closest && e.target.closest('#users-status-chips .oms-chip');
+  if (!chip) return;
+  window.usersStatusFilter = chip.getAttribute('data-user-status') || '';
+  syncUsersStatusChips();
+  renderUsersList();
+});
+
 function adminEnableMobileProducts() {
   document.body.classList.add('admin-mobile-products-override');
   const note = document.getElementById('admin-products-mobile-note');
@@ -1171,11 +1213,6 @@ function orderBackorderPcs(o) {
 }
 
 function updateAdminGlanceCounts() {
-  const o = document.getElementById('glance-orders-count');
-  const p = document.getElementById('glance-products-count');
-  const s = document.getElementById('glance-stock-count');
-  const f = document.getElementById('glance-finance-count');
-  const u = document.getElementById('glance-users-count');
   const openish = Array.isArray(masterOrders) ? masterOrders.filter(orderIsOpen).length : 0;
   const pendingN = Array.isArray(masterOrders) ? masterOrders.filter(function (x) {
     return String(x.status || '').toLowerCase() === 'pending';
@@ -1195,40 +1232,25 @@ function updateAdminGlanceCounts() {
   const pcs = Array.isArray(masterProducts) ? masterProducts.reduce(function (n, row) {
     return n + (parseInt(row.stock, 10) || 0);
   }, 0) : 0;
+  const lowStock = Array.isArray(masterProducts) ? masterProducts.filter(function (row) {
+    return (parseInt(row.stock, 10) || 0) <= 0;
+  }).length : 0;
   const pendingUsers = Array.isArray(masterUsers) ? masterUsers.filter(function (x) {
     return String(x.status || '').toLowerCase() === 'pending';
   }).length : 0;
-
-  if (o && Array.isArray(masterOrders)) {
-    o.textContent = openish + ' open · ' + masterOrders.length + ' total';
-    const setN = function (id, st) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = String(masterOrders.filter(function (x) {
-        return String(x.status || '').toLowerCase() === st;
-      }).length);
-    };
-    setN('glance-pending-n', 'pending');
-    setN('glance-confirmed-n', 'confirmed');
-    setN('glance-partial-n', 'partially_shipped');
-  }
-  if (f && Array.isArray(masterOrders)) {
-    f.textContent = unpaidN + ' open · $' + due.toFixed(2);
-  }
-  if (p && Array.isArray(masterProducts)) {
-    p.textContent = masterProducts.length + ' SKUs →';
-  }
-  if (s && Array.isArray(masterProducts)) {
-    s.textContent = pcs.toLocaleString() + ' pieces on hand →';
-  }
-  if (u && Array.isArray(masterUsers)) {
-    u.textContent = pendingUsers ? (pendingUsers + ' pending') : (masterUsers.length + ' accounts');
-  }
 
   const setText = function (id, val) {
     const el = document.getElementById(id);
     if (el) el.textContent = val;
   };
+  setText('m-kpi-open', String(openish));
+  setText('m-kpi-pending', String(pendingN));
+  setText('m-kpi-partial', String(partialN));
+  setText('m-kpi-ar', '$' + (due >= 1000 ? Math.round(due).toLocaleString() : due.toFixed(0)));
+  setText('m-kpi-ar-sub', unpaidN + ' open');
+  setText('m-kpi-lowstock', String(lowStock));
+  setText('m-kpi-users', String(pendingUsers));
+
   setText('desk-kpi-open', String(openish));
   setText('desk-kpi-pending', String(pendingN));
   setText('desk-kpi-partial', String(partialN));
@@ -1803,7 +1825,7 @@ function renderFinanceQueue() {
       const ps = orderPaymentStatus(o);
       const dDate = o.placedAt ? new Date(o.placedAt).toLocaleDateString() : '';
       return (
-        '<div class="order-glance-card">' +
+        '<div class="order-glance">' +
           '<div class="order-glance-top">' +
             '<span class="order-glance-id">' + escAttr(o.id) + '</span>' +
             '<span class="order-glance-date">' + escAttr(dDate) + '</span>' +
@@ -1818,8 +1840,7 @@ function renderFinanceQueue() {
             (ps !== 'paid'
               ? '<button type="button" class="btn-save" onclick="markOrderPaid(\'' + escAttr(o.id) + '\')">Mark paid</button>'
               : '') +
-            '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Email invoice</button>' +
-            '<button type="button" class="btn-view" style="border-color:var(--gold);color:var(--gold);" onclick="omsPdfOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">PDF</button>' +
+            '<button type="button" class="btn-email-cmd" onclick="omsEmailOrderId(\'' + escAttr(o.id) + '\',\'invoice\')">Email</button>' +
           '</div>' +
         '</div>'
       );
@@ -2428,10 +2449,33 @@ async function loadUsers() {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     masterUsers = await r.json();
     if (!Array.isArray(masterUsers)) throw new Error(masterUsers.error || 'Invalid users response');
-    
-    let html = '';
-    let cards = '';
-    masterUsers.forEach(u => {
+    renderUsersList();
+    populateModalCustomerDropdown();
+    updateAdminGlanceCounts();
+  } catch(e) {
+    console.error(e);
+    if (!String(e.message || '').includes('Unauthorized')) {
+      showStatus('Users load failed: ' + e.message, true);
+    }
+  }
+}
+
+function renderUsersList() {
+  if (!Array.isArray(masterUsers)) return;
+  const filter = window.usersStatusFilter == null ? '' : String(window.usersStatusFilter).toLowerCase();
+  const list = filter
+    ? masterUsers.filter(function (u) { return String(u.status || 'pending').toLowerCase() === filter; })
+    : masterUsers.slice();
+  const meta = document.getElementById('users-queue-meta');
+  if (meta) {
+    meta.textContent = list.length + ' user' + (list.length === 1 ? '' : 's') +
+      (filter ? (' · ' + filter) : '') +
+      (Array.isArray(masterUsers) ? (' · ' + masterUsers.length + ' total') : '');
+  }
+
+  let html = '';
+  let cards = '';
+  list.forEach(function (u) {
       const piecesAllowed = u.canOrderPieces === 1 || u.canOrderPieces === true;
       const st = String(u.status || 'pending').toLowerCase();
       const id = escAttr(u.id);
@@ -2493,37 +2537,31 @@ async function loadUsers() {
           <button type="button" class="btn-del" onclick="deleteUser('${id}')">Del</button>
         </div>
       </article>`;
-    });
-    document.getElementById('users-tbody').innerHTML = html || '<tr><td colspan="9" style="text-align:center;color:var(--silver);padding:24px;">No users yet.</td></tr>';
-    const cardsEl = document.getElementById('users-cards');
-    if (cardsEl) cardsEl.innerHTML = cards || '<div class="mcat-empty">No users yet.</div>';
-    // Keep mobile card controls in sync with matching desktop row controls (same data-id)
-    if (cardsEl) {
-      cardsEl.querySelectorAll('.status-sel, .pcs-sel, .pw-sel').forEach(function (el) {
-        el.addEventListener('change', function () {
-          const id = el.getAttribute('data-id');
-          const cls = el.classList.contains('status-sel') ? 'status-sel' : (el.classList.contains('pcs-sel') ? 'pcs-sel' : 'pw-sel');
-          document.querySelectorAll('#users-table .' + cls + '[data-id="' + id + '"]').forEach(function (other) {
-            if (other !== el) other.value = el.value;
-          });
-        });
-        el.addEventListener('input', function () {
-          if (!el.classList.contains('pw-sel')) return;
-          const id = el.getAttribute('data-id');
-          document.querySelectorAll('#users-table .pw-sel[data-id="' + id + '"]').forEach(function (other) {
-            if (other !== el) other.value = el.value;
-          });
+  });
+
+  const tbody = document.getElementById('users-tbody');
+  if (tbody) tbody.innerHTML = html || '<tr><td colspan="9" style="text-align:center;color:var(--silver);padding:24px;">No users yet.</td></tr>';
+  const cardsEl = document.getElementById('users-cards');
+  if (cardsEl) {
+    cardsEl.innerHTML = cards || '<div class="mcat-empty">No users in this filter.</div>';
+    cardsEl.querySelectorAll('.status-sel, .pcs-sel, .pw-sel').forEach(function (el) {
+      el.addEventListener('change', function () {
+        const id = el.getAttribute('data-id');
+        const cls = el.classList.contains('status-sel') ? 'status-sel' : (el.classList.contains('pcs-sel') ? 'pcs-sel' : 'pw-sel');
+        document.querySelectorAll('#users-table .' + cls + '[data-id="' + id + '"]').forEach(function (other) {
+          if (other !== el) other.value = el.value;
         });
       });
-    }
-    populateModalCustomerDropdown();
-    updateAdminGlanceCounts();
-  } catch(e) {
-    console.error(e);
-    if (!String(e.message || '').includes('Unauthorized')) {
-      showStatus('Users load failed: ' + e.message, true);
-    }
+      el.addEventListener('input', function () {
+        if (!el.classList.contains('pw-sel')) return;
+        const id = el.getAttribute('data-id');
+        document.querySelectorAll('#users-table .pw-sel[data-id="' + id + '"]').forEach(function (other) {
+          if (other !== el) other.value = el.value;
+        });
+      });
+    });
   }
+  syncUsersStatusChips();
 }
 
 function openUserModal(userId) {

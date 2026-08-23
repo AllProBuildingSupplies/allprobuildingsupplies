@@ -2571,7 +2571,7 @@ a.shop-flow-step:hover{color:var(--gold);}
   .order-glance-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
   .order-glance-id { font-family: monospace; color: var(--gold); font-size: 14px; }
   .order-glance-date { font-size: 12px; color: var(--silver); }
-  .order-glance-name { font-family: 'Oswald', sans-serif; font-size: 17px; color: var(--white); line-height: 1.15; }
+  .order-glance-name { font-family: 'Oswald', sans-serif; font-size: 18px; color: var(--white); line-height: 1.15; }
   .order-glance-mid {
     display: flex; justify-content: space-between; gap: 8px;
     font-size: 12px; color: var(--silver);
@@ -2580,22 +2580,21 @@ a.shop-flow-step:hover{color:var(--gold);}
     display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
     font-size: 12px;
   }
-  .order-glance-total { font-family: monospace; color: var(--gold); font-size: 14px; }
+  .order-glance-total { font-family: monospace; color: var(--gold); font-size: 15px; }
   .order-glance-bo { color: var(--smoke); }
   .order-glance-actions {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
     margin-top: 4px;
   }
   .order-glance-actions .btn-view,
   .order-glance-actions .btn-save,
   .order-glance-actions .btn-del,
   .order-glance-actions .btn-email-cmd {
-    width: 100% !important; margin: 0 !important; padding: 6px 4px !important; font-size: 11px !important; text-align: center;
+    width: 100% !important; margin: 0 !important; padding: 12px 6px !important; font-size: 13px !important; text-align: center; min-height: 44px;
   }
   #tab-orders .oms-toolbar { margin-top: 0; }
-  .admin-orders-actions .btn-add { width: 100%; }
 }
 
 @media (min-width: 769px) {
@@ -3001,19 +3000,60 @@ a.shop-flow-step:hover{color:var(--gold);}
   #prod-sections.sku-grid,
   .prod-sections-desktop.sku-grid { display: grid !important; }
 
-  /* Admin: glance home + compact tools */
-  .admin-mobile-home { display: grid; gap: 10px; margin-bottom: 16px; }
+  /* Admin: KPI home + compact ops lists (order/product/stock detail left as-is) */
+  .admin-mobile-home { display: grid; gap: 12px; margin-bottom: 8px; }
   .admin-glance-title {
-    font-family: 'Oswald', sans-serif; font-size: 18px; color: var(--white); margin: 0 0 2px;
+    font-family: 'Oswald', sans-serif; font-size: 18px; color: var(--white); margin: 0;
   }
-  .admin-glance-card {
-    display: flex; justify-content: space-between; align-items: center; gap: 12px;
-    width: 100%; text-align: left; padding: 16px 14px;
-    background: var(--ink2); border: 1px solid rgba(200,152,31,.25); color: var(--smoke); cursor: pointer;
+  .admin-mobile-kpi {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
-  .admin-glance-card:active { background: rgba(200,152,31,.1); }
-  .admin-glance-label { font-family: 'Oswald', sans-serif; font-size: 20px; color: var(--white); }
-  .admin-glance-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: .5px; }
+  .admin-mkpi {
+    display: grid;
+    gap: 2px;
+    text-align: left;
+    padding: 14px 12px;
+    background: var(--ink2);
+    border: 1px solid rgba(200,152,31,.28);
+    color: var(--smoke);
+    cursor: pointer;
+    min-height: 76px;
+  }
+  .admin-mkpi:active { background: rgba(200,152,31,.1); }
+  .admin-mkpi-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--silver);
+  }
+  .admin-mkpi-value {
+    font-family: 'Oswald', sans-serif;
+    font-size: 26px;
+    line-height: 1.05;
+    color: var(--gold);
+  }
+  .admin-mkpi-sub {
+    font-size: 11px;
+    color: var(--silver);
+  }
+  .admin-mobile-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .admin-mnav {
+    padding: 12px 8px;
+    background: var(--ink3);
+    border: 1px solid rgba(139,160,178,.25);
+    color: var(--white);
+    font-family: 'Oswald', sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .admin-mnav:active { border-color: var(--gold); color: var(--gold); }
   .admin-mobile-back {
     display: none; margin-bottom: 12px; background: none; border: 1px solid rgba(139,160,178,.3);
     color: var(--silver); font-family: 'DM Mono', monospace; font-size: 12px; padding: 10px 14px; cursor: pointer;
@@ -3024,22 +3064,101 @@ a.shop-flow-step:hover{color:var(--gold);}
   .admin-title { font-size: 20px; }
   body.admin-mobile-browsing .admin-mobile-home { display: none; }
   #tab-orders > p:first-of-type { display: none; }
-  #orders-table { min-width: 0 !important; }
-  #orders-table tr {
-    display: grid !important; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 12px 14px !important; margin-bottom: 10px !important;
+  .admin-orders-actions { display: none !important; } /* create/edit orders = desktop */
+  #tab-orders .oms-date-row { display: none; }
+  #tab-orders .oms-status-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
+    padding-bottom: 4px;
   }
-  #orders-table td { display: block !important; padding: 0 !important; }
-  #orders-table td::before { display: none !important; }
-  #orders-table td[data-label="Order ID"] { grid-column: 1; font-size: 14px; }
-  #orders-table td[data-label="Date"] { grid-column: 2; text-align: right; font-size: 12px; color: var(--silver); align-self: start; }
-  #orders-table td[data-label="Customer"] { grid-column: 1 / -1; font-size: 14px; }
-  #orders-table td[data-label="Total"] { grid-column: 1; font-size: 14px; color: var(--gold); }
-  #orders-table td[data-label="Status"] { grid-column: 2; text-align: right; }
-  #orders-table td[data-label="Action"] {
-    grid-column: 1 / -1; display: flex !important; flex-direction: row !important; gap: 8px; margin-top: 8px;
+  #tab-orders .oms-chip { flex: 0 0 auto; }
+  #tab-finance .wms-lead,
+  #tab-finance .fin-pay-methods { display: none; }
+  #tab-finance .oms-status-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
   }
-  #orders-table td[data-label="Action"] .btn-view,
-  #orders-table td[data-label="Action"] .btn-del { width: auto; flex: 1; margin: 0; padding: 10px 8px; font-size: 12px; }
+  #tab-finance .oms-chip { flex: 0 0 auto; }
+  .users-status-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .users-status-chips .oms-chip { flex: 0 0 auto; }
+
+  /* Email command center — full-height sheet on phone */
+  #email-modal-overlay {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+  #email-modal {
+    max-width: none !important;
+    width: 100% !important;
+    min-height: 100%;
+    margin: 0;
+    padding: 18px 16px 110px !important;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-sizing: border-box;
+  }
+  #email-modal .modal-title {
+    font-size: 20px;
+    margin-bottom: 14px;
+    padding-right: 36px;
+  }
+  #email-modal .modal-lbl { margin-top: 14px; }
+  #email-modal select.data-input,
+  #email-modal textarea.data-input,
+  #email-modal input.data-input {
+    font-size: 16px;
+    padding: 12px;
+  }
+  #email-modal .chk-row {
+    padding: 10px 0;
+    font-size: 15px;
+    gap: 12px;
+  }
+  #email-modal .chk-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+  #email-modal .email-action-toggle {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  #email-modal .email-action-btn {
+    width: 100%;
+    padding: 12px 8px;
+    font-size: 14px;
+  }
+  #email-modal .email-modal-footer {
+    position: sticky;
+    bottom: 0;
+    margin: 0 -16px -18px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, transparent, var(--ink) 28%);
+    z-index: 2;
+  }
+  #email-modal #btn-execute-send {
+    min-height: 48px;
+    font-size: 15px;
+  }
+  #email-modal #email-action-hint,
+  #email-modal #email-shipment-wrap > p,
+  #email-recipients-wrap > div > p {
+    font-size: 11px;
+  }
 
   /* Users — dense glance cards (real cards on phone; table on desktop) */
   .admin-users-intro { display: none; }
