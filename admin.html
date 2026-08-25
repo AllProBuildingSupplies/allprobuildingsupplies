@@ -485,43 +485,68 @@
     
     <div id="edit-lock-banner">⚠ This order is Delivered or Cancelled. Order editing is disabled. Change status to Pending or Confirmed to unlock fields.</div>
 
-    <div style="background:rgba(200,152,31,.05); border:1px solid rgba(200,152,31,.2); padding:16px; margin-bottom:24px; border-radius:4px;">
-      <div class="modal-lbl" style="color:var(--gold);">Auto-Fill Customer Info</div>
-      <select class="data-input locked-input" id="modal-cust-dropdown" onchange="loadCustomerIntoForm()" style="border-color:var(--gold);">
-        <option value="">-- Select Existing User or Type Manually Below --</option>
-      </select>
-    </div>
-
-    <div class="modal-grid">
-      <div class="modal-box">
-        <div class="modal-lbl">Customer Name</div>
-        <input type="text" class="data-input locked-input" id="edit-cust-name" style="margin-bottom:12px;">
-        <div class="modal-lbl">Company</div>
-        <input type="text" class="data-input locked-input" id="edit-cust-company" style="margin-bottom:12px;">
-        <div class="modal-lbl">Email</div>
-        <input type="text" class="data-input locked-input" id="edit-cust-email" style="margin-bottom:12px;">
-        <div class="modal-lbl">Phone</div>
-        <input type="text" class="data-input locked-input" id="edit-cust-phone">
-      </div>
-      <div class="modal-box">
-        <div class="modal-lbl">Saved Address</div>
-        <select class="data-input locked-input" id="edit-address-picker" onchange="applySelectedAddress()" style="margin-bottom:8px;">
-          <option value="">-- Type address manually or choose saved --</option>
-        </select>
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-          <button type="button" class="btn-view locked-input" id="btn-save-order-address" style="padding:6px 12px;font-size:11px;" onclick="saveCurrentAddressToCustomer()">💾 Save address to customer</button>
-          <button type="button" class="btn-view locked-input" id="btn-manage-order-addresses" style="padding:6px 12px;font-size:11px;" onclick="openAddressesFromOrder()">Manage addresses</button>
+    <section class="om-acc is-open" id="om-acc-customer" data-om-acc="customer">
+      <button type="button" class="om-acc-head" onclick="omToggleAcc('customer')">
+        <span class="om-acc-kicker">Customer</span>
+        <span class="om-acc-title" id="om-cust-summary">Customer</span>
+        <span class="om-acc-chevron" aria-hidden="true">▾</span>
+      </button>
+      <div class="om-acc-body">
+        <div class="om-autofill" id="om-autofill-wrap" style="background:rgba(200,152,31,.05); border:1px solid rgba(200,152,31,.2); padding:16px; margin-bottom:16px; border-radius:4px;">
+          <div class="modal-lbl" style="color:var(--gold);">Auto-Fill Customer Info</div>
+          <select class="data-input locked-input" id="modal-cust-dropdown" onchange="loadCustomerIntoForm()" style="border-color:var(--gold);">
+            <option value="">-- Select Existing User or Type Manually Below --</option>
+          </select>
         </div>
-        <div class="modal-lbl">Delivery / Logistics Address</div>
-        <textarea class="data-input locked-input" id="edit-delivery" style="resize:vertical;min-height:60px;margin-bottom:12px;"></textarea>
-        <div class="modal-lbl">PO Number</div>
-        <input type="text" class="data-input locked-input" id="edit-po" style="margin-bottom:12px;">
-        <div class="modal-lbl">Notes</div>
-        <textarea class="data-input locked-input" id="edit-notes" style="resize:vertical;min-height:60px;"></textarea>
+        <div class="modal-box om-cust-fields">
+          <div class="modal-lbl">Customer Name</div>
+          <input type="text" class="data-input locked-input" id="edit-cust-name" style="margin-bottom:12px;" oninput="omUpdateSummaries()">
+          <div class="modal-lbl">Company</div>
+          <input type="text" class="data-input locked-input" id="edit-cust-company" style="margin-bottom:12px;" oninput="omUpdateSummaries()">
+          <div class="modal-lbl">Email</div>
+          <input type="text" class="data-input locked-input" id="edit-cust-email" style="margin-bottom:12px;">
+          <div class="modal-lbl">Phone</div>
+          <input type="text" class="data-input locked-input" id="edit-cust-phone">
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="modal-box" style="margin-bottom:24px; padding:0; overflow:hidden;">
+    <section class="om-acc is-open" id="om-acc-address" data-om-acc="address">
+      <button type="button" class="om-acc-head" onclick="omToggleAcc('address')">
+        <span class="om-acc-kicker">Address / PO</span>
+        <span class="om-acc-title" id="om-addr-summary">Delivery</span>
+        <span class="om-acc-chevron" aria-hidden="true">▾</span>
+      </button>
+      <div class="om-acc-body">
+        <div class="modal-box">
+          <div id="om-address-edit-wrap">
+            <div class="modal-lbl">Saved Address</div>
+            <select class="data-input locked-input" id="edit-address-picker" onchange="applySelectedAddress()" style="margin-bottom:8px;">
+              <option value="">-- Type address manually or choose saved --</option>
+            </select>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+              <button type="button" class="btn-view locked-input" id="btn-save-order-address" style="padding:6px 12px;font-size:11px;" onclick="saveCurrentAddressToCustomer()">💾 Save address to customer</button>
+              <button type="button" class="btn-view locked-input" id="btn-manage-order-addresses" style="padding:6px 12px;font-size:11px;" onclick="openAddressesFromOrder()">Manage addresses</button>
+            </div>
+          </div>
+          <div class="modal-lbl">Delivery / Logistics Address</div>
+          <textarea class="data-input locked-input" id="edit-delivery" style="resize:vertical;min-height:60px;margin-bottom:12px;" oninput="omUpdateSummaries()"></textarea>
+          <div class="modal-lbl">PO Number</div>
+          <input type="text" class="data-input locked-input" id="edit-po" style="margin-bottom:12px;" oninput="omUpdateSummaries()">
+          <div class="modal-lbl">Notes</div>
+          <textarea class="data-input locked-input" id="edit-notes" style="resize:vertical;min-height:60px;"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="om-acc is-open" id="om-acc-items" data-om-acc="items">
+      <button type="button" class="om-acc-head" onclick="omToggleAcc('items')">
+        <span class="om-acc-kicker">Items</span>
+        <span class="om-acc-title" id="om-items-summary">0 items</span>
+        <span class="om-acc-chevron" aria-hidden="true">▾</span>
+      </button>
+      <div class="om-acc-body" style="padding:0;">
+      <div class="modal-box" style="margin:0; padding:0; overflow:hidden; border:none;">
       <div class="order-items-scroll">
       <table class="data-table" id="order-items-table" style="margin:0;">
         <colgroup>
@@ -551,21 +576,29 @@
         <tbody id="m-items-tbody"></tbody>
       </table>
       </div>
-
-      <div id="shipment-panel" style="padding:16px;border-top:1px solid rgba(200,152,31,.25);background:rgba(12,17,23,.45);">
-        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
-          <div style="flex:1;min-width:280px;">
-            <div class="modal-lbl" style="color:var(--gold);margin-bottom:4px;">Partial shipments / backorders</div>
-            <p style="font-size:12px;color:var(--silver);margin:0;line-height:1.5;">Enter <strong style="color:var(--gold);">Ship Now</strong> qty per line (≤ backorder), then record the shipment. Packing slips and invoices can target a specific shipment so you only bill what went out.</p>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            <button type="button" class="btn-view" id="btn-fill-ship-remaining" onclick="fillShipNowRemaining()">Fill remaining</button>
-            <button type="button" class="btn-save" id="btn-record-shipment" style="padding:10px 16px;" onclick="recordShipment()">📦 Record Shipment</button>
-          </div>
-        </div>
-        <div id="shipments-history" style="font-size:12px;color:var(--silver);"></div>
+      <div style="padding:16px; text-align:right; font-family:'Oswald',sans-serif; font-size:20px; color:var(--gold); border-top:1px solid rgba(255,255,255,.05);">
+        Calculated Total: <span id="m-total" style="color:var(--white)"></span>
       </div>
-      
+      </div>
+      </div>
+    </section>
+
+    <div id="shipment-panel" class="om-ship-panel">
+      <section class="om-acc" id="om-acc-shipments" data-om-acc="shipments">
+        <button type="button" class="om-acc-head" onclick="omToggleAcc('shipments')">
+          <span class="om-acc-kicker">Shipments</span>
+          <span class="om-acc-title" id="om-ship-summary">No shipments</span>
+          <span class="om-acc-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="om-acc-body">
+          <p class="om-ship-help">Choose a shipment to view what went out. Packing slips and invoices use this shipment from Quick actions.</p>
+          <select class="data-input" id="om-ship-sel" onchange="onOmShipSelect()" style="margin-bottom:12px;"></select>
+          <div id="shipments-history" style="font-size:12px;color:var(--silver);"></div>
+        </div>
+      </section>
+    </div>
+
+    <div id="om-add-panel" class="om-add-panel">
       <div class="add-item-bar locked-input" id="add-item-container">
         <div class="add-item-col" style="flex:2; min-width:200px;">
           <label class="modal-lbl">Select Product</label>
@@ -635,68 +668,67 @@
           </table>
         </div>
       </div>
-
-      <div style="padding:16px; text-align:right; font-family:'Oswald',sans-serif; font-size:20px; color:var(--gold); border-top:1px solid rgba(255,255,255,.05);">
-        Calculated Total: <span id="m-total" style="color:var(--white)"></span>
-      </div>
     </div>
 
     <div class="oms-quick-bar" id="oms-quick-bar">
       <div class="modal-lbl" style="color:var(--gold);margin-bottom:8px;">Quick actions</div>
       <div class="oms-quick-grid">
-        <button type="button" class="btn-view oms-qa" id="oms-qa-confirm" onclick="omsQuickConfirm()">✓ Confirm</button>
-        <button type="button" class="btn-save oms-qa" id="oms-qa-ship" onclick="omsQuickShipRemaining()">📦 Ship remaining</button>
-        <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-pack" onclick="omsQuickEmail('packing')">Packing slip</button>
-        <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-inv" onclick="omsQuickEmail('invoice')">Invoice</button>
-        <button type="button" class="btn-view oms-qa" id="oms-qa-inv-pdf" onclick="omsQuickPdf('invoice')" style="border-color:var(--gold);color:var(--gold);">⬇ Invoice PDF</button>
-        <button type="button" class="btn-save oms-qa" id="oms-qa-paid" onclick="omsQuickMarkPaid()">✓ Mark paid</button>
+        <button type="button" class="btn-view oms-qa" id="oms-qa-add" onclick="omQuickAddToOrder()">+ Add to order</button>
+        <button type="button" class="btn-view oms-qa" id="btn-fill-ship-remaining" onclick="omQuickFillRemaining()">Fill remaining qty</button>
+        <button type="button" class="btn-save oms-qa" id="btn-record-shipment" onclick="omQuickRecordShipment()">📦 Record shipment</button>
+        <button type="button" class="btn-view oms-qa" id="oms-qa-status" onclick="omQuickChangeStatus()">Change order status</button>
+        <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-pack" onclick="omQuickDoc('packing')">Packing slip</button>
+        <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-inv" onclick="omQuickDoc('invoice')">Invoice</button>
+        <button type="button" class="btn-save oms-qa" id="oms-qa-paid" onclick="omsQuickMarkPaid()">✓ Mark as paid</button>
         <button type="button" class="btn-view oms-qa" id="oms-qa-pay-cc" onclick="payActiveOrderViaCard()" style="border-color:var(--gold);color:var(--gold);">💳 Pay via CC</button>
+        <button type="button" class="btn-email-cmd oms-qa" id="oms-qa-email" onclick="openEmailModal()">Email console</button>
       </div>
     </div>
 
-    <div style="background:var(--ink); border:1px solid rgba(200,152,31,.2); padding:20px; border-radius:4px;">
-      <div class="modal-grid" style="margin-bottom:0; gap:20px;">
-        
-        <div>
-          <div class="modal-lbl" style="color:var(--gold)">Order Status</div>
-          <select id="m-status-sel" class="data-input" style="margin-bottom:16px;" onchange="toggleEditLock(this.value)">
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="partially_shipped">Partially Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-          <div class="modal-lbl" style="color:var(--gold)">Payment</div>
-          <select id="m-payment-sel" class="data-input" style="margin-bottom:8px;">
-            <option value="unpaid">Unpaid</option>
-            <option value="partial">Partial</option>
-            <option value="paid">Paid</option>
-          </select>
-          <select id="m-payment-method" class="data-input" style="margin-bottom:8px;">
-            <option value="">Method —</option>
-            <option value="card">Card</option>
-            <option value="zelle">Zelle</option>
-            <option value="wire">Wire</option>
-            <option value="ach">ACH</option>
-            <option value="other">Other</option>
-          </select>
-          <input type="text" id="m-payment-note" class="data-input" style="margin-bottom:10px;" placeholder="Payment note (optional)">
-          <button type="button" class="btn-view" id="btn-pay-invoice-cc" style="width:100%;margin-bottom:10px;border-color:var(--gold);color:var(--gold);" onclick="payActiveOrderViaCard()">💳 Pay this invoice via CC</button>
-          <p id="pay-invoice-cc-hint" style="font-size:11px;color:var(--silver);margin:-4px 0 12px;line-height:1.45;">Opens Banquest with invoice + card fee so you can charge the customer’s card.</p>
-          <button type="button" class="btn-save" id="btn-mark-paid-now" style="width:100%;margin-bottom:12px;background:rgba(46,204,113,.15);border-color:#2ecc71;color:#2ecc71;" onclick="markActiveOrderPaid()">✓ Mark paid now</button>
-          <button class="btn-save" style="width:100%;" onclick="saveOrderChanges()">💾 Save All Changes</button>
-          <button type="button" class="btn-del" id="btn-delete-order" style="width:100%;margin-top:12px;display:none;" onclick="deleteActiveOrder()">🗑 Delete Order Permanently</button>
-        </div>
-        
-        <div>
-          <div class="modal-lbl" style="color:var(--gold)">Communications</div>
-          <p style="font-size:12px; color:var(--silver); margin-bottom:12px; line-height:1.5;">Send formatted confirmation emails, delivery notifications, or invoices to customers and admins.</p>
-          <button class="btn-email-cmd" onclick="openEmailModal()">✉ Open Email Command Center</button>
-        </div>
-
-      </div>
+    <div id="om-status-panel" class="om-status-panel">
+      <div class="modal-lbl" style="color:var(--gold)">Order Status</div>
+      <select id="m-status-sel" class="data-input" style="margin-bottom:12px;" onchange="toggleEditLock(this.value); updateOmAddressLock();">
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="partially_shipped">Partially Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <div class="modal-lbl" style="color:var(--gold)">Payment</div>
+      <select id="m-payment-sel" class="data-input" style="margin-bottom:8px;">
+        <option value="unpaid">Unpaid</option>
+        <option value="partial">Partial</option>
+        <option value="paid">Paid</option>
+      </select>
+      <select id="m-payment-method" class="data-input" style="margin-bottom:8px;">
+        <option value="">Method —</option>
+        <option value="card">Card</option>
+        <option value="zelle">Zelle</option>
+        <option value="wire">Wire</option>
+        <option value="ach">ACH</option>
+        <option value="other">Other</option>
+      </select>
+      <input type="text" id="m-payment-note" class="data-input" placeholder="Payment note (optional)">
     </div>
 
+    <div class="om-save-bar">
+      <button class="btn-save" style="width:100%;" onclick="saveOrderChanges()">💾 Save All Changes</button>
+      <button type="button" class="btn-del" id="btn-delete-order" style="width:100%;margin-top:12px;display:none;" onclick="deleteActiveOrder()">🗑 Delete Order Permanently</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="om-doc-overlay" onclick="closeOmDocPicker(event)" style="display:none;">
+  <div id="om-doc-modal" onclick="event.stopPropagation()" class="auth-box" style="margin:auto;position:relative;width:100%;max-width:420px;padding:28px;text-align:left;">
+    <button class="modal-close" onclick="closeOmDocPicker(event)">&times;</button>
+    <div class="modal-title" id="om-doc-title" style="color:var(--gold);border-bottom:1px solid rgba(200,152,31,.3);margin-bottom:12px;padding-bottom:10px;font-size:20px;">Packing slip</div>
+    <p id="om-doc-sub" style="color:var(--silver);font-size:13px;margin-bottom:16px;line-height:1.5;">Which shipment?</p>
+    <select id="om-doc-ship-sel" class="data-input" style="margin-bottom:16px;"></select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button type="button" class="btn-email-cmd" id="om-doc-email" onclick="confirmOmDoc('email')">✉ Email</button>
+      <button type="button" class="btn-view" id="om-doc-pdf" onclick="confirmOmDoc('pdf')" style="border-color:var(--gold);color:var(--gold);">⬇ Download</button>
+    </div>
   </div>
 </div>
 
@@ -3348,28 +3380,226 @@ async function omsPdfOrderId(orderId, format) {
   setEmailActionMode('pdf');
 }
 
+function omToggleAcc(name) {
+  const el = document.getElementById('om-acc-' + name);
+  if (!el) return;
+  el.classList.toggle('is-open');
+}
+
+function omSetAcc(name, open) {
+  const el = document.getElementById('om-acc-' + name);
+  if (!el) return;
+  el.classList.toggle('is-open', !!open);
+}
+
+function omResetAccordions() {
+  const mobile = isAdminMobile();
+  ['customer', 'address', 'items', 'shipments'].forEach(function (name) {
+    omSetAcc(name, !mobile);
+  });
+  setOmAddPanel(false);
+  setOmStatusPanel(false);
+}
+
+function omUpdateSummaries() {
+  if (!activeOrderObj) return;
+  const cust = activeOrderObj.customer || {};
+  const nameEl = document.getElementById('om-cust-summary');
+  if (nameEl) {
+    const nm = String(cust.name || '').trim();
+    const co = String(cust.company || '').trim();
+    nameEl.textContent = nm ? (co && co !== nm ? (nm + ' · ' + co) : nm) : 'Customer';
+  }
+  const addrEl = document.getElementById('om-addr-summary');
+  if (addrEl) {
+    const addr = String((activeOrderObj.delivery && activeOrderObj.delivery.address) || document.getElementById('edit-delivery') && document.getElementById('edit-delivery').value || '').trim();
+    const po = String(activeOrderObj.po || (document.getElementById('edit-po') && document.getElementById('edit-po').value) || '').trim();
+    const shortAddr = addr ? addr.replace(/\s+/g, ' ').slice(0, 42) + (addr.length > 42 ? '…' : '') : 'No address';
+    addrEl.textContent = po ? (shortAddr + ' · PO ' + po) : shortAddr;
+  }
+  const items = activeOrderObj.items || [];
+  let pcs = 0;
+  let ctns = 0;
+  items.forEach(function (it) {
+    const q = parseInt(it.qty, 10) || 0;
+    pcs += q;
+    const pack = parseInt(String(it.pcsPerCtn || '').replace(/[^0-9]/g, ''), 10) || 1;
+    ctns += q / pack;
+  });
+  const itemsEl = document.getElementById('om-items-summary');
+  if (itemsEl) {
+    const ctnLabel = (Math.round(ctns * 100) / 100);
+    const tot = items.reduce(function (s, it) {
+      return s + (parseFloat(it.qty) || 0) * (parseFloat(it.unitPrice) || 0);
+    }, 0);
+    itemsEl.textContent = items.length + ' item' + (items.length === 1 ? '' : 's') +
+      ' · ' + pcs + ' pcs · ' + ctnLabel + ' ctn · $' + tot.toFixed(2);
+  }
+  const ships = Array.isArray(activeOrderObj.shipments) ? activeOrderObj.shipments : [];
+  const shipEl = document.getElementById('om-ship-summary');
+  if (shipEl) {
+    shipEl.textContent = ships.length
+      ? (ships.length + ' shipment' + (ships.length === 1 ? '' : 's'))
+      : 'No shipments';
+  }
+}
+
+function updateOmAddressLock() {
+  const st = String((document.getElementById('m-status-sel') && document.getElementById('m-status-sel').value) || (activeOrderObj && activeOrderObj.status) || '').toLowerCase();
+  const lockedAddr = st === 'partially_shipped' || st === 'delivered' || st === 'cancelled';
+  const wrap = document.getElementById('om-address-edit-wrap');
+  if (wrap) wrap.style.display = lockedAddr ? 'none' : '';
+  const auto = document.getElementById('om-autofill-wrap');
+  if (auto) auto.style.display = lockedAddr ? 'none' : '';
+}
+
+function setOmAddPanel(open) {
+  const panel = document.getElementById('om-add-panel');
+  if (panel) panel.classList.toggle('is-open', !!open);
+  const addBtn = document.getElementById('oms-qa-add');
+  if (addBtn) addBtn.classList.toggle('on', !!open);
+  syncAddItemVisibility();
+}
+
+function setOmStatusPanel(open) {
+  const panel = document.getElementById('om-status-panel');
+  if (panel) panel.classList.toggle('is-open', !!open);
+  const btn = document.getElementById('oms-qa-status');
+  if (btn) btn.classList.toggle('on', !!open);
+}
+
+function omQuickAddToOrder() {
+  const panel = document.getElementById('om-add-panel');
+  const next = !(panel && panel.classList.contains('is-open'));
+  setOmAddPanel(next);
+  if (next) {
+    omSetAcc('items', true);
+    const first = document.getElementById('new-item-sel');
+    if (first) first.focus();
+  }
+}
+
+function omQuickFillRemaining() {
+  omSetAcc('items', true);
+  fillShipNowRemaining();
+}
+
+function omQuickRecordShipment() {
+  omSetAcc('items', true);
+  recordShipment();
+}
+
+function omQuickChangeStatus() {
+  const panel = document.getElementById('om-status-panel');
+  setOmStatusPanel(!(panel && panel.classList.contains('is-open')));
+}
+
+let omDocFormat = 'packing';
+
+function omQuickDoc(format) {
+  if (!activeOrderObj) return;
+  omDocFormat = format === 'invoice' ? 'invoice' : 'packing';
+  const ships = Array.isArray(activeOrderObj.shipments) ? activeOrderObj.shipments : [];
+  if (!ships.length) {
+    alert('Record a shipment first, then send packing slip / invoice for that shipment.');
+    return;
+  }
+  const overlay = document.getElementById('om-doc-overlay');
+  const title = document.getElementById('om-doc-title');
+  const sub = document.getElementById('om-doc-sub');
+  const sel = document.getElementById('om-doc-ship-sel');
+  if (title) title.textContent = omDocFormat === 'invoice' ? 'Invoice' : 'Packing slip';
+  if (sub) sub.textContent = 'Which shipment ' + (omDocFormat === 'invoice' ? 'invoice' : 'packing slip') + '?';
+  if (sel) {
+    sel.innerHTML = ships.map(function (s, i) {
+      const label = (s.id || ('SHIP-' + (i + 1))) + ' · ' +
+        (s.shippedAt ? new Date(s.shippedAt).toLocaleDateString() : '') +
+        ' · $' + (Number(s.subtotal) || 0).toFixed(2);
+      return '<option value="' + i + '"' + (i === ships.length - 1 ? ' selected' : '') + '>' + escAttr(label) + '</option>';
+    }).join('');
+  }
+  if (overlay) {
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeOmDocPicker(e) {
+  if (e && e.target && e.target.id && e.target.id !== 'om-doc-overlay' && !e.target.classList.contains('modal-close')) {
+    return;
+  }
+  const overlay = document.getElementById('om-doc-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function confirmOmDoc(mode) {
+  const sel = document.getElementById('om-doc-ship-sel');
+  const emailSel = document.getElementById('email-shipment-sel');
+  if (sel && emailSel) emailSel.value = sel.value;
+  populateEmailShipmentSelect();
+  if (sel && emailSel) emailSel.value = sel.value;
+  closeOmDocPicker();
+  openEmailModal();
+  const fmt = document.getElementById('email-format-sel');
+  if (fmt) {
+    fmt.value = omDocFormat;
+    onEmailFormatChange();
+  }
+  if (sel && emailSel) emailSel.value = sel.value;
+  setEmailActionMode(mode === 'pdf' ? 'pdf' : 'email');
+}
+
+function onOmShipSelect() {
+  const omSel = document.getElementById('om-ship-sel');
+  const emailSel = document.getElementById('email-shipment-sel');
+  if (omSel && emailSel && omSel.value !== '') {
+    populateEmailShipmentSelect();
+    emailSel.value = omSel.value;
+  }
+  renderShipmentsHistory();
+}
+
+function syncAddItemVisibility() {
+  const locked = (function () {
+    const st = document.getElementById('m-status-sel');
+    const v = st ? st.value : '';
+    return v === 'delivered' || v === 'cancelled';
+  })();
+  const panelOpen = document.getElementById('om-add-panel') && document.getElementById('om-add-panel').classList.contains('is-open');
+  const show = panelOpen && !locked;
+  const add = document.getElementById('add-item-container');
+  const upload = document.getElementById('order-lines-upload-bar');
+  if (add) add.style.display = show ? 'flex' : 'none';
+  if (upload) upload.style.display = show ? 'flex' : 'none';
+  if (!show) cancelOrderLinesPreview();
+}
+
 function updateOmsQuickBar() {
   const bar = document.getElementById('oms-quick-bar');
   if (!bar || !activeOrderObj) return;
   const open = orderIsOpen(activeOrderObj);
   const back = orderBackorderPcs(activeOrderObj);
-  const st = String(activeOrderObj.status || '');
   const paid = orderPaymentStatus(activeOrderObj) === 'paid';
   bar.style.display = 'block';
-  const conf = document.getElementById('oms-qa-confirm');
-  const ship = document.getElementById('oms-qa-ship');
+  const fill = document.getElementById('btn-fill-ship-remaining');
+  const ship = document.getElementById('btn-record-shipment');
+  const addBtn = document.getElementById('oms-qa-add');
   const paidBtn = document.getElementById('oms-qa-paid');
-  if (conf) {
-    conf.disabled = !open || st !== 'pending';
-    conf.style.opacity = conf.disabled ? '0.45' : '1';
+  if (fill) {
+    fill.disabled = !open || back < 1;
+    fill.style.opacity = fill.disabled ? '0.45' : '1';
   }
   if (ship) {
     ship.disabled = !open || back < 1;
     ship.style.opacity = ship.disabled ? '0.45' : '1';
   }
+  if (addBtn) {
+    addBtn.disabled = !open;
+    addBtn.style.opacity = addBtn.disabled ? '0.45' : '1';
+  }
   if (paidBtn) {
     paidBtn.disabled = paid;
-    paidBtn.textContent = paid ? '✓ Paid' : '✓ Mark paid';
+    paidBtn.textContent = paid ? '✓ Paid' : '✓ Mark as paid';
     paidBtn.style.opacity = paid ? '0.45' : '1';
   }
   const payCc = document.getElementById('oms-qa-pay-cc');
@@ -3381,18 +3611,13 @@ function updateOmsQuickBar() {
       ? 'Order marked paid — you can still open Banquest if you need to re-run a card charge'
       : 'Open Banquest pay page for this invoice (includes card convenience fee)';
   }
-  const markNow = document.getElementById('btn-mark-paid-now');
-  if (markNow) {
-    markNow.disabled = paid;
-    markNow.textContent = paid ? '✓ Already paid' : '✓ Mark paid now';
-    markNow.style.opacity = paid ? '0.5' : '1';
-  }
   updatePayInvoiceCcButton();
+  updateOmAddressLock();
+  omUpdateSummaries();
 }
 
 async function updatePayInvoiceCcButton() {
-  const btn = document.getElementById('btn-pay-invoice-cc');
-  const hint = document.getElementById('pay-invoice-cc-hint');
+  const btn = document.getElementById('oms-qa-pay-cc') || document.getElementById('btn-pay-invoice-cc');
   if (!btn || !activeOrderObj) return;
   try {
     const methods = await getPaymentMethods(false);
@@ -3401,22 +3626,14 @@ async function updatePayInvoiceCcButton() {
     if (!built.url) {
       btn.disabled = true;
       btn.style.opacity = '0.5';
-      btn.textContent = '💳 Card pay link not configured';
-      if (hint) hint.textContent = 'Set BANQUEST_PAY_PAGE_URL / card pay link on the API to enable this.';
+      btn.textContent = '💳 Card pay not configured';
       return;
     }
     btn.disabled = liveTotal <= 0;
     btn.style.opacity = btn.disabled ? '0.5' : '1';
-    btn.textContent = '💳 Pay this invoice via CC — $' + built.fee.cardTotal.toFixed(2);
-    if (hint) {
-      hint.textContent = built.fee.pct > 0
-        ? ('Opens Banquest at $' + built.fee.cardTotal.toFixed(2) +
-           ' (invoice $' + built.fee.base.toFixed(2) + ' + ' + built.fee.pct +
-           '% fee). Charge the card here for the customer, then mark paid if the webhook does not.')
-        : ('Opens Banquest at $' + built.fee.cardTotal.toFixed(2) + '. Charge the card here for the customer.');
-    }
+    btn.textContent = '💳 Pay via CC — $' + built.fee.cardTotal.toFixed(2);
   } catch (_) {
-    btn.textContent = '💳 Pay this invoice via CC';
+    btn.textContent = '💳 Pay via CC';
   }
 }
 
@@ -3491,11 +3708,10 @@ function toggleEditLock(status) {
     btn.style.cursor = isLocked ? 'not-allowed' : 'pointer';
   });
   
-  document.getElementById('add-item-container').style.display = isLocked ? 'none' : 'flex';
-  const uploadBar = document.getElementById('order-lines-upload-bar');
-  if (uploadBar) uploadBar.style.display = isLocked ? 'none' : 'flex';
-  if (isLocked) cancelOrderLinesPreview();
+  syncAddItemVisibility();
+  if (isLocked) setOmAddPanel(false);
   document.getElementById('edit-lock-banner').style.display = isLocked ? 'block' : 'none';
+  updateOmAddressLock();
 }
 
 function nextLocalApbsOrderId() {
@@ -3582,7 +3798,10 @@ async function openOrderModal(orderId) {
   
   renderEditableItems();
   toggleEditLock(activeOrderObj.status || 'pending');
+  omResetAccordions();
   updateOmsQuickBar();
+  omUpdateSummaries();
+  updateOmAddressLock();
   
   document.getElementById('order-modal-overlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -3909,26 +4128,47 @@ function itemBackorderQty(item) {
 
 function renderShipmentsHistory() {
   const el = document.getElementById('shipments-history');
+  const sel = document.getElementById('om-ship-sel');
   if (!el || !activeOrderObj) return;
   const ships = Array.isArray(activeOrderObj.shipments) ? activeOrderObj.shipments : [];
+  if (sel) {
+    if (!ships.length) {
+      sel.innerHTML = '<option value="">No shipments yet</option>';
+      sel.disabled = true;
+    } else {
+      sel.disabled = false;
+      const cur = sel.value;
+      sel.innerHTML = ships.map(function (s, i) {
+        const label = (s.id || ('SHIP-' + (i + 1))) + ' · ' +
+          (s.shippedAt ? new Date(s.shippedAt).toLocaleDateString() : '') +
+          ' · $' + (Number(s.subtotal) || 0).toFixed(2);
+        return '<option value="' + i + '">' + escAttr(label) + '</option>';
+      }).join('');
+      const keep = parseInt(cur, 10);
+      sel.value = (Number.isFinite(keep) && keep >= 0 && keep < ships.length) ? String(keep) : String(ships.length - 1);
+    }
+  }
   if (!ships.length) {
-    el.innerHTML = '<em style="color:var(--smoke);">No shipments recorded yet.</em>';
+    el.innerHTML = '<em style="color:var(--smoke);">No shipments recorded yet. Use Fill remaining qty, then Record shipment.</em>';
+    omUpdateSummaries();
     return;
   }
-  el.innerHTML = ships.map(function (s, i) {
-    const when = s.shippedAt ? new Date(s.shippedAt).toLocaleString() : '';
-    const lines = (s.items || []).map(function (it) {
-      return '<span class="ship-hist-line">' +
-        escAttr(it.description || it.code || '') +
-        (it.size ? ' ' + escAttr(it.size) : '') +
-        ' × <strong>' + escAttr(String(it.qty)) + '</strong></span>';
-    }).join('');
-    return '<div class="ship-hist-card">' +
-      '<div class="ship-hist-top">' +
-      '<strong class="ship-hist-id">' + escAttr(s.id || ('SHIP-' + (i + 1))) + '</strong>' +
-      '<span>' + escAttr(when) + ' · $' + (Number(s.subtotal) || 0).toFixed(2) + '</span></div>' +
-      '<div class="ship-hist-lines">' + lines + '</div></div>';
+  const idx = sel ? parseInt(sel.value, 10) : ships.length - 1;
+  const i = Number.isFinite(idx) && idx >= 0 && idx < ships.length ? idx : ships.length - 1;
+  const s = ships[i];
+  const when = s.shippedAt ? new Date(s.shippedAt).toLocaleString() : '';
+  const lines = (s.items || []).map(function (it) {
+    return '<span class="ship-hist-line">' +
+      escAttr(it.description || it.code || '') +
+      (it.size ? ' ' + escAttr(it.size) : '') +
+      ' × <strong>' + escAttr(String(it.qty)) + '</strong></span>';
   }).join('');
+  el.innerHTML = '<div class="ship-hist-card is-selected">' +
+    '<div class="ship-hist-top">' +
+    '<strong class="ship-hist-id">' + escAttr(s.id || ('SHIP-' + (i + 1))) + '</strong>' +
+    '<span>' + escAttr(when) + ' · $' + (Number(s.subtotal) || 0).toFixed(2) + '</span></div>' +
+    '<div class="ship-hist-lines">' + lines + '</div></div>';
+  omUpdateSummaries();
 }
 
 function renderEditableItems() {
@@ -3975,6 +4215,7 @@ function renderEditableItems() {
   renderShipmentsHistory();
   toggleEditLock(document.getElementById('m-status-sel').value);
   updatePayInvoiceCcButton();
+  omUpdateSummaries();
 }
 
 function clampShipNow(idx) {
@@ -4135,6 +4376,7 @@ function liveRecalc() {
   });
   document.getElementById('m-total').textContent = '$' + calcTotal.toFixed(2);
   updatePayInvoiceCcButton();
+  omUpdateSummaries();
 }
 
 function removeOrderItem(idx) { 
@@ -4145,6 +4387,8 @@ function removeOrderItem(idx) {
 function closeOrderModal(e) { 
   if(e && (e.target.id === 'order-modal-overlay' || e.target.classList.contains('modal-close'))) { 
     document.getElementById('order-modal-overlay').style.display = 'none'; 
+    const docOv = document.getElementById('om-doc-overlay');
+    if (docOv) docOv.style.display = 'none';
     document.body.style.overflow = ''; 
     cancelOrderLinesPreview();
     activeOrderObj = null; 
@@ -4357,11 +4601,21 @@ function populateEmailShipmentSelect() {
     sel.innerHTML = '<option value="">No shipments yet — record a shipment on the order first</option>';
     return;
   }
+  const omSel = document.getElementById('om-ship-sel');
+  const docSel = document.getElementById('om-doc-ship-sel');
+  let prefer = ships.length - 1;
+  const tryN = function (el) {
+    if (!el) return;
+    const n = parseInt(el.value, 10);
+    if (Number.isFinite(n) && n >= 0 && n < ships.length) prefer = n;
+  };
+  tryN(omSel);
+  tryN(docSel);
   sel.innerHTML = ships.map(function (s, i) {
     const label = (s.id || ('SHIP-' + (i + 1))) + ' · ' +
       (s.shippedAt ? new Date(s.shippedAt).toLocaleDateString() : '') +
       ' · $' + (Number(s.subtotal) || 0).toFixed(2);
-    return '<option value="' + i + '"' + (i === ships.length - 1 ? ' selected' : '') + '>' + escAttr(label) + '</option>';
+    return '<option value="' + i + '"' + (i === prefer ? ' selected' : '') + '>' + escAttr(label) + '</option>';
   }).join('');
 }
 

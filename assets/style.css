@@ -2216,6 +2216,76 @@ a.shop-flow-step:hover{color:var(--gold);}
   max-width:none; width:calc(100vw - 24px); padding:24px 28px;
   margin:0 auto; position:relative; box-sizing:border-box;
 }
+.om-acc {
+  margin-bottom: 12px;
+  border: 1px solid rgba(200,152,31,.22);
+  background: var(--ink3);
+}
+.om-acc-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 14px 14px;
+  background: transparent;
+  border: 0;
+  color: var(--white);
+  cursor: pointer;
+  min-height: 48px;
+}
+.om-acc-kicker {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.om-acc-title {
+  flex: 1;
+  min-width: 0;
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.om-acc-chevron {
+  color: var(--gold);
+  font-size: 14px;
+  transition: transform .15s ease;
+}
+.om-acc.is-open .om-acc-chevron { transform: rotate(180deg); }
+.om-acc-body { display: none; padding: 0 14px 14px; }
+.om-acc.is-open .om-acc-body { display: block; }
+.om-ship-help { font-size: 12px; color: var(--silver); margin: 0 0 10px; line-height: 1.45; }
+.om-add-panel { display: none; margin-bottom: 12px; border: 1px dashed rgba(200,152,31,.35); }
+.om-add-panel.is-open { display: block; }
+.om-status-panel {
+  display: none;
+  margin: 0 0 16px;
+  padding: 16px;
+  background: var(--ink);
+  border: 1px solid rgba(200,152,31,.25);
+}
+.om-status-panel.is-open { display: block; }
+.om-save-bar { margin-top: 4px; }
+.oms-qa.on {
+  background: rgba(200,152,31,.14) !important;
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+#om-doc-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 12050;
+  background: rgba(0,0,0,.65);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
 #order-modal .order-items-scroll{
   overflow-x:auto;
   overflow-y:visible;
@@ -2542,6 +2612,8 @@ a.shop-flow-step:hover{color:var(--gold);}
   .oms-quick-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   }
+  #order-modal .om-acc-title { white-space: normal; }
+  #order-modal .oms-qa { min-height: 44px; }
   .oms-qa { width: 100% !important; justify-content: center; text-align: center; padding: 12px 8px !important; font-size: 12px !important; margin: 0 !important; }
   .order-row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
   .order-row-actions .btn-view,
