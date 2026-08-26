@@ -1245,18 +1245,89 @@ h1.htitle strong { color: var(--gold); }
   flex:1 1 auto;
   min-height:140px;
 }
-@media (max-width:700px){
+@media (max-width:768px){
   #prod-sections.classic-tiles{
-    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
-    gap:12px;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
   }
   .classic-tiles .classic-tile-top{
-    height:220px;
-    padding:12px 12px 10px;
+    height:auto;
+    padding:8px 8px 6px;
+    gap:6px;
   }
-  .classic-tiles .classic-tile-meta{min-height:52px}
+  .classic-tiles .classic-tile-meta{
+    min-height:0;
+    gap:1px;
+  }
+  .classic-tiles .classic-tile-meta .prod-section-code{
+    font-size:9px;
+    letter-spacing:.8px;
+  }
+  .classic-tiles .classic-tile-meta .prod-section-title{
+    font-size:12px;
+    line-height:1.2;
+    height:2.4em;
+    max-height:2.4em;
+  }
+  .classic-tiles .classic-tile-meta .prod-section-stats{
+    font-size:9px;
+  }
+  .classic-tiles .classic-tile-img{
+    flex:0 0 88px;
+    height:88px;
+    min-height:88px;
+  }
   .classic-tiles .classic-tile-img .cat-img,
-  .classic-tiles .classic-tile-img img{padding:8px}
+  .classic-tiles .classic-tile-img img{padding:4px}
+  .classic-tiles .classic-tile-guest .prod-section-body{
+    padding:6px 8px 8px;
+  }
+  .classic-tiles .classic-guest-sizes{gap:4px}
+  .classic-tiles .classic-guest-size{
+    font-size:10px;
+    padding:2px 5px;
+  }
+  .classic-tiles .classic-tile-logged{min-height:0}
+  .classic-tiles .classic-tile-logged .prod-section-body{min-height:0}
+  .classic-tiles .shop-size-stack{max-height:112px}
+  .classic-tiles .shop-size-line{
+    gap:4px;
+    padding:6px 8px;
+  }
+  .classic-tiles .shop-size{font-size:12px}
+  .classic-tiles .shop-stock-in,
+  .classic-tiles .shop-stock-out{font-size:10px}
+  .classic-tiles .shop-price{font-size:12px}
+  .classic-tiles .qty-badge{font-size:9px;padding:1px 5px}
+  /* Keep size rows compact in 2-col tiles (overrides fat-finger full-width buttons) */
+  .classic-tiles .classic-tile .add-to-cart-btn{
+    font-size:10px;
+    letter-spacing:.6px;
+    padding:7px 8px;
+    width:100%;
+  }
+  .classic-tiles .classic-tile .shop-buy{
+    width:100%;
+    flex-direction:column;
+    align-items:stretch;
+    gap:4px;
+  }
+  .classic-tiles .classic-tile .shop-qty-wrap{
+    width:100%;
+    justify-content:space-between;
+    padding:3px 6px;
+  }
+  .classic-tiles .classic-tile .shop-qty{
+    width:36px;
+    height:22px;
+    font-size:12px;
+  }
+}
+@media (min-width:520px) and (max-width:768px){
+  #prod-sections.classic-tiles{
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:10px;
+  }
 }
 .classic-guest-sizes{
   display:flex;
