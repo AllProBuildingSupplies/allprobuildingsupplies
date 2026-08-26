@@ -1246,7 +1246,7 @@ h1.htitle strong { color: var(--gold); }
   min-height:140px;
 }
 @media (max-width:768px){
-  #prod-sections.classic-tiles{
+  #prod-sections.prod-sections-desktop.classic-tiles{
     grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:8px;
   }
@@ -1324,7 +1324,7 @@ h1.htitle strong { color: var(--gold); }
   }
 }
 @media (min-width:520px) and (max-width:768px){
-  #prod-sections.classic-tiles{
+  #prod-sections.prod-sections-desktop.classic-tiles{
     grid-template-columns:repeat(3, minmax(0, 1fr));
     gap:10px;
   }
@@ -1589,6 +1589,24 @@ h1.htitle strong { color: var(--gold); }
   grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
   gap:14px;
   align-items:stretch;
+}
+/* Later unscoped 200px minmax would otherwise force 1-col phones — win with extra class */
+@media (max-width:768px){
+  #prod-sections.prod-sections-desktop.classic-tiles{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+  }
+  #prod-sections.prod-sections-desktop.sku-grid,
+  #prod-sections.sku-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+  }
+}
+@media (min-width:520px) and (max-width:768px){
+  #prod-sections.prod-sections-desktop.classic-tiles{
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:10px;
+  }
 }
 .prod-section table{width:100%;border-collapse:collapse;font-size:13px}
 .prod-section thead tr{background:var(--gold)}
