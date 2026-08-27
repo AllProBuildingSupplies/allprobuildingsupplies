@@ -126,28 +126,45 @@ def norm_name(s) -> str:
     return s.strip()
 
 
+def _norm_size_token(tok: str) -> str:
+    """Normalize one size segment like '1 1/2', '11/2', '1-1/2' -> '1-1/2'."""
+    tok = tok.strip()
+    tok = tok.replace("−", "-").replace("–", "-")
+    tok = re.sub(r"\s+", "", tok)
+    # 11/2 / 11/4 / 21/2 without separator (common in factory sheets)
+    tok = re.sub(r"^11/2$", "1-1/2", tok)
+    tok = re.sub(r"^11/4$", "1-1/4", tok)
+    tok = re.sub(r"^21/2$", "2-1/2", tok)
+    tok = re.sub(r"^21/4$", "2-1/4", tok)
+    # digit immediately before fraction: 11/2 already handled; 31/2 -> 3-1/2
+    tok = re.sub(r"^(\d+)(\d/\d)$", r"\1-\2", tok)
+    # spaced fraction already stripped: 1-1/2 stays
+    return tok
+
+
 def norm_size(s) -> str:
+    """Canonical size key: segments joined by x, single trailing quote.
+    Examples: 2" x 1-1/2" x 1-1/2"  and  2×1-1/2×1-1/2"  ->  2x1-1/2x1-1/2"
+    """
     if s is None:
         return ""
     s = norm_text(s)
-    s = s.replace("×", "x").replace("Ｘ", "x").replace("X", "x")
-    s = re.sub(r'[″"”]', '"', s)
-    s = re.sub(r"[′']", "", s)
-    # drop metric annotations
+    # drop metric / parenthetical annotations first
     s = re.sub(r"\([^)]*mm[^)]*\)", "", s, flags=re.I)
     s = re.sub(r"（[^）]*）", "", s)
     s = re.sub(r"\([^)]*\)", "", s)
+    # unify separators / quotes / primes
+    s = s.replace("×", "x").replace("Ｘ", "x").replace("X", "x").replace("*", "x")
+    s = re.sub(r'[″"”]+', "", s)  # strip ALL inch marks (avoid 2"x1-1/2" vs 2x1-1/2")
+    s = re.sub(r"[′']+", "", s)
     s = re.sub(r"\s*x\s*", "x", s)
     s = re.sub(r"\s+", "", s)
-    s = s.replace("−", "-").replace("–", "-")
-    # normalize fractions spacing already removed
-    s = s.replace("11/2", "1-1/2").replace("11/4", "1-1/4")
-    s = s.replace("21/2", "2-1/2")
-    # unify 1 1/2 -> 1-1/2 if still present
-    s = re.sub(r"(\d)(\d/\d)", r"\1-\2", s)
-    if s and not s.endswith('"') and re.search(r"\d", s):
-        s = s + '"'
-    return s
+    if not s:
+        return ""
+    parts = [_norm_size_token(p) for p in s.split("x") if p != ""]
+    if not parts:
+        return ""
+    return "x".join(parts) + '"'
 
 
 def parse_carton_cm(val):
@@ -262,21 +279,47 @@ def canonical_name(s: str) -> str:
     n = re.sub(r"\(H\s*X\s*H\)", "(H X H)", n)
     n = re.sub(r"\(H\s*X\s*S\)", "(H X S)", n)
     n = re.sub(r"\(S\s*X\s*H\)", "(S X H)", n)
+    n = re.sub(r"\(H\s*X\s*H\s*X\s*H\)", "(H X H X H)", n)
     n = re.sub(r"\(ALL\s*HUB\)", "(ALL HUB)", n)
-    n = re.sub(r"REDUCING SANITARY TEE\s*\(ALL HUB\)", "REDUCING SANITARY TEE (ALL HUB)", n)
-    n = re.sub(r"REDUCING WYE\s*\(ALL HUB\)", "REDUCING WYE (ALL HUB)", n)
+    # HxH without spaces/x words
+    n = re.sub(r"\(H\s*X\s*H\)", "(H X H)", n)
+    n = re.sub(r"\((H)(X)(H)\)", r"(H X H)", n)
+    n = re.sub(r"\((HXH)\)", "(H X H)", n)
     # ASTM spacing variants
     n = re.sub(r"ASTM\s+D\s*1785", "ASTM D1785", n)
     n = re.sub(r"ASTM\s+F\s*891", "ASTM F891", n)
     n = re.sub(r"ASTM\s+CPVC", "ASTM CPVC", n)
+    n = re.sub(r",\s*", ", ", n)
+    n = re.sub(r"\s*\(\s*", " (", n)
+    n = re.sub(r"\s*\)\s*", ")", n)
     n = re.sub(r"\s+", " ", n).strip()
-    mapping = {
+    # Known factory ↔ website wording aliases (same SKU family)
+    aliases = {
         "PEX-B": "PEX-B PIPE",
-        "ASTM D1785 SCH40 PVC": "ASTM D1785 SCH40 PVC",
+        "1/4 BEND, STREET (S X H)": "1/4 BEND, STREET (H X S)",  # ACS vs website orientation label
+        "1/8 BEND STREET (H X S)": "1/8 BEND, STREET (H X S)",
+        "1/8 BEND, STREET (H X S)": "1/8 BEND, STREET (H X S)",
+        "FLUSH BUSHING (S X H)": "FLUSH BUSHING (H X S)",
+        "FLUSH BUSHING (H X S)": "FLUSH BUSHING (H X S)",
+        "P-TRAP, LOW PROFILE(HXH)": "P-TRAP, LOW PROFILE (H X H)",
+        "P-TRAP, LOW PROFILE (HXH)": "P-TRAP, LOW PROFILE (H X H)",
+        "P-TRAP, LOW PROFILE(H X H)": "P-TRAP, LOW PROFILE (H X H)",
+        "DOUBLE SANITARY TEE, REDUCING(ALL HUB)": "DOUBLE SANITARY TEE, REDUCING (ALL HUB)",
+        "REDUCING DOUBLE WYE(ALL HUB)": "REDUCING DOUBLE WYE (ALL HUB)",
+        "REDUCING SANITARY TEE(ALL HUB)": "REDUCING SANITARY TEE (ALL HUB)",
+        "REDUCING WYE(ALL HUB)": "REDUCING WYE (ALL HUB)",
+        "LONG SWEEP 1/4 BEND W/SIDE INLET (ALL HUB)": "1/4 BEND W/ LOW HEEL INLET (H X H X H)",
+        "CLOSET FLANGE W/ADJUSTABLE METAL RING (H)": "CLOSET FLANGE W/ADJUSTABLE METAL RING (H)",
+        "CLOSET FLANGE W/TEST PLATE (H)": "CLOSET FLANGE W/TEST PLATE (H)",
         "ASTM F891 PVC FOAM CORE DWV PIPE": "ASTM F891 PVC FOAM CORE DWV PIPE",
+        "ASTM D1785 SCH40 PVC": "ASTM D1785 SCH40 PVC",
         "ASTM CPVC SCH80 PIPE": "ASTM CPVC SCH80 PIPE",
     }
-    return mapping.get(n, n)
+    # apply after normalizing LOW PROFILE compacted forms
+    n2 = re.sub(r"LOW PROFILE\s*\(\s*H\s*X?\s*H\s*\)", "LOW PROFILE (H X H)", n)
+    n2 = re.sub(r"LOW PROFILE\(HXH\)", "LOW PROFILE (H X H)", n2)
+    n = n2 if n2 else n
+    return aliases.get(n, n)
 
 
 def load_website():
@@ -347,10 +390,10 @@ def plausible_ddp(ddp, fob=None):
 
 
 def load_all3_and_margins():
-    """Yellow FOB + DDP + dims from All 3 Projects and Margins."""
+    """Yellow FOB ONLY from All 3 Projects col 18. DDP from All3 + Margins."""
     by_key = {}
 
-    def ingest(path, yellow_col, list_col=None, ddp_col=None, has_dims=False):
+    def ingest(path, yellow_col=None, list_col=None, ddp_col=None, has_dims=False):
         wb = openpyxl.load_workbook(path, data_only=True)
         ws = wb[wb.sheetnames[0]]
         for r in range(2, ws.max_row + 1):
@@ -371,16 +414,17 @@ def load_all3_and_margins():
                     "pcs_ctn": pcs or rec.get("pcs_ctn"),
                 }
             )
-            y = to_float(ws.cell(r, yellow_col).value)
-            if y is not None:
-                rec["fob_yellow"] = y
+            if yellow_col:
+                y = to_float(ws.cell(r, yellow_col).value)
+                if y is not None:
+                    rec["fob_yellow"] = y  # ONLY All 3 Projects yellow
             if list_col:
                 lv = to_float(ws.cell(r, list_col).value)
                 if lv is not None:
-                    rec["fob_list"] = lv
+                    rec["fob_list"] = lv  # kept for reference only; not used as FOB_USD
             if ddp_col:
                 dv = to_float(ws.cell(r, ddp_col).value)
-                fob_for_check = y if y is not None else rec.get("fob_yellow")
+                fob_for_check = rec.get("fob_yellow")
                 if plausible_ddp(dv, fob_for_check):
                     rec["ddp"] = dv
             if has_dims:
@@ -388,16 +432,24 @@ def load_all3_and_margins():
                 W = to_float(ws.cell(r, 9).value)
                 H = to_float(ws.cell(r, 10).value)
                 wt = to_float(ws.cell(r, 11).value)
-                if L:
+                # Prefer dims but don't overwrite if already set from a prior better source
+                if L and not rec.get("L"):
                     rec["L"] = L
-                if W:
+                if W and not rec.get("W"):
                     rec["W"] = W
-                if H:
+                if H and not rec.get("H"):
                     rec["H"] = H
+                if L and W and H:
+                    # Always keep a calculated source dims set from All3 when present
+                    rec["L"] = L
+                    rec["W"] = W
+                    rec["H"] = H
+                    rec["dims_source"] = "All_3_Projects"
                 if wt:
                     rec["wt_g"] = wt
             by_key[(tcode, name, size)] = rec
 
+    # Yellow FOB only from All 3 Projects
     ingest(
         UPLOADS / "All_3_Projects_8-27_e6e7.xlsx",
         yellow_col=18,
@@ -405,9 +457,10 @@ def load_all3_and_margins():
         ddp_col=20,
         has_dims=True,
     )
+    # Margins: DDP only (no yellow FOB — user restricted FOB to All 3 Projects yellow)
     ingest(
         UPLOADS / "Margins_8-24-26_284d.xlsx",
-        yellow_col=11,
+        yellow_col=None,
         list_col=None,
         ddp_col=13,
         has_dims=False,
@@ -638,25 +691,83 @@ def merge_all():
         if tcode_raw:
             found["tommur_code_web"] = tcode_raw
 
-    # Enrich from Lesso by name+size
+    # Build Tommur family map from website (description -> tommur code)
+    tommur_by_name = {}
+    tommur_by_name_size = {}
+    lesso_by_web_ns = {}
+    for wr in web_rows:
+        wname = canonical_name(wr.get("Description") or "")
+        wsize = norm_size(wr.get("Size"))
+        tcode_raw = norm_text(wr.get("Tommur-Code") or "")
+        tcode = tcode_raw.split(" - ")[0].strip() if " - " in tcode_raw else tcode_raw
+        if wname and tcode:
+            tommur_by_name.setdefault(wname, tcode)
+            tommur_by_name_size[(wname, wsize)] = tcode
+        lcode = norm_text(wr.get("Lesso-Code") or "")
+        if wname and wsize and lcode and not lcode.upper().startswith("PIPE"):
+            lesso_by_web_ns[(wname, wsize)] = lcode
+
+    def find_lesso(name, size):
+        name = canonical_name(name)
+        size = norm_size(size)
+        # Prefer authoritative Lesso DWV list match by name+size
+        candidates = [
+            (name, size),
+            (name.replace(" (ALL HUB)", "(ALL HUB)"), size),
+            (name.replace("(ALL HUB)", " (ALL HUB)"), size),
+            (re.sub(r"\s+", " ", name.replace(" ,", ",")).strip(), size),
+        ]
+        # Also try without spaces before paren
+        candidates.append((re.sub(r"\s*\(", "(", name), size))
+        for ns in candidates:
+            ns2 = (canonical_name(ns[0]), norm_size(ns[1]))
+            if ns2 in lesso_by_ns:
+                return lesso_by_ns[ns2]
+        # fuzzy: same canonical name, exact size across lesso dict
+        for (n, s), rec in lesso_by_ns.items():
+            if s == size and canonical_name(n) == name:
+                return rec
+        # looser name contains
+        for (n, s), rec in lesso_by_ns.items():
+            if s == size and name.replace(" ", "") == canonical_name(n).replace(" ", ""):
+                return rec
+        return None
+
+    # Enrich from Lesso by name+size — prefer Lesso master-carton dims for CBM
     for rec in universe.values():
-        ns = (rec["name"], rec["size"])
-        # try direct
-        Lrec = lesso_by_ns.get(ns)
-        # try alternate name forms
-        if not Lrec:
-            alt = rec["name"].replace(" (ALL HUB)", "(ALL HUB)").replace("(ALL HUB)", " (ALL HUB)")
-            alt = re.sub(r"\s+", " ", alt).strip()
-            Lrec = lesso_by_ns.get((canonical_name(alt), rec["size"]))
-        if not Lrec and rec.get("lesso_code_web"):
-            Lrec = lesso_by_code.get(rec["lesso_code_web"])
+        Lrec = find_lesso(rec["name"], rec["size"])
         if Lrec:
-            rec["lesso_code"] = Lrec.get("lesso_code") or rec.get("lesso_code_web") or ""
-            for fld in ("L", "W", "H", "pcs_ctn", "wt_g"):
-                if rec.get(fld) in (None, "") and Lrec.get(fld) is not None:
-                    rec[fld] = Lrec[fld]
-        elif rec.get("lesso_code_web"):
-            rec["lesso_code"] = rec["lesso_code_web"]
+            rec["lesso_code"] = Lrec.get("lesso_code") or rec.get("lesso_code") or ""
+            # Prefer Lesso packing dims for container planning (calculated CBM)
+            if Lrec.get("L") is not None:
+                rec["L"] = Lrec["L"]
+                rec["W"] = Lrec["W"]
+                rec["H"] = Lrec["H"]
+                rec["dims_source"] = "Lesso DWV list (master carton)"
+            if Lrec.get("pcs_ctn") is not None:
+                rec["pcs_ctn"] = Lrec["pcs_ctn"]
+            if Lrec.get("wt_g") is not None and rec.get("wt_g") in (None, ""):
+                rec["wt_g"] = Lrec["wt_g"]
+        else:
+            # website lesso if present
+            wlc = lesso_by_web_ns.get((rec["name"], rec["size"])) or rec.get("lesso_code_web")
+            if wlc:
+                rec["lesso_code"] = wlc
+                # if we have code, try code lookup for dims
+                crec = lesso_by_code.get(wlc)
+                if crec and crec.get("L") is not None:
+                    rec["L"] = crec["L"]
+                    rec["W"] = crec["W"]
+                    rec["H"] = crec["H"]
+                    rec["dims_source"] = "Lesso DWV list via website code"
+                    if crec.get("pcs_ctn"):
+                        rec["pcs_ctn"] = crec["pcs_ctn"]
+
+        # Fill Tommur code from website maps when missing
+        if not rec.get("tommur_code"):
+            tc = tommur_by_name_size.get((rec["name"], rec["size"])) or tommur_by_name.get(rec["name"])
+            if tc:
+                rec["tommur_code"] = tc
 
     # Enrich from project by tommur+size / name+size if missing FOB/DDP/dims
     for rec in universe.values():
@@ -666,9 +777,16 @@ def merge_all():
             cands.extend(proj_by_tcode_size.get((tc, rec["size"]), []))
         cands.extend(proj_by_name_size.get((rec["name"], rec["size"]), []))
         for prec in cands:
-            for fld in ("fob_yellow", "fob_list", "ddp", "L", "W", "H", "wt_g", "pcs_ctn"):
+            for fld in ("fob_yellow", "fob_list", "ddp", "wt_g", "pcs_ctn"):
                 if rec.get(fld) in (None, "") and prec.get(fld) is not None:
                     rec[fld] = prec[fld]
+            # Only take project dims if we don't already have Lesso dims
+            if not rec.get("dims_source") or "Lesso" not in str(rec.get("dims_source")):
+                for fld in ("L", "W", "H"):
+                    if prec.get(fld) is not None:
+                        rec[fld] = prec[fld]
+                if prec.get("L") and prec.get("W") and prec.get("H"):
+                    rec["dims_source"] = prec.get("dims_source") or "All_3_Projects"
             if not rec.get("tommur_code") and prec.get("tommur_code"):
                 rec["tommur_code"] = prec["tommur_code"]
             if not rec.get("material") and prec.get("material"):
@@ -679,19 +797,23 @@ def merge_all():
             dcands.extend(dav_by_tcode_size.get((tc, rec["size"]), []))
         dcands.extend(dav_by_name_size.get((rec["name"], rec["size"]), []))
         for drec in dcands:
-            if rec.get("fob_dav") is None and drec.get("fob_dav") is not None:
-                rec["fob_dav"] = drec["fob_dav"]
-            for fld in ("L", "W", "H", "wt_g", "pcs_ctn"):
-                if rec.get(fld) in (None, "") and drec.get(fld) is not None:
-                    rec[fld] = drec[fld]
+            # Davenport unit price often tracks old DDP for fittings — use as DDP if missing
+            if rec.get("ddp") is None and drec.get("fob_dav") is not None:
+                if plausible_ddp(drec["fob_dav"], rec.get("fob_yellow")):
+                    # only if looks like DDP vs yellow, or no yellow
+                    if rec.get("fob_yellow") is None or drec["fob_dav"] >= rec["fob_yellow"] * 0.98:
+                        rec["ddp"] = drec["fob_dav"]
+            if not rec.get("dims_source") or "Lesso" not in str(rec.get("dims_source")):
+                for fld in ("L", "W", "H", "wt_g", "pcs_ctn"):
+                    if rec.get(fld) in (None, "") and drec.get(fld) is not None:
+                        rec[fld] = drec[fld]
+                if drec.get("L") and drec.get("W") and drec.get("H") and not rec.get("dims_source"):
+                    rec["dims_source"] = "Davenport PI"
             if not rec.get("tommur_code") and drec.get("tommur_code"):
                 rec["tommur_code"] = drec["tommur_code"]
 
-    # Website tommur mapping for PVC codes like D035 when ACS lacked them
+    # Second pass: website join for remaining codes / sell
     for rec in universe.values():
-        if rec.get("tommur_code"):
-            continue
-        matches = web_by_tommur.get(("", ""))  # noop
         for wr in web_rows:
             if (wr.get("Material") or "").upper() != (rec.get("material") or "").upper():
                 continue
@@ -701,10 +823,14 @@ def merge_all():
                 continue
             tcode_raw = norm_text(wr.get("Tommur-Code") or "")
             tcode = tcode_raw.split(" - ")[0].strip() if " - " in tcode_raw else tcode_raw
-            rec["tommur_code"] = tcode
-            rec["apbs_code"] = wr.get("Code")
-            rec["lesso_code"] = rec.get("lesso_code") or wr.get("Lesso-Code") or ""
-            rec["sell_web"] = to_float(wr.get("Price"))
+            if tcode and not rec.get("tommur_code"):
+                rec["tommur_code"] = tcode
+            if not rec.get("apbs_code"):
+                rec["apbs_code"] = wr.get("Code")
+            if not rec.get("lesso_code") and wr.get("Lesso-Code"):
+                rec["lesso_code"] = wr.get("Lesso-Code")
+            if rec.get("sell_web") is None:
+                rec["sell_web"] = to_float(wr.get("Price"))
             break
 
     # Final dedupe: merge rows that share material+name+size and compatible tommur codes
@@ -750,51 +876,36 @@ def merge_all():
 def finalize_row(rec):
     material = rec.get("material") or ""
     name = rec.get("name") or ""
-    pipe = is_pipe_item(name, material)
-    sell_unit = "per ft" if pipe and "INSULATION" not in name.upper() else "per pc"
-    # insulation often per pc stick/tube — keep per pc; foam pipe on site is length pricing sometimes
+    sell_unit = "per pc"
     if "PIPE" in name.upper() and material.upper() in {"PVC", "CPVC", "PEX", "COPPER"}:
         sell_unit = "per ft"
     if "INSULATION" in name.upper():
         sell_unit = "per ft"
+    if material.upper() == "PEX" and name.upper() in {"PEX-B PIPE", "PEX-B"}:
+        sell_unit = "per ft"
 
     L, W, H = rec.get("L"), rec.get("W"), rec.get("H")
     pcs = rec.get("pcs_ctn") or rec.get("pack_web")
+    # ALWAYS calculate CBM from L/W/H — never copy shipment CBM totals from sheets
     cbm_ctn = cbm_from_lwh(L, W, H)
     cbm_pc = (cbm_ctn / pcs) if cbm_ctn and pcs and pcs > 0 else None
 
-    # Prefer yellow FOB; else list; else davenport; else ACS (may be DDP-like for PVC)
-    fob = None
-    fob_source = ""
-    if rec.get("fob_yellow") is not None:
-        fob = rec["fob_yellow"]
-        fob_source = "Yellow FOB (All3/Margins = list x 0.95)"
-    elif rec.get("fob_list") is not None:
-        fob = rec["fob_list"]
-        fob_source = "FOB list (All3 col Q / pre-discount)"
-    elif rec.get("fob_dav") is not None:
-        fob = rec["fob_dav"]
-        fob_source = "Davenport PI FOB"
-    elif rec.get("fob_acs") is not None and material.upper() != "COPPER":
-        fob = rec["fob_acs"]
-        fob_source = "All Current Supplies FOB (verify — some PVC rows track old DDP)"
+    # FOB_USD: ONLY yellow column from All 3 Projects; else blank
+    fob = rec.get("fob_yellow")
+    fob_source = "All 3 Projects yellow FOB" if fob is not None else ""
 
     ddp = rec.get("ddp")
     ddp_note = ""
-    # Infer DDP from All Current Supplies when it sits above yellow FOB in the
-    # historical ~1.05–1.25x band (ACS PVC "FOB" often stored old DDP).
-    if (
-        ddp is None
-        and rec.get("fob_acs") is not None
-        and rec.get("fob_yellow") is not None
-        and material.upper() == "PVC"
-    ):
-        ratio = rec["fob_acs"] / rec["fob_yellow"] if rec["fob_yellow"] else None
-        if ratio and 1.02 <= ratio <= 1.35:
+    # DDP from any sheet; ACS PVC "FOB" often equals historical DDP
+    if ddp is None and rec.get("fob_acs") is not None and material.upper() == "PVC":
+        if rec.get("fob_yellow") is not None:
+            ratio = rec["fob_acs"] / rec["fob_yellow"] if rec["fob_yellow"] else None
+            if ratio and 1.02 <= ratio <= 1.35:
+                ddp = rec["fob_acs"]
+                ddp_note = "DDP from All Current Supplies (matches prior DDP vs yellow FOB pattern)"
+        else:
             ddp = rec["fob_acs"]
-            ddp_note = "DDP inferred from All Current Supplies (matches prior DDP vs yellow FOB pattern)"
-    elif ddp is None and rec.get("fob_acs") is not None and rec.get("fob_yellow") is not None:
-        ddp_note = f"ACS value {rec['fob_acs']} present (not copied to DDP; ratio vs yellow outside 1.02–1.35)"
+            ddp_note = "DDP from All Current Supplies (no yellow FOB for this SKU)"
 
     sell = rec.get("sell_web")
     sell_source = "Website" if sell is not None else ""
@@ -809,15 +920,26 @@ def finalize_row(rec):
     freight_45 = (FREIGHT_PER_CONTAINER / CBM_45HQ) * cbm_pc if cbm_pc else None
 
     duty_amt = (fob * h["total"]) if (fob is not None and h["total"] is not None) else None
-    landed_40 = (fob + duty_amt + freight_40) if (fob is not None and duty_amt is not None and freight_40 is not None) else None
-    landed_45 = (fob + duty_amt + freight_45) if (fob is not None and duty_amt is not None and freight_45 is not None) else None
-    # if dims missing but have fob+duty, still show partial
-    if landed_40 is None and fob is not None and duty_amt is not None and freight_40 is None:
-        landed_40 = None  # leave blank — incomplete
-    if fob is not None and duty_amt is not None:
-        landed_ex_freight = fob + duty_amt
-    else:
-        landed_ex_freight = None
+    landed_40 = (
+        (fob + duty_amt + freight_40)
+        if (fob is not None and duty_amt is not None and freight_40 is not None)
+        else None
+    )
+    landed_45 = (
+        (fob + duty_amt + freight_45)
+        if (fob is not None and duty_amt is not None and freight_45 is not None)
+        else None
+    )
+    landed_ex_freight = (fob + duty_amt) if (fob is not None and duty_amt is not None) else None
+
+    # Combined uplift %: Landed = FOB * (1 + Duty_Tariff_Freight_Pct)
+    def uplift(freight):
+        if fob is None or fob == 0 or duty_amt is None or freight is None:
+            return None
+        return (duty_amt + freight) / fob
+
+    uplift_40 = uplift(freight_40)
+    uplift_45 = uplift(freight_45)
 
     margin_40 = (sell - landed_40) if (sell is not None and landed_40 is not None) else None
     margin_45 = (sell - landed_45) if (sell is not None and landed_45 is not None) else None
@@ -829,6 +951,16 @@ def finalize_row(rec):
     if fob is not None and ddp is not None:
         fob_vs_ddp = ddp - fob
         fob_lower = "YES" if fob < ddp else ("SAME" if abs(fob - ddp) < 1e-9 else "NO — FOB >= DDP")
+
+    notes = []
+    if ddp_note:
+        notes.append(ddp_note)
+    if rec.get("dims_source"):
+        notes.append(f"Dims: {rec['dims_source']}; CBM = L*W*H/1e6")
+    if cbm_ctn is None:
+        notes.append("Missing carton L/W/H — CBM/freight blank")
+    elif not pcs:
+        notes.append("Missing pcs/carton — CBM/pc blank")
 
     return {
         "APBS_Item_Code": rec.get("apbs_code") or rec.get("apbs_code_hint") or "",
@@ -843,14 +975,11 @@ def finalize_row(rec):
         "Carton_L_cm": L,
         "Carton_W_cm": W,
         "Carton_H_cm": H,
+        "Dims_Source": rec.get("dims_source") or "",
         "CBM_per_Carton": cbm_ctn,
         "CBM_per_Pc": cbm_pc,
         "FOB_USD": fob,
         "FOB_Source": fob_source,
-        "FOB_Yellow": rec.get("fob_yellow"),
-        "FOB_List": rec.get("fob_list"),
-        "FOB_Davenport": rec.get("fob_dav"),
-        "FOB_AllCurrentSupplies": rec.get("fob_acs") if material.upper() != "COPPER" else None,
         "DDP_Current": ddp,
         "FOB_vs_DDP_Savings": fob_vs_ddp,
         "FOB_Lower_Than_DDP": fob_lower,
@@ -861,10 +990,12 @@ def finalize_row(rec):
         "Duty_MFN_Pct": h["mfn"],
         "Tariff_Sec301_Pct": h["sec301"],
         "Tariff_FLIP301_Pct": h["flip"],
-        "Duty_Tariff_Total_Pct": h["total"],
+        "Duty_Tariff_Only_Pct": h["total"],
         "Est_Duty_Tariff_USD": duty_amt,
         "Freight_per_Pc_40ft": freight_40,
         "Freight_per_Pc_45HQ": freight_45,
+        "Duty_Tariff_Freight_Pct_40ft": uplift_40,
+        "Duty_Tariff_Freight_Pct_45HQ": uplift_45,
         "Est_Landed_per_Pc_40ft": landed_40,
         "Est_Landed_per_Pc_45HQ": landed_45,
         "Landed_ex_Freight": landed_ex_freight,
@@ -873,8 +1004,8 @@ def finalize_row(rec):
         "Margin_Pct_40ft": margin_pct_40,
         "Margin_Pct_45HQ": margin_pct_45,
         "Net_Wt_g_per_Pc": rec.get("wt_g"),
-        "Notes": ddp_note,
         "On_Website": "YES" if rec.get("apbs_code") or (rec.get("sell_web") is not None) else "NO",
+        "Notes": "; ".join(notes),
     }
 
 
@@ -891,14 +1022,11 @@ HEADERS = [
     "Carton_L_cm",
     "Carton_W_cm",
     "Carton_H_cm",
+    "Dims_Source",
     "CBM_per_Carton",
     "CBM_per_Pc",
     "FOB_USD",
     "FOB_Source",
-    "FOB_Yellow",
-    "FOB_List",
-    "FOB_Davenport",
-    "FOB_AllCurrentSupplies",
     "DDP_Current",
     "FOB_vs_DDP_Savings",
     "FOB_Lower_Than_DDP",
@@ -909,10 +1037,12 @@ HEADERS = [
     "Duty_MFN_Pct",
     "Tariff_Sec301_Pct",
     "Tariff_FLIP301_Pct",
-    "Duty_Tariff_Total_Pct",
+    "Duty_Tariff_Only_Pct",
     "Est_Duty_Tariff_USD",
     "Freight_per_Pc_40ft",
     "Freight_per_Pc_45HQ",
+    "Duty_Tariff_Freight_Pct_40ft",
+    "Duty_Tariff_Freight_Pct_45HQ",
     "Est_Landed_per_Pc_40ft",
     "Est_Landed_per_Pc_45HQ",
     "Landed_ex_Freight",
@@ -978,34 +1108,42 @@ def write_workbook(rows):
         ["CBM_per_pc formula", "(L_cm * W_cm * H_cm / 1,000,000) / pcs_per_carton"],
         ["", ""],
         ["FOB / DDP RULES", ""],
-        ["Primary FOB (FOB_USD)", "Yellow FOB from All 3 Projects / Margins (= listed FOB x 0.95)"],
-        ["Fallback FOB order", "FOB list → Davenport PI → All Current Supplies FOB"],
-        ["DDP_Current", "From project sheets 'Current DDP' (first shipments). Shown for FOB vs DDP compare."],
-        ["ACS PVC note", "All Current Supplies PVC 'FOB' often matches old DDP — surfaced in FOB_AllCurrentSupplies; only used as FOB_USD if no yellow/list/PI."],
+        ["FOB_USD", "ONLY the yellow FOB column from All 3 Projects 8-27.xlsx. Blank if not in that list."],
+        ["DDP_Current", "From any sheet: All3 Current DDP, Margins, Davenport unit prices, or All Current Supplies (PVC often stored old DDP there). Blank if none."],
+        ["", ""],
+        ["CBM", ""],
+        ["CBM_per_Carton", "ALWAYS calculated: L_cm * W_cm * H_cm / 1,000,000 (never copied from sheet shipment totals)"],
+        ["CBM_per_Pc", "CBM_per_Carton / Pcs_per_Carton"],
+        ["Dims preference", "Lesso DWV master carton when available; else All 3 Projects; else Davenport PI"],
         ["", ""],
         ["LANDED COST", ""],
-        ["Formula", "FOB + (FOB * total_duty_tariff_pct) + freight_per_pc"],
+        ["Formula", "FOB + (FOB * Duty_Tariff_Only_Pct) + freight_per_pc"],
+        ["Duty_Tariff_Freight_Pct", "(Duty$ + Freight$) / FOB   →   Landed ≈ FOB * (1 + this %)"],
         ["", ""],
         ["SELLING PRICE", ""],
         ["Source priority", "Website products.csv; Copper ACS price used when it matches site sell"],
-        ["MISSING FILE", "Complete Fittings Price Lists.xlsx was referenced from local OneDrive but not uploaded — upload it to refresh fitting sell prices"],
+        ["MISSING FILE", "Complete Fittings Price Lists.xlsx not uploaded — fitting sell prices from website only"],
         ["Blanks", "Where no sell price exists, Selling_Price left blank for you to set"],
+        ["", ""],
+        ["CODES", ""],
+        ["Tommur_Code", "From All3/Davenport/website maps; family code applied by description when size-level code known"],
+        ["Lesso_Code", "From Lesso DWV list match on description+size (authoritative); website as fallback"],
         ["", ""],
         ["HTS / DUTY / TARIFF (estimate — verify with customs broker before entry)", ""],
         ["MFN", "Ordinary HTS Column 1 general rate"],
         ["Section 301", f"{ADD_SEC301*100:.1f}% additional on China-origin for these headings (Lists 1-3 typical)"],
         ["FLIP 301 / forced-labor add-on", f"{ADD_FLIP*100:.1f}% additional on China products of China effective ~2026-07-24 (USTR FLIP 301 action) — confirm applicability per entry"],
-        ["Total stack used here", "MFN + 25% Sec 301 + 12.5% FLIP"],
+        ["Duty_Tariff_Only_Pct", "MFN + 25% Sec 301 + 12.5% FLIP (no freight)"],
         ["NOT included", "MPF (0.3464%), HMF (0.125%), brokerage, trucking, Section 232 copper (if any) — add if needed"],
         ["Color", "Left blank (not in source files)"],
         ["", ""],
         ["DATA SOURCES", ""],
-        ["All_3_Projects_8-27.xlsx", "Yellow FOB, list FOB, DDP, carton dims, Tommur codes"],
-        ["Margins_8-24-26.xlsx", "Yellow FOB confirmation"],
-        ["Davenport_8-27.xlsx", "Tommur PI dims / alternate FOB"],
-        ["All_Current_Supplies.xlsx", "Full Tommur-offerable catalog (PVC/CPVC/Copper/PEX)"],
-        ["Lesso_DWV_List.xlsx", "Lesso codes + carton LxWxH + pcs/ctn for DWV fittings"],
-        ["Website assets/products.csv", "APBS item codes, Lesso codes, selling prices"],
+        ["All_3_Projects_8-27.xlsx", "Yellow FOB (ONLY FOB source), DDP, carton dims, Tommur codes"],
+        ["Margins_8-24-26.xlsx", "DDP only"],
+        ["Davenport_8-27.xlsx", "Dims / DDP-like unit prices / Tommur codes"],
+        ["All_Current_Supplies.xlsx", "Full Tommur-offerable catalog (PVC/CPVC/Copper/PEX); PVC FOB col used as DDP"],
+        ["Lesso_DWV_List.xlsx", "Lesso codes + master carton LxWxH + pcs/ctn for DWV fittings"],
+        ["Website assets/products.csv", "APBS item codes, Tommur/Lesso maps, selling prices"],
     ]
     for r in notes:
         ws.append(r)
@@ -1055,10 +1193,6 @@ def write_workbook(rows):
     yellow_fill = PatternFill("solid", fgColor="FFF2CC")
     money_cols = {
         "FOB_USD",
-        "FOB_Yellow",
-        "FOB_List",
-        "FOB_Davenport",
-        "FOB_AllCurrentSupplies",
         "DDP_Current",
         "FOB_vs_DDP_Savings",
         "Selling_Price",
@@ -1075,7 +1209,9 @@ def write_workbook(rows):
         "Duty_MFN_Pct",
         "Tariff_Sec301_Pct",
         "Tariff_FLIP301_Pct",
-        "Duty_Tariff_Total_Pct",
+        "Duty_Tariff_Only_Pct",
+        "Duty_Tariff_Freight_Pct_40ft",
+        "Duty_Tariff_Freight_Pct_45HQ",
         "Margin_Pct_40ft",
         "Margin_Pct_45HQ",
     }
@@ -1092,9 +1228,9 @@ def write_workbook(rows):
         for name in ("CBM_per_Carton", "CBM_per_Pc"):
             ws.cell(r, header_idx[name]).number_format = "0.000000"
         # highlight yellow FOB used
-        if ws.cell(r, header_idx["FOB_Source"]).value and "Yellow" in str(
+        if ws.cell(r, header_idx["FOB_Source"]).value and "yellow" in str(
             ws.cell(r, header_idx["FOB_Source"]).value
-        ):
+        ).lower():
             ws.cell(r, header_idx["FOB_USD"]).fill = yellow_fill
         # flag FOB not lower than DDP
         flag = ws.cell(r, header_idx["FOB_Lower_Than_DDP"]).value
