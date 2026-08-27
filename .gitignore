@@ -4,6 +4,7 @@ node_modules/
 # Brochure PDF build artifacts
 brochure/node_modules/
 brochure/All-Pro-Building-Supplies-Brochure-temp.pdf
+brochure/sell-sheets/html/
 
 # Cloudflare Worker local cache
 backend/.wrangler/

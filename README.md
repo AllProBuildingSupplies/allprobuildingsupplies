@@ -51,7 +51,16 @@ API URL: `assets/main.js` → `window.APBS_API_BASE`
 
 Production data lives in Cloudflare D1 (`allpro-db`). Manage products and users through the admin panel or CSV upload. There is no seed file in this repo by design.
 
-## Security notes
+## Brochure & sell sheets
+
+From `brochure/` (requires `npm install` once — downloads Chromium for Puppeteer):
+
+```bash
+npm run build          # company brochure PDF
+npm run sell-sheets    # one sell sheet PDF per product category
+```
+
+Sell sheet outputs land in `brochure/sell-sheets/pdf/`.
 
 - Trade customers receive a signed JWT on login (`apbs_token`).
 - Checkout and order history require that token.

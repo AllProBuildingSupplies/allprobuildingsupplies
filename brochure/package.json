@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node generate-pdf.mjs"
+    "build": "node generate-pdf.mjs",
+    "sell-sheets": "node generate-sell-sheets.mjs"
   },
   "devDependencies": {
     "puppeteer": "^24.0.0"

@@ -32,3 +32,6 @@ Run both at once; the frontend calls the backend over HTTP.
 
 ### Brochure PDF tool (optional)
 From `brochure/`: `npm install` then `npm run build`. `npm install` downloads a Chromium build for Puppeteer, so it is intentionally excluded from the startup update script.
+
+### Category sell sheets
+From `brochure/`: `npm run sell-sheets` regenerates one PDF per catalog category (plus an index) under `brochure/sell-sheets/pdf/`, driven by `assets/products.csv` and standards in `brochure/category-standards.js`.
