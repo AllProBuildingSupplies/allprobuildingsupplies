@@ -249,14 +249,13 @@ const SHARED_CSS = `
     width: auto;
     display: block;
     margin-bottom: 8px;
-    filter: brightness(0) invert(1);
   }
   .brand-name {
     font-family: 'Oswald', sans-serif;
     font-size: 15px;
     font-weight: 700;
     letter-spacing: 1.5px;
-    color: #fff;
+    color: var(--gold-soft);
     line-height: 1.1;
   }
   .brand-script {
