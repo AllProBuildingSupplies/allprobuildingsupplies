@@ -12,6 +12,11 @@ Built by `scripts/build_tommur_cost_margin.py` from the factory/project workbook
 - **Assumptions_Notes** — formulas and caveats
 - **Summary** — counts
 
+## Key rules
+- **FOB_USD** = yellow column from All 3 Projects only (else blank)
+- **CBM** = always `L×W×H/1,000,000` (prefer Lesso carton dims)
+- **Duty_Tariff_Freight_Pct** = `(duty$ + freight$) / FOB` → Landed ≈ FOB × (1 + pct)
+
 ## Rebuild
 ```bash
 python3 scripts/build_tommur_cost_margin.py
