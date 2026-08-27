@@ -606,25 +606,54 @@ const SHARED_CSS = `
   }
   .fill-card .pname { font-size: 12px; margin-bottom: 3px; }
   .fill-card .sku { font-size: 8px; margin-bottom: 5px; }
-  .fill-card .sizes { font-size: 9px; color: var(--ink); line-height: 1.4; }
-  .fill-card .stds { margin-top: 6px; font-size: 7.5px; }
+  .fill-card .sizes-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold2);
+    margin: 4px 0 6px;
+  }
+  .fill-card .stds { margin-top: 8px; font-size: 7.5px; }
   .fill-body { display: flex; flex-direction: column; height: 100%; min-height: 0; }
   .size-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 6px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(0.72in, 1fr));
+    gap: 8px;
+    margin-top: 2px;
     flex: 1;
-    align-content: flex-start;
+    align-content: start;
+  }
+  .size-chips.compact {
+    grid-template-columns: repeat(auto-fill, minmax(0.48in, 1fr));
+    gap: 4px;
+    margin-top: 3px;
   }
   .size-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0.42in;
+    padding: 6px 4px;
     font-family: 'DM Mono', monospace;
-    font-size: 8px;
-    letter-spacing: 0.5px;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.15;
+    text-align: center;
     color: var(--navy);
     background: #fff;
-    border: 1px solid var(--line);
-    padding: 5px 8px;
+    border: 1.5px solid var(--navy);
+    box-sizing: border-box;
+  }
+  .size-chips.compact .size-chip {
+    min-height: 0.28in;
+    font-size: 6.5px;
+    padding: 3px 2px;
+    border-width: 1px;
+  }
+  .pg-item .size-chips {
+    margin-top: 3px;
   }
   .order-bar {
     margin-top: 8px;
@@ -797,6 +826,14 @@ function renderSidebar(meta) {
   </aside>`;
 }
 
+function renderSizeChips(sizes, { compact = false } = {}) {
+  if (!sizes?.length) return '<div class="size-chips"><span class="size-chip">—</span></div>';
+  const chips = sizes
+    .map((s) => `<div class="size-chip">${esc(s)}</div>`)
+    .join('');
+  return `<div class="size-chips${compact ? ' compact' : ''}">${chips}</div>`;
+}
+
 function renderProductTable(families, mode) {
   if (mode === 'dense') {
     const items = families
@@ -806,8 +843,8 @@ function renderProductTable(families, mode) {
           ${url ? `<img class="thumb" src="${url}" alt=""/>` : '<div></div>'}
           <div>
             <div class="pname">${esc(f.family)}</div>
-            <div class="sku">${esc(f.code)}</div>
-            <div class="sizes">${esc(f.sizes.join(', '))}${f.pack ? ` · Pk ${esc(f.pack)}` : ''}</div>
+            <div class="sku">${esc(f.code)}${f.pack ? ` · Pk ${esc(f.pack)}` : ''}</div>
+            ${renderSizeChips(f.sizes, { compact: true })}
           </div>
         </div>`;
       })
@@ -823,16 +860,13 @@ function renderProductTable(families, mode) {
         const factory = [f.tommur ? `Tommur ${f.tommur}` : '', f.lesso ? `Lesso ${f.lesso}` : '']
           .filter(Boolean)
           .join(' · ');
-        const sizeChips = f.sizes
-          .map((s) => `<span class="size-chip">${esc(s)}</span>`)
-          .join('');
         return `<div class="fill-card">
           ${url ? `<img src="${url}" alt=""/>` : '<div></div>'}
           <div class="fill-body">
             <div class="pname">${esc(f.family)}</div>
             <div class="sku">${esc(f.code)} · ${esc(f.description)}</div>
-            <div class="sizes"><strong>Available sizes</strong></div>
-            <div class="size-chips">${sizeChips}</div>
+            <div class="sizes-label">Available sizes · ${f.sizes.length}</div>
+            ${renderSizeChips(f.sizes)}
             <div class="stds">Pack ${esc(f.pack || '—')} · ${esc((f.standards || []).join(' · ') || '—')}${factory ? ` · ${esc(factory)}` : ''}</div>
           </div>
         </div>`;
@@ -849,11 +883,11 @@ function renderProductTable(families, mode) {
         .join(' · ');
       return `<tr>
         <td style="width:0.32in">${url ? `<img class="thumb" src="${url}" alt=""/>` : ''}</td>
-        <td style="width:1.2in"><div class="sku">${esc(f.code)}</div><div class="pname">${esc(f.family)}</div></td>
+        <td style="width:1.15in"><div class="sku">${esc(f.code)}</div><div class="pname">${esc(f.family)}</div></td>
         <td>${esc(f.description)}${factory ? `<div class="stds">${esc(factory)}</div>` : ''}</td>
-        <td class="sizes" style="width:1.55in">${esc(f.sizes.join(', '))}</td>
+        <td style="width:2.1in">${renderSizeChips(f.sizes, { compact: true })}</td>
         <td class="pack" style="width:0.35in">${esc(f.pack || '—')}</td>
-        <td class="stds" style="width:1.05in">${esc((f.standards || []).join(' · ') || '—')}</td>
+        <td class="stds" style="width:1in">${esc((f.standards || []).join(' · ') || '—')}</td>
       </tr>`;
     })
     .join('');
