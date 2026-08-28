@@ -22,6 +22,13 @@
   window.APBS_API_BASE = isTest
     ? 'https://allpro-api-test.baruch-6d5.workers.dev/api'
     : 'https://allpro-api.baruch-6d5.workers.dev/api';
+  // Optional full API base override for local/dev (do not hardcode in commits):
+  // ?apbs_api=http://127.0.0.1:8787/api
+  try {
+    var q2 = new URLSearchParams(window.location.search || '');
+    var apiOverride = (q2.get('apbs_api') || '').trim();
+    if (apiOverride) window.APBS_API_BASE = apiOverride.replace(/\/?$/, '');
+  } catch (_) {}
 })();
 
 window.APBS_THEME_KEY = 'apbs_theme';

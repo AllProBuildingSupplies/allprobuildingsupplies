@@ -7,13 +7,17 @@ DIST="$(mktemp -d /tmp/allpro-test-XXXXXX)"
 cleanup() { rm -rf "$DIST"; }
 trap cleanup EXIT
 
-mkdir -p "$DIST/assets" "$DIST/images"
+mkdir -p "$DIST/assets" "$DIST/images" "$DIST/data"
 shopt -s nullglob
 cp -f "$ROOT"/*.html "$DIST/" 2>/dev/null || true
 cp -f "$ROOT/sw.js" "$DIST/" 2>/dev/null || true
 cp -f "$ROOT/manifest.webmanifest" "$DIST/" 2>/dev/null || true
 cp -a "$ROOT/assets/." "$DIST/assets/"
 cp -a "$ROOT/images/." "$DIST/images/" 2>/dev/null || true
+# Inbound invoice seed JSON (Admin → Stock → Import invoices)
+if [[ -d "$ROOT/data" ]]; then
+  cp -a "$ROOT/data/." "$DIST/data/"
+fi
 rm -f "$DIST/CNAME"
 
 cd "$ROOT/backend"

@@ -1,0 +1,727 @@
+{
+  "note": "ETA from Wan Hai 2026-09-15. Container number mapping: Container 3 PDF -> WHSU9010053, Container 4 PDF -> WHSU9004718 (swap if wrong). Inventory is INBOUND only until received \u2014 do not add to on-hand until arrival.",
+  "containers": [
+    {
+      "id": "inbound-whsu9010053",
+      "label": "Container 3",
+      "container_number": "WHSU9010053",
+      "carrier": "Wan Hai Lines",
+      "eta": "2026-09-15",
+      "invoice_ref": "SG 260509-003-SG",
+      "invoice_date": "2026-05-29",
+      "status": "in_transit",
+      "items": [
+        {
+          "code": "PVC-PIPE-FOAM",
+          "size": "2",
+          "tommur_code": "A100P01-",
+          "qty": 1519,
+          "cartons": null
+        },
+        {
+          "code": "PVC-PIPE-FOAM",
+          "size": "3",
+          "tommur_code": "A100P01-",
+          "qty": 1519,
+          "cartons": null
+        },
+        {
+          "code": "PVC-PIPE-FOAM",
+          "size": "4",
+          "tommur_code": "A100P01-",
+          "qty": 765,
+          "cartons": null
+        },
+        {
+          "code": "PVC-CPLNG",
+          "size": "4",
+          "tommur_code": "D004",
+          "qty": 100,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-CPLNG",
+          "size": "3",
+          "tommur_code": "D004",
+          "qty": 300,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-CPLNG",
+          "size": "2",
+          "tommur_code": "D004",
+          "qty": 500,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-CPLNG",
+          "size": "1-1/2",
+          "tommur_code": "D004",
+          "qty": 400,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-PTRAPLOW",
+          "size": "4",
+          "tommur_code": "A 062",
+          "qty": 20,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-PTRAPLOW",
+          "size": "3",
+          "tommur_code": "A 062",
+          "qty": 100,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-PTRAPLOW",
+          "size": "2",
+          "tommur_code": "A 062",
+          "qty": 180,
+          "cartons": 12
+        },
+        {
+          "code": "PVC-PTRAPLOW",
+          "size": "1-1/2",
+          "tommur_code": "A 062",
+          "qty": 150,
+          "cartons": 6
+        },
+        {
+          "code": "PVC-PTRAP",
+          "size": "3",
+          "tommur_code": "D103",
+          "qty": 10,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-PTRAP",
+          "size": "2",
+          "tommur_code": "D103",
+          "qty": 15,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-PTRAP",
+          "size": "1-1/2",
+          "tommur_code": "D103",
+          "qty": 25,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-WYEDBL",
+          "size": "3x3x2x2",
+          "tommur_code": "D097",
+          "qty": 75,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-WYERED",
+          "size": "4x4x2",
+          "tommur_code": "D092",
+          "qty": 20,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-WYERED",
+          "size": "3x3x2",
+          "tommur_code": "D092",
+          "qty": 240,
+          "cartons": 20
+        },
+        {
+          "code": "PVC-WYEHUB",
+          "size": "2",
+          "tommur_code": "D090",
+          "qty": 300,
+          "cartons": 12
+        },
+        {
+          "code": "PVC-WYEHUB",
+          "size": "1-1/2",
+          "tommur_code": "D090",
+          "qty": 50,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-CLEANTEE",
+          "size": "2",
+          "tommur_code": "D078",
+          "qty": 300,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-SANTEE",
+          "size": "4",
+          "tommur_code": "D065",
+          "qty": 10,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-1/16HH",
+          "size": "2",
+          "tommur_code": "D057",
+          "qty": 200,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-1/8HS",
+          "size": "4",
+          "tommur_code": "D055",
+          "qty": 90,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-1/8HH",
+          "size": "4",
+          "tommur_code": "D053",
+          "qty": 90,
+          "cartons": 6
+        },
+        {
+          "code": "PVC-1/8HH",
+          "size": "1-1/2",
+          "tommur_code": "D053",
+          "qty": 700,
+          "cartons": 7
+        },
+        {
+          "code": "PVC-1/4LOWHEEL",
+          "size": "3x3x2",
+          "tommur_code": "D050",
+          "qty": 160,
+          "cartons": 16
+        },
+        {
+          "code": "PVC-1/4HHLNG",
+          "size": "2",
+          "tommur_code": "D043",
+          "qty": 600,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-1/4HH",
+          "size": "2",
+          "tommur_code": "D035",
+          "qty": 1000,
+          "cartons": 20
+        },
+        {
+          "code": "PVC-1/4HH",
+          "size": "1-1/2",
+          "tommur_code": "D035",
+          "qty": 1000,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-CAPSOC",
+          "size": "2",
+          "tommur_code": "D025",
+          "qty": 180,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-MADPTR",
+          "size": "1-1/2",
+          "tommur_code": "D021",
+          "qty": 300,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-BUSHINGHS",
+          "size": "3x2",
+          "tommur_code": "D019",
+          "qty": 120,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-INCREDHH",
+          "size": "4x3",
+          "tommur_code": "D007",
+          "qty": 80,
+          "cartons": 4
+        }
+      ]
+    },
+    {
+      "id": "inbound-whsu9004718",
+      "label": "Container 4",
+      "container_number": "WHSU9004718",
+      "carrier": "Wan Hai Lines",
+      "eta": "2026-09-15",
+      "status": "in_transit",
+      "items": [
+        {
+          "code": "PVC-PIPE-FOAM",
+          "size": "1-1/2",
+          "tommur_code": "A100P01-",
+          "qty": 3080,
+          "cartons": null
+        },
+        {
+          "code": "PVC-PIPE-FOAM",
+          "size": "2",
+          "tommur_code": "A100P01-",
+          "qty": 1561,
+          "cartons": null
+        },
+        {
+          "code": "PVC-PIPE-FOAM",
+          "size": "3",
+          "tommur_code": "A100P01-",
+          "qty": 1561,
+          "cartons": null
+        },
+        {
+          "code": "PVC-CLSTFLNGH",
+          "size": "4x3",
+          "tommur_code": "D121",
+          "qty": 200,
+          "cartons": 8
+        },
+        {
+          "code": "PVC-PTRAP",
+          "size": "4",
+          "tommur_code": "D103",
+          "qty": 4,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-PTRAP",
+          "size": "3",
+          "tommur_code": "D103",
+          "qty": 10,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-PTRAP",
+          "size": "2",
+          "tommur_code": "D103",
+          "qty": 15,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-PTRAP",
+          "size": "1-1/2",
+          "tommur_code": "D103",
+          "qty": 25,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-WYEDBL",
+          "size": "3x3x2x2",
+          "tommur_code": "D097",
+          "qty": 75,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-WYERED",
+          "size": "4x4x3",
+          "tommur_code": "D092",
+          "qty": 40,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-WYERED",
+          "size": "4x4x2",
+          "tommur_code": "D092",
+          "qty": 20,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-WYERED",
+          "size": "3x3x2",
+          "tommur_code": "D092",
+          "qty": 240,
+          "cartons": 20
+        },
+        {
+          "code": "PVC-WYEHUB",
+          "size": "4",
+          "tommur_code": "D090",
+          "qty": 40,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-WYEHUB",
+          "size": "3",
+          "tommur_code": "D090",
+          "qty": 150,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-WYEHUB",
+          "size": "2",
+          "tommur_code": "D090",
+          "qty": 300,
+          "cartons": 12
+        },
+        {
+          "code": "PVC-WYEHUB",
+          "size": "1-1/2",
+          "tommur_code": "D090",
+          "qty": 50,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-CLEANTEE",
+          "size": "4",
+          "tommur_code": "D078",
+          "qty": 20,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-CLEANTEE",
+          "size": "3",
+          "tommur_code": "D078",
+          "qty": 120,
+          "cartons": 6
+        },
+        {
+          "code": "PVC-CLEANTEE",
+          "size": "2",
+          "tommur_code": "D078",
+          "qty": 300,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-SANTEEDBL",
+          "size": "2x2x1-1/2x1-1/2",
+          "tommur_code": "D073",
+          "qty": 100,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-SANTEERED",
+          "size": "3x3x2",
+          "tommur_code": "D066",
+          "qty": 90,
+          "cartons": 6
+        },
+        {
+          "code": "PVC-SANTEERED",
+          "size": "2x1-1/2x2",
+          "tommur_code": "D066",
+          "qty": 600,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-SANTEERED",
+          "size": "2x2x1-1/2",
+          "tommur_code": "D066",
+          "qty": 600,
+          "cartons": 12
+        },
+        {
+          "code": "PVC-SANTEERED",
+          "size": "2x1-1/2x1-1/2",
+          "tommur_code": "D066",
+          "qty": 600,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-SANTEE",
+          "size": "4",
+          "tommur_code": "D065",
+          "qty": 10,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-SANTEE",
+          "size": "3",
+          "tommur_code": "D065",
+          "qty": 60,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-SANTEE",
+          "size": "2",
+          "tommur_code": "D065",
+          "qty": 280,
+          "cartons": 8
+        },
+        {
+          "code": "PVC-SANTEE",
+          "size": "1-1/2",
+          "tommur_code": "D065",
+          "qty": 300,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-1/16HS",
+          "size": "3",
+          "tommur_code": "D059",
+          "qty": 100,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-1/16HS",
+          "size": "2",
+          "tommur_code": "D059",
+          "qty": 200,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-1/16HS",
+          "size": "1-1/2",
+          "tommur_code": "D059",
+          "qty": 200,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-1/16HH",
+          "size": "3",
+          "tommur_code": "D057",
+          "qty": 100,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-1/16HH",
+          "size": "2",
+          "tommur_code": "D057",
+          "qty": 200,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-1/16HH",
+          "size": "1-1/2",
+          "tommur_code": "D057",
+          "qty": 200,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-1/8HS",
+          "size": "4",
+          "tommur_code": "D055",
+          "qty": 90,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-1/8HS",
+          "size": "3",
+          "tommur_code": "D055",
+          "qty": 800,
+          "cartons": 32
+        },
+        {
+          "code": "PVC-1/8HS",
+          "size": "2",
+          "tommur_code": "D055",
+          "qty": 800,
+          "cartons": 16
+        },
+        {
+          "code": "PVC-1/8HS",
+          "size": "1-1/2",
+          "tommur_code": "D055",
+          "qty": 800,
+          "cartons": 8
+        },
+        {
+          "code": "PVC-1/8HH",
+          "size": "4",
+          "tommur_code": "D053",
+          "qty": 90,
+          "cartons": 6
+        },
+        {
+          "code": "PVC-1/8HH",
+          "size": "3",
+          "tommur_code": "D053",
+          "qty": 800,
+          "cartons": 25
+        },
+        {
+          "code": "PVC-1/8HH",
+          "size": "2",
+          "tommur_code": "D053",
+          "qty": 800,
+          "cartons": 16
+        },
+        {
+          "code": "PVC-1/8HH",
+          "size": "1-1/2",
+          "tommur_code": "D053",
+          "qty": 800,
+          "cartons": 8
+        },
+        {
+          "code": "PVC-1/4LOWHEEL",
+          "size": "3x3x2",
+          "tommur_code": "D050",
+          "qty": 160,
+          "cartons": 16
+        },
+        {
+          "code": "PVC-1/4HHLNG",
+          "size": "4",
+          "tommur_code": "D043",
+          "qty": 20,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-1/4HHLNG",
+          "size": "3",
+          "tommur_code": "D043",
+          "qty": 600,
+          "cartons": 60
+        },
+        {
+          "code": "PVC-1/4HHLNG",
+          "size": "2",
+          "tommur_code": "D043",
+          "qty": 600,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-1/4HS",
+          "size": "4",
+          "tommur_code": "D040",
+          "qty": 20,
+          "cartons": 2
+        },
+        {
+          "code": "PVC-1/4HS",
+          "size": "3",
+          "tommur_code": "D040",
+          "qty": 100,
+          "cartons": 5
+        },
+        {
+          "code": "PVC-1/4HS",
+          "size": "2",
+          "tommur_code": "D040",
+          "qty": 200,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-1/4HS",
+          "size": "1-1/2",
+          "tommur_code": "D040",
+          "qty": 180,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-1/4HH",
+          "size": "4",
+          "tommur_code": "D035",
+          "qty": 100,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-1/4HH",
+          "size": "3",
+          "tommur_code": "D035",
+          "qty": 800,
+          "cartons": 33
+        },
+        {
+          "code": "PVC-1/4HH",
+          "size": "2",
+          "tommur_code": "D035",
+          "qty": 1000,
+          "cartons": 20
+        },
+        {
+          "code": "PVC-1/4HH",
+          "size": "1-1/2",
+          "tommur_code": "D035",
+          "qty": 1000,
+          "cartons": 10
+        },
+        {
+          "code": "PVC-CAPSOC",
+          "size": "4",
+          "tommur_code": "D025",
+          "qty": 20,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-CAPSOC",
+          "size": "3",
+          "tommur_code": "D025",
+          "qty": 60,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-CAPSOC",
+          "size": "2",
+          "tommur_code": "D025",
+          "qty": 180,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-CAPSOC",
+          "size": "1-1/2",
+          "tommur_code": "D025",
+          "qty": 240,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-MADPTR",
+          "size": "2",
+          "tommur_code": "D021",
+          "qty": 200,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-MADPTR",
+          "size": "1-1/2",
+          "tommur_code": "D021",
+          "qty": 300,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-BUSHINGHS",
+          "size": "4x3",
+          "tommur_code": "D019",
+          "qty": 90,
+          "cartons": 3
+        },
+        {
+          "code": "PVC-BUSHINGHS",
+          "size": "3x2",
+          "tommur_code": "D019",
+          "qty": 120,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-BUSHINGHS",
+          "size": "2x1-1/2",
+          "tommur_code": "D019",
+          "qty": 200,
+          "cartons": 1
+        },
+        {
+          "code": "PVC-INCREDHH",
+          "size": "4x3",
+          "tommur_code": "D007",
+          "qty": 80,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-INCREDHH",
+          "size": "3x2",
+          "tommur_code": "D007",
+          "qty": 240,
+          "cartons": 3
+        },
+        {
+          "code": "PVC-INCREDHH",
+          "size": "2x1-1/2",
+          "tommur_code": "D007",
+          "qty": 400,
+          "cartons": 4
+        },
+        {
+          "code": "PVC-SANTEERED",
+          "size": "4x4x3",
+          "tommur_code": "D066",
+          "qty": 20,
+          "cartons": 2
+        }
+      ]
+    }
+  ]
+}

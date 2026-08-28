@@ -3459,6 +3459,74 @@ html.apbs-no-custom-cursor, html.apbs-no-custom-cursor body {
   padding-top: 20px;
   border-top: 1px solid rgba(200,152,31,.2);
 }
+.wms-inbound { display: flex; flex-direction: column; gap: 12px; }
+.wms-inbound-card {
+  border: 1px solid rgba(200,152,31,.28);
+  background: rgba(0,0,0,.18);
+  padding: 14px 16px;
+}
+.wms-inbound-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.wms-inbound-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  color: var(--gold);
+  letter-spacing: .04em;
+}
+.wms-inbound-meta {
+  font-size: 13px;
+  color: var(--silver);
+  line-height: 1.45;
+}
+.wms-inbound-meta strong { color: var(--text, #eee); font-weight: 600; }
+.wms-inbound-status {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid rgba(200,152,31,.4);
+  color: var(--gold);
+}
+.wms-inbound-status.is-received {
+  border-color: rgba(46,204,113,.45);
+  color: #2ecc71;
+}
+.wms-inbound-status.is-arrived {
+  border-color: rgba(52,152,219,.45);
+  color: #5dade2;
+}
+.wms-inbound-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.wms-inbound-lines {
+  margin-top: 10px;
+  max-height: 220px;
+  overflow: auto;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: var(--silver);
+  border-top: 1px solid rgba(200,152,31,.15);
+  padding-top: 8px;
+}
+.wms-inbound-lines table { width: 100%; border-collapse: collapse; }
+.wms-inbound-lines td, .wms-inbound-lines th {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.wms-inbound-lines th { color: var(--gold); font-weight: 500; }
+.wms-inbound-empty { color: var(--silver); font-size: 13px; padding: 8px 0; }
 .wms-section-head {
   display: flex;
   align-items: center;

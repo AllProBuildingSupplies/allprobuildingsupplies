@@ -1117,6 +1117,168 @@ async function ensureStockMovementsTable(env) {
   } catch (_) {}
 }
 
+/** Inbound ocean containers (expected inventory until received into on-hand). */
+async function ensureInboundShipmentsTable(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS inbound_shipments (
+      id TEXT PRIMARY KEY,
+      label TEXT DEFAULT '',
+      container_number TEXT NOT NULL DEFAULT '',
+      carrier TEXT DEFAULT '',
+      eta TEXT DEFAULT '',
+      invoice_ref TEXT DEFAULT '',
+      invoice_date TEXT DEFAULT '',
+      status TEXT DEFAULT 'in_transit',
+      items_json TEXT DEFAULT '[]',
+      notes TEXT DEFAULT '',
+      received_at TEXT DEFAULT '',
+      created_at TEXT,
+      updated_at TEXT
+    )
+  `).run();
+  try {
+    await env.DB.prepare(
+      `CREATE INDEX IF NOT EXISTS idx_inbound_status ON inbound_shipments(status)`
+    ).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(
+      `CREATE INDEX IF NOT EXISTS idx_inbound_container ON inbound_shipments(container_number)`
+    ).run();
+  } catch (_) {}
+}
+
+function parseInboundItems(raw) {
+  let items = raw;
+  if (typeof raw === 'string') {
+    try {
+      items = JSON.parse(raw || '[]');
+    } catch (_) {
+      items = [];
+    }
+  }
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((it) => {
+      const code = normalizeProductCode(it && (it.code || it.sku));
+      const size = canonicalizeSize(it && it.size);
+      const qty = parseInt(it && (it.qty ?? it.quantity ?? it.pcs), 10);
+      const cartons = it && it.cartons != null ? parseInt(it.cartons, 10) : null;
+      const tommur = it && (it.tommur_code || it.tommur) ? String(it.tommur_code || it.tommur).trim() : '';
+      if (!code || !size || !Number.isFinite(qty) || qty <= 0) return null;
+      return {
+        code,
+        size,
+        qty,
+        cartons: Number.isFinite(cartons) ? cartons : null,
+        tommur_code: tommur,
+      };
+    })
+    .filter(Boolean);
+}
+
+function formatInboundRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    label: row.label || '',
+    containerNumber: row.container_number || '',
+    carrier: row.carrier || '',
+    eta: row.eta || '',
+    invoiceRef: row.invoice_ref || '',
+    invoiceDate: row.invoice_date || '',
+    status: row.status || 'in_transit',
+    items: parseInboundItems(row.items_json),
+    notes: row.notes || '',
+    receivedAt: row.received_at || '',
+    createdAt: row.created_at || '',
+    updatedAt: row.updated_at || '',
+    totalPcs: parseInboundItems(row.items_json).reduce((s, it) => s + (it.qty || 0), 0),
+    lineCount: parseInboundItems(row.items_json).length,
+  };
+}
+
+async function upsertInboundShipment(env, body) {
+  const now = new Date().toISOString();
+  const id = String((body && (body.id || body.container_number || body.containerNumber)) || '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .toLowerCase();
+  if (!id) throw new Error('Missing inbound id or container number');
+  const containerNumber = String(
+    (body && (body.container_number || body.containerNumber)) || ''
+  ).trim();
+  const items = parseInboundItems((body && (body.items || body.lines)) || []);
+  const existing = await env.DB.prepare(`SELECT * FROM inbound_shipments WHERE id = ?`)
+    .bind(id)
+    .first();
+  let status = String((body && body.status) || 'in_transit').trim() || 'in_transit';
+  // Re-importing invoice lines must not unlock a container that was already received.
+  if (existing && String(existing.status) === 'received' && status !== 'received') {
+    if (!(body && body.forceStatus === true)) {
+      status = 'received';
+    }
+  }
+  const fields = {
+    label: String((body && body.label) || '').trim(),
+    container_number: containerNumber,
+    carrier: String((body && body.carrier) || '').trim(),
+    eta: String((body && body.eta) || '').trim(),
+    invoice_ref: String((body && (body.invoice_ref || body.invoiceRef)) || '').trim(),
+    invoice_date: String((body && (body.invoice_date || body.invoiceDate)) || '').trim(),
+    status,
+    items_json: JSON.stringify(items),
+    notes: String((body && body.notes) || '').trim(),
+    updated_at: now,
+  };
+  if (existing) {
+    await env.DB.prepare(
+      `UPDATE inbound_shipments
+       SET label=?, container_number=?, carrier=?, eta=?, invoice_ref=?, invoice_date=?,
+           status=?, items_json=?, notes=?, updated_at=?
+       WHERE id=?`
+    )
+      .bind(
+        fields.label,
+        fields.container_number,
+        fields.carrier,
+        fields.eta,
+        fields.invoice_ref,
+        fields.invoice_date,
+        fields.status,
+        fields.items_json,
+        fields.notes,
+        fields.updated_at,
+        id
+      )
+      .run();
+  } else {
+    await env.DB.prepare(
+      `INSERT INTO inbound_shipments
+       (id, label, container_number, carrier, eta, invoice_ref, invoice_date, status,
+        items_json, notes, received_at, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', ?, ?)`
+    )
+      .bind(
+        id,
+        fields.label,
+        fields.container_number,
+        fields.carrier,
+        fields.eta,
+        fields.invoice_ref,
+        fields.invoice_date,
+        fields.status,
+        fields.items_json,
+        fields.notes,
+        now,
+        now
+      )
+      .run();
+  }
+  const row = await env.DB.prepare(`SELECT * FROM inbound_shipments WHERE id = ?`).bind(id).first();
+  return formatInboundRow(row);
+}
+
 /** Published invoice HTML + PDF docs for customer emails. */
 async function ensureInvoiceDocsTable(env) {
   await env.DB.prepare(`
@@ -1181,6 +1343,7 @@ async function ensureRuntimeSchema(env) {
       await ensureOrderShipmentColumns(env);
       await ensureOrderPaymentColumns(env);
       await ensureStockMovementsTable(env);
+      await ensureInboundShipmentsTable(env);
       await ensureInvoiceDocsTable(env);
       try {
         await backfillLegacyOrderShipments(env);
@@ -3223,6 +3386,149 @@ export default {
           .bind(limit)
           .all();
         return jsonResponse({ movements: results || [] });
+      }
+
+      // Inbound containers: expected stock in transit (not yet on hand).
+      if (path === '/api/admin/inbound' && request.method === 'GET') {
+        const status = String(url.searchParams.get('status') || '').trim();
+        let q = `SELECT * FROM inbound_shipments`;
+        const binds = [];
+        if (status) {
+          q += ` WHERE status = ?`;
+          binds.push(status);
+        }
+        q += ` ORDER BY CASE status WHEN 'in_transit' THEN 0 WHEN 'arrived' THEN 1 WHEN 'received' THEN 2 ELSE 3 END, eta ASC, container_number ASC`;
+        const stmt = env.DB.prepare(q);
+        const { results } = binds.length ? await stmt.bind(...binds).all() : await stmt.all();
+        return jsonResponse({ shipments: (results || []).map(formatInboundRow) });
+      }
+
+      if (path === '/api/admin/inbound' && request.method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        const list = Array.isArray(body)
+          ? body
+          : Array.isArray(body && body.containers)
+            ? body.containers
+            : Array.isArray(body && body.shipments)
+              ? body.shipments
+              : body
+                ? [body]
+                : [];
+        if (!list.length) return jsonResponse({ error: 'No inbound shipments provided' }, 400);
+        const saved = [];
+        for (const raw of list) {
+          saved.push(await upsertInboundShipment(env, raw));
+        }
+        return jsonResponse({ success: true, count: saved.length, shipments: saved });
+      }
+
+      if (path.startsWith('/api/admin/inbound/') && request.method === 'GET') {
+        const id = decodeURIComponent(path.slice('/api/admin/inbound/'.length).split('/')[0] || '');
+        if (!id || id.includes('/')) return jsonResponse({ error: 'Not found' }, 404);
+        const row = await env.DB.prepare(`SELECT * FROM inbound_shipments WHERE id = ?`).bind(id).first();
+        if (!row) return jsonResponse({ error: 'Inbound shipment not found' }, 404);
+        return jsonResponse(formatInboundRow(row));
+      }
+
+      if (path.startsWith('/api/admin/inbound/') && path.endsWith('/receive') && request.method === 'POST') {
+        const id = decodeURIComponent(
+          path.slice('/api/admin/inbound/'.length, path.length - '/receive'.length)
+        );
+        const row = await env.DB.prepare(`SELECT * FROM inbound_shipments WHERE id = ?`).bind(id).first();
+        if (!row) return jsonResponse({ error: 'Inbound shipment not found' }, 404);
+        if (String(row.status || '') === 'received') {
+          return jsonResponse({ error: 'Already received into stock', shipment: formatInboundRow(row) }, 400);
+        }
+        const items = parseInboundItems(row.items_json);
+        if (!items.length) return jsonResponse({ error: 'No line items to receive' }, 400);
+
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const stmts = [];
+        const missing = [];
+        const applied = [];
+        let updated = 0;
+        for (const raw of items) {
+          const match = findProduct(allProds, raw.code, raw.size);
+          if (!match) {
+            missing.push({ code: raw.code, size: raw.size, qty: raw.qty, error: 'Product not found' });
+            continue;
+          }
+          const before = parseInt(match.qty, 10) || 0;
+          const after = before + raw.qty;
+          stmts.push(
+            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(
+              raw.qty,
+              match.code,
+              match.size
+            )
+          );
+          applied.push({ code: match.code, size: match.size, before, delta: raw.qty, after });
+          match.qty = after;
+          updated += 1;
+        }
+        if (stmts.length) await env.DB.batch(stmts);
+        const note = `inbound ${row.container_number || id}`;
+        for (const a of applied) {
+          await logStockMovement(env, {
+            code: a.code,
+            size: a.size,
+            delta: a.delta,
+            reason: 'receive',
+            qtyBefore: a.before,
+            qtyAfter: a.after,
+            note,
+          });
+        }
+        const now = new Date().toISOString();
+        await env.DB.prepare(
+          `UPDATE inbound_shipments SET status = 'received', received_at = ?, updated_at = ? WHERE id = ?`
+        )
+          .bind(now, now, id)
+          .run();
+        const updatedRow = await env.DB.prepare(`SELECT * FROM inbound_shipments WHERE id = ?`)
+          .bind(id)
+          .first();
+        return jsonResponse({
+          success: true,
+          updated,
+          applied,
+          missing,
+          shipment: formatInboundRow(updatedRow),
+        });
+      }
+
+      if (path.startsWith('/api/admin/inbound/') && request.method === 'PUT') {
+        const id = decodeURIComponent(path.slice('/api/admin/inbound/'.length));
+        if (!id || id.includes('/')) return jsonResponse({ error: 'Not found' }, 404);
+        const body = await request.json().catch(() => ({}));
+        const existing = await env.DB.prepare(`SELECT * FROM inbound_shipments WHERE id = ?`)
+          .bind(id)
+          .first();
+        if (!existing) return jsonResponse({ error: 'Inbound shipment not found' }, 404);
+        const merged = {
+          ...existing,
+          id,
+          label: body.label != null ? body.label : existing.label,
+          container_number:
+            body.container_number != null || body.containerNumber != null
+              ? body.container_number || body.containerNumber
+              : existing.container_number,
+          carrier: body.carrier != null ? body.carrier : existing.carrier,
+          eta: body.eta != null ? body.eta : existing.eta,
+          invoice_ref:
+            body.invoice_ref != null || body.invoiceRef != null
+              ? body.invoice_ref || body.invoiceRef
+              : existing.invoice_ref,
+          invoice_date:
+            body.invoice_date != null || body.invoiceDate != null
+              ? body.invoice_date || body.invoiceDate
+              : existing.invoice_date,
+          status: body.status != null ? body.status : existing.status,
+          notes: body.notes != null ? body.notes : existing.notes,
+          items: body.items != null ? body.items : parseInboundItems(existing.items_json),
+        };
+        const saved = await upsertInboundShipment(env, merged);
+        return jsonResponse({ success: true, shipment: saved });
       }
 
       if (path === '/api/admin/payment-methods' && request.method === 'GET') {
