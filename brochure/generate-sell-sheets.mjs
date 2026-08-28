@@ -139,8 +139,6 @@ function productFamilies(rows) {
         image: r.Image,
         family: r.sub_sub_sub_category || r.Description,
         pack: r.Pack,
-        tommur: r['Tommur-Code'] || '',
-        lesso: r['Lesso-Code'] || '',
         sizes: [],
         standards: standardsForSku(r),
       });
@@ -148,8 +146,6 @@ function productFamilies(rows) {
     const fam = byCode.get(code);
     if (r.Size && !fam.sizes.includes(r.Size)) fam.sizes.push(r.Size);
     if (r.Pack) fam.pack = r.Pack;
-    if (r['Tommur-Code'] && !fam.tommur) fam.tommur = r['Tommur-Code'];
-    if (r['Lesso-Code'] && !fam.lesso) fam.lesso = r['Lesso-Code'];
     if (r.Image && !fam.image) fam.image = r.Image;
   }
   for (const fam of byCode.values()) fam.sizes.sort(sizeSort);
@@ -547,23 +543,49 @@ const SHARED_CSS = `
   .prod-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3px 10px;
+    gap: 2px 8px;
     flex: 1 1 0;
     align-content: start;
     min-height: 0;
-    overflow: hidden;
   }
+  .prod-grid.cols-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px 6px;
+  }
+  .prod-grid.ultra .pg-item {
+    padding: 2px 3px;
+    gap: 3px;
+    grid-template-columns: 0.22in 1fr;
+    align-items: start;
+  }
+  .prod-grid.ultra .thumb {
+    width: 0.22in;
+    height: 0.22in;
+  }
+  .prod-grid.ultra .pname { font-size: 7px; line-height: 1.1; }
+  .prod-grid.ultra .sku { font-size: 5.5px; }
   .pg-item {
     display: grid;
     grid-template-columns: 0.28in 1fr;
     gap: 5px;
-    align-items: center;
+    align-items: start;
     padding: 3px 4px;
     border-bottom: 1px solid var(--line2);
   }
   .pg-item .pname { font-size: 7.5px; }
   .pg-item .sku { font-size: 6px; }
   .pg-item .sizes { font-size: 6.5px; }
+  .main.compact-mid .mid { margin-bottom: 4px; }
+  .main.compact-mid .construction td { padding: 2px 0; font-size: 7px; }
+  .main.compact-mid .std-box { padding: 6px 7px; }
+  .main.compact-mid .std-row { margin-bottom: 3px; font-size: 7px; }
+  .main.compact-mid .apps { margin-top: 4px; gap: 3px; }
+  .main.compact-mid .chip { font-size: 5.5px; padding: 2px 4px; }
+  .main.compact-mid .stats { margin-bottom: 6px; padding-bottom: 5px; }
+  .main.compact-mid .stat-v { font-size: 14px; }
+  .main.compact-mid .order-bar { padding: 6px 8px; margin-top: 4px; }
+  .main.compact-mid .order-bar .ob-t { font-size: 11px; }
+  .main.compact-mid .prod-lbl { margin: 0 0 3px; }
 
   /* Large fill cards for sparse categories */
   .fill-grid {
@@ -624,9 +646,9 @@ const SHARED_CSS = `
     align-content: start;
   }
   .size-chips.compact {
-    grid-template-columns: repeat(auto-fill, minmax(0.48in, 1fr));
-    gap: 4px;
-    margin-top: 3px;
+    grid-template-columns: repeat(auto-fill, minmax(0.40in, 1fr));
+    gap: 3px;
+    margin-top: 2px;
   }
   .size-chip {
     display: flex;
@@ -646,13 +668,22 @@ const SHARED_CSS = `
     box-sizing: border-box;
   }
   .size-chips.compact .size-chip {
-    min-height: 0.28in;
-    font-size: 6.5px;
-    padding: 3px 2px;
+    min-height: 0.22in;
+    font-size: 6px;
+    padding: 2px 1px;
     border-width: 1px;
   }
+  .prod-grid.ultra .size-chips.compact {
+    grid-template-columns: repeat(auto-fill, minmax(0.34in, 1fr));
+    gap: 2px;
+  }
+  .prod-grid.ultra .size-chips.compact .size-chip {
+    min-height: 0.18in;
+    font-size: 5.5px;
+    padding: 1px;
+  }
   .pg-item .size-chips {
-    margin-top: 3px;
+    margin-top: 2px;
   }
   .order-bar {
     margin-top: 8px;
@@ -826,7 +857,7 @@ function renderSidebar(meta) {
 }
 
 function renderSizeChips(sizes, { compact = false } = {}) {
-  if (!sizes?.length) return '<div class="size-chips"><span class="size-chip">—</span></div>';
+  if (!sizes?.length) return '<div class="size-chips"><div class="size-chip">—</div></div>';
   const chips = sizes
     .map((s) => `<div class="size-chip">${esc(s)}</div>`)
     .join('');
@@ -834,7 +865,8 @@ function renderSizeChips(sizes, { compact = false } = {}) {
 }
 
 function renderProductTable(families, mode) {
-  if (mode === 'dense') {
+  if (mode === 'dense' || mode === 'ultra') {
+    const colsClass = mode === 'ultra' || families.length >= 18 ? ' cols-3 ultra' : '';
     const items = families
       .map((f) => {
         const url = productImgUrl(f.image);
@@ -848,7 +880,7 @@ function renderProductTable(families, mode) {
         </div>`;
       })
       .join('');
-    return `<div class="prod-grid">${items}</div>`;
+    return `<div class="prod-grid${colsClass}">${items}</div>`;
   }
 
   if (mode === 'fill') {
@@ -856,9 +888,6 @@ function renderProductTable(families, mode) {
     const cards = families
       .map((f) => {
         const url = productImgUrl(f.image);
-        const factory = [f.tommur ? `Tommur ${f.tommur}` : '', f.lesso ? `Lesso ${f.lesso}` : '']
-          .filter(Boolean)
-          .join(' · ');
         return `<div class="fill-card">
           ${url ? `<img src="${url}" alt=""/>` : '<div></div>'}
           <div class="fill-body">
@@ -866,7 +895,7 @@ function renderProductTable(families, mode) {
             <div class="sku">${esc(f.code)} · ${esc(f.description)}</div>
             <div class="sizes-label">Available sizes · ${f.sizes.length}</div>
             ${renderSizeChips(f.sizes)}
-            <div class="stds">Pack ${esc(f.pack || '—')} · ${esc((f.standards || []).join(' · ') || '—')}${factory ? ` · ${esc(factory)}` : ''}</div>
+            <div class="stds">Pack ${esc(f.pack || '—')} · ${esc((f.standards || []).join(' · ') || '—')}</div>
           </div>
         </div>`;
       })
@@ -877,13 +906,10 @@ function renderProductTable(families, mode) {
   const rows = families
     .map((f) => {
       const url = productImgUrl(f.image);
-      const factory = [f.tommur ? `T: ${f.tommur}` : '', f.lesso ? `L: ${f.lesso}` : '']
-        .filter(Boolean)
-        .join(' · ');
       return `<tr>
         <td style="width:0.32in">${url ? `<img class="thumb" src="${url}" alt=""/>` : ''}</td>
         <td style="width:1.15in"><div class="sku">${esc(f.code)}</div><div class="pname">${esc(f.family)}</div></td>
-        <td>${esc(f.description)}${factory ? `<div class="stds">${esc(factory)}</div>` : ''}</td>
+        <td>${esc(f.description)}</td>
         <td style="width:2.1in">${renderSizeChips(f.sizes, { compact: true })}</td>
         <td class="pack" style="width:0.35in">${esc(f.pack || '—')}</td>
         <td class="stds" style="width:1in">${esc((f.standards || []).join(' · ') || '—')}</td>
@@ -917,14 +943,15 @@ function renderCategoryPage(meta, families, rowCount) {
     .map((s) => `<span class="badge">${esc(s.code)}</span>`)
     .join('');
 
-  const mode = families.length >= 9 ? 'dense' : 'fill';
+  const mode = families.length >= 18 ? 'ultra' : families.length >= 9 ? 'dense' : 'fill';
   const productBlock = renderProductTable(families, mode);
-  const sectionLabel = mode === 'dense' ? 'Product Line' : 'Products & Specs';
+  const sectionLabel = mode === 'fill' ? 'Products & Specs' : 'Product Line';
+  const mainClass = mode === 'ultra' ? 'main compact-mid' : 'main';
 
   return `
 <section class="page">
   ${renderSidebar(meta)}
-  <div class="main">
+  <div class="${mainClass}">
     <div class="main-head">
       <h1 class="main-title">${esc(meta.title)}</h1>
       <div class="main-meta">Spec Sheet / Updated ${esc(COMPANY.updated)}<br/><strong>Call for Pricing</strong></div>
@@ -1023,8 +1050,8 @@ function renderIndex(categories) {
       <div class="main-meta">Line Card / Updated ${esc(COMPANY.updated)}<br/><strong>${esc(COMPANY.web)}</strong></div>
     </div>
     <p style="font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:10px;max-width:5.8in">
-      One dense spec sheet per category from the factory-sourced catalog — product codes, sizes, packs,
-      factory references, and governing ASTM / ASME / NSF standards. Pricing on request.
+      One dense spec sheet per category — product codes, sizes, packs,
+      and governing ASTM / ASME / NSF standards. Pricing on request.
     </p>
     <div class="cat-cards">${cards}</div>
   </div>
