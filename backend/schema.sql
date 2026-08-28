@@ -58,3 +58,19 @@ CREATE TABLE IF NOT EXISTS order_items (
   price_at_purchase REAL,
   qty_shipped       INTEGER DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS inbound_shipments (
+  id                TEXT PRIMARY KEY,
+  label             TEXT DEFAULT '',
+  container_number  TEXT NOT NULL DEFAULT '',
+  carrier           TEXT DEFAULT '',
+  eta               TEXT DEFAULT '',
+  invoice_ref       TEXT DEFAULT '',
+  invoice_date      TEXT DEFAULT '',
+  status            TEXT DEFAULT 'in_transit',
+  items_json        TEXT DEFAULT '[]',
+  notes             TEXT DEFAULT '',
+  received_at       TEXT DEFAULT '',
+  created_at        TEXT,
+  updated_at        TEXT
+);

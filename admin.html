@@ -240,6 +240,18 @@
 
       <div class="wms-section">
         <div class="wms-section-head">
+          <div class="wms-action-title" style="margin:0;">Inbound containers</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="importInboundSeed()">Import invoices</button>
+            <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="loadInboundShipments()">Refresh</button>
+          </div>
+        </div>
+        <p class="wms-hint" style="margin-bottom:10px;">Ocean containers in transit — expected pieces from commercial invoices. Stock stays off on-hand until you receive the container.</p>
+        <div id="wms-inbound" class="wms-inbound" aria-live="polite">Loading…</div>
+      </div>
+
+      <div class="wms-section">
+        <div class="wms-section-head">
           <div class="wms-action-title" style="margin:0;">Pick list — open backorders</div>
           <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="renderWmsPickList()">Refresh</button>
         </div>
@@ -1394,6 +1406,7 @@ function initWmsStockTab() {
     renderWmsPickList();
   }).catch(function () {});
   loadWmsMovements();
+  loadInboundShipments();
   if (!Array.isArray(masterOrders) || !masterOrders.length) {
     loadOrders().then(function () { renderWmsPickList(); }).catch(function () {});
   }
@@ -1411,6 +1424,146 @@ function initWmsStockTab() {
         if (first) first.click();
       }
     });
+  }
+}
+
+let inboundShipmentsCache = [];
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+async function loadInboundShipments() {
+  const box = document.getElementById('wms-inbound');
+  if (!box) return;
+  try {
+    const r = await adminFetch('/admin/inbound');
+    const d = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error((d && d.error) || 'Failed to load inbound');
+    inboundShipmentsCache = Array.isArray(d.shipments) ? d.shipments : [];
+    renderInboundShipments();
+  } catch (e) {
+    box.innerHTML = '<div class="wms-inbound-empty">' + escapeHtml(e.message || 'Could not load inbound') + '</div>';
+  }
+}
+
+function renderInboundShipments() {
+  const box = document.getElementById('wms-inbound');
+  if (!box) return;
+  const list = inboundShipmentsCache || [];
+  if (!list.length) {
+    box.innerHTML = '<div class="wms-inbound-empty">No inbound containers yet. Click <strong>Import invoices</strong> to load Container 3 &amp; 4 from the commercial invoices.</div>';
+    return;
+  }
+  box.innerHTML = list.map(function (s) {
+    const status = String(s.status || 'in_transit');
+    const statusClass = status === 'received' ? 'is-received' : (status === 'arrived' ? 'is-arrived' : '');
+    const eta = s.eta ? escapeHtml(s.eta) : '—';
+    const lines = (s.items || []).slice().sort(function (a, b) {
+      return String(a.code).localeCompare(String(b.code)) || String(a.size).localeCompare(String(b.size));
+    });
+    const linesHtml = lines.length
+      ? '<div class="wms-inbound-lines"><table><thead><tr><th>Code</th><th>Size</th><th>Qty</th></tr></thead><tbody>' +
+        lines.map(function (it) {
+          return '<tr><td>' + escapeHtml(it.code) + '</td><td>' + escapeHtml(it.size) + '</td><td>' + escapeHtml(it.qty) + '</td></tr>';
+        }).join('') +
+        '</tbody></table></div>'
+      : '';
+    const receiveBtn = status === 'received'
+      ? ''
+      : '<button type="button" class="btn-save" style="padding:8px 14px;font-size:13px;" onclick="receiveInboundShipment(\'' + escapeHtml(s.id).replace(/'/g, '') + '\')">Receive into stock</button>';
+    const markArrived = status === 'in_transit'
+      ? '<button type="button" class="btn-view" style="padding:8px 14px;font-size:13px;" onclick="markInboundArrived(\'' + escapeHtml(s.id).replace(/'/g, '') + '\')">Mark arrived</button>'
+      : '';
+    return (
+      '<div class="wms-inbound-card">' +
+        '<div class="wms-inbound-top">' +
+          '<div class="wms-inbound-id">' + escapeHtml(s.containerNumber || s.id) + '</div>' +
+          '<span class="wms-inbound-status ' + statusClass + '">' + escapeHtml(status.replace(/_/g, ' ')) + '</span>' +
+        '</div>' +
+        '<div class="wms-inbound-meta">' +
+          (s.label ? '<div><strong>' + escapeHtml(s.label) + '</strong></div>' : '') +
+          '<div>' + escapeHtml(s.carrier || 'Carrier TBD') + ' · ETA <strong>' + eta + '</strong></div>' +
+          '<div>' + escapeHtml(s.lineCount || lines.length) + ' SKUs · <strong>' + escapeHtml(s.totalPcs || 0) + '</strong> pcs expected</div>' +
+          (s.invoiceRef ? '<div>Invoice ' + escapeHtml(s.invoiceRef) + '</div>' : '') +
+        '</div>' +
+        '<div class="wms-inbound-actions">' + markArrived + receiveBtn + '</div>' +
+        linesHtml +
+      '</div>'
+    );
+  }).join('');
+}
+
+async function importInboundSeed() {
+  showStatus('Importing container invoices…', false);
+  try {
+    const res = await fetch('data/inbound-containers.json?t=' + Date.now());
+    if (!res.ok) throw new Error('Could not load data/inbound-containers.json');
+    const seed = await res.json();
+    const containers = (seed && seed.containers) || [];
+    if (!containers.length) throw new Error('Seed file has no containers');
+    const r = await adminFetch('/admin/inbound', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ containers: containers }),
+    });
+    const d = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error((d && d.error) || 'Import failed');
+    inboundShipmentsCache = d.shipments || [];
+    renderInboundShipments();
+    showStatus('Imported ' + (d.count || containers.length) + ' inbound container(s). ETA 9/15 — not added to on-hand yet.', false);
+  } catch (e) {
+    showStatus(e.message || 'Import failed', true);
+  }
+}
+
+async function markInboundArrived(id) {
+  try {
+    const r = await adminFetch('/admin/inbound/' + encodeURIComponent(id), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'arrived' }),
+    });
+    const d = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error((d && d.error) || 'Update failed');
+    await loadInboundShipments();
+    showStatus('Marked arrived: ' + id, false);
+  } catch (e) {
+    showStatus(e.message || 'Update failed', true);
+  }
+}
+
+async function receiveInboundShipment(id) {
+  const ship = (inboundShipmentsCache || []).find(function (s) { return s.id === id; });
+  const label = ship ? (ship.containerNumber || id) : id;
+  const pcs = ship ? (ship.totalPcs || 0) : 0;
+  if (!confirm('Receive container ' + label + ' into on-hand stock?\n\nThis adds ' + pcs + ' pieces across ' + ((ship && ship.lineCount) || '?') + ' SKUs.\nOnly do this when the container is physically received.')) {
+    return;
+  }
+  showStatus('Receiving ' + label + ' into inventory…', false);
+  try {
+    const r = await adminFetch('/admin/inbound/' + encodeURIComponent(id) + '/receive', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    const d = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error((d && d.error) || 'Receive failed');
+    const miss = (d.missing || []).length;
+    await loadProducts();
+    await loadInboundShipments();
+    loadWmsMovements();
+    showStatus(
+      'Received ' + (d.updated || 0) + ' SKU(s) from ' + label +
+      (miss ? (' · ' + miss + ' line(s) missing from catalog') : ''),
+      !!miss
+    );
+  } catch (e) {
+    showStatus(e.message || 'Receive failed', true);
   }
 }
 
