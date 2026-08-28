@@ -24,6 +24,64 @@
     : 'https://allpro-api.baruch-6d5.workers.dev/api';
 })();
 
+window.APBS_THEME_KEY = 'apbs_theme';
+window.apbsGetTheme = function apbsGetTheme() {
+  try { return localStorage.getItem(window.APBS_THEME_KEY) === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; }
+};
+window.apbsIsLightTheme = function apbsIsLightTheme() {
+  return document.documentElement.classList.contains('theme-light');
+};
+window.apbsSyncThemeLogos = function apbsSyncThemeLogos() {
+  var light = window.apbsIsLightTheme();
+  document.querySelectorAll('img').forEach(function (img) {
+    var src = img.getAttribute('src') || '';
+    if (!/logo\.png(\?|$)/.test(src) && !/images\/logo\.png/.test(src) && img.dataset.logoDark == null) return;
+    if (!img.dataset.logoDark) img.dataset.logoDark = src;
+    img.src = light ? 'images/logo-email-white.png' : img.dataset.logoDark;
+  });
+};
+window.apbsSyncThemeControls = function apbsSyncThemeControls() {
+  var light = window.apbsIsLightTheme();
+  document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
+    btn.setAttribute('aria-pressed', light ? 'true' : 'false');
+    btn.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
+    btn.title = light ? 'Dark mode' : 'Light mode';
+    var label = btn.querySelector('.theme-toggle-text');
+    if (label) label.textContent = light ? 'Dark' : 'Light';
+  });
+  var metas = document.querySelectorAll('meta[name="theme-color"]');
+  for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', light ? '#FFFFFF' : '#0C1117');
+};
+window.apbsSetTheme = function apbsSetTheme(theme) {
+  var light = theme === 'light';
+  document.documentElement.classList.toggle('theme-light', light);
+  document.documentElement.style.colorScheme = light ? 'light' : 'dark';
+  try { localStorage.setItem(window.APBS_THEME_KEY, light ? 'light' : 'dark'); } catch (e) {}
+  window.apbsSyncThemeControls();
+  window.apbsSyncThemeLogos();
+};
+window.apbsToggleTheme = function apbsToggleTheme() {
+  window.apbsSetTheme(window.apbsIsLightTheme() ? 'dark' : 'light');
+};
+window.apbsThemeToggleHtml = function apbsThemeToggleHtml() {
+  return '<button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Switch to light mode" title="Light mode">' +
+    '<svg class="theme-toggle-ico theme-ico-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 14.3A9 9 0 1 1 9.7 3 7 7 0 0 0 21 14.3z"/></svg>' +
+    '<svg class="theme-toggle-ico theme-ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' +
+    '<span class="theme-toggle-text">Light</span></button>';
+};
+window.apbsBindThemeToggles = function apbsBindThemeToggles() {
+  document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
+    if (btn.__apbsThemeBound) return;
+    btn.__apbsThemeBound = true;
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.apbsToggleTheme();
+    });
+  });
+  window.apbsSyncThemeControls();
+  window.apbsSyncThemeLogos();
+};
+
 function apbsShowTestBanner() {
   if (!window.APBS_IS_TEST) return;
   if (document.getElementById('apbs-test-banner')) return;
@@ -294,7 +352,10 @@ function loadGlobalLayout() {
         <a href="tel:17327341123" style="cursor:none;"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.22 1.12.45 2.32.68 3.58.68.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H8c.55 0 1 .45 1 1 0 1.27.2 2.48.57 3.62.1.32.03.68-.22.96L6.6 10.8z"/></svg>732-734-1123</a>
         <a href="mailto:info@allprobuildingsupplies.com" style="cursor:none;"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>info@allprobuildingsupplies.com</a>
       </div>
-      <div class="topbar-badge">Contractor-Grade · Fast Response · NJ &amp; Surrounding Areas</div>
+      <div class="topbar-end">
+        ${window.apbsThemeToggleHtml()}
+        <div class="topbar-badge">Contractor-Grade · Fast Response · NJ &amp; Surrounding Areas</div>
+      </div>
     </div>
 
     <nav>
@@ -314,11 +375,12 @@ function loadGlobalLayout() {
         <li><a href="contact.html" style="cursor:none;">Contact</a></li>
       </ul>
       <div class="nav-actions" id="nav-auth-container">
+        ${window.apbsThemeToggleHtml()}
         <a href="tel:17327341123" class="nav-tel" style="cursor:none;"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--gold)"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.22 1.12.45 2.32.68 3.58.68.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H8c.55 0 1 .45 1 1 0 1.27.2 2.48.57 3.62.1.32.03.68-.22.96L6.6 10.8z"/></svg>732-734-1123</a>
         <span id="auth-buttons" style="display:inline-flex; align-items:center; gap:8px;">
           <a href="login.html" class="nav-cta" id="nav-login-btn" style="background:transparent;border:1px solid var(--gold);color:var(--gold);cursor:none;">Login</a>
           <a href="account.html" class="nav-cta" id="nav-account-btn" style="display:none;background:var(--ink3);border:1px solid rgba(200,152,31,.3);flex-direction:column;align-items:flex-start;padding:6px 12px;line-height:1.3;gap:2px;cursor:none;"><span style="font-size:9px;color:var(--silver);letter-spacing:1px;font-family:'DM Mono',monospace;">ACCOUNT</span><span id="nav-logged-in-name" style="font-size:12px;color:var(--white);">My Account</span></a>
-          <a href="cart.html" class="nav-cta" id="nav-cart-btn" style="background:var(--gold);color:var(--ink);border:none;cursor:none;">Cart <span id="nav-cart-count" class="cart-nav-badge"></span></a>
+          <a href="cart.html" class="nav-cta" id="nav-cart-btn" style="background:var(--gold);color:var(--on-gold);border:none;cursor:none;">Cart <span id="nav-cart-count" class="cart-nav-badge"></span></a>
         </span>
       </div>
       <button class="hamburger" id="hamburger" aria-label="Menu" style="cursor:none;">
@@ -335,6 +397,7 @@ function loadGlobalLayout() {
         </div>
         <button class="mob-search-btn" type="submit">Search catalog</button>
       </form>
+      <div class="mob-theme-row">${window.apbsThemeToggleHtml()}</div>
       <a href="index.html" style="cursor:none;">Home</a>
       <a href="products.html" style="cursor:none;">Products</a>
       <a href="about.html" style="cursor:none;">About</a>
@@ -388,6 +451,8 @@ function loadGlobalLayout() {
 
   const footerContainer = document.getElementById('global-footer');
   if(footerContainer) footerContainer.innerHTML = footerHTML;
+
+  window.apbsBindThemeToggles();
 
   if(!window.__apbsGlobalScriptsInit){
     initGlobalScripts();
