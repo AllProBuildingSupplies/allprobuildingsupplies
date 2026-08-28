@@ -61,6 +61,10 @@ nav .theme-toggle{
   background:transparent;border:1px solid var(--gold);color:var(--gold);
   padding:7px 10px;
 }
+/* Desktop storefront: toggle lives in the gold topbar */
+.topbar + nav .theme-toggle{display:none}
+.mob-theme-row{display:none;padding:4px 0 12px;border-bottom:1px solid rgba(200,152,31,.2);margin-bottom:8px}
+.mob-theme-row .theme-toggle{width:100%;justify-content:center;padding:10px 12px}
 
 /* NAV */
 nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 var(--page-pad);height:76px;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);overflow:visible}
@@ -234,6 +238,8 @@ footer{background:var(--ink);border-top:1px solid rgba(200,152,31,.12)}
 }
 @media(max-width:600px){
   .topbar{display:none}
+  .topbar + nav .theme-toggle{display:inline-flex}
+  .mob-theme-row{display:block}
   nav{padding:0 14px}
   .nav-logo img{height:32px}
   .nav-brand-text{font-size:13px}

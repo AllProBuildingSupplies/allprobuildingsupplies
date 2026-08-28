@@ -375,6 +375,7 @@ function loadGlobalLayout() {
         <li><a href="contact.html" style="cursor:none;">Contact</a></li>
       </ul>
       <div class="nav-actions" id="nav-auth-container">
+        ${window.apbsThemeToggleHtml()}
         <a href="tel:17327341123" class="nav-tel" style="cursor:none;"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--gold)"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.22 1.12.45 2.32.68 3.58.68.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H8c.55 0 1 .45 1 1 0 1.27.2 2.48.57 3.62.1.32.03.68-.22.96L6.6 10.8z"/></svg>732-734-1123</a>
         <span id="auth-buttons" style="display:inline-flex; align-items:center; gap:8px;">
           <a href="login.html" class="nav-cta" id="nav-login-btn" style="background:transparent;border:1px solid var(--gold);color:var(--gold);cursor:none;">Login</a>
@@ -396,6 +397,7 @@ function loadGlobalLayout() {
         </div>
         <button class="mob-search-btn" type="submit">Search catalog</button>
       </form>
+      <div class="mob-theme-row">${window.apbsThemeToggleHtml()}</div>
       <a href="index.html" style="cursor:none;">Home</a>
       <a href="products.html" style="cursor:none;">Products</a>
       <a href="about.html" style="cursor:none;">About</a>
