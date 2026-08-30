@@ -1,118 +1,118 @@
-Tommur_Code,APBS_Code,Description,Size,Material,Unit,Order_Pcs,Pcs_per_Carton,Cartons,CBM,Carton_L_in,Carton_W_in,Carton_H_in,Carton_LxWxH_in,Carton_NetWt_lb,FedEx_DimWt_lb,FOB_USD,Est_Landed_45HQ_USD,DDP_USD,Notes
-D057,PVC-1/16HH,1/16 BEND (H x H),"1-1/2""",PVC,pc,400,200,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,26.5,34.1,,,0.1620,3mo sales
-D057,PVC-1/16HH,1/16 BEND (H x H),"2""",PVC,pc,300,100,3,0.2328,22.0,16.5,13.0,22.0x16.5x13.0,19.9,34.1,,,0.2441,3mo sales
-D057,PVC-1/16HH,1/16 BEND (H x H),"3""",PVC,pc,150,25,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,16.1,16.4,,,0.8100,3mo sales
-D059,PVC-1/16HS,"1/16 BEND, STREET (H x S)","1-1/2""",PVC,pc,400,200,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,24.7,34.1,,,0.1519,3mo sales
-D059,PVC-1/16HS,"1/16 BEND, STREET (H x S)","2""",PVC,pc,300,100,3,0.2328,22.0,16.5,13.0,22.0x16.5x13.0,20.5,34.1,,,0.2509,3mo sales
-D059,PVC-1/16HS,"1/16 BEND, STREET (H x S)","3""",PVC,pc,150,25,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,15.2,16.4,,,0.7538,3mo sales
-D035,PVC-1/4HH,1/4 BEND (H x H),"1-1/2""",PVC,pc,2900,100,29,1.6147,16.1,11.0,19.1,16.1x11.0x19.1,24.0,24.4,0.2307,0.3748,0.2655,3mo sales
-D035,PVC-1/4HH,1/4 BEND (H x H),"2""",PVC,pc,1600,50,32,1.7817,16.1,11.0,19.1,16.1x11.0x19.1,17.4,24.4,0.3734,0.6239,0.4298,3mo sales
-D035,PVC-1/4HH,1/4 BEND (H x H),"3""",PVC,pc,1300,25,52,4.036,22.0,16.5,13.0,22.0x16.5x13.0,24.6,34.1,1.1046,1.8301,1.2712,3mo sales
-D035,PVC-1/4HH,1/4 BEND (H x H),"4""",PVC,pc,140,10,14,0.7795,16.1,11.0,19.1,16.1x11.0x19.1,18.2,24.4,2.1055,3.4598,2.2163,3mo sales
-D035,PVC-1/4HH,1/4 BEND (H x H),"6""",PVC,pc,40,4,10,0.7762,22.0,16.5,13.0,22.0x16.5x13.0,17.7,34.1,5.7095,9.7326,6.0100,expand product line
-D050,PVC-1/4LOWHEEL,1/4 BEND W/ LOW HEEL INLET (H x H x H),"3x3x2""",PVC,pc,190,10,19,0.711,15.9,11.0,13.0,15.9x11.0x13.0,12.7,16.4,,,1.3163,3mo sales
-D040,PVC-1/4HS,"1/4 BEND, STREET (H x S)","1-1/2""",PVC,pc,360,180,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,33.6,34.1,,,0.2295,3mo sales
-D040,PVC-1/4HS,"1/4 BEND, STREET (H x S)","2""",PVC,pc,300,50,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,15.3,16.4,,,0.3848,3mo sales
-D040,PVC-1/4HS,"1/4 BEND, STREET (H x S)","3""",PVC,pc,140,20,7,0.3897,16.1,11.0,19.1,16.1x11.0x19.1,19.8,24.4,,,1.2150,3mo sales
-D040,PVC-1/4HS,"1/4 BEND, STREET (H x S)","4""",PVC,pc,30,10,3,0.167,16.1,11.0,19.1,16.1x11.0x19.1,17.6,24.4,,,2.1600,3mo sales
-D053,PVC-1/8HH,1/8 BEND (H x H),"1-1/2""",PVC,pc,1300,100,13,0.4865,15.9,11.0,13.0,15.9x11.0x13.0,18.5,16.4,,,0.2273,3mo sales
-D053,PVC-1/8HH,1/8 BEND (H x H),"2""",PVC,pc,2450,50,49,1.8337,15.9,11.0,13.0,15.9x11.0x13.0,14.4,16.4,0.3060,0.4978,0.3521,3mo sales
-D053,PVC-1/8HH,1/8 BEND (H x H),"3""",PVC,pc,1325,25,53,2.9509,16.1,11.0,19.1,16.1x11.0x19.1,21.5,24.4,0.9091,1.4795,1.0462,3mo sales
-D053,PVC-1/8HH,1/8 BEND (H x H),"4""",PVC,pc,240,15,16,1.2419,22.0,16.5,13.0,22.0x16.5x13.0,22.8,34.1,1.6227,2.7384,1.8675,3mo sales
-D053,PVC-1/8HH,1/8 BEND (H x H),"6""",PVC,pc,40,5,8,0.6209,22.0,16.5,13.0,22.0x16.5x13.0,15.7,34.1,3.5094,6.2749,3.6941,expand product line
-D053,PVC-1/8HH,1/8 BEND (H x H),"8""",PVC,pc,40,4,10,1.5842,24.0,20.9,19.3,24.0x20.9x19.3,24.5,69.5,6.7353,12.8416,7.0898,expand product line
-D055,PVC-1/8HS,1/8 BEND STREET (H x S),"1-1/2""",PVC,pc,2500,100,25,0.9355,15.9,11.0,13.0,15.9x11.0x13.0,18.5,16.4,,,0.2273,3mo sales
-D055,PVC-1/8HS,1/8 BEND STREET (H x S),"2""",PVC,pc,1950,50,39,1.4595,15.9,11.0,13.0,15.9x11.0x13.0,15.4,16.4,,,0.3500,3mo sales
-D055,PVC-1/8HS,1/8 BEND STREET (H x S),"3""",PVC,pc,925,25,37,2.0601,16.1,11.0,19.1,16.1x11.0x19.1,20.4,24.4,,,1.0013,3mo sales
-D055,PVC-1/8HS,1/8 BEND STREET (H x S),"4""",PVC,pc,243,9,27,1.0104,15.9,11.0,13.0,15.9x11.0x13.0,12.3,16.4,,,1.6000,3mo sales
-D025,PVC-CAPSOC,CAP (SOC),"1-1/2""",PVC,pc,480,240,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,16.4,16.4,,,0.0906,3mo sales
-D025,PVC-CAPSOC,CAP (SOC),"2""",PVC,pc,360,180,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,17.5,16.4,,,0.1294,3mo sales
-D025,PVC-CAPSOC,CAP (SOC),"3""",PVC,pc,120,60,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,19.8,16.4,,,0.4286,3mo sales
-D025,PVC-CAPSOC,CAP (SOC),"4""",PVC,pc,40,20,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,11.5,16.4,,,0.7538,3mo sales
-D078,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"2""",PVC,pc,420,60,7,0.5433,22.0,16.5,13.0,22.0x16.5x13.0,27.0,34.1,,,0.5625,3mo sales
-D078,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"3""",PVC,pc,180,20,9,0.5011,16.1,11.0,19.1,16.1x11.0x19.1,24.3,24.4,,,1.5638,3mo sales
-D078,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"4""",PVC,pc,30,10,3,0.167,16.1,11.0,19.1,16.1x11.0x19.1,21.5,24.4,,,2.7788,3mo sales
-D121,PVC-CLSTFLNGH,CLOSET FLANGE W/TEST PLATE (H),"4x3""",PVC,pc,1060,20,53,2.738,16.1,11.0,17.7,16.1x11.0x17.7,17.3,22.7,,,1.3140,3mo sales
-D004,PVC-CPLNG,COUPLING (H x H),"1-1/2""",PVC,pc,800,400,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,36.2,34.1,,,0.1193,3mo sales
-D004,PVC-CPLNG,COUPLING (H x H),"2""",PVC,pc,1200,100,12,0.4491,15.9,11.0,13.0,15.9x11.0x13.0,13.7,16.4,,,0.1688,3mo sales
-D004,PVC-CPLNG,COUPLING (H x H),"3""",PVC,pc,720,60,12,0.6681,16.1,11.0,19.1,16.1x11.0x19.1,27.0,24.4,,,0.5513,3mo sales
-D004,PVC-CPLNG,COUPLING (H x H),"4""",PVC,pc,250,25,10,0.5568,16.1,11.0,19.1,16.1x11.0x19.1,19.4,24.4,,,0.9450,3mo sales
-D073,PVC-SANTEEDBL,"DOUBLE SANITARY TEE, REDUCING (ALL HUB)","2x2x1-1/2x1-1/2""",PVC,pc,150,25,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,11.6,16.4,,,0.5625,3mo sales
-D019,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"2x1-1/2""",PVC,pc,400,200,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,19.8,16.4,,,0.1215,3mo sales
-D019,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"3x2""",PVC,pc,240,120,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,45.0,34.1,,,0.4590,3mo sales
-D019,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"4x3""",PVC,pc,150,30,5,0.1871,15.9,11.0,13.0,15.9x11.0x13.0,15.2,16.4,,,0.6188,3mo sales
-D043,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"2""",PVC,pc,840,60,14,1.0866,22.0,16.5,13.0,22.0x16.5x13.0,24.6,34.1,,,0.5153,3mo sales
-D043,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"3""",PVC,pc,840,10,84,3.1434,15.9,11.0,13.0,15.9x11.0x13.0,11.7,16.4,,,1.4850,3mo sales
-D043,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"4""",PVC,pc,30,5,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,10.6,16.4,,,2.5875,3mo sales
-D021,PVC-MADPTR,MALE ADAPTER (MPT x H),"1-1/2""",PVC,pc,600,300,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,24.5,34.1,,,0.1001,3mo sales
-D021,PVC-MADPTR,MALE ADAPTER (MPT x H),"2""",PVC,pc,400,200,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,21.6,34.1,,,0.1328,3mo sales
-D103,PVC-PTRAP,P-TRAP (H x H),"1-1/2""",PVC,pc,75,25,3,0.1123,15.9,11.0,13.0,15.9x11.0x13.0,12.7,16.4,,,0.6188,3mo sales
-D103,PVC-PTRAP,P-TRAP (H x H),"2""",PVC,pc,30,15,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,13.2,16.4,0.9434,1.5503,1.0913,3mo sales
-D103,PVC-PTRAP,P-TRAP (H x H),"3""",PVC,pc,20,10,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,23.8,34.1,,,2.9138,3mo sales
-D103,PVC-PTRAP,P-TRAP (H x H),"4""",PVC,pc,8,4,2,0.1114,16.1,11.0,19.1,16.1x11.0x19.1,16.3,24.4,,,5.1863,3mo sales
-A 062,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","1-1/2""",PVC,pc,375,25,15,0.4082,15.9,11.0,9.4,15.9x11.0x9.4,12.3,11.9,,,0.6075,3mo sales
-A 062,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","2""",PVC,pc,435,15,29,1.0852,15.9,11.0,13.0,15.9x11.0x13.0,12.8,16.4,,,1.0238,3mo sales
-A 062,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","3""",PVC,pc,240,10,24,1.8628,22.0,16.5,13.0,22.0x16.5x13.0,24.3,34.1,,,2.9813,3mo sales
-A 062,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","4""",PVC,pc,48,4,12,0.6681,16.1,11.0,19.1,16.1x11.0x19.1,16.1,24.4,,,5.2763,3mo sales
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"2x1-1/2""",PVC,pc,600,100,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,13.9,16.4,0.1486,0.2394,0.1710,3mo sales
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"3x2""",PVC,pc,400,80,5,0.3881,22.0,16.5,13.0,22.0x16.5x13.0,32.1,34.1,0.4272,0.6796,0.4916,3mo sales
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"4x3""",PVC,pc,120,20,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,16.0,16.4,0.8407,1.3343,0.9675,3mo sales
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"10x6""",PVC,pc,48,12,4,0.8119,24.0,21.7,23.8,24.0x21.7x23.8,84.7,89.1,8.9537,13.9658,9.4250,expand product line
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"10x8""",PVC,pc,50,10,5,1.0149,24.0,21.7,23.8,24.0x21.7x23.8,73.2,89.1,8.9537,14.2411,9.4250,expand product line
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"4x2""",PVC,pc,80,40,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,29.9,34.1,0.7527,1.2163,0.7923,expand product line
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"6x3""",PVC,pc,60,15,4,0.3105,22.0,16.5,13.0,22.0x16.5x13.0,32.7,34.1,3.0210,4.6687,3.1800,expand product line
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"6x4""",PVC,pc,48,6,8,0.2994,15.9,11.0,13.0,15.9x11.0x13.0,11.0,16.4,1.9453,3.2428,2.0477,expand product line
-D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"8x6""",PVC,pc,48,12,4,0.4418,19.3,18.1,19.3,19.3x18.1x19.3,47.2,48.5,4.1155,6.5355,4.3321,expand product line
-D097,PVC-WYEDBL,REDUCING DOUBLE WYE (ALL HUB),"3x3x2x2""",PVC,pc,105,15,7,0.5433,22.0,16.5,13.0,22.0x16.5x13.0,19.6,34.1,,,1.6650,3mo sales
-D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2x1-1/2""",PVC,pc,250,50,5,0.2382,16.1,11.0,16.3,16.1x11.0x16.3,20.9,20.9,0.4190,0.6759,,expand product line
-D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2x1-1/2x1-1/2""",PVC,pc,840,60,14,1.0866,22.0,16.5,13.0,22.0x16.5x13.0,21.2,34.1,,,0.4511,3mo sales
-D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2x1-1/2x2""",PVC,pc,840,60,14,1.0866,22.0,16.5,13.0,22.0x16.5x13.0,25.2,34.1,,,0.5153,3mo sales
-D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2x2x1-1/2""",PVC,pc,850,50,17,0.9465,16.1,11.0,19.1,16.1x11.0x19.1,18.0,24.4,,,0.4714,3mo sales
-D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"3x2""",PVC,pc,240,15,16,0.6061,16.1,11.0,13.0,16.1x11.0x13.0,13.7,16.6,1.0500,1.7050,,expand product line
-D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"3x3x2""",PVC,pc,270,15,18,0.6736,15.9,11.0,13.0,15.9x11.0x13.0,13.7,16.4,1.0264,1.6688,1.1812,3mo sales
-D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"4x4x2""",PVC,pc,120,10,12,0.4491,15.9,11.0,13.0,15.9x11.0x13.0,13.1,16.4,1.3979,2.3008,1.4715,expand product line
-D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"4x4x3""",PVC,pc,30,10,3,0.167,16.1,11.0,19.1,16.1x11.0x19.1,18.0,24.4,2.0529,3.3847,2.3625,3mo sales
-D092,PVC-WYERED,REDUCING WYE (ALL HUB),"3x3x2""",PVC,pc,336,12,28,1.0478,15.9,11.0,13.0,15.9x11.0x13.0,14.6,16.4,1.2904,2.0965,1.4850,3mo sales
-D092,PVC-WYERED,REDUCING WYE (ALL HUB),"4x4x2""",PVC,pc,30,10,3,0.167,16.1,11.0,19.1,16.1x11.0x19.1,17.8,24.4,1.8964,3.1613,2.1825,3mo sales
-D092,PVC-WYERED,REDUCING WYE (ALL HUB),"4x4x3""",PVC,pc,60,10,6,0.4657,22.0,16.5,13.0,22.0x16.5x13.0,23.4,34.1,2.5905,4.3310,2.9813,3mo sales
-D092,PVC-WYERED,REDUCING WYE (ALL HUB),"6x6x2""",PVC,pc,40,5,8,0.6209,22.0,16.5,13.0,22.0x16.5x13.0,21.4,34.1,4.5554,7.7686,4.7951,expand product line
-D092,PVC-WYERED,REDUCING WYE (ALL HUB),"6x6x3""",PVC,pc,39,3,13,0.7238,16.1,11.0,19.1,16.1x11.0x19.1,13.6,24.4,4.8095,8.3787,5.0627,expand product line
-D092,PVC-WYERED,REDUCING WYE (ALL HUB),"6x6x4""",PVC,pc,40,4,10,0.8618,22.0,15.9,15.0,22.0x15.9x15.0,19.2,37.8,5.3472,9.3895,5.6286,expand product line
-D092,PVC-WYERED,REDUCING WYE (ALL HUB),"8x8x4""",PVC,pc,40,4,10,1.5842,24.0,20.9,19.3,24.0x20.9x19.3,32.8,69.5,8.9935,16.0663,9.4668,expand product line
-D092,PVC-WYERED,REDUCING WYE (ALL HUB),"8x8x6""",PVC,pc,40,2,20,2.2089,19.3,18.1,19.3,19.3x18.1x19.3,21.3,48.5,11.6915,21.1904,12.3068,expand product line
-D065,PVC-SANTEE,SANITARY TEE (ALL HUB),"1-1/2""",PVC,pc,720,60,12,0.551,16.1,11.0,15.7,16.1x11.0x15.7,17.7,20.2,0.3059,0.4991,0.3623,3mo sales
-D065,PVC-SANTEE,SANITARY TEE (ALL HUB),"2""",PVC,pc,595,35,17,0.9465,16.1,11.0,19.1,16.1x11.0x19.1,16.5,24.4,0.4845,0.8213,0.5737,3mo sales
-D065,PVC-SANTEE,SANITARY TEE (ALL HUB),"3""",PVC,pc,60,15,4,0.2227,16.1,11.0,19.1,16.1x11.0x19.1,21.0,24.4,1.5054,2.4519,1.7325,3mo sales
-D065,PVC-SANTEE,SANITARY TEE (ALL HUB),"4""",PVC,pc,50,5,10,0.4592,16.1,11.0,15.7,16.1x11.0x15.7,12.8,20.2,2.6505,4.5324,3.1387,3mo sales
-D090,PVC-WYEHUB,WYE (ALL HUB),"1-1/2""",PVC,pc,200,50,4,0.1837,16.1,11.0,15.7,16.1x11.0x15.7,18.1,20.2,,,0.4545,expand product line
-D090,PVC-WYEHUB,WYE (ALL HUB),"2""",PVC,pc,400,25,16,0.5988,15.9,11.0,13.0,15.9x11.0x13.0,14.1,16.4,0.5963,0.9734,0.6863,3mo sales
-D090,PVC-WYEHUB,WYE (ALL HUB),"3""",PVC,pc,390,15,26,2.018,22.0,16.5,13.0,22.0x16.5x13.0,25.3,34.1,1.7987,2.9897,2.0700,3mo sales
-D090,PVC-WYEHUB,WYE (ALL HUB),"4""",PVC,pc,64,8,8,0.6209,22.0,16.5,13.0,22.0x16.5x13.0,23.8,34.1,3.2748,5.4661,3.7687,3mo sales
-D090,PVC-WYEHUB,WYE (ALL HUB),"6""",PVC,pc,60,2,30,2.3285,22.0,16.5,13.0,22.0x16.5x13.0,13.1,34.1,7.5662,13.9634,7.9645,expand product line
-PEXB,PEX-ELBOW,ELBOW,"1-1/2""",PEX,pc,100,100,1,0.15,19.7,19.7,23.6,19.7x19.7x23.6,55.3,65.9,4.2433,6.1816,4.4667,PEX 3mo starter
-PEXB,PEX-ELBOW,ELBOW,"1-1/4""",PEX,pc,200,100,2,0.25,19.7,19.7,19.7,19.7x19.7x19.7,47.2,54.9,2.4897,3.6570,2.6207,PEX 3mo starter
-PEXB,PEX-ELBOW,ELBOW,"1/2""",PEX,pc,1200,100,12,0.72,19.7,19.7,9.4,19.7x19.7x9.4,26.9,26.3,0.4659,0.7141,0.4904,PEX 3mo starter
-PEXB,PEX-ELBOW,ELBOW,"2""",PEX,pc,100,100,1,0.06,19.7,19.7,9.4,19.7x19.7x9.4,26.9,26.3,8.5387,12.2422,8.9881,PEX 3mo starter
-PEXB,PEX-ELBOW,ELBOW,"3/4""",PEX,pc,900,100,9,0.585,19.7,19.7,10.2,19.7x19.7x10.2,30.0,28.5,0.7896,1.1804,0.8311,PEX 3mo starter
-PEXB,PEX-CPLNG,PEX COUPLING,"1""",PEX,pc,240,150,2,0.12,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-CPLNG,PEX COUPLING,"1/2""",PEX,pc,900,300,3,0.18,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-CPLNG,PEX COUPLING,"3/4""",PEX,pc,600,200,3,0.195,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-FADPTR,PEX FEMALE ADAPTER (PEX x FIPT),"1/2""",PEX,pc,300,200,2,0.12,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-FADPTR,PEX FEMALE ADAPTER (PEX x FIPT),"3/4""",PEX,pc,300,150,2,0.13,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-MADPTR,PEX MALE ADAPTER (PEX x MIPT),"1/2""",PEX,pc,500,200,3,0.18,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-MADPTR,PEX MALE ADAPTER (PEX x MIPT),"3/4""",PEX,pc,300,150,2,0.13,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-REDTEE,PEX REDUCING TEE,"1x1x3/4""",PEX,pc,120,80,2,0.13,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-REDTEE,PEX REDUCING TEE,"3/4x3/4x1/2""",PEX,pc,240,100,3,0.195,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-TEE,PEX TEE,"1""",PEX,pc,240,100,3,0.18,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-TEE,PEX TEE,"1/2""",PEX,pc,800,200,4,0.24,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-PEXB,PEX-TEE,PEX TEE,"3/4""",PEX,pc,600,150,4,0.26,,,,,,,,,,NEW SKU — factory quote FOB + confirm carton pack
-4B200B (1),PEX-B PIPE,PEX-B PIPE,"1""",PEX,ft,2400,100,24,3.0,19.7,19.7,19.7,19.7x19.7x19.7,47.2,54.9,0.2941,0.5153,0.3096,PEX 3mo starter
-4B200B (1),PEX-B PIPE,PEX-B PIPE,"1-1/2""",PEX,ft,600,100,6,1.05,19.7,19.7,27.6,19.7x19.7x27.6,67.2,76.8,0.9838,1.5256,1.0356,PEX 3mo starter
-4B200B (1),PEX-B PIPE,PEX-B PIPE,"1-1/4""",PEX,ft,900,100,9,1.35,19.7,19.7,23.6,19.7x19.7x23.6,55.3,65.9,0.6179,0.9908,0.6504,PEX 3mo starter
-4B200B (1),PEX-B PIPE,PEX-B PIPE,"1/2""",PEX,ft,6000,100,60,3.6,19.7,19.7,9.4,19.7x19.7x9.4,26.9,26.3,0.0915,0.1775,0.0963,PEX 3mo starter
-4B200B (1),PEX-B PIPE,PEX-B PIPE,"2""",PEX,ft,300,100,3,0.135,19.7,19.7,7.1,19.7x19.7x7.1,22.7,19.8,1.9690,2.8050,2.0726,PEX 3mo starter
-4B200B (1),PEX-B PIPE,PEX-B PIPE,"3/4""",PEX,ft,4500,100,45,2.925,19.7,19.7,10.2,19.7x19.7x10.2,30.0,28.5,0.1717,0.2943,0.1807,PEX 3mo starter
-PEXB,PEX-REDUCER,REDUCER,"1-1/2x3/4""",PEX,pc,100,100,1,0.15,19.7,19.7,23.6,19.7x19.7x23.6,55.3,65.9,1.7339,2.5981,1.8252,PEX 3mo starter
-PEXB,PEX-REDUCER,REDUCER,"1x1/2""",PEX,pc,200,100,2,0.25,19.7,19.7,19.7,19.7x19.7x19.7,47.2,54.9,0.7825,1.2192,0.8237,PEX 3mo starter
-PEXB,PEX-REDUCER,REDUCER,"2x3/4""",PEX,pc,100,100,1,0.175,19.7,19.7,27.6,19.7x19.7x27.6,67.2,76.8,2.9513,4.3569,3.1067,PEX 3mo starter
-PEXB,PEX-REDUCER,REDUCER,"3/4x1/2""",PEX,pc,300,100,3,0.135,19.7,19.7,7.1,19.7x19.7x7.1,30.0,19.8,0.5010,0.7521,0.5274,PEX 3mo starter
+Tommur_Code,APBS_Code,Description,Size,Material,Unit,Order_Pcs,Pcs_per_Carton,Cartons,CBM,Carton_L_in,Carton_W_in,Carton_H_in,Carton_LxWxH_in,Carton_NetWt_lb,FedEx_DimWt_lb,FOB_USD,Est_Landed_45HQ_USD,DDP_USD,DDP_Source,Landed_vs_DDP,FOB_vs_DDP,AllPro_Sell,DDP_to_Sell_USD,DDP_Markup_Pct,DDP_Margin_Pct,Landed_to_Sell_USD,Landed_Margin_Pct,Proposed_Sell,Price_Note,Notes
+D057,PVC-1/16HH,1/16 BEND (H x H),"1-1/2""",PVC,pc,400,200,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,26.5,34.1,,,0.16,screenshot,,DDP only (no FOB),1.36,1.20,750%,88%,,,1.36,keep All Pro (88% margin on DDP),3mo sales
+D057,PVC-1/16HH,1/16 BEND (H x H),"2""",PVC,pc,300,100,3,0.2328,22.0,16.5,13.0,22.0x16.5x13.0,19.9,34.1,,,0.24,screenshot,,DDP only (no FOB),0.91,0.67,279%,74%,,,0.91,keep All Pro (74% margin on DDP),3mo sales
+D057,PVC-1/16HH,1/16 BEND (H x H),"3""",PVC,pc,150,25,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,16.1,16.4,,,0.81,screenshot,,DDP only (no FOB),2.65,1.84,227%,69%,,,2.65,keep All Pro (69% margin on DDP),3mo sales
+D059,PVC-1/16HS,"1/16 BEND, STREET (H x S)","1-1/2""",PVC,pc,400,200,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,24.7,34.1,,,0.15,screenshot,,DDP only (no FOB),2.05,1.90,1267%,93%,,,2.05,keep All Pro (93% margin on DDP),3mo sales
+D059,PVC-1/16HS,"1/16 BEND, STREET (H x S)","2""",PVC,pc,300,100,3,0.2328,22.0,16.5,13.0,22.0x16.5x13.0,20.5,34.1,,,0.25,screenshot,,DDP only (no FOB),2.26,2.01,804%,89%,,,2.26,keep All Pro (89% margin on DDP),3mo sales
+D059,PVC-1/16HS,"1/16 BEND, STREET (H x S)","3""",PVC,pc,150,25,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,15.2,16.4,,,0.75,screenshot,,DDP only (no FOB),7.46,6.71,895%,90%,,,7.46,keep All Pro (90% margin on DDP),3mo sales
+D035,PVC-1/4HH,1/4 BEND (H x H),"1-1/2""",PVC,pc,2900,100,29,1.6147,16.1,11.0,19.1,16.1x11.0x19.1,24.0,24.4,0.2307,0.3748,0.27,screenshot,0.10,DDP cheaper than FOB landed,0.53,0.26,96%,49%,0.16,29%,0.75,raise to 50% margin on FOB landed (now 29%),3mo sales
+D035,PVC-1/4HH,1/4 BEND (H x H),"2""",PVC,pc,1600,50,32,1.7817,16.1,11.0,19.1,16.1x11.0x19.1,17.4,24.4,0.3734,0.6239,0.43,screenshot,0.19,DDP cheaper than FOB landed,0.86,0.43,100%,50%,0.24,27%,1.25,raise to 50% margin on FOB landed (now 27%),3mo sales
+D035,PVC-1/4HH,1/4 BEND (H x H),"3""",PVC,pc,1300,25,52,4.036,22.0,16.5,13.0,22.0x16.5x13.0,24.6,34.1,1.1046,1.8301,1.27,screenshot,0.56,DDP cheaper than FOB landed,2.65,1.38,109%,52%,0.82,31%,3.65,raise to 50% margin on FOB landed (now 31%),3mo sales
+D035,PVC-1/4HH,1/4 BEND (H x H),"4""",PVC,pc,140,10,14,0.7795,16.1,11.0,19.1,16.1x11.0x19.1,18.2,24.4,2.1055,3.4598,2.22,screenshot,1.24,DDP cheaper than FOB landed,4.99,2.77,125%,56%,1.53,31%,6.90,raise to 50% margin on FOB landed (now 31%),3mo sales
+D035,PVC-1/4HH,1/4 BEND (H x H),"6""",PVC,pc,40,4,10,0.7762,22.0,16.5,13.0,22.0x16.5x13.0,17.7,34.1,5.7095,9.7326,6.01,cost tracker,3.72,DDP cheaper than FOB landed,22.84,16.83,280%,74%,13.11,57%,22.84,keep All Pro (57% margin on FOB landed),expand product line
+D050,PVC-1/4LOWHEEL,1/4 BEND W/ LOW HEEL INLET (H x H x H),"3x3x2""",PVC,pc,190,10,19,0.711,15.9,11.0,13.0,15.9x11.0x13.0,12.7,16.4,,,1.32,screenshot,,DDP only (no FOB),4.11,2.79,211%,68%,,,4.11,keep All Pro (68% margin on DDP),3mo sales
+D040,PVC-1/4HS,"1/4 BEND, STREET (H x S)","1-1/2""",PVC,pc,360,180,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,33.6,34.1,,,0.23,screenshot,,DDP only (no FOB),0.70,0.47,204%,67%,,,0.70,keep All Pro (67% margin on DDP),3mo sales
+D040,PVC-1/4HS,"1/4 BEND, STREET (H x S)","2""",PVC,pc,300,50,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,15.3,16.4,,,0.38,screenshot,,DDP only (no FOB),0.99,0.61,161%,62%,,,0.99,keep All Pro (62% margin on DDP),3mo sales
+D040,PVC-1/4HS,"1/4 BEND, STREET (H x S)","3""",PVC,pc,140,20,7,0.3897,16.1,11.0,19.1,16.1x11.0x19.1,19.8,24.4,,,1.22,screenshot,,DDP only (no FOB),2.95,1.73,142%,59%,,,2.95,keep All Pro (59% margin on DDP),3mo sales
+D040,PVC-1/4HS,"1/4 BEND, STREET (H x S)","4""",PVC,pc,30,10,3,0.167,16.1,11.0,19.1,16.1x11.0x19.1,17.6,24.4,,,2.16,screenshot,,DDP only (no FOB),4.86,2.70,125%,56%,,,4.86,keep All Pro (56% margin on DDP),3mo sales
+D053,PVC-1/8HH,1/8 BEND (H x H),"1-1/2""",PVC,pc,1300,100,13,0.4865,15.9,11.0,13.0,15.9x11.0x13.0,18.5,16.4,,,0.23,screenshot,,DDP only (no FOB),0.52,0.29,126%,56%,,,0.52,keep All Pro (56% margin on DDP),3mo sales
+D053,PVC-1/8HH,1/8 BEND (H x H),"2""",PVC,pc,2450,50,49,1.8337,15.9,11.0,13.0,15.9x11.0x13.0,14.4,16.4,0.3060,0.4978,0.35,screenshot,0.15,DDP cheaper than FOB landed,0.79,0.44,126%,56%,0.29,37%,1.00,raise to 50% margin on FOB landed (now 37%),3mo sales
+D053,PVC-1/8HH,1/8 BEND (H x H),"3""",PVC,pc,1325,25,53,2.9509,16.1,11.0,19.1,16.1x11.0x19.1,21.5,24.4,0.9091,1.4795,1.05,screenshot,0.43,DDP cheaper than FOB landed,2.16,1.11,106%,51%,0.68,32%,2.95,raise to 50% margin on FOB landed (now 32%),3mo sales
+D053,PVC-1/8HH,1/8 BEND (H x H),"4""",PVC,pc,240,15,16,1.2419,22.0,16.5,13.0,22.0x16.5x13.0,22.8,34.1,1.6227,2.7384,1.87,screenshot,0.87,DDP cheaper than FOB landed,4.11,2.24,120%,55%,1.37,33%,5.50,raise to 50% margin on FOB landed (now 33%),3mo sales
+D053,PVC-1/8HH,1/8 BEND (H x H),"6""",PVC,pc,40,5,8,0.6209,22.0,16.5,13.0,22.0x16.5x13.0,15.7,34.1,3.5094,6.2749,3.69,cost tracker,2.58,DDP cheaper than FOB landed,14.04,10.35,280%,74%,7.77,55%,14.04,keep All Pro (55% margin on FOB landed),expand product line
+D053,PVC-1/8HH,1/8 BEND (H x H),"8""",PVC,pc,40,4,10,1.5842,24.0,20.9,19.3,24.0x20.9x19.3,24.5,69.5,6.7353,12.8416,7.09,cost tracker,5.75,DDP cheaper than FOB landed,26.94,19.85,280%,74%,14.10,52%,26.94,keep All Pro (52% margin on FOB landed),expand product line
+D055,PVC-1/8HS,1/8 BEND STREET (H x S),"1-1/2""",PVC,pc,2500,100,25,0.9355,15.9,11.0,13.0,15.9x11.0x13.0,18.5,16.4,,,0.23,screenshot,,DDP only (no FOB),0.49,0.26,113%,53%,,,0.49,keep All Pro (53% margin on DDP),3mo sales
+D055,PVC-1/8HS,1/8 BEND STREET (H x S),"2""",PVC,pc,1950,50,39,1.4595,15.9,11.0,13.0,15.9x11.0x13.0,15.4,16.4,,,0.38,screenshot,,DDP only (no FOB),0.82,0.44,116%,54%,,,0.82,keep All Pro (54% margin on DDP),3mo sales
+D055,PVC-1/8HS,1/8 BEND STREET (H x S),"3""",PVC,pc,925,25,37,2.0601,16.1,11.0,19.1,16.1x11.0x19.1,20.4,24.4,,,1.00,screenshot,,DDP only (no FOB),2.22,1.22,122%,55%,,,2.22,keep All Pro (55% margin on DDP),3mo sales
+D055,PVC-1/8HS,1/8 BEND STREET (H x S),"4""",PVC,pc,243,9,27,1.0104,15.9,11.0,13.0,15.9x11.0x13.0,12.3,16.4,,,1.72,screenshot,,DDP only (no FOB),3.87,2.15,125%,56%,,,3.87,keep All Pro (56% margin on DDP),3mo sales
+D025,PVC-CAPSOC,CAP (SOC),"1-1/2""",PVC,pc,480,240,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,16.4,16.4,,,0.09,screenshot,,DDP only (no FOB),0.65,0.56,622%,86%,,,0.65,keep All Pro (86% margin on DDP),3mo sales
+D025,PVC-CAPSOC,CAP (SOC),"2""",PVC,pc,360,180,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,17.5,16.4,,,0.13,screenshot,,DDP only (no FOB),1.48,1.35,1038%,91%,,,1.48,keep All Pro (91% margin on DDP),3mo sales
+D025,PVC-CAPSOC,CAP (SOC),"3""",PVC,pc,120,60,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,19.8,16.4,,,0.43,screenshot,,DDP only (no FOB),5.42,4.99,1160%,92%,,,5.42,keep All Pro (92% margin on DDP),3mo sales
+D025,PVC-CAPSOC,CAP (SOC),"4""",PVC,pc,40,20,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,11.5,16.4,,,0.76,screenshot,,DDP only (no FOB),10.50,9.74,1282%,93%,,,10.50,keep All Pro (93% margin on DDP),3mo sales
+D078,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"2""",PVC,pc,420,60,7,0.5433,22.0,16.5,13.0,22.0x16.5x13.0,27.0,34.1,,,0.56,screenshot,,DDP only (no FOB),2.87,2.31,412%,80%,,,2.87,keep All Pro (80% margin on DDP),3mo sales
+D078,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"3""",PVC,pc,180,20,9,0.5011,16.1,11.0,19.1,16.1x11.0x19.1,24.3,24.4,,,1.56,screenshot,,DDP only (no FOB),5.25,3.69,237%,70%,,,5.25,keep All Pro (70% margin on DDP),3mo sales
+D078,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"4""",PVC,pc,30,10,3,0.167,16.1,11.0,19.1,16.1x11.0x19.1,21.5,24.4,,,2.78,screenshot,,DDP only (no FOB),9.05,6.27,226%,69%,,,9.05,keep All Pro (69% margin on DDP),3mo sales
+D121,PVC-CLSTFLNGH,CLOSET FLANGE W/TEST PLATE (H),"4x3""",PVC,pc,1060,20,53,2.738,16.1,11.0,17.7,16.1x11.0x17.7,17.3,22.7,,,1.06,screenshot,,DDP only (no FOB),2.59,1.53,144%,59%,,,2.59,keep All Pro (59% margin on DDP),3mo sales
+D004,PVC-CPLNG,COUPLING (H x H),"1-1/2""",PVC,pc,800,400,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,36.2,34.1,,,0.12,screenshot,,DDP only (no FOB),0.25,0.13,108%,52%,,,0.25,keep All Pro (52% margin on DDP),3mo sales
+D004,PVC-CPLNG,COUPLING (H x H),"2""",PVC,pc,1200,100,12,0.4491,15.9,11.0,13.0,15.9x11.0x13.0,13.7,16.4,,,0.17,screenshot,,DDP only (no FOB),0.34,0.17,100%,50%,,,0.34,keep All Pro (50% margin on DDP),3mo sales
+D004,PVC-CPLNG,COUPLING (H x H),"3""",PVC,pc,720,60,12,0.6681,16.1,11.0,19.1,16.1x11.0x19.1,27.0,24.4,,,0.55,screenshot,,DDP only (no FOB),1.15,0.60,109%,52%,,,1.15,keep All Pro (52% margin on DDP),3mo sales
+D004,PVC-CPLNG,COUPLING (H x H),"4""",PVC,pc,250,25,10,0.5568,16.1,11.0,19.1,16.1x11.0x19.1,19.4,24.4,,,0.95,screenshot,,DDP only (no FOB),2.13,1.18,124%,55%,,,2.13,keep All Pro (55% margin on DDP),3mo sales
+D073,PVC-SANTEEDBL,"DOUBLE SANITARY TEE, REDUCING (ALL HUB)","2x2x1-1/2x1-1/2""",PVC,pc,150,25,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,11.6,16.4,,,0.56,screenshot,,DDP only (no FOB),4.25,3.69,659%,87%,,,4.25,keep All Pro (87% margin on DDP),3mo sales
+D019,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"2x1-1/2""",PVC,pc,400,200,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,19.8,16.4,,,0.12,screenshot,,DDP only (no FOB),0.85,0.73,608%,86%,,,0.85,keep All Pro (86% margin on DDP),3mo sales
+D019,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"3x2""",PVC,pc,240,120,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,45.0,34.1,,,0.46,screenshot,,DDP only (no FOB),1.15,0.69,150%,60%,,,1.15,keep All Pro (60% margin on DDP),3mo sales
+D019,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"4x3""",PVC,pc,150,30,5,0.1871,15.9,11.0,13.0,15.9x11.0x13.0,15.2,16.4,,,0.62,screenshot,,DDP only (no FOB),2.01,1.39,224%,69%,,,2.01,keep All Pro (69% margin on DDP),3mo sales
+D043,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"2""",PVC,pc,840,60,14,1.0866,22.0,16.5,13.0,22.0x16.5x13.0,24.6,34.1,,,0.52,screenshot,,DDP only (no FOB),1.34,0.82,158%,61%,,,1.34,keep All Pro (61% margin on DDP),3mo sales
+D043,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"3""",PVC,pc,840,10,84,3.1434,15.9,11.0,13.0,15.9x11.0x13.0,11.7,16.4,,,1.49,screenshot,,DDP only (no FOB),3.17,1.68,113%,53%,,,3.17,keep All Pro (53% margin on DDP),3mo sales
+D043,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"4""",PVC,pc,30,5,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,10.6,16.4,,,2.59,screenshot,,DDP only (no FOB),6.47,3.88,150%,60%,,,6.47,keep All Pro (60% margin on DDP),3mo sales
+D021,PVC-MADPTR,MALE ADAPTER (MPT x H),"1-1/2""",PVC,pc,600,300,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,24.5,34.1,,,0.10,screenshot,,DDP only (no FOB),0.55,0.45,450%,82%,,,0.55,keep All Pro (82% margin on DDP),3mo sales
+D021,PVC-MADPTR,MALE ADAPTER (MPT x H),"2""",PVC,pc,400,200,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,21.6,34.1,,,0.13,screenshot,,DDP only (no FOB),0.65,0.52,400%,80%,,,0.65,keep All Pro (80% margin on DDP),3mo sales
+D103,PVC-PTRAP,P-TRAP (H x H),"1-1/2""",PVC,pc,75,25,3,0.1123,15.9,11.0,13.0,15.9x11.0x13.0,12.7,16.4,,,0.62,screenshot,,DDP only (no FOB),3.89,3.27,527%,84%,,,3.89,keep All Pro (84% margin on DDP),3mo sales
+D103,PVC-PTRAP,P-TRAP (H x H),"2""",PVC,pc,30,15,2,0.0748,15.9,11.0,13.0,15.9x11.0x13.0,13.2,16.4,0.9434,1.5503,1.09,screenshot,0.46,DDP cheaper than FOB landed,2.35,1.26,116%,54%,0.80,34%,3.10,raise to 50% margin on FOB landed (now 34%),3mo sales
+D103,PVC-PTRAP,P-TRAP (H x H),"3""",PVC,pc,20,10,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,23.8,34.1,,,2.91,screenshot,,DDP only (no FOB),15.05,12.14,417%,81%,,,15.05,keep All Pro (81% margin on DDP),3mo sales
+D103,PVC-PTRAP,P-TRAP (H x H),"4""",PVC,pc,8,4,2,0.1114,16.1,11.0,19.1,16.1x11.0x19.1,16.3,24.4,,,5.19,screenshot,,DDP only (no FOB),26.75,21.56,415%,81%,,,26.75,keep All Pro (81% margin on DDP),3mo sales
+A 062,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","1-1/2""",PVC,pc,375,25,15,0.4082,15.9,11.0,9.4,15.9x11.0x9.4,12.3,11.9,,,0.61,screenshot,,DDP only (no FOB),1.22,0.61,100%,50%,,,1.22,keep All Pro (50% margin on DDP),3mo sales
+A 062,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","2""",PVC,pc,435,15,29,1.0852,15.9,11.0,13.0,15.9x11.0x13.0,12.8,16.4,,,1.02,screenshot,,DDP only (no FOB),5.25,4.23,415%,81%,,,5.25,keep All Pro (81% margin on DDP),3mo sales
+A 062,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","3""",PVC,pc,240,10,24,1.8628,22.0,16.5,13.0,22.0x16.5x13.0,24.3,34.1,,,2.98,screenshot,,DDP only (no FOB),16.25,13.27,445%,82%,,,16.25,keep All Pro (82% margin on DDP),3mo sales
+A 062,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","4""",PVC,pc,48,4,12,0.6681,16.1,11.0,19.1,16.1x11.0x19.1,16.1,24.4,,,5.28,screenshot,,DDP only (no FOB),38.00,32.72,620%,86%,,,38.00,keep All Pro (86% margin on DDP),3mo sales
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"2x1-1/2""",PVC,pc,600,100,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,13.9,16.4,0.1486,0.2394,0.17,screenshot,0.07,DDP cheaper than FOB landed,1.60,1.43,841%,89%,1.36,85%,1.60,keep All Pro (85% margin on FOB landed),3mo sales
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"3x2""",PVC,pc,400,80,5,0.3881,22.0,16.5,13.0,22.0x16.5x13.0,32.1,34.1,0.4272,0.6796,0.49,screenshot,0.19,DDP cheaper than FOB landed,1.84,1.35,276%,73%,1.16,63%,1.84,keep All Pro (63% margin on FOB landed),3mo sales
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"4x3""",PVC,pc,120,20,6,0.2245,15.9,11.0,13.0,15.9x11.0x13.0,16.0,16.4,0.8407,1.3343,0.97,screenshot,0.36,DDP cheaper than FOB landed,3.85,2.88,297%,75%,2.52,65%,3.85,keep All Pro (65% margin on FOB landed),3mo sales
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"10x6""",PVC,pc,48,12,4,0.8119,24.0,21.7,23.8,24.0x21.7x23.8,84.7,89.1,8.9537,13.9658,9.43,cost tracker,4.54,DDP cheaper than FOB landed,35.82,26.39,280%,74%,21.85,61%,35.82,keep All Pro (61% margin on FOB landed),expand product line
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"10x8""",PVC,pc,50,10,5,1.0149,24.0,21.7,23.8,24.0x21.7x23.8,73.2,89.1,8.9537,14.2411,9.43,cost tracker,4.82,DDP cheaper than FOB landed,35.82,26.39,280%,74%,21.58,60%,35.82,keep All Pro (60% margin on FOB landed),expand product line
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"4x2""",PVC,pc,80,40,2,0.1552,22.0,16.5,13.0,22.0x16.5x13.0,29.9,34.1,0.7527,1.2163,0.79,cost tracker,0.42,DDP cheaper than FOB landed,3.01,2.22,280%,74%,1.79,60%,3.01,keep All Pro (60% margin on FOB landed),expand product line
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"6x3""",PVC,pc,60,15,4,0.3105,22.0,16.5,13.0,22.0x16.5x13.0,32.7,34.1,3.0210,4.6687,3.18,cost tracker,1.49,DDP cheaper than FOB landed,12.08,8.90,280%,74%,7.41,61%,12.08,keep All Pro (61% margin on FOB landed),expand product line
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"6x4""",PVC,pc,48,6,8,0.2994,15.9,11.0,13.0,15.9x11.0x13.0,11.0,16.4,1.9453,3.2428,2.05,cost tracker,1.20,DDP cheaper than FOB landed,7.78,5.73,280%,74%,4.54,58%,7.78,keep All Pro (58% margin on FOB landed),expand product line
+D007,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"8x6""",PVC,pc,48,12,4,0.4418,19.3,18.1,19.3,19.3x18.1x19.3,47.2,48.5,4.1155,6.5355,4.33,cost tracker,2.20,DDP cheaper than FOB landed,16.46,12.13,280%,74%,9.92,60%,16.46,keep All Pro (60% margin on FOB landed),expand product line
+D097,PVC-WYEDBL,REDUCING DOUBLE WYE (ALL HUB),"3x3x2x2""",PVC,pc,105,15,7,0.5433,22.0,16.5,13.0,22.0x16.5x13.0,19.6,34.1,,,1.67,screenshot,,DDP only (no FOB),6.55,4.88,292%,75%,,,6.55,keep All Pro (75% margin on DDP),3mo sales
+D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2x1-1/2""",PVC,pc,250,50,5,0.2382,16.1,11.0,16.3,16.1x11.0x16.3,20.9,20.9,0.4190,0.6759,,,,FOB only (no DDP),1.68,,,,1.00,60%,1.68,keep All Pro (60% margin on FOB landed),expand product line
+D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2x1-1/2x1-1/2""",PVC,pc,840,60,14,1.0866,22.0,16.5,13.0,22.0x16.5x13.0,21.2,34.1,,,0.45,screenshot,,DDP only (no FOB),1.15,0.70,156%,61%,,,1.15,keep All Pro (61% margin on DDP),3mo sales
+D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2x1-1/2x2""",PVC,pc,840,60,14,1.0866,22.0,16.5,13.0,22.0x16.5x13.0,25.2,34.1,,,0.47,screenshot,,DDP only (no FOB),1.53,1.06,226%,69%,,,1.53,keep All Pro (69% margin on DDP),3mo sales
+D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2x2x1-1/2""",PVC,pc,850,50,17,0.9465,16.1,11.0,19.1,16.1x11.0x19.1,18.0,24.4,,,0.52,screenshot,,DDP only (no FOB),1.16,0.64,123%,55%,,,1.16,keep All Pro (55% margin on DDP),3mo sales
+D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"3x2""",PVC,pc,240,15,16,0.6061,16.1,11.0,13.0,16.1x11.0x13.0,13.7,16.6,1.0500,1.7050,,,,FOB only (no DDP),4.20,,,,2.50,59%,4.20,keep All Pro (59% margin on FOB landed),expand product line
+D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"3x3x2""",PVC,pc,270,15,18,0.6736,15.9,11.0,13.0,15.9x11.0x13.0,13.7,16.4,1.0264,1.6688,1.18,screenshot,0.49,DDP cheaper than FOB landed,5.75,4.57,387%,79%,4.08,71%,5.75,keep All Pro (71% margin on FOB landed),3mo sales
+D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"4x4x2""",PVC,pc,120,10,12,0.4491,15.9,11.0,13.0,15.9x11.0x13.0,13.1,16.4,1.3979,2.3008,1.47,cost tracker,0.83,DDP cheaper than FOB landed,5.59,4.12,280%,74%,3.29,59%,5.59,keep All Pro (59% margin on FOB landed),expand product line
+D066,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"4x4x3""",PVC,pc,30,10,3,0.167,16.1,11.0,19.1,16.1x11.0x19.1,18.0,24.4,2.0529,3.3847,2.36,screenshot,1.02,DDP cheaper than FOB landed,9.65,7.29,309%,76%,6.27,65%,9.65,keep All Pro (65% margin on FOB landed),3mo sales
+D092,PVC-WYERED,REDUCING WYE (ALL HUB),"3x3x2""",PVC,pc,336,12,28,1.0478,15.9,11.0,13.0,15.9x11.0x13.0,14.6,16.4,1.2904,2.0965,1.49,screenshot,0.61,DDP cheaper than FOB landed,7.05,5.56,373%,79%,4.95,70%,7.05,keep All Pro (70% margin on FOB landed),3mo sales
+D092,PVC-WYERED,REDUCING WYE (ALL HUB),"4x4x2""",PVC,pc,30,10,3,0.167,16.1,11.0,19.1,16.1x11.0x19.1,17.8,24.4,1.8964,3.1613,2.18,screenshot,0.98,DDP cheaper than FOB landed,5.30,3.12,143%,59%,2.14,40%,6.30,raise to 50% margin on FOB landed (now 40%),3mo sales
+D092,PVC-WYERED,REDUCING WYE (ALL HUB),"4x4x3""",PVC,pc,60,10,6,0.4657,22.0,16.5,13.0,22.0x16.5x13.0,23.4,34.1,2.5905,4.3310,2.98,screenshot,1.35,DDP cheaper than FOB landed,6.71,3.73,125%,56%,2.38,35%,8.65,raise to 50% margin on FOB landed (now 35%),3mo sales
+D092,PVC-WYERED,REDUCING WYE (ALL HUB),"6x6x2""",PVC,pc,40,5,8,0.6209,22.0,16.5,13.0,22.0x16.5x13.0,21.4,34.1,4.5554,7.7686,4.80,cost tracker,2.97,DDP cheaper than FOB landed,18.22,13.42,280%,74%,10.45,57%,18.22,keep All Pro (57% margin on FOB landed),expand product line
+D092,PVC-WYERED,REDUCING WYE (ALL HUB),"6x6x3""",PVC,pc,39,3,13,0.7238,16.1,11.0,19.1,16.1x11.0x19.1,13.6,24.4,4.8095,8.3787,5.06,cost tracker,3.32,DDP cheaper than FOB landed,19.24,14.18,280%,74%,10.86,56%,19.24,keep All Pro (56% margin on FOB landed),expand product line
+D092,PVC-WYERED,REDUCING WYE (ALL HUB),"6x6x4""",PVC,pc,40,4,10,0.8618,22.0,15.9,15.0,22.0x15.9x15.0,19.2,37.8,5.3472,9.3895,5.63,cost tracker,3.76,DDP cheaper than FOB landed,21.39,15.76,280%,74%,12.00,56%,21.39,keep All Pro (56% margin on FOB landed),expand product line
+D092,PVC-WYERED,REDUCING WYE (ALL HUB),"8x8x4""",PVC,pc,40,4,10,1.5842,24.0,20.9,19.3,24.0x20.9x19.3,32.8,69.5,8.9935,16.0663,9.47,cost tracker,6.60,DDP cheaper than FOB landed,35.97,26.50,280%,74%,19.90,55%,35.97,keep All Pro (55% margin on FOB landed),expand product line
+D092,PVC-WYERED,REDUCING WYE (ALL HUB),"8x8x6""",PVC,pc,40,2,20,2.2089,19.3,18.1,19.3,19.3x18.1x19.3,21.3,48.5,11.6915,21.1904,12.31,cost tracker,8.88,DDP cheaper than FOB landed,46.77,34.46,280%,74%,25.58,55%,46.77,keep All Pro (55% margin on FOB landed),expand product line
+D065,PVC-SANTEE,SANITARY TEE (ALL HUB),"1-1/2""",PVC,pc,720,60,12,0.551,16.1,11.0,15.7,16.1x11.0x15.7,17.7,20.2,0.3059,0.4991,0.36,screenshot,0.14,DDP cheaper than FOB landed,0.91,0.55,153%,60%,0.41,45%,1.00,raise to 50% margin on FOB landed (now 45%),3mo sales
+D065,PVC-SANTEE,SANITARY TEE (ALL HUB),"2""",PVC,pc,595,35,17,0.9465,16.1,11.0,19.1,16.1x11.0x19.1,16.5,24.4,0.4845,0.8213,0.57,screenshot,0.25,DDP cheaper than FOB landed,1.32,0.75,132%,57%,0.50,38%,1.65,raise to 50% margin on FOB landed (now 38%),3mo sales
+D065,PVC-SANTEE,SANITARY TEE (ALL HUB),"3""",PVC,pc,60,15,4,0.2227,16.1,11.0,19.1,16.1x11.0x19.1,21.0,24.4,1.5054,2.4519,1.73,screenshot,0.72,DDP cheaper than FOB landed,6.99,5.26,304%,75%,4.54,65%,6.99,keep All Pro (65% margin on FOB landed),3mo sales
+D065,PVC-SANTEE,SANITARY TEE (ALL HUB),"4""",PVC,pc,50,5,10,0.4592,16.1,11.0,15.7,16.1x11.0x15.7,12.8,20.2,2.6505,4.5324,3.14,screenshot,1.39,DDP cheaper than FOB landed,14.75,11.61,370%,79%,10.22,69%,14.75,keep All Pro (69% margin on FOB landed),3mo sales
+D090,PVC-WYEHUB,WYE (ALL HUB),"1-1/2""",PVC,pc,200,50,4,0.1837,16.1,11.0,15.7,16.1x11.0x15.7,18.1,20.2,,,0.45,screenshot,,DDP only (no FOB),1.72,1.27,282%,74%,,,1.72,keep All Pro (74% margin on DDP),expand product line
+D090,PVC-WYEHUB,WYE (ALL HUB),"2""",PVC,pc,400,25,16,0.5988,15.9,11.0,13.0,15.9x11.0x13.0,14.1,16.4,0.5963,0.9734,0.69,screenshot,0.28,DDP cheaper than FOB landed,3.60,2.91,422%,81%,2.63,73%,3.60,keep All Pro (73% margin on FOB landed),3mo sales
+D090,PVC-WYEHUB,WYE (ALL HUB),"3""",PVC,pc,390,15,26,2.018,22.0,16.5,13.0,22.0x16.5x13.0,25.3,34.1,1.7987,2.9897,2.07,screenshot,0.92,DDP cheaper than FOB landed,7.19,5.12,247%,71%,4.20,58%,7.19,keep All Pro (58% margin on FOB landed),3mo sales
+D090,PVC-WYEHUB,WYE (ALL HUB),"4""",PVC,pc,64,8,8,0.6209,22.0,16.5,13.0,22.0x16.5x13.0,23.8,34.1,3.2748,5.4661,3.77,screenshot,1.70,DDP cheaper than FOB landed,13.10,9.33,247%,71%,7.63,58%,13.10,keep All Pro (58% margin on FOB landed),3mo sales
+D090,PVC-WYEHUB,WYE (ALL HUB),"6""",PVC,pc,60,2,30,2.3285,22.0,16.5,13.0,22.0x16.5x13.0,13.1,34.1,7.5662,13.9634,7.96,cost tracker,6.00,DDP cheaper than FOB landed,30.26,22.30,280%,74%,16.30,54%,30.26,keep All Pro (54% margin on FOB landed),expand product line
+PEXB,PEX-ELBOW,ELBOW,"1-1/2""",PEX,pc,100,100,1,0.15,19.7,19.7,23.6,19.7x19.7x23.6,55.3,65.9,4.2433,6.1816,4.47,cost tracker,1.71,DDP cheaper than FOB landed,16.97,12.50,280%,74%,10.79,64%,16.97,keep All Pro (64% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-ELBOW,ELBOW,"1-1/4""",PEX,pc,200,100,2,0.25,19.7,19.7,19.7,19.7x19.7x19.7,47.2,54.9,2.4897,3.6570,2.62,cost tracker,1.04,DDP cheaper than FOB landed,9.96,7.34,280%,74%,6.30,63%,9.96,keep All Pro (63% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-ELBOW,ELBOW,"1/2""",PEX,pc,1200,100,12,0.72,19.7,19.7,9.4,19.7x19.7x9.4,26.9,26.3,0.4659,0.7141,0.49,cost tracker,0.22,DDP cheaper than FOB landed,1.86,1.37,279%,74%,1.15,62%,1.86,keep All Pro (62% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-ELBOW,ELBOW,"2""",PEX,pc,100,100,1,0.06,19.7,19.7,9.4,19.7x19.7x9.4,26.9,26.3,8.5387,12.2422,8.99,cost tracker,3.25,DDP cheaper than FOB landed,34.15,25.16,280%,74%,21.91,64%,34.15,keep All Pro (64% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-ELBOW,ELBOW,"3/4""",PEX,pc,900,100,9,0.585,19.7,19.7,10.2,19.7x19.7x10.2,30.0,28.5,0.7896,1.1804,0.83,cost tracker,0.35,DDP cheaper than FOB landed,3.16,2.33,280%,74%,1.98,63%,3.16,keep All Pro (63% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-CPLNG,PEX COUPLING,"1""",PEX,pc,240,150,2,0.12,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-CPLNG,PEX COUPLING,"1/2""",PEX,pc,900,300,3,0.18,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-CPLNG,PEX COUPLING,"3/4""",PEX,pc,600,200,3,0.195,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-FADPTR,PEX FEMALE ADAPTER (PEX x FIPT),"1/2""",PEX,pc,300,200,2,0.12,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-FADPTR,PEX FEMALE ADAPTER (PEX x FIPT),"3/4""",PEX,pc,300,150,2,0.13,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-MADPTR,PEX MALE ADAPTER (PEX x MIPT),"1/2""",PEX,pc,500,200,3,0.18,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-MADPTR,PEX MALE ADAPTER (PEX x MIPT),"3/4""",PEX,pc,300,150,2,0.13,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-REDTEE,PEX REDUCING TEE,"1x1x3/4""",PEX,pc,120,80,2,0.13,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-REDTEE,PEX REDUCING TEE,"3/4x3/4x1/2""",PEX,pc,240,100,3,0.195,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-TEE,PEX TEE,"1""",PEX,pc,240,100,3,0.18,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-TEE,PEX TEE,"1/2""",PEX,pc,800,200,4,0.24,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+PEXB,PEX-TEE,PEX TEE,"3/4""",PEX,pc,600,150,4,0.26,,,,,,,,,,,,no FOB or DDP — factory quote,,,,,,,,factory must quote — no cost yet,NEW SKU — factory quote FOB + confirm carton pack
+4B200B (1),PEX-B PIPE,PEX-B PIPE,"1""",PEX,ft,2400,100,24,3.0,19.7,19.7,19.7,19.7x19.7x19.7,47.2,54.9,0.2941,0.5153,0.31,cost tracker,0.21,DDP cheaper than FOB landed,1.18,0.87,281%,74%,0.66,56%,1.18,keep All Pro (56% margin on FOB landed),PEX 3mo starter
+4B200B (1),PEX-B PIPE,PEX-B PIPE,"1-1/2""",PEX,ft,600,100,6,1.05,19.7,19.7,27.6,19.7x19.7x27.6,67.2,76.8,0.9838,1.5256,1.04,cost tracker,0.49,DDP cheaper than FOB landed,3.94,2.90,280%,74%,2.41,61%,3.94,keep All Pro (61% margin on FOB landed),PEX 3mo starter
+4B200B (1),PEX-B PIPE,PEX-B PIPE,"1-1/4""",PEX,ft,900,100,9,1.35,19.7,19.7,23.6,19.7x19.7x23.6,55.3,65.9,0.6179,0.9908,0.65,cost tracker,0.34,DDP cheaper than FOB landed,2.47,1.82,280%,74%,1.48,60%,2.47,keep All Pro (60% margin on FOB landed),PEX 3mo starter
+4B200B (1),PEX-B PIPE,PEX-B PIPE,"1/2""",PEX,ft,6000,100,60,3.6,19.7,19.7,9.4,19.7x19.7x9.4,26.9,26.3,0.0915,0.1775,0.10,cost tracker,0.08,DDP cheaper than FOB landed,0.37,0.27,284%,74%,0.19,52%,0.37,keep All Pro (52% margin on FOB landed),PEX 3mo starter
+4B200B (1),PEX-B PIPE,PEX-B PIPE,"2""",PEX,ft,300,100,3,0.135,19.7,19.7,7.1,19.7x19.7x7.1,22.7,19.8,1.9690,2.8050,2.07,cost tracker,0.73,DDP cheaper than FOB landed,7.88,5.81,280%,74%,5.07,64%,7.88,keep All Pro (64% margin on FOB landed),PEX 3mo starter
+4B200B (1),PEX-B PIPE,PEX-B PIPE,"3/4""",PEX,ft,4500,100,45,2.925,19.7,19.7,10.2,19.7x19.7x10.2,30.0,28.5,0.1717,0.2943,0.18,cost tracker,0.11,DDP cheaper than FOB landed,0.69,0.51,282%,74%,0.40,57%,0.69,keep All Pro (57% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-REDUCER,REDUCER,"1-1/2x3/4""",PEX,pc,100,100,1,0.15,19.7,19.7,23.6,19.7x19.7x23.6,55.3,65.9,1.7339,2.5981,1.83,cost tracker,0.77,DDP cheaper than FOB landed,6.94,5.11,280%,74%,4.34,63%,6.94,keep All Pro (63% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-REDUCER,REDUCER,"1x1/2""",PEX,pc,200,100,2,0.25,19.7,19.7,19.7,19.7x19.7x19.7,47.2,54.9,0.7825,1.2192,0.82,cost tracker,0.40,DDP cheaper than FOB landed,3.13,2.31,280%,74%,1.91,61%,3.13,keep All Pro (61% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-REDUCER,REDUCER,"2x3/4""",PEX,pc,100,100,1,0.175,19.7,19.7,27.6,19.7x19.7x27.6,67.2,76.8,2.9513,4.3569,3.11,cost tracker,1.25,DDP cheaper than FOB landed,11.81,8.70,280%,74%,7.45,63%,11.81,keep All Pro (63% margin on FOB landed),PEX 3mo starter
+PEXB,PEX-REDUCER,REDUCER,"3/4x1/2""",PEX,pc,300,100,3,0.135,19.7,19.7,7.1,19.7x19.7x7.1,30.0,19.8,0.5010,0.7521,0.53,cost tracker,0.22,DDP cheaper than FOB landed,2.00,1.47,279%,74%,1.25,62%,2.00,keep All Pro (62% margin on FOB landed),PEX 3mo starter
