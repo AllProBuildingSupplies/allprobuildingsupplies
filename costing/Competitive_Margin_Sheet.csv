@@ -1,0 +1,206 @@
+Code,Material,Description,Size,Unit,On_Website,FOB,Landed,Cheapest_Online,Online_Source,Margin_USD,Margin_Pct,Landed_Basis,Notes
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"1""",ft,YES,0.39,0.64,9.8,pvcfittingsonline,9.16,93.5,45HQ,
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"1-1/2""",ft,YES,0.65,1.1,16.59,pvcfittingsonline,15.49,93.4,45HQ,
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"1-1/4""",ft,YES,0.54,0.9,13.69,pvcfittingsonline,12.79,93.4,45HQ,
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"1/2""",ft,YES,0.31,0.47,4.92,pvcfittingsonline,4.45,90.4,45HQ,
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"2""",ft,YES,1.42,2.28,22.91,pvcfittingsonline,20.63,90.0,45HQ,
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"2-1/2""",ft,YES,1.38,2.37,34.8,pvcfittingsonline,32.43,93.2,45HQ,
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"3""",ft,YES,2.78,4.56,43.13,pvcfittingsonline,38.57,89.4,45HQ,
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"3/4""",ft,YES,0.39,0.61,6.68,pvcfittingsonline,6.07,90.9,45HQ,
+CPVC-PIPE-SCH80,CPVC,ASTM CPVC SCH80 PIPE,"4""",ft,YES,4.02,6.72,62.9,pvcfittingsonline,56.18,89.3,45HQ,
+,CPVC,COUPLING,"1-1/2""",pc,NO,3.54,5.09,12.25,pvcfittingsonline,7.16,58.4,45HQ,
+,CPVC,COUPLING,"1-1/2""",pc,NO,3.54,5.1,12.25,pvcfittingsonline,7.15,58.4,45HQ,
+,CPVC,COUPLING,"1-1/4""",pc,NO,2.32,3.33,9.78,pvcfittingsonline,6.45,66.0,45HQ,
+,CPVC,COUPLING,"1-1/4""",pc,NO,2.32,3.33,9.78,pvcfittingsonline,6.45,66.0,45HQ,
+,CPVC,COUPLING,"2""",pc,NO,6.43,9.29,14.22,pvcfittingsonline,4.93,34.7,45HQ,
+,CPVC,COUPLING,"2""",pc,NO,6.43,9.31,14.22,pvcfittingsonline,4.91,34.5,45HQ,
+,CPVC,COUPLING,"2-1/2""",pc,NO,10.35,15.0,31.73,pvcfittingsonline,16.73,52.7,45HQ,
+,CPVC,COUPLING,"3""",pc,NO,15.37,21.95,34.5,pvcfittingsonline,12.55,36.4,ex-freight,
+,CPVC,COUPLING,"4""",pc,NO,33.13,47.69,45.15,pvcfittingsonline,-2.54,-5.6,45HQ,
+CPVC-PIPE-SDR11,CPVC,CPVC ASTM 2846 PIPE SDR-11,"1x2.6""",ft,YES,0.99,1.46,1.56,homedepot,0.1,6.4,45HQ,
+,CPVC,CPVC ASTM 2846 PIPE SDR-11,"1¼x3.18""",ft,NO,1.48,2.18,9.89,flexpvc,7.71,78.0,45HQ,
+,CPVC,CPVC ASTM 2846 PIPE SDR-11,"1½x3.76""",ft,NO,2.07,3.04,10.9,flexpvc,7.86,72.1,45HQ,
+CPVC-PIPE-SDR11,CPVC,CPVC ASTM 2846 PIPE SDR-11,"2x4.9""",ft,YES,3.53,5.2,17.88,flexpvc,12.68,70.9,45HQ,
+,CPVC,CPVC ASTM 2846 PIPE SDR-11,"½x1.73""",ft,NO,0.36,0.52,0.59,homedepot,0.07,11.9,45HQ,
+,CPVC,CPVC ASTM 2846 PIPE SDR-11,"¾x2.03""",ft,NO,0.59,0.87,0.91,homedepot,0.04,4.4,45HQ,
+CPVC-PIPE-SDR13.5,CPVC,CPVC ASTM 2846 PIPE SDR-13.5,"1x2.03""",ft,YES,0.79,1.18,,,,,45HQ,SDR-13.5 not commonly stocked online
+,CPVC,CPVC ASTM 2846 PIPE SDR-13.5,"1¼x2.59""",ft,NO,1.22,1.81,,,,,45HQ,SDR-13.5 not commonly stocked online
+,CPVC,CPVC ASTM 2846 PIPE SDR-13.5,"1½x3.06""",ft,NO,1.71,2.55,,,,,45HQ,SDR-13.5 not commonly stocked online
+CPVC-PIPE-SDR13.5,CPVC,CPVC ASTM 2846 PIPE SDR-13.5,"2x4.0""",ft,YES,2.93,4.36,,,,,45HQ,SDR-13.5 not commonly stocked online
+,CPVC,CPVC ASTM 2846 PIPE SDR-13.5,"½x1.51""",ft,NO,0.32,0.47,,,,,45HQ,SDR-13.5 not commonly stocked online
+,CPVC,CPVC ASTM 2846 PIPE SDR-13.5,"¾x1.73""",ft,NO,0.52,0.77,,,,,45HQ,SDR-13.5 not commonly stocked online
+,CPVC,TEE,"1""",pc,NO,4.5,6.45,4.52,homedepot,-1.93,-42.7,45HQ,
+,CPVC,TEE,"1""",pc,NO,4.5,6.47,9.57,pvcfittingsonline,3.1,32.4,45HQ,
+,CPVC,TEE,"1-1/2""",pc,NO,10.23,14.69,23.13,pvcfittingsonline,8.44,36.5,45HQ,
+,CPVC,TEE,"1-1/2""",pc,NO,10.23,14.71,23.13,pvcfittingsonline,8.42,36.4,45HQ,
+,CPVC,TEE,"1/2""",pc,NO,1.17,1.68,0.36,homedepot,-1.32,-366.7,45HQ,
+,CPVC,TEE,"1/2""",pc,NO,1.17,1.71,7.71,pvcfittingsonline,6.0,77.8,45HQ,
+,CPVC,TEE,"2""",pc,NO,17.64,25.44,25.69,pvcfittingsonline,0.25,1.0,45HQ,
+,CPVC,TEE,"2""",pc,NO,17.64,25.51,25.69,pvcfittingsonline,0.18,0.7,45HQ,
+,CPVC,TEE,"3/4""",pc,NO,2.54,3.65,0.64,homedepot,-3.01,-470.3,45HQ,
+,CPVC,TEE,"3/4""",pc,NO,2.54,3.69,7.81,pvcfittingsonline,4.12,52.8,45HQ,
+,CPVC,TEE,"4""",pc,NO,95.95,138.24,87.16,pvcfittingsonline,-51.08,-58.6,45HQ,
+COPPER-L-PEXADPTR,Copper,ADAPTER (COPPER TO PEX),"1-1/2""",pc,YES,12.67,17.94,,,,,45HQ,
+COPPER-L-PEXADPTR,Copper,ADAPTER (COPPER TO PEX),"2""",pc,YES,18.67,40.47,,,,,45HQ,
+COPPER-L-PEXADPTR,Copper,ADAPTER (COPPER TO PEX),"2-1/2""",pc,YES,38.0,58.68,387.48,amazon,328.8,84.9,45HQ,Uponor ProPEX x copper press (not F1807 crimp/sweat).
+COPPER-L-PEXADPTR,Copper,ADAPTER (COPPER TO PEX),"3/4""",pc,YES,2.81,14.13,,,,,45HQ,online brass PEX adapter not comparable to copper adapter
+COPPER-L-STUB,Copper,COPPER ELBOW STUB OUT,"1/2""",pc,YES,4.75,10.34,5.76,procuru,-4.58,-79.5,45HQ,Type L sweat stub-out 7x6; 100+ $5.76.
+COPPER-K-PIPE,Copper,COPPER PIPE K,"1/2""",ft,YES,8.55,12.01,3.87,homedepot,-8.14,-210.3,45HQ,Soft Type K 60ft coil $232.20 ($3.87/ft).
+COPPER-L-PIPE,Copper,COPPER PIPE L,"1""",ft,YES,15.86,22.11,6.18,homedepot,-15.93,-257.8,45HQ,qty10+ $61.83/stick ($6.18/ft). Single $77.29 ($7.73/ft).
+COPPER-L-PIPE,Copper,COPPER PIPE L,"1-1/2""",ft,YES,26.17,36.52,10.24,homedepot,-26.28,-256.6,45HQ,qty10+ $102.40/stick ($10.24/ft). Single $128 ($12.80/ft).
+COPPER-L-PIPE,Copper,COPPER PIPE L,"1-1/4""",ft,YES,20.33,28.36,7.25,homedepot,-21.11,-291.2,45HQ,10ft $72.48 ($7.25/ft) on HD listing—verify locally; AC&B alt $15.95/ft.
+COPPER-L-PIPE,Copper,COPPER PIPE L,"1/2""",ft,YES,6.93,9.65,2.66,homedepot,-6.99,-262.8,45HQ,Hard Type L 10ft; qty10+ $26.62/stick ($2.66/ft). Single $33.28 ($3.33/ft).
+COPPER-L-PIPE,Copper,COPPER PIPE L,"2""",ft,YES,40.23,56.16,14.9,homedepot,-41.26,-276.9,45HQ,10ft $149 ($14.90/ft). AC&B $31.69/ft.
+COPPER-L-PIPE,Copper,COPPER PIPE L,"2-1/2""",ft,YES,56.84,79.36,48.96,acandb,-30.4,-62.1,45HQ,10ft hard $489.59. USSupply ~$499.93. HD not listed.
+COPPER-L-PIPE,Copper,COPPER PIPE L,"3/4""",ft,YES,10.99,15.32,4.34,homedepot,-10.98,-253.0,45HQ,qty10+ $43.37/stick ($4.34/ft). Single $54.21 ($5.42/ft).
+COPPER-L-CPLNG,Copper,COUPLING,"1-1/2""",pc,YES,3.54,5.03,4.28,plumbingsell,-0.75,-17.5,45HQ,w/stop; box ~$4.28 (list $4.51).
+COPPER-L-CPLNG,Copper,COUPLING,"1-1/4""",pc,YES,2.32,3.31,3.22,plumbingsell,-0.09,-2.8,45HQ,w/stop; box ~$3.22 (list $3.39).
+COPPER-L-CPLNG,Copper,COUPLING,"2""",pc,YES,6.43,9.14,7.58,plumbingsell,-1.56,-20.6,45HQ,w/stop; box ~$7.58 (list $7.98).
+COPPER-L-CPLNG,Copper,COUPLING,"2-1/2""",pc,YES,10.35,14.66,18.99,plumbingsell,4.33,22.8,45HQ,w/stop; box ~$18.99 (list $19.99).
+COPPER-L-CPLNG,Copper,COUPLING,"3""",pc,YES,15.37,21.59,28.49,plumbingsell,6.9,24.2,ex-freight,w/stop; box ~$28.49 (list $29.99).
+COPPER-L-CPLNG,Copper,COUPLING,"4""",pc,YES,33.13,46.66,60.79,plumbingsell,14.13,23.2,45HQ,w/stop; box ~$60.79 (list $63.99).
+,Copper,DIELECRIC UNION,"3/4""",pc,NO,1.44,2.14,5.97,supplyhouse,3.83,64.2,45HQ,MNPT x C LF; box/25 $5.97. Watts CxF box $16.37.
+COPPER-K-90,Copper,ELBOW 90,"1""",pc,YES,2.43,3.54,3.23,plumbingsell,-0.31,-9.6,45HQ,Box/30 $3.23. Procuru 100+ ~$3.87.
+COPPER-L-90,Copper,ELBOW 90,"1-1/2""",pc,YES,5.2,7.34,7.18,plumbingsell,-0.16,-2.2,45HQ,Box/10 $7.18. Procuru $9.65.
+COPPER-L-90,Copper,ELBOW 90,"1-1/4""",pc,YES,3.37,4.78,4.49,plumbingsell,-0.29,-6.5,45HQ,Box/10 $4.49. Procuru $6.27.
+COPPER-L-90,Copper,ELBOW 90,"1/2""",pc,YES,0.61,0.9,0.6,homedepot,-0.3,-50.0,45HQ,50-pack $0.60. SH box $0.80; Procuru 100+ $0.62.
+COPPER-L-90,Copper,ELBOW 90,"2""",pc,YES,10.09,14.3,12.02,plumbingsell,-2.28,-19.0,45HQ,Box/10 $12.02. SH box $13.10.
+,Copper,ELBOW 90,"2-1/2""",pc,NO,0.0,0.12,,,,,45HQ,100+ $20.39. Plumbingsell box ~$35.; FOB is $0 in tracker — excluded until real FOB entered
+COPPER-K-90,Copper,ELBOW 90,"3""",pc,YES,31.17,43.91,34.06,procuru,-9.85,-28.9,45HQ,100+ ~$34.06 (list $37.84).
+COPPER-L-90,Copper,ELBOW 90,"3/4""",pc,YES,1.36,1.95,1.35,procuru,-0.6,-44.4,45HQ,100+ $1.35. SH box $1.81; HD 10pk $1.86.
+COPPER-L-90,Copper,ELBOW 90,"4""",pc,YES,61.31,86.5,104.95,procuru,18.45,17.6,45HQ,100+ ~$104.95 (list $116.61).
+COPPER-L-REDTEE,Copper,RED TEE,"1-1/2x1-1/2x1-1/4""",pc,YES,9.62,13.57,16.53,plumbingsell,2.96,17.9,45HQ,Box/10 $16.53.
+COPPER-L-REDTEE,Copper,RED TEE,"1-1/2x1-1/2x1/2""",pc,YES,6.9,9.74,11.95,plumbingsell,2.21,18.5,45HQ,Box/10 $11.95.
+COPPER-L-REDTEE,Copper,RED TEE,"1-1/2x1-1/2x3/4""",pc,YES,7.42,10.47,13.7,plumbingsell,3.23,23.6,45HQ,Box/10 $13.70.
+COPPER-L-REDTEE,Copper,RED TEE,"1-1/4x1-1/4x3/4""",pc,YES,5.09,7.21,11.96,plumbingsell,4.75,39.7,45HQ,Box/10 $11.96.
+,Copper,RED TEE,"1/2x1/2x1-1/4""",pc,NO,0.0,0.05,,,,,45HQ,FOB is $0 in tracker — excluded until real FOB entered
+COPPER-L-REDTEE,Copper,RED TEE,"1/2x1/2x3/4""",pc,YES,2.11,3.01,3.19,plumbingsell,0.18,5.6,45HQ,Box/30 $3.19.
+COPPER-L-REDTEE,Copper,RED TEE,"1x3/4""",pc,YES,3.84,5.43,4.79,plumbingsell,-0.64,-13.4,45HQ,As 1x1x3/4; box $4.79.
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2x1-1/2""",pc,YES,25.57,35.98,56.04,plumbingsell,20.06,35.8,45HQ,Interpreted as 2-1/2x2-1/2x1-1/2.
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2x2""",pc,YES,28.27,39.82,61.62,plumbingsell,21.8,35.4,45HQ,Interpreted as 2-1/2x2-1/2x2.
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2x2-1/2x1-1/2""",pc,YES,25.57,35.98,56.04,plumbingsell,20.06,35.8,45HQ,Box ~$56.04.
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2x2-1/2x2""",pc,YES,28.27,39.77,61.62,plumbingsell,21.85,35.5,45HQ,Box ~$61.62.
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2x2-1/2x3/4""",pc,YES,18.49,26.13,46.99,plumbingsell,20.86,44.4,45HQ,Box ~$46.99.
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2x2x2-1/2""",pc,YES,28.27,39.77,73.4,plumbingsell,33.63,45.8,45HQ,Box ~$73.40.
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2x3/4""",pc,YES,18.5,26.11,46.99,plumbingsell,20.88,44.4,45HQ,Interpreted as 2-1/2x2-1/2x3/4.
+COPPER-L-REDTEE,Copper,RED TEE,"2x2x1-1/2""",pc,YES,16.75,23.67,27.53,plumbingsell,3.86,14.0,45HQ,Box ~$27.53.
+COPPER-L-REDTEE,Copper,RED TEE,"2x2x1-1/4""",pc,YES,17.64,24.82,26.31,plumbingsell,1.49,5.7,45HQ,Box ~$26.31.
+COPPER-L-REDTEE,Copper,RED TEE,"2x2x3/4""",pc,YES,12.39,17.45,23.61,plumbingsell,6.16,26.1,45HQ,Box ~$23.61.
+COPPER-L-REDTEE,Copper,RED TEE,"2x3/4""",pc,YES,12.39,17.55,23.61,plumbingsell,6.06,25.7,45HQ,Interpreted as 2x2x3/4.
+COPPER-L-REDTEE,Copper,RED TEE,"2x3/4x2""",pc,YES,17.64,24.83,,,,,45HQ,
+COPPER-L-REDTEE,Copper,RED TEE,"3/4x1/2x3/4""",pc,YES,1.97,2.82,4.94,plumbingsell,2.12,42.9,45HQ,Box/30 $4.94.
+COPPER-L-REDTEE,Copper,RED TEE,"3/4x1x3/4""",pc,YES,5.07,7.17,7.03,plumbingsell,-0.14,-2.0,45HQ,Closest 3/4x3/4x1; exact 3/4x1x3/4 not listed.
+COPPER-L-REDTEE,Copper,RED TEE,"3/4x3/4x1/2""",pc,YES,1.97,2.87,3.38,plumbingsell,0.51,15.1,45HQ,Box/30 $3.38.
+COPPER-L-REDTEE,Copper,RED TEE,"3x1-1/2""",pc,YES,33.73,47.45,68.34,plumbingsell,20.89,30.6,45HQ,Interpreted as 3x3x1-1/2.
+COPPER-L-REDTEE,Copper,RED TEE,"3x2""",pc,YES,44.91,63.2,72.83,plumbingsell,9.63,13.2,45HQ,Interpreted as 3x3x2.
+COPPER-L-REDTEE,Copper,RED TEE,"3x3/4""",pc,YES,44.91,63.22,50.91,plumbingsell,-12.31,-24.2,45HQ,Interpreted as 3x3x3/4.
+COPPER-L-REDTEE,Copper,RED TEE,"3x3x1/2""",pc,YES,26.89,37.84,198.07,fwwebb,160.23,80.9,45HQ,Wrot 611R $198.07.
+COPPER-L-REDTEE,Copper,RED TEE,"3x3x2""",pc,YES,31.63,44.49,72.83,plumbingsell,28.34,38.9,45HQ,Box ~$72.83.
+COPPER-L-REDTEE,Copper,RED TEE,"3x3x3/4""",pc,YES,38.19,53.71,50.91,plumbingsell,-2.8,-5.5,45HQ,Box ~$50.91.
+COPPER-L-REDTEE,Copper,RED TEE,"4x1-1/2""",pc,YES,95.95,134.95,122.26,plumbingsell,-12.69,-10.4,45HQ,Interpreted as 4x4x1-1/2.
+COPPER-L-REDTEE,Copper,RED TEE,"4x2""",pc,YES,95.95,134.84,136.88,plumbingsell,2.04,1.5,45HQ,Interpreted as 4x4x2.
+COPPER-L-REDTEE,Copper,RED TEE,"4x3x2-1/2""",pc,YES,95.95,135.33,184.88,plumbingsell,49.55,26.8,45HQ,Box ~$184.88.
+COPPER-L-REDTEE,Copper,RED TEE,"4x4x1-1/2""",pc,YES,81.83,115.5,122.26,plumbingsell,6.76,5.5,45HQ,Box ~$122.26.
+COPPER-L-REDTEE,Copper,RED TEE,"4x4x2""",pc,YES,81.83,115.5,136.88,plumbingsell,21.38,15.6,45HQ,Box ~$136.88.
+COPPER-L-REDTEE,Copper,RED TEE,"4x4x3""",pc,YES,81.83,115.5,150.26,plumbingsell,34.76,23.1,45HQ,Box ~$150.26.
+COPPER-L-REDTEE,Copper,RED TEE,"4x4x3/4""",pc,YES,95.95,135.33,147.59,zoro,12.26,8.3,45HQ,Nibco 611R $147.59; FW Webb $398.71.
+COPPER-L-REDUCER,Copper,REDUCER,"1-1/2x1-1/4""",pc,YES,3.24,4.67,8.18,plumbingsell,3.51,42.9,45HQ,Box/10 $8.18.
+COPPER-K-REDUCER,Copper,REDUCER,"1-1/4x3/4""",pc,YES,3.24,4.59,3.49,plumbingsell,-1.1,-31.5,45HQ,Box/10 $3.49.
+COPPER-L-REDUCER,Copper,REDUCER,"1x3/4""",pc,YES,1.36,2.03,2.27,plumbingsell,0.24,10.6,45HQ,Box/30 $2.27.
+COPPER-L-REDUCER,Copper,REDUCER,"2-1/2x2""",pc,YES,28.27,39.75,18.12,plumbingsell,-21.63,-119.4,45HQ,Box/10 $18.12.
+COPPER-L-REDUCER,Copper,REDUCER,"2x1-1/2""",pc,YES,5.87,8.28,9.08,plumbingsell,0.8,8.8,45HQ,Box/10 $9.08.
+COPPER-L-REDUCER,Copper,REDUCER,"3/4x1/2""",pc,YES,0.71,1.03,1.28,plumbingsell,0.25,19.5,45HQ,Box/30 $1.28.
+COPPER-L-REDUCER,Copper,REDUCER,"3x2""",pc,YES,16.8,23.75,27.31,plumbingsell,3.56,13.0,45HQ,Box/10 $27.31.
+COPPER-L-REDUCER,Copper,REDUCER,"3x2-1/2""",pc,YES,16.61,23.46,27.93,plumbingsell,4.47,16.0,45HQ,Box ~$27.93 (list $29.40).
+COPPER-L-REDUCER,Copper,REDUCER,"4x2""",pc,YES,36.03,50.67,68.7,plumbingsell,18.03,26.2,45HQ,Box ~$68.70 (list $72.32).
+COPPER-L-REDUCER,Copper,REDUCER,"4x3""",pc,YES,81.83,116.19,61.13,plumbingsell,-55.06,-90.1,45HQ,Box ~$61.13 (list $64.35).
+COPPER-L-TEE,Copper,TEE,"1""",pc,YES,4.27,6.03,6.27,plumbingsell,0.24,3.8,45HQ,Box/30 $6.27.
+COPPER-L-TEE,Copper,TEE,"1-1/2""",pc,YES,10.23,14.42,15.9,plumbingsell,1.48,9.3,45HQ,Box/10 $15.90.
+COPPER-L-TEE,Copper,TEE,"1/2""",pc,YES,1.11,1.68,1.03,homedepot,-0.65,-63.1,45HQ,30-pack $1.03.
+COPPER-K-TEE,Copper,TEE,"1x3/4""",pc,YES,3.64,5.15,4.79,plumbingsell,-0.36,-7.5,45HQ,As 1x1x3/4; box $4.79.
+COPPER-L-TEE,Copper,TEE,"2""",pc,YES,17.64,24.89,28.54,plumbingsell,3.65,12.8,45HQ,Box/10 $28.54.
+COPPER-L-TEE,Copper,TEE,"3/4""",pc,YES,2.4,3.49,3.39,plumbingsell,-0.1,-2.9,45HQ,Box/30 $3.39. HD 10pk $4.17.
+COPPER-K-TEE,Copper,TEE,"3/4x1/2x1/2""",pc,YES,1.87,2.74,4.5,plumbingsell,1.76,39.1,45HQ,Box/30 $4.50.
+COPPER-K-TEE,Copper,TEE,"3/4x3/4x1/2""",pc,YES,1.87,2.66,3.38,plumbingsell,0.72,21.3,45HQ,Box/30 $3.38.
+COPPER-L-TEE,Copper,TEE,"4""",pc,YES,95.95,134.93,208.99,plumbingsell,74.06,35.4,45HQ,Box/10 $208.99.
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"1""",ft,YES,1.95,2.87,0.5,homedepot,-2.37,-474.0,45HQ,
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"1-1/2""",ft,YES,3.22,4.78,0.74,homedepot,-4.04,-545.9,45HQ,
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"1-1/4""",ft,YES,2.67,3.95,1.09,flexpvc,-2.86,-262.4,45HQ,
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"1/2""",ft,YES,0.96,1.4,0.3,homedepot,-1.1,-366.7,45HQ,
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"2""",ft,YES,4.4,6.59,1.23,homedepot,-5.36,-435.8,45HQ,
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"2-1/2""",ft,YES,6.86,10.23,2.89,flexpvc,-7.34,-254.0,45HQ,
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"3""",ft,YES,9.01,13.51,3.49,flexpvc,-10.02,-287.1,45HQ,
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"3/4""",ft,YES,1.29,1.9,0.35,homedepot,-1.55,-442.9,45HQ,
+PVC-PIPE-INSLTN,INSULATION,PIPE INSULATION COLD WATER SUPPLY,"4""",ft,YES,13.22,19.94,4.29,flexpvc,-15.65,-364.8,45HQ,
+PEX-ELBOW,PEX,ELBOW,"1-1/2""",pc,YES,4.24,6.18,16.03,supplyhouse,9.85,61.4,45HQ,
+PEX-ELBOW,PEX,ELBOW,"1-1/4""",pc,YES,2.49,3.66,20.38,supplyhouse,16.72,82.0,45HQ,
+PEX-ELBOW,PEX,ELBOW,"1/2""",pc,YES,0.47,0.71,0.46,pexuniverse,-0.25,-54.3,45HQ,
+PEX-ELBOW,PEX,ELBOW,"2""",pc,YES,8.54,12.24,55.79,supplyhouse,43.55,78.1,45HQ,
+PEX-ELBOW,PEX,ELBOW,"3/4""",pc,YES,0.79,1.18,0.95,pexuniverse,-0.23,-24.2,45HQ,
+PEX-B PIPE,PEX,PEX-B PIPE,"1""",ft,YES,0.29,0.52,0.64,pexuniverse,0.12,18.8,45HQ,
+PEX-B PIPE,PEX,PEX-B PIPE,"1-1/2""",ft,YES,0.98,1.53,4.36,homedepot,2.83,64.9,45HQ,
+PEX-B PIPE,PEX,PEX-B PIPE,"1-1/4""",ft,YES,0.62,0.99,2.2,homedepot,1.21,55.0,45HQ,
+PEX-B PIPE,PEX,PEX-B PIPE,"1/2""",ft,YES,0.09,0.18,0.21,pexuniverse,0.03,14.3,45HQ,
+PEX-B PIPE,PEX,PEX-B PIPE,"2""",ft,YES,1.97,2.8,6.75,homedepot,3.95,58.5,45HQ,
+PEX-B PIPE,PEX,PEX-B PIPE,"3/4""",ft,YES,0.17,0.29,0.4,pexuniverse,0.11,27.5,45HQ,
+PEX-REDUCER,PEX,REDUCER,"1-1/2x3/4""",pc,YES,1.73,2.6,,,,,45HQ,
+PEX-REDUCER,PEX,REDUCER,"1x1/2""",pc,YES,0.78,1.22,0.8,pexuniverse,-0.42,-52.5,45HQ,
+,PEX,REDUCER,"2-1/2x2""",pc,NO,0.0,0.04,,,,,45HQ,FOB is $0 in tracker — excluded until real FOB entered
+PEX-REDUCER,PEX,REDUCER,"2x3/4""",pc,YES,2.95,4.36,,,,,45HQ,
+PEX-REDUCER,PEX,REDUCER,"3/4x1/2""",pc,YES,0.5,0.75,0.4,pexuniverse,-0.35,-87.5,45HQ,
+PVC-1/4HH,PVC,1/4 BEND (H X H),"1-1/2""",pc,YES,0.23,0.37,2.87,pvcfittingsonline.com,2.5,87.1,45HQ,each
+,PVC,1/4 BEND (H X H),"10""",pc,NO,0.0,0.0,,,,,ex-freight,each vent/short 90; FOB is $0 in tracker — excluded until real FOB entered
+PVC-1/4HH,PVC,1/4 BEND (H X H),"2""",pc,YES,0.37,0.62,2.98,homedepot.com,2.36,79.2,45HQ,each
+PVC-1/4HH,PVC,1/4 BEND (H X H),"3""",pc,YES,1.1,1.83,7.02,homedepot.com,5.19,73.9,45HQ,each
+PVC-1/4HH,PVC,1/4 BEND (H X H),"4""",pc,YES,2.11,3.46,12.27,homedepot.com,8.81,71.8,45HQ,each
+PVC-1/4HH,PVC,1/4 BEND (H X H),"6""",pc,YES,5.71,9.73,44.15,homedepot.com,34.42,78.0,45HQ,each
+PVC-1/8HH,PVC,1/8 BEND (H X H),"2""",pc,YES,0.31,0.5,2.68,homedepot.com,2.18,81.3,45HQ,each
+PVC-1/8HH,PVC,1/8 BEND (H X H),"3""",pc,YES,0.91,1.48,5.75,homedepot.com,4.27,74.3,45HQ,each
+PVC-1/8HH,PVC,1/8 BEND (H X H),"4""",pc,YES,1.62,2.74,11.4,supplyhouse.com,8.66,76.0,45HQ,box unit
+PVC-1/8HH,PVC,1/8 BEND (H X H),"6""",pc,YES,3.51,6.27,32.62,homedepot.com,26.35,80.8,45HQ,each
+PVC-1/8HH,PVC,1/8 BEND (H X H),"8""",pc,YES,6.74,12.84,143.5,flexpvc.com,130.66,91.1,45HQ,each
+PVC-45ELLSOC,PVC,45° ELL (SOC X SOC),"10""",pc,YES,17.15,28.65,,,,,45HQ,
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"1""",pc,YES,0.16,0.32,0.99,flexpvc.com,0.67,67.7,45HQ,per ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"1-1/2""",pc,YES,0.26,0.56,1.89,flexpvc.com,1.33,70.4,45HQ,per ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"1-1/4""",pc,YES,0.22,0.45,1.99,flexpvc.com,1.54,77.4,45HQ,per ft
+,PVC,ASTM D1785 SCH40 PVC,"1/2(21.34x2.77mm）""",pc,NO,0.08,0.15,0.69,flexpvc.com,0.54,78.3,45HQ,per ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"10""",pc,YES,4.03,8.06,45.0,flexpvc.com,36.94,82.1,45HQ,per ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"2""",pc,YES,0.35,0.79,2.49,flexpvc.com,1.7,68.3,45HQ,per ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"2-1/2""",pc,YES,0.55,1.22,5.19,flexpvc.com,3.97,76.5,45HQ,per ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"3""",pc,YES,0.72,1.67,4.89,flexpvc.com,3.22,65.8,45HQ,per ft solid; HD dual-mark cheaper but use FlexPVC for solid SCH40
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"3/4""",pc,YES,0.11,0.21,0.75,flexpvc.com,0.54,72.0,45HQ,per ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"4""",pc,YES,1.03,2.53,7.71,homedepot.com,5.18,67.2,45HQ,per ft from 10ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"6""",pc,YES,2.17,5.41,14.95,flexpvc.com,9.54,63.8,45HQ,per ft
+PVC-PIPE-SOLID,PVC,ASTM D1785 SCH40 PVC,"8""",pc,YES,2.84,6.37,24.95,flexpvc.com,18.58,74.5,45HQ,per ft
+PVC-PTRAP,PVC,P-TRAP (H X H),"2""",pc,YES,0.94,1.55,7.53,homedepot.com,5.98,79.4,45HQ,
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"10x6""",ft,YES,8.95,13.97,,,,,45HQ,
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"10x8""",ft,YES,8.95,14.24,,,,,45HQ,
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"2x1-1/2""",ft,YES,0.15,0.24,2.01,supplyhouse.com,1.77,88.1,45HQ,box
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"3x2""",ft,YES,0.43,0.68,7.36,homedepot.com,6.68,90.8,45HQ,
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"4x2""",ft,YES,0.75,1.22,18.15,pvcfittingsonline.com,16.93,93.3,45HQ,
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"4x3""",ft,YES,0.84,1.33,19.34,pvcfittingsonline.com,18.01,93.1,45HQ,
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"6x3""",ft,YES,3.02,4.67,,,,,45HQ,
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"6x4""",ft,YES,1.95,3.24,71.38,pvcfittingsonline.com,68.14,95.5,45HQ,
+PVC-INCREDHH,PVC,PIPE INCREASER-REDUCER (H X H),"8x6""",ft,YES,4.12,6.54,95.86,pvcfittingsonline.com,89.32,93.2,45HQ,
+PVC-SANTEERED,PVC,REDUCING SANITARY TEE (ALL HUB),"2x1-1/2""",pc,YES,0.42,0.68,3.68,homedepot.com,3.0,81.5,45HQ,2x2x1-1/2
+PVC-SANTEERED,PVC,REDUCING SANITARY TEE (ALL HUB),"3x2""",pc,YES,1.05,1.7,13.86,pvcfittingsonline.com,12.16,87.7,45HQ,3x3x2 SCH40
+PVC-SANTEERED,PVC,REDUCING SANITARY TEE (ALL HUB),"3x3x2""",pc,YES,1.03,1.67,13.86,pvcfittingsonline.com,12.19,88.0,45HQ,
+PVC-SANTEERED,PVC,REDUCING SANITARY TEE (ALL HUB),"4x4x2""",pc,YES,1.4,2.3,25.47,homedepot.com,23.17,91.0,45HQ,
+PVC-SANTEERED,PVC,REDUCING SANITARY TEE (ALL HUB),"4x4x3""",pc,YES,2.05,3.38,41.08,pvcfittingsonline.com,37.7,91.8,45HQ,
+,PVC,REDUCING WYE (ALL HUB),"10x10x4""",pc,NO,0.0,4.16,,,,,45HQ,FOB is $0 in tracker — excluded until real FOB entered
+PVC-WYERED,PVC,REDUCING WYE (ALL HUB),"3x3x2""",pc,YES,1.29,2.1,10.25,homedepot.com,8.15,79.5,45HQ,
+PVC-WYERED,PVC,REDUCING WYE (ALL HUB),"4x4x2""",pc,YES,1.9,3.16,19.37,homedepot.com,16.21,83.7,45HQ,
+PVC-WYERED,PVC,REDUCING WYE (ALL HUB),"4x4x3""",pc,YES,2.59,4.33,16.88,homedepot.com,12.55,74.3,45HQ,
+PVC-WYERED,PVC,REDUCING WYE (ALL HUB),"6x6x2""",pc,YES,4.56,7.77,114.2,pvcfittingsonline.com,106.43,93.2,45HQ,
+PVC-WYERED,PVC,REDUCING WYE (ALL HUB),"6x6x3""",pc,YES,4.81,8.38,126.72,pvcfittingsonline.com,118.34,93.4,45HQ,
+PVC-WYERED,PVC,REDUCING WYE (ALL HUB),"6x6x4""",pc,YES,5.35,9.39,95.91,pvcfittingsonline.com,86.52,90.2,45HQ,
+PVC-WYERED,PVC,REDUCING WYE (ALL HUB),"8x8x4""",pc,YES,8.99,16.07,236.03,pvcfittingsonline.com,219.96,93.2,45HQ,
+PVC-WYERED,PVC,REDUCING WYE (ALL HUB),"8x8x6""",pc,YES,11.69,21.19,288.44,flexpvc.com,267.25,92.7,45HQ,
+PVC-SANTEE,PVC,SANITARY TEE (ALL HUB),"1-1/2""",pc,YES,0.31,0.5,2.93,supplyhouse.com,2.43,82.9,45HQ,box
+PVC-SANTEE,PVC,SANITARY TEE (ALL HUB),"2""",pc,YES,0.48,0.82,4.28,homedepot.com,3.46,80.8,45HQ,each
+PVC-SANTEE,PVC,SANITARY TEE (ALL HUB),"3""",pc,YES,1.51,2.45,10.86,homedepot.com,8.41,77.4,45HQ,each
+PVC-SANTEE,PVC,SANITARY TEE (ALL HUB),"4""",pc,YES,2.65,4.53,18.19,homedepot.com,13.66,75.1,45HQ,each
+PVC-WYEHUB,PVC,WYE (ALL HUB),"2""",pc,YES,0.6,0.97,6.57,homedepot.com,5.6,85.2,45HQ,
+PVC-WYEHUB,PVC,WYE (ALL HUB),"3""",pc,YES,1.8,2.99,13.46,supplyhouse.com,10.47,77.8,45HQ,box
+PVC-WYEHUB,PVC,WYE (ALL HUB),"4""",pc,YES,3.27,5.47,25.15,homedepot.com,19.68,78.3,45HQ,
+PVC-WYEHUB,PVC,WYE (ALL HUB),"6""",pc,YES,7.57,13.96,47.7,homedepot.com,33.74,70.7,45HQ,
