@@ -47,9 +47,24 @@ API URL: `assets/main.js` → `window.APBS_API_BASE`
 2. Enter the password you set as `ADMIN_TOKEN`
 3. Token is stored in `sessionStorage` as `apbs_admin_token`
 
+## Where to find things
+
+Agent work that is **not** the live storefront (factory orders, cost/margin workbooks, sell-sheet PDFs) is under [`cursor/`](cursor/README.md), one subfolder per agent stream.
+
 ## Database
 
 Production data lives in Cloudflare D1 (`allpro-db`). Manage products and users through the admin panel or CSV upload. There is no seed file in this repo by design.
+
+## Brochure & sell sheets
+
+From `brochure/` (requires `npm install` once — downloads Chromium for Puppeteer):
+
+```bash
+npm run build          # company brochure PDF
+npm run sell-sheets    # one sell sheet PDF per product category
+```
+
+Sell sheet outputs land in `brochure/sell-sheets/pdf/`. Index of agent folders: [`cursor/README.md`](cursor/README.md).
 
 ## Security notes
 
