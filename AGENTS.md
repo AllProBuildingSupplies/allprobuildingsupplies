@@ -37,4 +37,4 @@ From `brochure/`: `npm install` then `npm run build`. `npm install` downloads a 
 From `brochure/`: `npm run sell-sheets` regenerates one PDF per catalog category (plus an index) under `brochure/sell-sheets/pdf/`, driven by `assets/products.csv` and standards in `brochure/category-standards.js`.
 
 ### Finding Cursor agent work
-Agent deliverables (factory orders, margin sheets, sell-sheet pointers) live under `cursor/` with one subfolder per stream of work. See `cursor/README.md`. Do not recreate long-lived `cursor/*` feature branches for work that already landed on `main`.
+Agent deliverables live under `cursor/` (see `cursor/README.md`). GitHub should stay on `main` only. Archive finished Cursor cloud agents in the Agents dashboard; do not recreate long-lived `cursor/*` feature branches for work that already landed.
