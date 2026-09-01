@@ -14,6 +14,7 @@ import {
   timeline,
 } from './core.js';
 import {
+  atpForPairs,
   atpForSku,
   cycleCount,
   getBalance,
@@ -34,24 +35,40 @@ function parseCustomer(row) {
 export async function hydrateOrder(env, orderId) {
   const o = await env.DB.prepare(`SELECT * FROM orders WHERE id = ?`).bind(orderId).first();
   if (!o) return null;
-  const { results: items } = await env.DB.prepare(
-    `SELECT i.*, p.description, p.pack, p.qty AS catalog_qty, p.price AS catalog_price
-     FROM order_items i
-     LEFT JOIN products p ON p.code = i.product_sku AND p.size = i.size
-     WHERE i.order_id = ?`
-  )
-    .bind(orderId)
-    .all();
-  const { results: allocs } = await env.DB.prepare(
-    `SELECT * FROM allocations WHERE order_id = ? ORDER BY created_at`
-  )
-    .bind(orderId)
-    .all();
-  const { results: ships } = await env.DB.prepare(
-    `SELECT * FROM outbound_shipments WHERE order_id = ? ORDER BY created_at`
-  )
-    .bind(orderId)
-    .all();
+  const [itemRes, allocRes, shipRes, taskRes, stopRes, events] = await Promise.all([
+    env.DB.prepare(
+      `SELECT i.*, p.description, p.pack, p.qty AS catalog_qty, p.price AS catalog_price
+       FROM order_items i
+       LEFT JOIN products p ON p.code = i.product_sku AND p.size = i.size
+       WHERE i.order_id = ?`
+    )
+      .bind(orderId)
+      .all(),
+    env.DB.prepare(`SELECT * FROM allocations WHERE order_id = ? ORDER BY created_at`)
+      .bind(orderId)
+      .all(),
+    env.DB.prepare(`SELECT * FROM outbound_shipments WHERE order_id = ? ORDER BY created_at`)
+      .bind(orderId)
+      .all(),
+    env.DB.prepare(`SELECT * FROM warehouse_tasks WHERE order_id = ? ORDER BY created_at`)
+      .bind(orderId)
+      .all(),
+    env.DB.prepare(
+      `SELECT st.*, l.run_date, l.truck, l.driver, l.status AS load_status
+       FROM load_stops st
+       JOIN loads l ON l.id = st.load_id
+       WHERE st.order_id = ?
+       ORDER BY st.id`
+    )
+      .bind(orderId)
+      .all(),
+    timeline(env, 'order', orderId, 60),
+  ]);
+  const items = itemRes.results;
+  const allocs = allocRes.results;
+  const ships = shipRes.results;
+  const tasks = taskRes.results;
+  const stops = stopRes.results;
   const shipIds = (ships || []).map((s) => s.id);
   let lines = [];
   if (shipIds.length) {
@@ -63,21 +80,6 @@ export async function hydrateOrder(env, orderId) {
       .all();
     lines = results || [];
   }
-  const { results: tasks } = await env.DB.prepare(
-    `SELECT * FROM warehouse_tasks WHERE order_id = ? ORDER BY created_at`
-  )
-    .bind(orderId)
-    .all();
-  const { results: stops } = await env.DB.prepare(
-    `SELECT st.*, l.run_date, l.truck, l.driver, l.status AS load_status
-     FROM load_stops st
-     JOIN loads l ON l.id = st.load_id
-     WHERE st.order_id = ?
-     ORDER BY st.id`
-  )
-    .bind(orderId)
-    .all();
-  const events = await timeline(env, 'order', orderId, 60);
   const customer = parseCustomer(o);
   const fulfillment = normalizeFulfillment(o);
 
@@ -105,8 +107,12 @@ export async function hydrateOrder(env, orderId) {
     };
   });
 
+  const atpMap = await atpForPairs(
+    env,
+    mappedItems.map((it) => ({ code: it.code, size: it.size }))
+  );
   for (const it of mappedItems) {
-    it.atp = await atpForSku(env, it.code, it.size);
+    it.atp = atpMap[`${it.code}\x1e${it.size}`] || (await atpForSku(env, it.code, it.size));
   }
 
   const nextActions = nextOrderActions(fulfillment, o, mappedItems);
@@ -668,6 +674,29 @@ export async function hydrateLoad(env, loadId) {
   return { ...load, stops: stops || [] };
 }
 
+export async function listLoads(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM loads ORDER BY run_date DESC, created_at DESC LIMIT 50`
+  ).all();
+  const loads = results || [];
+  if (!loads.length) return [];
+  const ids = loads.map((l) => l.id);
+  const { results: stops } = await env.DB.prepare(
+    `SELECT st.*, s.status AS shipment_status, s.method
+     FROM load_stops st
+     LEFT JOIN outbound_shipments s ON s.id = st.shipment_id
+     WHERE st.load_id IN (${ids.map(() => '?').join(',')})
+     ORDER BY st.seq, st.id`
+  )
+    .bind(...ids)
+    .all();
+  const by = {};
+  for (const st of stops || []) {
+    (by[st.load_id] || (by[st.load_id] = [])).push(st);
+  }
+  return loads.map((l) => ({ ...l, stops: by[l.id] || [] }));
+}
+
 export async function addStopToLoad(env, loadId, shipmentId, auth) {
   const load = await env.DB.prepare(`SELECT * FROM loads WHERE id = ?`).bind(loadId).first();
   const ship = await env.DB.prepare(`SELECT * FROM outbound_shipments WHERE id = ?`).bind(shipmentId).first();
@@ -968,6 +997,25 @@ export async function hydrateInbound(env, id) {
   return { ...row, lines: lines || [] };
 }
 
+export async function listInbounds(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM inbound_shipments ORDER BY datetime(COALESCE(updated_at, created_at)) DESC LIMIT 50`
+  ).all();
+  const rows = results || [];
+  if (!rows.length) return [];
+  const ids = rows.map((r) => r.id);
+  const { results: lines } = await env.DB.prepare(
+    `SELECT * FROM inbound_lines WHERE inbound_id IN (${ids.map(() => '?').join(',')})`
+  )
+    .bind(...ids)
+    .all();
+  const by = {};
+  for (const ln of lines || []) {
+    (by[ln.inbound_id] || (by[ln.inbound_id] = [])).push(ln);
+  }
+  return rows.map((r) => ({ ...r, lines: by[r.id] || [] }));
+}
+
 export async function arriveInbound(env, id, auth) {
   await env.DB.prepare(`UPDATE inbound_shipments SET status = 'arrived', updated_at = ? WHERE id = ?`)
     .bind(nowIso(), id)
@@ -1067,43 +1115,42 @@ export async function receiveInbound(env, id, auth, { lines } = {}) {
 }
 
 export async function inbox(env) {
-  const pending = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM orders WHERE LOWER(COALESCE(fulfillment_status, status, '')) IN ('pending', '')`
-  ).first();
-  const hold = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM orders WHERE fulfillment_status = 'on_hold' OR credit_hold = 1`
-  ).first();
-  const picks = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM warehouse_tasks WHERE type = 'pick' AND status IN ('pending', 'in_progress')`
-  ).first();
-  const putaway = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM warehouse_tasks WHERE type = 'putaway' AND status IN ('pending', 'in_progress')`
-  ).first();
-  const unpacked = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM outbound_shipments WHERE status = 'packed'`
-  ).first();
-  const unassigned = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM outbound_shipments WHERE COALESCE(load_id, '') = '' AND status IN ('packed', 'staged')`
-  ).first();
-  const ar = await env.DB.prepare(
-    `SELECT COUNT(*) AS n, COALESCE(SUM(total_amount), 0) AS amt FROM orders
-     WHERE LOWER(COALESCE(payment_status, 'unpaid')) IN ('unpaid', 'partial')
-       AND LOWER(COALESCE(status, '')) != 'cancelled'`
-  ).first();
-  const exceptions = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM exceptions WHERE status = 'open'`
-  ).first();
-  const inbound = await env.DB.prepare(
-    `SELECT COUNT(*) AS n FROM inbound_shipments WHERE LOWER(status) IN ('in_transit', 'arrived')`
-  ).first();
-
-  const { results: work } = await env.DB.prepare(
+  const [pending, hold, picks, putaway, unpacked, unassigned, ar, exceptions, inbound, workRes] =
+    await Promise.all([
+      env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM orders WHERE LOWER(COALESCE(fulfillment_status, status, '')) IN ('pending', '')`
+      ).first(),
+      env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM orders WHERE fulfillment_status = 'on_hold' OR credit_hold = 1`
+      ).first(),
+      env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM warehouse_tasks WHERE type = 'pick' AND status IN ('pending', 'in_progress')`
+      ).first(),
+      env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM warehouse_tasks WHERE type = 'putaway' AND status IN ('pending', 'in_progress')`
+      ).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM outbound_shipments WHERE status = 'packed'`).first(),
+      env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM outbound_shipments WHERE COALESCE(load_id, '') = '' AND status IN ('packed', 'staged')`
+      ).first(),
+      env.DB.prepare(
+        `SELECT COUNT(*) AS n, COALESCE(SUM(total_amount), 0) AS amt FROM orders
+         WHERE LOWER(COALESCE(payment_status, 'unpaid')) IN ('unpaid', 'partial')
+           AND LOWER(COALESCE(status, '')) != 'cancelled'`
+      ).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM exceptions WHERE status = 'open'`).first(),
+      env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM inbound_shipments WHERE LOWER(status) IN ('in_transit', 'arrived')`
+      ).first(),
+      env.DB.prepare(
     `SELECT id, status, fulfillment_status, total_amount, customer_snapshot, created_at, po
      FROM orders
      WHERE LOWER(COALESCE(fulfillment_status, status, '')) IN ('pending', 'confirmed', 'released', 'picking', 'packed', 'staged', 'loaded', 'out_for_delivery', 'on_hold')
      ORDER BY datetime(created_at) DESC
      LIMIT 40`
-  ).all();
+      ).all(),
+    ]);
+  const work = workRes.results;
 
   return {
     kpis: {
@@ -1134,32 +1181,32 @@ export async function searchOps(env, q) {
   const needle = String(q || '').trim();
   if (!needle) return { orders: [], shipments: [], loads: [], pos: [], inbound: [] };
   const like = `%${needle}%`;
-  const orders = await env.DB.prepare(
-    `SELECT id, status, fulfillment_status, total_amount, po, customer_snapshot FROM orders
-     WHERE id LIKE ? OR po LIKE ? OR customer_snapshot LIKE ? LIMIT 15`
-  )
-    .bind(like, like, like)
-    .all();
-  const shipments = await env.DB.prepare(
-    `SELECT id, order_id, status FROM outbound_shipments WHERE id LIKE ? OR order_id LIKE ? LIMIT 10`
-  )
-    .bind(like, like)
-    .all();
-  const loads = await env.DB.prepare(
-    `SELECT id, status, truck, run_date FROM loads WHERE id LIKE ? OR truck LIKE ? OR driver LIKE ? LIMIT 10`
-  )
-    .bind(like, like, like)
-    .all();
-  const pos = await env.DB.prepare(
-    `SELECT id, vendor, status FROM vendor_pos WHERE id LIKE ? OR vendor LIKE ? LIMIT 10`
-  )
-    .bind(like, like)
-    .all();
-  const inbound = await env.DB.prepare(
-    `SELECT id, container_number, status FROM inbound_shipments WHERE id LIKE ? OR container_number LIKE ? LIMIT 10`
-  )
-    .bind(like, like)
-    .all();
+  const [orders, shipments, loads, pos, inbound] = await Promise.all([
+    env.DB.prepare(
+      `SELECT id, status, fulfillment_status, total_amount, po, customer_snapshot FROM orders
+       WHERE id LIKE ? OR po LIKE ? OR customer_snapshot LIKE ? LIMIT 15`
+    )
+      .bind(like, like, like)
+      .all(),
+    env.DB.prepare(
+      `SELECT id, order_id, status FROM outbound_shipments WHERE id LIKE ? OR order_id LIKE ? LIMIT 10`
+    )
+      .bind(like, like)
+      .all(),
+    env.DB.prepare(
+      `SELECT id, status, truck, run_date FROM loads WHERE id LIKE ? OR truck LIKE ? OR driver LIKE ? LIMIT 10`
+    )
+      .bind(like, like, like)
+      .all(),
+    env.DB.prepare(`SELECT id, vendor, status FROM vendor_pos WHERE id LIKE ? OR vendor LIKE ? LIMIT 10`)
+      .bind(like, like)
+      .all(),
+    env.DB.prepare(
+      `SELECT id, container_number, status FROM inbound_shipments WHERE id LIKE ? OR container_number LIKE ? LIMIT 10`
+    )
+      .bind(like, like)
+      .all(),
+  ]);
   return {
     orders: orders.results || [],
     shipments: shipments.results || [],

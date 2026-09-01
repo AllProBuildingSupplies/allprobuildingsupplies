@@ -103,22 +103,72 @@ export async function catalogQty(env, code, size) {
  * ATP = catalog available (products.qty) + inbound not yet received.
  * products.qty is decremented at order capture (existing storefront contract).
  */
-export async function atpForSku(env, code, size) {
-  const available = await catalogQty(env, code, size);
-  const physical = await physicalOnHand(env, code, size);
-  const allocated = await allocatedOpen(env, code, size);
-  const inbound = await inboundExpected(env, code, size);
-  const floor = await getBalance(env, code, size, 'FLOOR');
+function shapeAtp(code, size, row) {
+  const available = intQty(row && row.available);
+  const inbound = intQty(row && row.inbound);
   return {
     code,
     size: size || '',
     available,
-    physical,
-    floor,
-    allocated,
+    physical: intQty(row && row.physical),
+    floor: intQty(row && row.floor),
+    allocated: intQty(row && row.allocated),
     inbound,
     atp: available + inbound,
   };
+}
+
+const ATP_SELECT = `
+  COALESCE((SELECT x.qty FROM products x WHERE x.code = p.code AND x.size = p.size), 0) AS available,
+  COALESCE((SELECT SUM(b.qty) FROM inventory_balances b WHERE b.code = p.code AND b.size = p.size), 0) AS physical,
+  COALESCE((SELECT b.qty FROM inventory_balances b WHERE b.code = p.code AND b.size = p.size AND b.location_id = 'FLOOR'), 0) AS floor,
+  COALESCE((SELECT SUM(a.qty) FROM allocations a WHERE a.code = p.code AND a.size = p.size AND a.status IN ('open', 'released') AND a.kind = 'hard'), 0) AS allocated,
+  COALESCE((
+    SELECT SUM(l.qty_expected - l.qty_received)
+    FROM inbound_lines l
+    JOIN inbound_shipments s ON s.id = l.inbound_id
+    WHERE l.code = p.code AND l.size = p.size
+      AND LOWER(COALESCE(s.status, '')) IN ('in_transit', 'arrived')
+  ), 0) AS inbound
+`;
+
+export async function atpForSku(env, code, size) {
+  const sz = size || '';
+  const row = await env.DB.prepare(
+    `SELECT ${ATP_SELECT} FROM (SELECT ? AS code, ? AS size) p`
+  )
+    .bind(code, sz)
+    .first();
+  return shapeAtp(code, sz, row);
+}
+
+export async function atpForPairs(env, pairs) {
+  const uniq = [];
+  const seen = new Set();
+  for (const p of pairs || []) {
+    const code = p.code;
+    const size = p.size || '';
+    const key = code + '\x1e' + size;
+    if (!code || seen.has(key)) continue;
+    seen.add(key);
+    uniq.push({ code, size });
+  }
+  const out = {};
+  if (!uniq.length) return out;
+  const { results: rows } = await env.DB.prepare(
+    `SELECT p.code, p.size, ${ATP_SELECT} FROM products p
+     WHERE ${uniq.map(() => `(p.code = ? AND p.size = ?)`).join(' OR ')}`
+  )
+    .bind(...uniq.flatMap((p) => [p.code, p.size]))
+    .all();
+  for (const row of rows || []) {
+    out[`${row.code}\x1e${row.size || ''}`] = shapeAtp(row.code, row.size, row);
+  }
+  for (const p of uniq) {
+    const key = `${p.code}\x1e${p.size}`;
+    if (!out[key]) out[key] = shapeAtp(p.code, p.size, null);
+  }
+  return out;
 }
 
 export async function applyCatalogDelta(env, code, size, delta) {
@@ -157,8 +207,8 @@ export async function cycleCount(env, { code, size, locationId, countedQty }) {
 export async function inventorySnapshot(env, { q = '', limit = 80 } = {}) {
   const needle = String(q || '').trim();
   let sql = `
-    SELECT p.code, p.size, p.description, p.pack, p.qty AS available,
-           p.tommur_code, p.lesso_code
+    SELECT p.code, p.size, p.description, p.pack, p.tommur_code, p.lesso_code,
+           ${ATP_SELECT}
     FROM products p
   `;
   const binds = [];
@@ -170,13 +220,8 @@ export async function inventorySnapshot(env, { q = '', limit = 80 } = {}) {
   sql += ` ORDER BY p.code, p.size LIMIT ?`;
   binds.push(limit);
   const { results } = await env.DB.prepare(sql).bind(...binds).all();
-  const rows = [];
-  for (const p of results || []) {
-    const atp = await atpForSku(env, p.code, p.size);
-    rows.push({
-      ...p,
-      ...atp,
-    });
-  }
-  return rows;
+  return (results || []).map((p) => ({
+    ...p,
+    ...shapeAtp(p.code, p.size, p),
+  }));
 }

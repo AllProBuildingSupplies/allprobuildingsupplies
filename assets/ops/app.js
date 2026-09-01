@@ -272,8 +272,7 @@ async function viewOrder(id) {
 }
 
 async function viewWarehouse() {
-  const tasks = await ops('/tasks?status=open');
-  const waves = await ops('/waves');
+  const [tasks, waves] = await Promise.all([ops('/tasks?status=open'), ops('/waves')]);
   const cards = (tasks || [])
     .map((t) => {
       const left = Math.max(0, (t.qty_expected || 0) - (t.qty_done || 0));
@@ -349,8 +348,8 @@ async function viewShipment(id) {
 }
 
 async function viewLoads() {
-  const list = await ops('/loads');
-  const unassigned = (await ops('/shipments')).filter((s) => !s.load_id && ['packed', 'staged'].includes(s.status));
+  const [list, allShips] = await Promise.all([ops('/loads'), ops('/shipments')]);
+  const unassigned = (allShips || []).filter((s) => !s.load_id && ['packed', 'staged'].includes(s.status));
   const rows = (list || []).map(
     (l) => `<tr data-go="loads/${esc(l.id)}"><td>${esc(l.id)}</td><td>${esc(l.run_date)}</td><td>${esc(l.truck)}</td>
       <td>${pill(l.status)}</td><td>${(l.stops || []).length} stops</td></tr>`
@@ -369,8 +368,11 @@ async function viewLoads() {
 }
 
 async function viewLoad(id) {
-  const l = await ops('/loads/' + encodeURIComponent(id));
-  const ships = (await ops('/shipments')).filter((s) => !s.load_id && ['packed', 'staged'].includes(s.status));
+  const [l, allShips] = await Promise.all([
+    ops('/loads/' + encodeURIComponent(id)),
+    ops('/shipments'),
+  ]);
+  const ships = (allShips || []).filter((s) => !s.load_id && ['packed', 'staged'].includes(s.status));
   const opts = ships.map((s) => `<option value="${esc(s.id)}">${esc(s.id)} · ${esc(s.order_id)}</option>`).join('');
   const stops = (l.stops || [])
     .map(

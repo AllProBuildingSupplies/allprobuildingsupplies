@@ -31,6 +31,8 @@ import {
   inbox,
   inventorySnapshot,
   listExceptions,
+  listInbounds,
+  listLoads,
   listLocations,
   listOrders,
   markShipmentInvoiced,
@@ -231,12 +233,7 @@ export async function handleOpsRequest(request, env, auth, url) {
     }
 
     if (parts[0] === 'loads' && parts.length === 1 && method === 'GET') {
-      const { results } = await env.DB.prepare(`SELECT * FROM loads ORDER BY run_date DESC, created_at DESC LIMIT 50`).all();
-      const out = [];
-      for (const l of results || []) {
-        out.push(await hydrateLoad(env, l.id));
-      }
-      return jsonResponse(out);
+      return jsonResponse(await listLoads(env));
     }
     if (parts[0] === 'loads' && parts.length === 1 && method === 'POST') {
       return jsonResponse(await createLoad(env, auth, body));
@@ -322,12 +319,7 @@ export async function handleOpsRequest(request, env, auth, url) {
     }
 
     if (parts[0] === 'inbound' && parts.length === 1 && method === 'GET') {
-      const { results } = await env.DB.prepare(
-        `SELECT * FROM inbound_shipments ORDER BY datetime(COALESCE(updated_at, created_at)) DESC LIMIT 50`
-      ).all();
-      const out = [];
-      for (const r of results || []) out.push(await hydrateInbound(env, r.id));
-      return jsonResponse(out);
+      return jsonResponse(await listInbounds(env));
     }
     if (parts[0] === 'inbound' && parts.length === 1 && method === 'POST') {
       return jsonResponse(await createInbound(env, auth, body));
