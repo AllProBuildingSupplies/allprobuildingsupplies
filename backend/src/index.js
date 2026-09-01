@@ -71,6 +71,16 @@ function roundMoney(n) {
   return Math.round((v + Number.EPSILON) * 100) / 100;
 }
 
+/** D1 rejects `undefined` binds (D1_TYPE_ERROR). Prefer empty string over null. */
+function d1Text(v) {
+  return v == null ? '' : String(v);
+}
+
+function d1Num(v, fallback = 0) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 function productCategoryFields(p) {
   return {
     material: p.material != null ? String(p.material).trim() : '',
@@ -908,6 +918,57 @@ async function tableColumns(env, table) {
   return (results || []).map((r) => ({ name: r.name, type: r.type, notnull: r.notnull, dflt: r.dflt_value, pk: r.pk }));
 }
 
+async function addMissingColumns(env, table, defs) {
+  let have;
+  try {
+    have = new Set((await tableColumns(env, table)).map((c) => c.name));
+  } catch (_) {
+    return;
+  }
+  for (const def of defs) {
+    const name = String(def).trim().split(/\s+/)[0];
+    if (!name || have.has(name)) continue;
+    try {
+      await env.DB.prepare(`ALTER TABLE ${table} ADD COLUMN ${def}`).run();
+      have.add(name);
+    } catch (_) {}
+  }
+}
+
+/**
+ * Columns the admin order INSERT writes. After ops_boot the full ALTER sweep is
+ * skipped, so a TEST D1 booted before payment/qty_shipped columns existed 500s
+ * on Save order. Two PRAGMAs + ALTERs only for missing names.
+ */
+async function ensureOrderWriteColumns(env) {
+  await addMissingColumns(env, 'orders', [
+    'created_at TEXT',
+    'user_id TEXT',
+    "status TEXT DEFAULT 'pending'",
+    'total_amount REAL',
+    'delivery_method TEXT',
+    'delivery_address TEXT',
+    'po TEXT',
+    'notes TEXT',
+    'customer_snapshot TEXT',
+    "shipments_json TEXT DEFAULT '[]'",
+    "payment_status TEXT DEFAULT 'unpaid'",
+    'paid_at TEXT',
+    "payment_method TEXT DEFAULT ''",
+    "payment_note TEXT DEFAULT ''",
+    "fulfillment_status TEXT DEFAULT ''",
+    "hold_reason TEXT DEFAULT ''",
+    "promised_at TEXT DEFAULT ''",
+    'credit_hold INTEGER DEFAULT 0',
+  ]);
+  await addMissingColumns(env, 'order_items', [
+    'qty_shipped INTEGER DEFAULT 0',
+    'qty_allocated INTEGER DEFAULT 0',
+    'qty_picked INTEGER DEFAULT 0',
+    'qty_packed INTEGER DEFAULT 0',
+  ]);
+}
+
 /** Partial shipments: cumulative qty_shipped per line + shipments history JSON on orders. */
 async function ensureOrderShipmentColumns(env) {
   try {
@@ -1346,7 +1407,10 @@ async function ensureRuntimeSchema(env) {
         const ready = await env.DB.prepare(
           `SELECT next_val FROM ops_sequences WHERE name = 'ops_boot'`
         ).first();
-        if (ready && Number(ready.next_val) >= 1) return;
+        if (ready && Number(ready.next_val) >= 1) {
+          await ensureOrderWriteColumns(env);
+          return;
+        }
       } catch (_) {}
       await ensureCoreSchema(env);
       await ensureAddressesTable(env);
@@ -1512,7 +1576,13 @@ async function setOrderPaymentStatus(env, orderId, fields) {
   await env.DB.prepare(
     `UPDATE orders SET payment_status = ?, paid_at = ?, payment_method = ?, payment_note = ? WHERE id = ?`
   )
-    .bind(pay.paymentStatus, pay.paidAt, pay.paymentMethod, pay.paymentNote, id)
+    .bind(
+      d1Text(pay.paymentStatus),
+      d1Text(pay.paidAt),
+      d1Text(pay.paymentMethod),
+      d1Text(pay.paymentNote),
+      d1Text(id)
+    )
     .run();
   return { success: true, orderId: id, ...pay, previousStatus: existing.payment_status || 'unpaid' };
 }
@@ -3707,23 +3777,23 @@ export default {
                payment_note=excluded.payment_note,
                created_at=COALESCE(orders.created_at, excluded.created_at)`
           ).bind(
-            o.id,
-            custEmail,
-            o.status,
-            totalAmt,
-            o.delivery?.method || 'delivery',
-            o.delivery?.address || '',
-            o.po || '',
-            o.notes || '',
-            JSON.stringify(o.customer || {}),
-            shipmentsJson,
-            placedIso,
-            pay.paymentStatus,
-            pay.paidAt,
-            pay.paymentMethod,
-            pay.paymentNote
+            d1Text(o.id),
+            d1Text(custEmail),
+            d1Text(o.status || 'pending'),
+            d1Num(totalAmt),
+            d1Text(o.delivery?.method || 'delivery'),
+            d1Text(o.delivery?.address || ''),
+            d1Text(o.po),
+            d1Text(o.notes),
+            d1Text(JSON.stringify(o.customer || {})),
+            d1Text(shipmentsJson),
+            d1Text(placedIso),
+            d1Text(pay.paymentStatus),
+            d1Text(pay.paidAt),
+            d1Text(pay.paymentMethod),
+            d1Text(pay.paymentNote)
           ),
-          env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(o.id),
+          env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(d1Text(o.id)),
         ];
 
         const itemsToSave = priced.validated || [];
@@ -3731,7 +3801,14 @@ export default {
           stmts.push(
             env.DB.prepare(
               'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase, qty_shipped) VALUES (?, ?, ?, ?, ?, ?)'
-            ).bind(o.id, i.code, i.size, i.qty, i.unitPrice, i.qtyShipped || 0)
+            ).bind(
+              d1Text(o.id),
+              d1Text(i.code),
+              d1Text(i.size),
+              d1Num(i.qty),
+              d1Num(i.unitPrice),
+              d1Num(i.qtyShipped)
+            )
           );
         }
 
@@ -3752,8 +3829,20 @@ export default {
         try {
           await env.DB.batch(stmts);
         } catch (err) {
-          await reapplyOldStock();
-          throw err;
+          const msg = String(err && err.message ? err.message : err);
+          if (/no such column/i.test(msg)) {
+            schemaReadyPromise = null;
+            await ensureRuntimeSchema(env);
+            try {
+              await env.DB.batch(stmts);
+            } catch (err2) {
+              await reapplyOldStock();
+              throw err2;
+            }
+          } else {
+            await reapplyOldStock();
+            throw err;
+          }
         }
 
         if (o.status !== 'cancelled' && itemsToSave.length > 0) {
@@ -3949,7 +4038,10 @@ export default {
 
       return jsonResponse({ error: 'Route Not Found' }, 404);
     } catch (error) {
-      const detail = error && error.message ? String(error.message) : String(error);
+      const msg = error && error.message ? String(error.message) : String(error);
+      const cause =
+        error && error.cause && error.cause.message ? String(error.cause.message) : '';
+      const detail = cause && cause !== msg ? msg + ' — ' + cause : msg;
       return jsonResponse({ error: 'Internal Server Error', detail }, 500);
     }
   },

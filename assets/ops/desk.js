@@ -563,6 +563,8 @@ function collectOrderPayload() {
     paymentStatus: val('o-pay') || 'unpaid',
     paymentMethod: val('o-pay-method'),
     paymentNote: val('o-pay-note'),
+    paidAt: null,
+    shipments: [],
     items,
   };
 }

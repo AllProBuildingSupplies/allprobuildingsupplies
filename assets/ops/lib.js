@@ -23,7 +23,11 @@ export async function api(path, opts = {}) {
     location.reload();
     throw new Error('Unauthorized');
   }
-  if (!r.ok) throw new Error(data.error || data.detail || 'HTTP ' + r.status);
+  if (!r.ok) {
+    const err = data.error || 'HTTP ' + r.status;
+    const detail = data.detail && data.detail !== err ? data.detail : '';
+    throw new Error(detail ? err + ': ' + detail : err);
+  }
   return data;
 }
 
