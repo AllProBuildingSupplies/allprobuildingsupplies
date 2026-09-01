@@ -757,6 +757,11 @@ window.opsDoLogin = async function opsDoLogin() {
 
 async function start() {
   if (window.apbsShowTestBanner) window.apbsShowTestBanner();
+  const themeSlot = document.querySelector('.ops-login-theme');
+  if (themeSlot && window.apbsThemeToggleHtml && !themeSlot.querySelector('[data-theme-toggle]')) {
+    themeSlot.innerHTML = window.apbsThemeToggleHtml();
+  }
+  if (window.apbsBindThemeToggles) window.apbsBindThemeToggles();
   $('ops-login-btn').addEventListener('click', window.opsDoLogin);
   $('ops-pin').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') window.opsDoLogin();
