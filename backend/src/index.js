@@ -1342,6 +1342,12 @@ function stripDataUrlBase64(value) {
 async function ensureRuntimeSchema(env) {
   if (!schemaReadyPromise) {
     schemaReadyPromise = (async () => {
+      try {
+        const ready = await env.DB.prepare(
+          `SELECT next_val FROM ops_sequences WHERE name = 'ops_boot'`
+        ).first();
+        if (ready && Number(ready.next_val) >= 1) return;
+      } catch (_) {}
       await ensureCoreSchema(env);
       await ensureAddressesTable(env);
       await ensureProductFactoryColumns(env);
