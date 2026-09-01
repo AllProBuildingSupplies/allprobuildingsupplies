@@ -3829,8 +3829,14 @@ export default {
         try {
           await env.DB.batch(stmts);
         } catch (err) {
-          const msg = String(err && err.message ? err.message : err);
-          if (/no such column/i.test(msg)) {
+          const msg = [
+            err && err.message,
+            err && err.cause && err.cause.message,
+            err,
+          ]
+            .filter(Boolean)
+            .join(' ');
+          if (/no such column|has no column named|D1_COLUMN_NOTFOUND/i.test(msg)) {
             schemaReadyPromise = null;
             await ensureRuntimeSchema(env);
             try {
