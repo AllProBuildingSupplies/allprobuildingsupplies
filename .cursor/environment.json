@@ -11,5 +11,8 @@
       "command": "python3 -m http.server 8080"
     }
   ],
-  "ports": [8080, 8787]
+  "ports": [
+    { "name": "frontend", "port": 8080 },
+    { "name": "backend", "port": 8787 }
+  ]
 }
