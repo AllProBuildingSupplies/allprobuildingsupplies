@@ -3,10 +3,10 @@
 .ops-body #cursor,.ops-body #cursor-ring{display:none !important;}
 .ops-body button,.ops-body a{cursor:pointer;}
 
-.ops-login{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:32px 16px;
-}
+.ops-login[hidden],
+.ops-app[hidden],
+.ops-palette[hidden],
+.ops-flash[hidden]{display:none !important;}
 .ops-login-card{
   width:min(420px,100%);background:var(--ink2);border:1px solid var(--line);
   padding:36px 32px;text-align:center;
@@ -134,8 +134,9 @@
 
 .ops-palette{
   position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:80;
-  display:flex;justify-content:center;padding:12vh 16px 0;
+  display:none;justify-content:center;padding:12vh 16px 0;
 }
+.ops-palette.is-open{display:flex;}
 .ops-palette-box{
   width:min(560px,100%);background:var(--ink2);border:1px solid var(--gold);
   box-shadow:var(--shadow);

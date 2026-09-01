@@ -663,6 +663,7 @@ async function handleCount(e) {
 }
 
 function openPalette() {
+  $('ops-palette').classList.add('is-open');
   $('ops-palette').hidden = false;
   $('ops-palette-input').value = '';
   drawPalette('');
@@ -680,13 +681,17 @@ function drawPalette(q) {
 function bindPalette() {
   $('ops-cmd-open').addEventListener('click', openPalette);
   $('ops-palette').addEventListener('click', (e) => {
-    if (e.target.id === 'ops-palette') $('ops-palette').hidden = true;
+    if (e.target.id === 'ops-palette') {
+      $('ops-palette').classList.remove('is-open');
+      $('ops-palette').hidden = true;
+    }
   });
   $('ops-palette-input').addEventListener('input', (e) => drawPalette(e.target.value));
   $('ops-palette-list').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-pal]');
     if (!btn) return;
     const item = PALETTE.find((p) => p.id === btn.dataset.pal);
+    $('ops-palette').classList.remove('is-open');
     $('ops-palette').hidden = true;
     if (item) item.run();
   });
@@ -695,7 +700,10 @@ function bindPalette() {
       e.preventDefault();
       openPalette();
     }
-    if (e.key === 'Escape') $('ops-palette').hidden = true;
+    if (e.key === 'Escape') {
+      $('ops-palette').classList.remove('is-open');
+      $('ops-palette').hidden = true;
+    }
   });
 }
 
@@ -733,8 +741,26 @@ async function bootApp() {
   await render();
 }
 
+window.opsDoLogin = async function opsDoLogin() {
+  const err = $('ops-login-err');
+  if (err) err.hidden = true;
+  try {
+    await login($('ops-pin').value);
+    await bootApp();
+  } catch (e) {
+    if (err) {
+      err.hidden = false;
+      err.textContent = e.message;
+    }
+  }
+};
+
 async function start() {
   if (window.apbsShowTestBanner) window.apbsShowTestBanner();
+  $('ops-login-btn').addEventListener('click', window.opsDoLogin);
+  $('ops-pin').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') window.opsDoLogin();
+  });
   if (token()) {
     try {
       await ops('/me');
@@ -743,19 +769,6 @@ async function start() {
   }
   $('ops-login').hidden = false;
   $('ops-app').hidden = true;
-  $('ops-login-btn').addEventListener('click', async () => {
-    $('ops-login-err').hidden = true;
-    try {
-      await login($('ops-pin').value);
-      await bootApp();
-    } catch (e) {
-      $('ops-login-err').hidden = false;
-      $('ops-login-err').textContent = e.message;
-    }
-  });
-  $('ops-pin').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') $('ops-login-btn').click();
-  });
 }
 
 start();
