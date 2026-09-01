@@ -4,8 +4,10 @@ New operations suite on branch `cursor/all-pro-os-test-0a19`. **Does not replace
 
 | Open this | What it is |
 |---|---|
-| [`ops.html`](../../ops.html) | All Pro OS UI (inbox, orders, warehouse, shipments, loads, driver, inbound, purchasing, finance) |
+| [`ops.html`](../../ops.html) | All Pro OS UI — inbox, orders (create/edit/docs/pay), warehouse, shipments, loads, driver, inbound, purchasing, inventory/catalog, finance, customers |
 | [`backend/src/ops/`](../../backend/src/ops/) | D1 tables + `/api/ops/*` Worker routes |
+
+Classic `admin.html` stays as fallback. OS calls the same `/api/admin/*` endpoints for master data, invoices, email, and payments.
 
 ## How to run locally
 
@@ -14,6 +16,15 @@ New operations suite on branch `cursor/all-pro-os-test-0a19`. **Does not replace
 3. Open `http://127.0.0.1:8080/ops.html?apbs_api=http://127.0.0.1:8787/api`
 
 Test Pages (`allpro-test.pages.dev/ops.html`) talks to the **test** Worker automatically.
+
+## Modules
+
+- **Customers** — add/edit/delete accounts, approve, password, addresses, credit hold/limit
+- **Orders** — create/edit/delete sales orders and lines, CSV lines, confirm → pick → pack, invoice/packing email + PDF, Banquest, mark paid
+- **Inventory** — SKU add/edit/delete, CSV export/replace/receive, ATP, cycle count
+- **Warehouse** — pick/putaway tasks plus receive/adjust and movement log
+- **Purchasing / inbound** — vendor PO forms with lines; inbound containers with receive qty
+- **Finance** — AR, mark paid, payment methods (Zelle / wire / ACH / card)
 
 ## Documents (real tables, not JSON)
 

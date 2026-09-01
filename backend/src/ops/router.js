@@ -18,6 +18,7 @@ import {
   createPurchaseOrder,
   createWaveFromOrders,
   cycleCount,
+  deletePurchaseOrder,
   departLoad,
   enrichOrdersForCustomer,
   financeAr,
@@ -46,6 +47,7 @@ import {
   setCustomerCredit,
   stageShipment,
   syncOrderIntoOps,
+  updatePurchaseOrder,
 } from './flow.js';
 
 export { ensureOpsSchema, syncOrderIntoOps, enrichOrdersForCustomer };
@@ -311,6 +313,16 @@ export async function handleOpsRequest(request, env, auth, url) {
       if (!po) return jsonResponse({ error: 'PO not found' }, 404);
       return jsonResponse(po);
     }
+    if (parts[0] === 'purchase-orders' && parts[1] && parts.length === 2 && method === 'PUT') {
+      const r = await updatePurchaseOrder(env, parts[1], auth, body);
+      if (r.error) return jsonResponse(r, r.status || 400);
+      return jsonResponse(r);
+    }
+    if (parts[0] === 'purchase-orders' && parts[1] && parts.length === 2 && method === 'DELETE') {
+      const r = await deletePurchaseOrder(env, parts[1]);
+      if (r.error) return jsonResponse(r, r.status || 400);
+      return jsonResponse(r);
+    }
     if (parts[0] === 'purchase-orders' && parts[2] === 'send' && method === 'POST') {
       return jsonResponse(await sendPurchaseOrder(env, parts[1], auth));
     }
@@ -344,7 +356,7 @@ export async function handleOpsRequest(request, env, auth, url) {
 
     if (parts[0] === 'customers' && method === 'GET') {
       const { results } = await env.DB.prepare(
-        `SELECT id, email, fname, lname, company, phone, status, credit_limit, credit_hold FROM users ORDER BY company, email`
+        `SELECT id, email, fname, lname, company, phone, status, canOrderPieces, credit_limit, credit_hold FROM users ORDER BY company, email`
       ).all();
       return jsonResponse(results || []);
     }

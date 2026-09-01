@@ -1,70 +1,39 @@
-const API = () => (window.APBS_API_BASE || '').replace(/\/$/, '');
+import {
+  $,
+  custName,
+  esc,
+  flash,
+  go,
+  money,
+  ops,
+  pill,
+  route,
+  table,
+  token,
+} from './lib.js';
+import {
+  bindDesk,
+  handleDeskChange,
+  handleDeskClick,
+  handleDeskInput,
+  handleHitsClick,
+  viewCustomer,
+  viewCustomers,
+  viewFinanceDesk,
+  viewInboundDesk,
+  viewInboundList,
+  viewInventory,
+  viewOrderDesk,
+  viewOrdersList,
+  viewPoDesk,
+  viewProduct,
+  viewPurchasingList,
+  viewWarehouseStock,
+} from './desk.js';
 
-function token() {
-  return sessionStorage.getItem('apbs_admin_token') || '';
+function API() {
+  return (window.APBS_API_BASE || '').replace(/\/$/, '');
 }
-
-function headers() {
-  return window.apbsAdminHeaders
-    ? window.apbsAdminHeaders({ 'Content-Type': 'application/json' })
-    : { 'Content-Type': 'application/json' };
-}
-
-async function ops(path, opts = {}) {
-  const r = await fetch(API() + '/ops' + path, {
-    ...opts,
-    headers: { ...headers(), ...(opts.headers || {}) },
-  });
-  const data = await r.json().catch(() => ({}));
-  if (r.status === 401) {
-    sessionStorage.removeItem('apbs_admin_token');
-    location.reload();
-    throw new Error('Unauthorized');
-  }
-  if (!r.ok) throw new Error(data.error || data.detail || 'HTTP ' + r.status);
-  return data;
-}
-
-function $(id) {
-  return document.getElementById(id);
-}
-
-function esc(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/"/g, '&quot;');
-}
-
-function money(n) {
-  return '$' + (Number(n) || 0).toFixed(2);
-}
-
-function pill(status) {
-  const st = String(status || '').replace(/\s+/g, '_');
-  return `<span class="ops-pill ${esc(st)}">${esc(st.replace(/_/g, ' ') || '—')}</span>`;
-}
-
-function custName(c) {
-  if (!c) return '—';
-  return c.company || c.name || [c.fname, c.lname].filter(Boolean).join(' ') || c.email || '—';
-}
-
-function flash(msg, isErr) {
-  const el = $('ops-flash');
-  if (!el) return;
-  el.hidden = !msg;
-  el.textContent = msg || '';
-  el.style.borderColor = isErr ? '#c45' : '';
-}
-
-function route() {
-  const hash = (location.hash || '#/inbox').replace(/^#/, '');
-  const parts = hash.split('/').filter(Boolean);
-  return { parts, view: parts[0] || 'inbox', id: parts[1] || '' };
-}
-
-const ROLES = ['owner', 'sales', 'warehouse', 'dispatch', 'driver', 'finance'];
 
 async function login(password) {
   const r = await fetch(API() + '/admin/login', {
@@ -80,21 +49,25 @@ async function login(password) {
 const PALETTE = [
   { id: 'inbox', label: 'Go to Inbox', run: () => go('inbox') },
   { id: 'orders', label: 'Go to Orders', run: () => go('orders') },
+  { id: 'new-order', label: 'New sales order', run: () => go('orders/new') },
   { id: 'warehouse', label: 'Go to Warehouse tasks', run: () => go('warehouse') },
+  { id: 'stock', label: 'Go to Warehouse stock', run: () => go('warehouse/stock') },
   { id: 'shipments', label: 'Go to Shipments', run: () => go('shipments') },
   { id: 'loads', label: 'Go to Loads', run: () => go('loads') },
   { id: 'driver', label: 'Go to Driver run', run: () => go('driver') },
   { id: 'inbound', label: 'Go to Inbound dock', run: () => go('inbound') },
+  { id: 'new-inbound', label: 'New inbound container', run: () => go('inbound/new') },
   { id: 'purchasing', label: 'Go to Purchasing', run: () => go('purchasing') },
-  { id: 'inventory', label: 'Go to Inventory', run: () => go('inventory') },
+  { id: 'new-po', label: 'New vendor PO', run: () => go('purchasing/new') },
+  { id: 'inventory', label: 'Go to Inventory / catalog', run: () => go('inventory') },
+  { id: 'new-sku', label: 'New product SKU', run: () => go('inventory/new') },
   { id: 'finance', label: 'Go to Finance / AR', run: () => go('finance') },
   { id: 'exceptions', label: 'Go to Exceptions', run: () => go('exceptions') },
-  { id: 'customers', label: 'Go to Customers / credit', run: () => go('customers') },
+  { id: 'customers', label: 'Go to Customers', run: () => go('customers') },
+  { id: 'new-customer', label: 'New customer', run: () => go('customers/new') },
 ];
 
-function go(path) {
-  location.hash = '#/' + path.replace(/^\//, '');
-}
+const ROLES = ['owner', 'sales', 'warehouse', 'dispatch', 'driver', 'finance'];
 
 function setNav(view) {
   document.querySelectorAll('.ops-nav a').forEach((a) => {
@@ -119,13 +92,15 @@ function setNav(view) {
 
 async function render() {
   flash('');
-  const { view, id } = route();
-  setNav(view);
+  const { view, id, extra } = route();
+  setNav(view === 'waves' ? 'warehouse' : view);
   const root = $('ops-view');
   try {
     if (view === 'inbox') return void (root.innerHTML = await viewInbox());
-    if (view === 'orders' && id) return void (root.innerHTML = await viewOrder(id));
-    if (view === 'orders') return void (root.innerHTML = await viewOrders());
+    if (view === 'orders' && id === 'new') return void (root.innerHTML = await viewOrderDesk('new', ''));
+    if (view === 'orders' && id) return void (root.innerHTML = await viewOrderWorkspace(id));
+    if (view === 'orders') return void (root.innerHTML = await viewOrdersList());
+    if (view === 'warehouse' && id === 'stock') return void (root.innerHTML = await viewWarehouseStock());
     if (view === 'warehouse') return void (root.innerHTML = await viewWarehouse());
     if (view === 'waves' && id) return void (root.innerHTML = await viewWave(id));
     if (view === 'shipments' && id) return void (root.innerHTML = await viewShipment(id));
@@ -133,13 +108,16 @@ async function render() {
     if (view === 'loads' && id) return void (root.innerHTML = await viewLoad(id));
     if (view === 'loads') return void (root.innerHTML = await viewLoads());
     if (view === 'driver') return void (root.innerHTML = await viewDriver());
-    if (view === 'inbound' && id) return void (root.innerHTML = await viewInbound(id));
-    if (view === 'inbound') return void (root.innerHTML = await viewInbounds());
-    if (view === 'purchasing' && id) return void (root.innerHTML = await viewPo(id));
-    if (view === 'purchasing') return void (root.innerHTML = await viewPurchasing());
+    if (view === 'inbound' && (id === 'new' || id)) return void (root.innerHTML = await viewInboundDesk(id || 'new'));
+    if (view === 'inbound') return void (root.innerHTML = await viewInboundList());
+    if (view === 'purchasing' && (id === 'new' || id)) return void (root.innerHTML = await viewPoDesk(id || 'new'));
+    if (view === 'purchasing') return void (root.innerHTML = await viewPurchasingList());
+    if (view === 'inventory' && id === 'new') return void (root.innerHTML = await viewProduct('new', extra));
+    if (view === 'inventory' && id === 'edit') return void (root.innerHTML = await viewProduct('edit', extra));
     if (view === 'inventory') return void (root.innerHTML = await viewInventory());
-    if (view === 'finance') return void (root.innerHTML = await viewFinance());
+    if (view === 'finance') return void (root.innerHTML = await viewFinanceDesk(id || 'open'));
     if (view === 'exceptions') return void (root.innerHTML = await viewExceptions());
+    if (view === 'customers' && (id === 'new' || id)) return void (root.innerHTML = await viewCustomer(id || 'new'));
     if (view === 'customers') return void (root.innerHTML = await viewCustomers());
     root.innerHTML = await viewInbox();
   } catch (e) {
@@ -169,11 +147,11 @@ async function viewInbox() {
     ['inboundOpen', 'Inbound', 'inbound'],
     ['arOpen', 'Open AR', 'finance'],
     ['exceptions', 'Exceptions', 'exceptions'],
-    ['onHold', 'On hold', 'exceptions'],
+    ['onHold', 'On hold', 'customers'],
   ];
   return `
     <div class="ops-row"><h1 class="ops-h1">What needs you</h1>
-      <span class="ops-sub">Work queues — not modules. Press ⌘K.</span></div>
+      <span class="ops-sub">Work queues — not modules. Press ⌘K. New order / customer live in the palette.</span></div>
     <div class="ops-kpis">
       ${kpis
         .map(
@@ -191,30 +169,8 @@ async function viewInbox() {
     </div>`;
 }
 
-function table(headers, rows) {
-  if (!rows.length) return `<div class="ops-empty">Nothing here yet.</div>`;
-  return `<div style="overflow:auto"><table class="ops-table">
-    <thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
-    <tbody>${rows.join('')}</tbody>
-  </table></div>`;
-}
-
-async function viewOrders() {
-  const list = await ops('/orders?status=open');
-  return `
-    <div class="ops-row"><h1 class="ops-h1">Orders</h1>
-      <span class="ops-sub">Confirm → allocate → pick → pack → load → POD</span></div>
-    ${table(
-      ['Order', 'Customer', 'PO', 'Total', 'Fulfillment', 'Pay'],
-      (list || []).map(orderRow)
-    )}`;
-}
-
-async function viewOrder(id) {
+async function viewOrderWorkspace(id) {
   const o = await ops('/orders/' + encodeURIComponent(id));
-  const actions = (o.nextActions || [])
-    .map((a) => `<button class="ops-btn ops-btn-gold" data-act="${esc(a.id)}" data-order="${esc(o.id)}">${esc(a.label)}</button>`)
-    .join('');
   const lines = (o.items || [])
     .map(
       (it) => `<tr>
@@ -224,7 +180,6 @@ async function viewOrder(id) {
         <td class="num">${it.qtyPicked}</td>
         <td class="num">${it.qtyShipped}</td>
         <td class="num">${it.qtyRemaining}</td>
-        <td class="num">${money(it.unitPrice)}</td>
         <td class="ops-sub">ATP ${it.atp ? it.atp.available : '—'}${it.atp && it.atp.inbound ? ' +IB ' + it.atp.inbound : ''}</td>
       </tr>`
     )
@@ -241,34 +196,18 @@ async function viewOrder(id) {
         `<li><strong>${esc(e.action)}</strong> ${esc(e.from_status)} → ${esc(e.to_status)} <span>${esc(e.actor)}</span></li>`
     )
     .join('');
-  return `
-    <div class="ops-row">
-      <div><h1 class="ops-h1">${esc(o.id)}</h1>
-        <div class="ops-sub">${esc(custName(o.customer))} · ${pill(o.fulfillment)} ${pill(o.paymentStatus)}</div></div>
-      <div class="ops-btn-row">${actions}
-        <button class="ops-btn" data-act="wave" data-order="${esc(o.id)}">Release wave</button>
-      </div>
-    </div>
-    <div class="ops-grid-2">
+  const fulfillmentHtml = `
+    <div class="ops-grid-2" style="margin-top:16px">
       <div class="ops-card">
-        <h3>Lines</h3>
-        ${table(['SKU', 'Ord', 'Alloc', 'Pick', 'Ship', 'Left', 'Price', 'ATP'], [lines])}
+        <h3>Fulfillment</h3>
+        ${table(['SKU', 'Ord', 'Alloc', 'Pick', 'Ship', 'Left', 'ATP'], lines ? [lines] : [])}
       </div>
       <div>
-        <div class="ops-card" style="margin-bottom:12px">
-          <h3>Promise</h3>
-          <dl class="ops-dl">
-            <dt>Method</dt><dd>${esc(o.delivery && o.delivery.method)}</dd>
-            <dt>Address</dt><dd>${esc(o.delivery && o.delivery.address)}</dd>
-            <dt>PO</dt><dd>${esc(o.po)}</dd>
-            <dt>Promised</dt><dd>${esc(o.promisedAt || '—')}</dd>
-            <dt>Hold</dt><dd>${esc(o.holdReason || '—')}</dd>
-          </dl>
-        </div>
-        <div class="ops-card" style="margin-bottom:12px"><h3>Shipments</h3>${ships}</div>
+        <div class="ops-card" style="margin-bottom:12px"><h3>Outbound</h3>${ships}</div>
         <div class="ops-card"><h3>Timeline</h3><ul class="ops-timeline">${tl || '<li>No events yet</li>'}</ul></div>
       </div>
     </div>`;
+  return viewOrderDesk(id, fulfillmentHtml);
 }
 
 async function viewWarehouse() {
@@ -297,7 +236,11 @@ async function viewWarehouse() {
     .join('');
   return `
     <div class="ops-row"><h1 class="ops-h1">Warehouse</h1>
-      <span class="ops-sub">Phone-sized tasks. Scan / type qty, tap Done.</span></div>
+      <div class="ops-tabs">
+        <a href="#/warehouse" class="is-on">Tasks</a>
+        <a href="#/warehouse/stock">Stock</a>
+      </div></div>
+    <p class="ops-sub">Phone-sized tasks. Scan / type qty, tap Done. Receive and adjust on Stock.</p>
     ${cards || '<div class="ops-empty">No open tasks. Confirm an order and release a wave.</div>'}
     <div class="ops-card" style="margin-top:18px"><h3>Waves</h3>${table(['Wave', 'Status', 'Note'], waveRows ? [waveRows] : [])}</div>`;
 }
@@ -338,6 +281,7 @@ async function viewShipment(id) {
       <div class="ops-btn-row">
         <button class="ops-btn" data-ship-stage="${esc(s.id)}">Stage dock</button>
         <button class="ops-btn ops-btn-gold" data-ship-invoice="${esc(s.id)}">Mark invoiced</button>
+        <a class="ops-btn" href="#/orders/${esc(s.order_id)}">Invoice / email</a>
       </div>
     </div>
     <div class="ops-card">
@@ -431,102 +375,6 @@ async function viewDriver() {
     ${blocks || '<div class="ops-empty">No loads for today.</div>'}`;
 }
 
-async function viewInbounds() {
-  const list = await ops('/inbound');
-  const rows = (list || []).map((ib) => {
-    const exp = (ib.lines || []).reduce((s, l) => s + (l.qty_expected || 0), 0);
-    const rec = (ib.lines || []).reduce((s, l) => s + (l.qty_received || 0), 0);
-    return `<tr data-go="inbound/${esc(ib.id)}"><td>${esc(ib.container_number || ib.id)}</td>
-      <td>${pill(ib.status)}</td><td>${esc(ib.eta)}</td><td>${esc(ib.po_id || '')}</td>
-      <td class="num">${rec}/${exp}</td></tr>`;
-  });
-  return `<div class="ops-row"><h1 class="ops-h1">Inbound</h1>
-      <span class="ops-sub">Containers against POs — receive into RECEIVING, then putaway.</span></div>
-    ${table(['Container', 'Status', 'ETA', 'PO', 'Recv'], rows)}`;
-}
-
-async function viewInbound(id) {
-  const ib = await ops('/inbound/' + encodeURIComponent(id));
-  const lines = (ib.lines || [])
-    .map(
-      (l) =>
-        `<tr><td>${esc(l.code)} ${esc(l.size)}</td><td class="num">${l.qty_expected}</td><td class="num">${l.qty_received}</td></tr>`
-    )
-    .join('');
-  return `<div class="ops-row">
-      <div><h1 class="ops-h1">${esc(ib.container_number || ib.id)}</h1>${pill(ib.status)}</div>
-      <div class="ops-btn-row">
-        <button class="ops-btn" data-ib-arrive="${esc(ib.id)}">Mark arrived</button>
-        <button class="ops-btn ops-btn-gold" data-ib-recv="${esc(ib.id)}">Receive all</button>
-      </div>
-    </div>
-    <p class="ops-sub">PO ${esc(ib.po_id || '—')} · ETA ${esc(ib.eta || '—')}</p>
-    ${table(['SKU', 'Expected', 'Received'], lines ? [lines] : [])}`;
-}
-
-async function viewPurchasing() {
-  const list = await ops('/purchase-orders');
-  const rows = (list || []).map(
-    (p) =>
-      `<tr data-go="purchasing/${esc(p.id)}"><td>${esc(p.id)}</td><td>${esc(p.vendor)}</td><td>${pill(p.status)}</td>
-       <td>${esc(p.eta)}</td><td class="num">${money(p.landed_cost)}</td></tr>`
-  );
-  return `<div class="ops-row"><h1 class="ops-h1">Vendor POs</h1>
-      <button class="ops-btn ops-btn-gold" id="ops-new-po">New PO</button></div>
-    ${table(['PO', 'Vendor', 'Status', 'ETA', 'Landed'], rows)}
-    <p class="ops-sub">Tommur / Lesso factory orders. Landed cost = lines + freight + duty.</p>`;
-}
-
-async function viewPo(id) {
-  const po = await ops('/purchase-orders/' + encodeURIComponent(id));
-  const lines = (po.lines || [])
-    .map(
-      (l) =>
-        `<tr><td>${esc(l.code)} ${esc(l.size)}</td><td class="num">${l.qty_ordered}</td><td class="num">${l.qty_received}</td><td class="num">${money(l.unit_cost)}</td></tr>`
-    )
-    .join('');
-  return `<div class="ops-row">
-      <div><h1 class="ops-h1">${esc(po.id)}</h1>${pill(po.status)} · ${esc(po.vendor)}</div>
-      <button class="ops-btn" data-po-send="${esc(po.id)}">Mark sent</button>
-    </div>
-    <p class="ops-sub">Freight ${money(po.freight)} · Duty ${money(po.duty)} · Landed ${money(po.landed_cost)}</p>
-    ${table(['SKU', 'Ordered', 'Received', 'Cost'], lines ? [lines] : [])}`;
-}
-
-async function viewInventory() {
-  const q = ($('ops-search') && $('ops-search').value) || '';
-  const rows = await ops('/inventory?q=' + encodeURIComponent(q));
-  const body = (rows || []).map(
-    (p) => `<tr>
-      <td>${esc(p.code)}<div class="ops-sub">${esc(p.description)} ${esc(p.size)}</div></td>
-      <td class="num">${p.available}</td>
-      <td class="num">${p.floor}</td>
-      <td class="num">${p.allocated}</td>
-      <td class="num">${p.inbound}</td>
-      <td class="num">${p.atp}</td>
-      <td><input class="ops-big-qty" style="width:72px;height:34px;font-size:16px" data-count-sku="${esc(p.code)}" data-count-size="${esc(p.size)}" placeholder="count"/></td>
-    </tr>`
-  );
-  return `<div class="ops-row"><h1 class="ops-h1">Inventory / ATP</h1>
-      <span class="ops-sub">Available is what the catalog can sell. Floor is warehouse location qty.</span></div>
-    ${table(['SKU', 'Avail', 'Floor', 'Alloc', 'Inbound', 'ATP', 'Cycle count'], body)}`;
-}
-
-async function viewFinance() {
-  const rows = await ops('/finance/ar');
-  const open = (rows || []).filter((r) => ['unpaid', 'partial'].includes(String(r.paymentStatus || 'unpaid').toLowerCase()));
-  const body = (rows || []).map(
-    (r) => `<tr data-go="orders/${esc(r.id)}">
-      <td>${esc(r.id)}</td><td>${esc(custName(r.customer))}</td>
-      <td class="num">${money(r.total)}</td><td>${pill(r.paymentStatus)}</td><td>${pill(r.fulfillment)}</td></tr>`
-  );
-  const amt = open.reduce((s, r) => s + (Number(r.total) || 0), 0);
-  return `<div class="ops-row"><h1 class="ops-h1">Accounts receivable</h1>
-      <span class="ops-sub">${open.length} open · ${money(amt)}</span></div>
-    ${table(['Order', 'Customer', 'Total', 'Pay', 'Fulfillment'], body)}
-    <p class="ops-sub">Invoice-from-shipment: open a packed shipment and mark invoiced after POD. Banquest / Zelle still live on classic invoices.</p>`;
-}
-
 async function viewExceptions() {
   const list = await ops('/exceptions');
   const rows = (list || []).map(
@@ -537,22 +385,8 @@ async function viewExceptions() {
     </tr>`
   );
   return `<div class="ops-row"><h1 class="ops-h1">Exceptions</h1>
-      <a class="ops-btn" href="#/customers">Credit holds</a></div>
+      <a class="ops-btn" href="#/customers">Customers / credit</a></div>
     ${table(['Kind', 'Status', 'Summary', 'Doc', ''], rows)}`;
-}
-
-async function viewCustomers() {
-  const list = await ops('/customers');
-  const rows = (list || []).map(
-    (u) => `<tr>
-      <td>${esc(u.company || '')}</td><td>${esc(u.email)}</td>
-      <td class="num">${money(u.credit_limit)}</td>
-      <td>${pill(u.credit_hold ? 'hold' : 'ok')}</td>
-      <td><button class="ops-btn" data-credit="${esc(u.email)}" data-hold="${u.credit_hold ? 0 : 1}">${u.credit_hold ? 'Release' : 'Hold'}</button></td>
-    </tr>`
-  );
-  return `<div class="ops-row"><h1 class="ops-h1">Customers / credit</h1></div>
-    ${table(['Company', 'Email', 'Limit', 'Hold', ''], rows)}`;
 }
 
 async function onAction(orderId, act) {
@@ -576,7 +410,12 @@ async function onAction(orderId, act) {
       else await render();
       return;
     }
-    if (act === 'invoice') go('shipments');
+    if (act === 'invoice') {
+      const el = document.getElementById('doc-type');
+      if (el) el.value = 'invoice';
+      flash('Use Documents on this order to email or print the invoice.');
+      return;
+    }
     flash('Saved.');
     await render();
   } catch (e) {
@@ -590,23 +429,15 @@ function qtyForTask(id) {
 }
 
 async function handleClick(e) {
-  const t = e.target.closest('[data-go],[data-act],[data-task-done],[data-task-short],[data-ship-stage],[data-ship-invoice],[data-load-depart],[data-load-add],[data-pod],[data-refuse],[data-ib-arrive],[data-ib-recv],[data-po-send],[data-exc],[data-credit],#ops-new-load,#ops-new-po');
+  if (handleHitsClick(e)) return;
+  const t = e.target.closest(
+    '[data-go],[data-act],[data-task-done],[data-task-short],[data-ship-stage],[data-ship-invoice],[data-load-depart],[data-load-add],[data-pod],[data-refuse],[data-ib-arrive],[data-ib-recv],[data-po-send],[data-exc],[data-credit],#ops-new-load,[data-save-customer],[data-del-customer],[data-save-address],[data-del-addr],[data-save-product],[data-del-product],[data-export-csv],[data-stock-receive],[data-stock-adjust],[data-save-order],[data-del-order],[data-add-hit],[data-rm-line],[data-mark-paid],[data-banquest],[data-send-doc],[data-print-doc],[data-save-po],[data-del-po],[data-add-poline],[data-rm-poline],[data-save-inbound],[data-add-ibline],[data-rm-ibline],[data-ib-recv-form],[data-ar-filter]'
+  );
   if (!t) return;
+  if (await handleDeskClick(t)) return;
   if (t.id === 'ops-new-load') {
     const r = await ops('/loads', { method: 'POST', body: JSON.stringify({ runDate: new Date().toISOString().slice(0, 10) }) });
     go('loads/' + r.load.id);
-    return;
-  }
-  if (t.id === 'ops-new-po') {
-    const vendor = prompt('Vendor (Tommur / Lesso / other)', 'Tommur');
-    if (!vendor) return;
-    const code = prompt('First SKU code (optional)') || '';
-    const size = code ? prompt('Size') || '' : '';
-    const qty = code ? parseInt(prompt('Qty') || '0', 10) : 0;
-    const freight = parseFloat(prompt('Freight $') || '0') || 0;
-    const body = { vendor, freight, lines: code && qty ? [{ code, size, qty }] : [] };
-    const r = await ops('/purchase-orders', { method: 'POST', body: JSON.stringify(body) });
-    go('purchasing/' + r.po.id);
     return;
   }
   if (t.dataset.go) {
@@ -726,14 +557,26 @@ async function bootApp() {
   roleSel.addEventListener('change', async () => {
     await ops('/me', { method: 'POST', body: JSON.stringify({ role: roleSel.value }) });
   });
+  bindDesk({ render });
   $('ops-view').addEventListener('click', handleClick);
   $('ops-view').addEventListener('keydown', handleCount);
+  $('ops-view').addEventListener('change', async (e) => {
+    if (await handleDeskChange(e)) return;
+  });
+  $('ops-view').addEventListener('input', (e) => {
+    handleDeskInput(e);
+  });
   $('ops-menu').addEventListener('click', () => $('ops-app').classList.toggle('is-nav'));
   bindPalette();
   $('ops-search').addEventListener('keydown', async (e) => {
     if (e.key !== 'Enter') return;
     const q = e.target.value.trim();
     if (!q) return;
+    const { view } = route();
+    if (view === 'inventory' || view === 'customers' || view === 'orders') {
+      await render();
+      return;
+    }
     const res = await ops('/search?q=' + encodeURIComponent(q));
     if (res.orders && res.orders[0]) return go('orders/' + res.orders[0].id);
     if (res.shipments && res.shipments[0]) return go('shipments/' + res.shipments[0].id);

@@ -168,6 +168,44 @@
 
 .ops-empty{padding:28px;color:var(--text-muted);border:1px dashed var(--line);text-align:center;}
 
+.ops-form .ops-fields{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 14px;
+}
+.ops-form .ops-fields label,
+.ops-form .ops-check{
+  display:flex;flex-direction:column;gap:4px;
+  font-size:11px;color:var(--text-muted);letter-spacing:.4px;text-transform:uppercase;
+}
+.ops-form .ops-fields .data-input,
+.ops-form textarea.data-input,
+.ops-form select.data-input{
+  text-transform:none;letter-spacing:0;font-size:14px;color:var(--text);
+  background:var(--input-bg);border:1px solid var(--line);
+}
+.ops-form textarea.data-input{min-height:72px;resize:vertical;}
+.ops-span-2{grid-column:1 / -1;}
+.ops-check{flex-direction:row;align-items:center;gap:8px;margin:10px 0;text-transform:none;letter-spacing:0;font-size:13px;color:var(--text);}
+.ops-btn-danger{border-color:#c45;color:#c45;}
+.ops-btn-danger:hover{background:rgba(204,68,85,.12);}
+.ops-tabs{display:flex;gap:6px;flex-wrap:wrap;}
+.ops-tabs a{
+  padding:6px 10px;border:1px solid var(--line);color:var(--text-muted);font-size:13px;
+}
+.ops-tabs a.is-on{border-color:var(--gold);color:var(--gold);background:rgba(200,152,31,.12);}
+.ops-hits{
+  border:1px solid var(--line);background:var(--surface);margin:8px 0 12px;max-height:240px;overflow:auto;
+}
+.ops-hits button{
+  display:block;width:100%;text-align:left;padding:8px 10px;border:0;background:transparent;color:var(--text);font-size:13px;
+}
+.ops-hits button:hover,.ops-hits button.is-on{background:rgba(200,152,31,.12);}
+.ops-hits code{color:var(--gold);}
+.ops-table.ops-static tr{cursor:default;}
+.ops-table.ops-static .data-input{min-width:70px;padding:6px 8px;font-size:13px;}
+.ops-form label.ops-btn{display:inline-flex;align-items:center;margin:0;text-transform:none;letter-spacing:0;cursor:pointer;}
+
+html.theme-light .ops-btn-danger{border-color:#8B1E1E;color:#8B1E1E;}
+
 .ops-top .theme-toggle,
 .ops-login-theme .theme-toggle{
   background:transparent;border:1px solid var(--gold);color:var(--gold);padding:7px 10px;

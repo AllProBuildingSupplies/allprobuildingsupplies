@@ -3177,6 +3177,49 @@ export default {
         return jsonResponse({ success: true, ...result });
       }
 
+      // Single-SKU upsert so All Pro OS can add/edit without replacing the catalog.
+      if (path === '/api/admin/products' && request.method === 'PUT') {
+        const p = await request.json().catch(() => ({}));
+        const code = normalizeProductCode(p.code);
+        const size = canonicalizeSize(p.size);
+        if (!code || !size) return jsonResponse({ error: 'code and size are required' }, 400);
+        const { results: existing } = await env.DB.prepare('SELECT code, size FROM products WHERE code = ?').bind(code).all();
+        const stmts = [];
+        for (const row of existing || []) {
+          if (canonicalizeSize(row.size) !== size) continue;
+          if (normalizeSize(row.size) === size) continue;
+          stmts.push(env.DB.prepare('DELETE FROM products WHERE code = ? AND size = ?').bind(row.code, row.size));
+        }
+        stmts.push(
+          env.DB.prepare(`
+            INSERT INTO products (${PRODUCT_INSERT_COLS})
+            VALUES (${PRODUCT_INSERT_PLACEHOLDERS})
+            ON CONFLICT(code, size) DO UPDATE SET
+              description=excluded.description, pack=excluded.pack,
+              qty=excluded.qty, price=excluded.price, image=excluded.image,
+              material=excluded.material,
+              main_category=excluded.main_category, sub_category=excluded.sub_category,
+              sub_sub_category=excluded.sub_sub_category,
+              sub_sub_sub_category=excluded.sub_sub_sub_category,
+              tommur_code=CASE WHEN excluded.tommur_code = '' THEN products.tommur_code ELSE excluded.tommur_code END,
+              lesso_code=CASE WHEN excluded.lesso_code = '' THEN products.lesso_code ELSE excluded.lesso_code END
+          `).bind(...productInsertBinds({ ...p, code }, size))
+        );
+        await env.DB.batch(stmts);
+        return jsonResponse({ success: true, code, size });
+      }
+
+      if (path === '/api/admin/products' && request.method === 'DELETE') {
+        const code = normalizeProductCode(url.searchParams.get('code'));
+        const size = canonicalizeSize(url.searchParams.get('size'));
+        if (!code || !size) return jsonResponse({ error: 'code and size are required' }, 400);
+        await env.DB.prepare('DELETE FROM products WHERE code = ? AND size = ?').bind(code, size).run();
+        try {
+          await env.DB.prepare('DELETE FROM inventory_balances WHERE code = ? AND size = ?').bind(code, size).run();
+        } catch (_) {}
+        return jsonResponse({ success: true, deleted: { code, size } });
+      }
+
       if (path === '/api/admin/products/sync' && request.method === 'POST') {
         const products = await request.json();
         const stmts = [env.DB.prepare('DELETE FROM products')];

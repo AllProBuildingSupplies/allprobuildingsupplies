@@ -144,7 +144,18 @@ export async function hydrateOrder(env, orderId) {
     stops: stops || [],
     timeline: events,
     nextActions,
+    docShipments: parseDocShipments(o.shipments_json),
   };
+}
+
+function parseDocShipments(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
 }
 
 function nextOrderActions(fulfillment, order, items) {
@@ -920,6 +931,62 @@ export async function hydratePo(env, poId) {
     .bind(poId)
     .all();
   return { ...po, lines: lines || [], inbound: inbound || [] };
+}
+
+export async function updatePurchaseOrder(env, poId, auth, body) {
+  const existing = await hydratePo(env, poId);
+  if (!existing) return { error: 'PO not found', status: 404 };
+  const vendor = body.vendor != null ? String(body.vendor) : existing.vendor;
+  const freight = body.freight != null ? Number(body.freight) || 0 : Number(existing.freight) || 0;
+  const duty = body.duty != null ? Number(body.duty) || 0 : Number(existing.duty) || 0;
+  const notes = body.notes != null ? String(body.notes) : existing.notes || '';
+  const eta = body.eta != null ? String(body.eta) : existing.eta || '';
+  const status = body.status != null ? String(body.status) : existing.status || 'draft';
+  let landed = freight + duty;
+  await env.DB.prepare(
+    `UPDATE vendor_pos SET vendor = ?, freight = ?, duty = ?, notes = ?, eta = ?, status = ? WHERE id = ?`
+  )
+    .bind(vendor, freight, duty, notes, eta, status, poId)
+    .run();
+  if (Array.isArray(body.lines)) {
+    await env.DB.prepare(`DELETE FROM po_lines WHERE po_id = ?`).bind(poId).run();
+    for (const ln of body.lines) {
+      const qty = intQty(ln.qty || ln.qtyOrdered || ln.qty_ordered);
+      if (!ln.code || qty < 1) continue;
+      const cost = Number(ln.unitCost || ln.unit_cost) || 0;
+      const received = intQty(ln.qtyReceived || ln.qty_received);
+      landed += cost * qty;
+      await env.DB.prepare(
+        `INSERT INTO po_lines (po_id, code, size, qty_ordered, qty_received, unit_cost, description)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      )
+        .bind(poId, ln.code, ln.size || '', qty, received, cost, ln.description || '')
+        .run();
+    }
+  } else {
+    for (const ln of existing.lines || []) {
+      landed += (Number(ln.unit_cost) || 0) * intQty(ln.qty_ordered);
+    }
+  }
+  await env.DB.prepare(`UPDATE vendor_pos SET landed_cost = ? WHERE id = ?`).bind(landed, poId).run();
+  await logEvent(env, {
+    entityType: 'po',
+    entityId: poId,
+    action: 'update',
+    toStatus: status,
+    actor: actorFromAuth(auth),
+  });
+  return { ok: true, po: await hydratePo(env, poId) };
+}
+
+export async function deletePurchaseOrder(env, poId) {
+  const existing = await hydratePo(env, poId);
+  if (!existing) return { error: 'PO not found', status: 404 };
+  await env.DB.batch([
+    env.DB.prepare(`DELETE FROM po_lines WHERE po_id = ?`).bind(poId),
+    env.DB.prepare(`DELETE FROM vendor_pos WHERE id = ?`).bind(poId),
+  ]);
+  return { ok: true, deletedId: poId };
 }
 
 export async function sendPurchaseOrder(env, poId, auth) {
