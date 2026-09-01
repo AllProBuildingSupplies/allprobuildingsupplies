@@ -185,6 +185,9 @@
 .ops-form textarea.data-input{min-height:72px;resize:vertical;}
 .ops-span-2{grid-column:1 / -1;}
 .ops-check{flex-direction:row;align-items:center;gap:8px;margin:10px 0;text-transform:none;letter-spacing:0;font-size:13px;color:var(--text);}
+.ops-addr-book{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;}
+.ops-addr-book[hidden]{display:none !important;}
+.ops-addr-book .ops-check{margin:0;}
 .ops-btn-danger{border-color:#c45;color:#c45;}
 .ops-btn-danger:hover{background:rgba(204,68,85,.12);}
 .ops-tabs{display:flex;gap:6px;flex-wrap:wrap;}

@@ -431,7 +431,7 @@ function qtyForTask(id) {
 async function handleClick(e) {
   if (handleHitsClick(e)) return;
   const t = e.target.closest(
-    '[data-go],[data-act],[data-task-done],[data-task-short],[data-ship-stage],[data-ship-invoice],[data-load-depart],[data-load-add],[data-pod],[data-refuse],[data-ib-arrive],[data-ib-recv],[data-po-send],[data-exc],[data-credit],#ops-new-load,[data-save-customer],[data-del-customer],[data-save-address],[data-del-addr],[data-save-product],[data-del-product],[data-export-csv],[data-stock-receive],[data-stock-adjust],[data-save-order],[data-del-order],[data-add-hit],[data-rm-line],[data-mark-paid],[data-banquest],[data-send-doc],[data-print-doc],[data-save-po],[data-del-po],[data-add-poline],[data-rm-poline],[data-save-inbound],[data-add-ibline],[data-rm-ibline],[data-ib-recv-form],[data-ar-filter]'
+    '[data-go],[data-act],[data-task-done],[data-task-short],[data-ship-stage],[data-ship-invoice],[data-load-depart],[data-load-add],[data-pod],[data-refuse],[data-ib-arrive],[data-ib-recv],[data-po-send],[data-exc],[data-credit],#ops-new-load,[data-save-customer],[data-del-customer],[data-save-address],[data-del-addr],[data-save-product],[data-del-product],[data-export-csv],[data-stock-receive],[data-stock-adjust],[data-save-order],[data-add-order-addr],[data-del-order],[data-add-hit],[data-rm-line],[data-mark-paid],[data-banquest],[data-send-doc],[data-print-doc],[data-save-po],[data-del-po],[data-add-poline],[data-rm-poline],[data-save-inbound],[data-add-ibline],[data-rm-ibline],[data-ib-recv-form],[data-ar-filter]'
   );
   if (!t) return;
   if (await handleDeskClick(t)) return;

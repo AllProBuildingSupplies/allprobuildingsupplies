@@ -529,6 +529,68 @@ function lineRowHtml(it, idx) {
   </tr>`;
 }
 
+function normAddr(s) {
+  return String(s || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function orderCustomerEmail() {
+  return val('o-email') || val('o-cust');
+}
+
+function savedAddressValues() {
+  return Array.from(document.querySelectorAll('#o-saved-addr option[data-full]')).map((o) => o.getAttribute('data-full') || '');
+}
+
+function shipAddrIsNew() {
+  const method = val('o-method') || 'delivery';
+  const addr = val('o-address');
+  if (!addr || method === 'pickup' || addr.toUpperCase() === 'PICKUP') return false;
+  const n = normAddr(addr);
+  return !savedAddressValues().some((a) => normAddr(a) === n);
+}
+
+function syncOrderAddressBookUi() {
+  const wrap = $('o-addr-book-row');
+  if (!wrap) return;
+  const show = !!orderCustomerEmail() && shipAddrIsNew();
+  wrap.hidden = !show;
+}
+
+function fillSavedAddressSelect(addresses, selectedFull) {
+  const sel = $('o-saved-addr');
+  if (!sel) return;
+  const cur = selectedFull != null ? selectedFull : val('o-address');
+  const opts = ['<option value="">— Type new or pick saved —</option>'];
+  (addresses || []).forEach((a) => {
+    const full = a.fullAddress || a.full_address || '';
+    if (!full) return;
+    const lab = [a.label, full].filter(Boolean).join(' — ');
+    const on = normAddr(full) === normAddr(cur) ? ' selected' : '';
+    opts.push(`<option value="${esc(full)}" data-full="${esc(full)}"${on}>${esc(lab)}</option>`);
+  });
+  sel.innerHTML = opts.join('');
+  syncOrderAddressBookUi();
+}
+
+async function loadOrderSavedAddresses(email, selectedFull) {
+  if (!email) {
+    fillSavedAddressSelect([], selectedFull);
+    return [];
+  }
+  try {
+    const addr = await api('/admin/addresses?email=' + encodeURIComponent(email));
+    const list = addr.addresses || [];
+    fillSavedAddressSelect(list, selectedFull);
+    return list;
+  } catch (_) {
+    fillSavedAddressSelect([], selectedFull);
+    return [];
+  }
+}
+
 function collectOrderPayload() {
   const items = [];
   document.querySelectorAll('[data-oline]').forEach((row) => {
@@ -565,6 +627,7 @@ function collectOrderPayload() {
     paymentNote: val('o-pay-note'),
     paidAt: null,
     shipments: [],
+    saveAddress: $('o-save-addr') ? $('o-save-addr').checked && shipAddrIsNew() : shipAddrIsNew(),
     items,
   };
 }
@@ -642,6 +705,31 @@ export async function viewOrderDesk(id, fulfillmentHtml) {
         })
     )
     .join('');
+  let savedAddrs = [];
+  const custEmail = (o.customer && o.customer.email) || '';
+  if (custEmail) {
+    try {
+      const addr = await api('/admin/addresses?email=' + encodeURIComponent(custEmail));
+      savedAddrs = addr.addresses || [];
+    } catch (_) {}
+  }
+  const ship = (o.delivery && o.delivery.address) || '';
+  const savedOpts = ['<option value="">— Type new or pick saved —</option>']
+    .concat(
+      savedAddrs.map((a) => {
+        const full = a.fullAddress || a.full_address || '';
+        const lab = [a.label, full].filter(Boolean).join(' — ');
+        const on = normAddr(full) && normAddr(full) === normAddr(ship) ? ' selected' : '';
+        return `<option value="${esc(full)}" data-full="${esc(full)}"${on}>${esc(lab)}</option>`;
+      })
+    )
+    .join('');
+  const shipIsNew =
+    !!custEmail &&
+    !!ship &&
+    ship.toUpperCase() !== 'PICKUP' &&
+    String((o.delivery && o.delivery.method) || 'delivery') !== 'pickup' &&
+    !savedAddrs.some((a) => normAddr(a.fullAddress || a.full_address) === normAddr(ship));
   const lineRows = (o.items || []).map((it, i) => lineRowHtml(it, i));
   const actions = (o.nextActions || [])
     .map((a) => `<button class="ops-btn ops-btn-gold" data-act="${esc(a.id)}" data-order="${esc(o.id)}">${esc(a.label)}</button>`)
@@ -668,7 +756,12 @@ export async function viewOrderDesk(id, fulfillmentHtml) {
         ${field('o-email', 'Email', `value="${esc((o.customer && o.customer.email) || '')}"`)}
         ${field('o-phone', 'Phone', `value="${esc((o.customer && o.customer.phone) || '')}"`)}
         ${selectField('o-method', 'Method', ['delivery', 'pickup'], (o.delivery && o.delivery.method) || 'delivery')}
-        <label class="ops-span-2">Ship to<textarea class="data-input" id="o-address" rows="2">${esc((o.delivery && o.delivery.address) || '')}</textarea></label>
+        <label>Saved address<select class="data-input" id="o-saved-addr">${savedOpts}</select></label>
+        <label class="ops-span-2">Ship to<textarea class="data-input" id="o-address" rows="2">${esc(ship)}</textarea></label>
+        <div class="ops-span-2 ops-addr-book" id="o-addr-book-row"${shipIsNew ? '' : ' hidden'}>
+          <label class="ops-check"><input type="checkbox" id="o-save-addr" checked> Add to address book when saving</label>
+          <button type="button" class="ops-btn ops-btn-gold" data-add-order-addr>Add to address book</button>
+        </div>
         ${field('o-po', 'PO #', `value="${esc(o.po || '')}"`)}
         ${selectField('o-status', 'Status', ['pending', 'processing', 'partially_shipped', 'delivered', 'cancelled'], o.status || 'pending')}
         ${selectField('o-pay', 'Payment', ['unpaid', 'partial', 'paid'], o.paymentStatus || 'unpaid')}
@@ -694,7 +787,10 @@ export async function viewOrderDesk(id, fulfillmentHtml) {
 
 async function fillCustomerFromSelect() {
   const email = val('o-cust');
-  if (!email) return;
+  if (!email) {
+    fillSavedAddressSelect([]);
+    return;
+  }
   const users = await ops('/customers');
   const u = (users || []).find((x) => String(x.email).toLowerCase() === email.toLowerCase());
   if (!u) return;
@@ -702,11 +798,13 @@ async function fillCustomerFromSelect() {
   if ($('o-company')) $('o-company').value = u.company || '';
   if ($('o-email')) $('o-email').value = u.email || '';
   if ($('o-phone')) $('o-phone').value = u.phone || '';
-  try {
-    const addr = await api('/admin/addresses?email=' + encodeURIComponent(email));
-    const def = (addr.addresses || []).find((a) => a.isDefault || a.is_default) || (addr.addresses || [])[0];
-    if (def && $('o-address')) $('o-address').value = def.fullAddress || def.full_address || '';
-  } catch (_) {}
+  const list = await loadOrderSavedAddresses(email);
+  const def = (list || []).find((a) => a.isDefault || a.is_default) || (list || [])[0];
+  if (def && $('o-address')) {
+    const full = def.fullAddress || def.full_address || '';
+    $('o-address').value = full;
+    fillSavedAddressSelect(list, full);
+  }
 }
 
 async function addCatalogHit() {
@@ -1201,6 +1299,19 @@ export async function handleDeskClick(t) {
       await rerender();
       return true;
     }
+    if (t.dataset.addOrderAddr != null) {
+      const email = orderCustomerEmail();
+      const full = val('o-address');
+      if (!email) throw new Error('Select or enter a customer email first');
+      if (!full || full.toUpperCase() === 'PICKUP') throw new Error('Enter a delivery address to save');
+      await api('/admin/addresses', {
+        method: 'POST',
+        body: JSON.stringify({ email, fullAddress: full, phone: val('o-phone') }),
+      });
+      await loadOrderSavedAddresses(email, full);
+      flash('Added to address book');
+      return true;
+    }
     if (t.dataset.saveOrder != null) {
       const payload = collectOrderPayload();
       if (!payload.customer.email && !payload.customer.name) throw new Error('Customer name or email is required');
@@ -1349,6 +1460,15 @@ export async function handleDeskChange(e) {
     await fillCustomerFromSelect();
     return true;
   }
+  if (e.target && e.target.id === 'o-saved-addr') {
+    if ($('o-address') && e.target.value) $('o-address').value = e.target.value;
+    syncOrderAddressBookUi();
+    return true;
+  }
+  if (e.target && e.target.id === 'o-method') {
+    syncOrderAddressBookUi();
+    return true;
+  }
   const file = e.target.files && e.target.files[0];
   if (!file) return false;
   try {
@@ -1407,6 +1527,16 @@ export async function handleDeskChange(e) {
 export function handleDeskInput(e) {
   if (e.target && e.target.id === 'sku-q') {
     searchSkuHits();
+    return true;
+  }
+  if (e.target && (e.target.id === 'o-address' || e.target.id === 'o-email')) {
+    const sel = $('o-saved-addr');
+    if (sel && e.target.id === 'o-address') {
+      const n = normAddr(e.target.value);
+      const match = Array.from(sel.options).find((o) => o.getAttribute('data-full') && normAddr(o.getAttribute('data-full')) === n);
+      sel.value = match ? match.value : '';
+    }
+    syncOrderAddressBookUi();
     return true;
   }
   return false;

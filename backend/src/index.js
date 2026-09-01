@@ -3860,9 +3860,15 @@ export default {
           }
         }
 
-        // Persist address + phone on the customer's address book when possible.
+        // Opt-in: OS "Add to address book" / saveAddress checkbox. Classic admin uses the explicit button.
         const delAddr = String(o.delivery?.address || '').trim();
-        if (custEmail && custEmail !== 'unknown' && delAddr && delAddr.toUpperCase() !== 'PICKUP') {
+        if (
+          o.saveAddress === true &&
+          custEmail &&
+          custEmail !== 'unknown' &&
+          delAddr &&
+          delAddr.toUpperCase() !== 'PICKUP'
+        ) {
           const dbUser = await findUserByEmailOrId(env, custEmail);
           if (dbUser) {
             try {
