@@ -132,6 +132,7 @@ export async function ensureOpsSchema(env) {
         delivered_at TEXT DEFAULT '',
         load_id TEXT DEFAULT '',
         invoice_doc_id TEXT DEFAULT '',
+        invoiced_at TEXT DEFAULT '',
         note TEXT DEFAULT '',
         created_at TEXT NOT NULL
       )

@@ -967,6 +967,15 @@ async function ensureOrderWriteColumns(env) {
     'qty_picked INTEGER DEFAULT 0',
     'qty_packed INTEGER DEFAULT 0',
   ]);
+  await addMissingColumns(env, 'outbound_shipments', [
+    "invoice_doc_id TEXT DEFAULT ''",
+    "invoiced_at TEXT DEFAULT ''",
+    "staged_at TEXT DEFAULT ''",
+    "loaded_at TEXT DEFAULT ''",
+    "delivered_at TEXT DEFAULT ''",
+    "load_id TEXT DEFAULT ''",
+    "note TEXT DEFAULT ''",
+  ]);
 }
 
 /** Partial shipments: cumulative qty_shipped per line + shipments history JSON on orders. */

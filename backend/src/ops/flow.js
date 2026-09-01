@@ -866,15 +866,38 @@ export async function capturePod(env, stopId, auth, { signerName, signatureData,
 export async function markShipmentInvoiced(env, shipmentId, auth, invoiceDocId) {
   const s = await env.DB.prepare(`SELECT * FROM outbound_shipments WHERE id = ?`).bind(shipmentId).first();
   if (!s) return { error: 'Shipment not found', status: 404 };
-  await env.DB.prepare(`UPDATE outbound_shipments SET invoice_doc_id = ? WHERE id = ?`)
-    .bind(invoiceDocId || '', shipmentId)
-    .run();
+  const actor = actorFromAuth(auth);
+  const docId = String(invoiceDocId || s.invoice_doc_id || '').trim();
+  const stamped = nowIso();
+  try {
+    await env.DB.prepare(
+      `UPDATE outbound_shipments SET invoice_doc_id = ?, invoiced_at = ? WHERE id = ?`
+    )
+      .bind(docId, stamped, shipmentId)
+      .run();
+  } catch (err) {
+    const msg = String(err && err.message ? err.message : err);
+    if (!/no such column|has no column named/i.test(msg)) throw err;
+    await env.DB.prepare(`UPDATE outbound_shipments SET invoice_doc_id = ? WHERE id = ?`)
+      .bind(docId, shipmentId)
+      .run();
+  }
   await setOrderFulfillment(env, s.order_id, 'invoiced', {
-    actor: actorFromAuth(auth),
+    actor,
     action: 'invoice',
     note: shipmentId,
   });
-  return { ok: true, shipment: await hydrateShipment(env, shipmentId) };
+  await logEvent(env, {
+    entityType: 'shipment',
+    entityId: shipmentId,
+    action: 'invoice',
+    fromStatus: s.status,
+    toStatus: s.status,
+    actor,
+    note: docId || 'marked invoiced',
+  });
+  const shipment = await hydrateShipment(env, shipmentId);
+  return { ok: true, shipment: { ...shipment, invoiced_at: shipment.invoiced_at || stamped } };
 }
 
 export async function createPurchaseOrder(env, auth, body) {

@@ -263,11 +263,16 @@ async function viewShipments() {
   const rows = (list || []).map(
     (s) => `<tr data-go="shipments/${esc(s.id)}">
       <td>${esc(s.id)}</td><td>${esc(s.order_id)}</td><td>${esc(custName(s.customer))}</td>
-      <td>${pill(s.status)}</td><td>${esc(s.load_id || '—')}</td></tr>`
+      <td>${pill(s.status)}${shipmentInvoiced(s) ? ' ' + pill('invoiced') : ''}</td>
+      <td>${esc(s.load_id || '—')}</td></tr>`
   );
   return `<div class="ops-row"><h1 class="ops-h1">Outbound shipments</h1>
     <span class="ops-sub">First-class OB documents — not JSON on the order.</span></div>
     ${table(['Shipment', 'Order', 'Customer', 'Status', 'Load'], rows)}`;
+}
+
+function shipmentInvoiced(s) {
+  return !!(s && (s.invoiced_at || (s.invoice_doc_id && String(s.invoice_doc_id).trim())));
 }
 
 async function viewShipment(id) {
@@ -275,19 +280,24 @@ async function viewShipment(id) {
   const lines = (s.lines || [])
     .map((l) => `<tr><td>${esc(l.code)} ${esc(l.size)}</td><td>${esc(l.description)}</td><td class="num">${l.qty}</td><td class="num">${money(l.unit_price)}</td></tr>`)
     .join('');
+  const invoiced = shipmentInvoiced(s);
   return `<div class="ops-row">
       <div><h1 class="ops-h1">${esc(s.id)}</h1>
-        <div class="ops-sub">Order <a href="#/orders/${esc(s.order_id)}">${esc(s.order_id)}</a> · ${pill(s.status)}</div></div>
+        <div class="ops-sub">Order <a href="#/orders/${esc(s.order_id)}">${esc(s.order_id)}</a> · ${pill(s.status)}${invoiced ? ' ' + pill('invoiced') : ''}</div></div>
       <div class="ops-btn-row">
         <button class="ops-btn" data-ship-stage="${esc(s.id)}">Stage dock</button>
-        <button class="ops-btn ops-btn-gold" data-ship-invoice="${esc(s.id)}">Mark invoiced</button>
+        ${
+          invoiced
+            ? `<span class="ops-sub">Invoiced${s.invoiced_at ? ' ' + esc(String(s.invoiced_at).slice(0, 10)) : ''}</span>`
+            : `<button class="ops-btn ops-btn-gold" data-ship-invoice="${esc(s.id)}">Mark invoiced</button>`
+        }
         <a class="ops-btn" href="#/orders/${esc(s.order_id)}">Invoice / email</a>
       </div>
     </div>
     <div class="ops-card">
       <h3>Lines</h3>
       ${table(['SKU', 'Desc', 'Qty', 'Price'], lines ? [lines] : [])}
-      <p class="ops-sub" style="margin-top:10px">Load ${esc(s.load_id || 'not assigned')} · ${esc(s.method || '')}</p>
+      <p class="ops-sub" style="margin-top:10px">Load ${esc(s.load_id || 'not assigned')} · ${esc(s.method || '')}. Mark invoiced flags the shipment; use Invoice / email to send the PDF.</p>
     </div>`;
 }
 
@@ -453,7 +463,12 @@ async function handleClick(e) {
       await ops(`/tasks/${t.dataset.taskShort}/short`, { method: 'POST', body: JSON.stringify({ qty: qtyForTask(t.dataset.taskShort), note: 'short' }) });
     }
     if (t.dataset.shipStage) await ops(`/shipments/${t.dataset.shipStage}/stage`, { method: 'POST', body: '{}' });
-    if (t.dataset.shipInvoice) await ops(`/shipments/${t.dataset.shipInvoice}/invoice`, { method: 'POST', body: '{}' });
+    if (t.dataset.shipInvoice) {
+      await ops(`/shipments/${t.dataset.shipInvoice}/invoice`, { method: 'POST', body: '{}' });
+      await render();
+      flash('Marked invoiced');
+      return;
+    }
     if (t.dataset.loadDepart) await ops(`/loads/${t.dataset.loadDepart}/depart`, { method: 'POST', body: '{}' });
     if (t.dataset.loadAdd) {
       const sel = $('ops-add-ship');
