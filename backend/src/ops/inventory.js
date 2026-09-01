@@ -4,7 +4,7 @@
  * inventory_balances is physical qty by location.
  */
 
-import { intQty, nowIso } from './core.js';
+import { intQty } from './core.js';
 
 export async function listLocations(env) {
   const { results } = await env.DB.prepare(
@@ -121,16 +121,6 @@ export async function atpForSku(env, code, size) {
   };
 }
 
-export async function atpMapForCodes(env, pairs) {
-  const out = {};
-  for (const p of pairs) {
-    const key = `${p.code}\x1e${p.size || ''}`;
-    if (out[key]) continue;
-    out[key] = await atpForSku(env, p.code, p.size || '');
-  }
-  return out;
-}
-
 export async function applyCatalogDelta(env, code, size, delta) {
   if (!code || !delta) return;
   await env.DB.prepare(
@@ -140,24 +130,11 @@ export async function applyCatalogDelta(env, code, size, delta) {
     .run();
 }
 
-export async function setCatalogQty(env, code, size, qty) {
-  await env.DB.prepare(`UPDATE products SET qty = ? WHERE code = ? AND size = ?`)
-    .bind(Math.max(0, intQty(qty)), code, size || '')
-    .run();
-}
-
 export async function onPhysicalReceive(env, code, size, qty, locationId = 'FLOOR') {
   const n = intQty(qty);
   if (n < 1) return;
   await addBalance(env, code, size, locationId, n);
   await applyCatalogDelta(env, code, size, n);
-}
-
-export async function onPhysicalAdjust(env, code, size, delta, locationId = 'FLOOR') {
-  const d = intQty(delta);
-  if (!d) return;
-  await addBalance(env, code, size, locationId, d);
-  await applyCatalogDelta(env, code, size, d);
 }
 
 export async function cycleCount(env, { code, size, locationId, countedQty }) {
@@ -203,5 +180,3 @@ export async function inventorySnapshot(env, { q = '', limit = 80 } = {}) {
   }
   return rows;
 }
-
-export { nowIso };

@@ -81,30 +81,6 @@ export async function openException(env, { kind, entityType, entityId, summary, 
     .run();
 }
 
-export async function resolveExceptions(env, entityType, entityId, actor) {
-  await env.DB.prepare(
-    `UPDATE exceptions SET status = 'resolved', resolved_at = ?, resolved_by = ?
-     WHERE entity_type = ? AND entity_id = ? AND status = 'open'`
-  )
-    .bind(nowIso(), actor || '', entityType, entityId)
-    .run();
-}
-
-export const ORDER_STATES = [
-  'pending',
-  'on_hold',
-  'confirmed',
-  'released',
-  'picking',
-  'packed',
-  'staged',
-  'loaded',
-  'out_for_delivery',
-  'delivered',
-  'invoiced',
-  'cancelled',
-];
-
 /** Compatible overlay: map legacy admin status onto fulfillment_status. */
 export function normalizeFulfillment(order) {
   const f = String(order.fulfillment_status || '').trim();

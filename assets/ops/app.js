@@ -81,11 +81,15 @@ const PALETTE = [
   { id: 'inbox', label: 'Go to Inbox', run: () => go('inbox') },
   { id: 'orders', label: 'Go to Orders', run: () => go('orders') },
   { id: 'warehouse', label: 'Go to Warehouse tasks', run: () => go('warehouse') },
+  { id: 'shipments', label: 'Go to Shipments', run: () => go('shipments') },
   { id: 'loads', label: 'Go to Loads', run: () => go('loads') },
   { id: 'driver', label: 'Go to Driver run', run: () => go('driver') },
   { id: 'inbound', label: 'Go to Inbound dock', run: () => go('inbound') },
   { id: 'purchasing', label: 'Go to Purchasing', run: () => go('purchasing') },
+  { id: 'inventory', label: 'Go to Inventory', run: () => go('inventory') },
   { id: 'finance', label: 'Go to Finance / AR', run: () => go('finance') },
+  { id: 'exceptions', label: 'Go to Exceptions', run: () => go('exceptions') },
+  { id: 'customers', label: 'Go to Customers / credit', run: () => go('customers') },
 ];
 
 function go(path) {
@@ -108,13 +112,14 @@ function setNav(view) {
     inventory: 'Inventory',
     finance: 'Finance',
     exceptions: 'Exceptions',
+    customers: 'Customers',
   };
   $('ops-crumb').textContent = titles[view] || 'All Pro OS';
 }
 
 async function render() {
   flash('');
-  const { view, id, parts } = route();
+  const { view, id } = route();
   setNav(view);
   const root = $('ops-view');
   try {
@@ -421,8 +426,7 @@ async function viewDriver() {
     })
     .join('');
   return `<div class="ops-row"><h1 class="ops-h1">Driver run</h1><span class="ops-sub">${esc(run.date)}</span></div>
-    ${blocks || '<div class="ops-empty">No loads for today.</div>'}
-    <div id="ops-pod-box"></div>`;
+    ${blocks || '<div class="ops-empty">No loads for today.</div>'}`;
 }
 
 async function viewInbounds() {
@@ -724,7 +728,6 @@ async function bootApp() {
   $('ops-view').addEventListener('keydown', handleCount);
   $('ops-menu').addEventListener('click', () => $('ops-app').classList.toggle('is-nav'));
   bindPalette();
-  let searchT;
   $('ops-search').addEventListener('keydown', async (e) => {
     if (e.key !== 'Enter') return;
     const q = e.target.value.trim();

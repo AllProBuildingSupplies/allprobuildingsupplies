@@ -167,7 +167,6 @@
 .ops-pal-item:hover,.ops-pal-item.is-on{background:rgba(200,152,31,.12);color:var(--text);}
 
 .ops-empty{padding:28px;color:var(--text-muted);border:1px dashed var(--line);text-align:center;}
-.ops-sig{width:100%;height:120px;background:#fff;border:1px solid var(--line);touch-action:none;}
 
 .ops-top .theme-toggle,
 .ops-login-theme .theme-toggle{

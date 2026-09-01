@@ -14,15 +14,12 @@ import {
   timeline,
 } from './core.js';
 import {
-  addBalance,
-  applyCatalogDelta,
   atpForSku,
   cycleCount,
   getBalance,
   inventorySnapshot,
   listLocations,
   moveBalance,
-  onPhysicalAdjust,
   onPhysicalReceive,
 } from './inventory.js';
 
@@ -398,9 +395,6 @@ export async function completeTask(env, taskId, auth, { qty, note, short } = {})
   const newDone = intQty(task.qty_done) + done;
   const expected = intQty(task.qty_expected);
   let status = newDone >= expected ? 'done' : 'in_progress';
-  if (short || (done < Math.max(0, expected - intQty(task.qty_done)) && qty != null && newDone < expected)) {
-    if (short) status = 'short';
-  }
   if (short) status = 'short';
 
   if (task.type === 'pick' && done > 0) {
@@ -567,12 +561,6 @@ export async function packOrder(env, orderId, auth, { lines, note, method } = {}
     .bind(JSON.stringify(list), orderId)
     .run();
 
-  const { results: afterItems } = await env.DB.prepare(
-    `SELECT quantity, qty_shipped FROM order_items WHERE order_id = ?`
-  )
-    .bind(orderId)
-    .all();
-  const allShipped = (afterItems || []).every((it) => intQty(it.qty_shipped) >= intQty(it.quantity));
   const destLoc = methodUse === 'pickup' || methodUse === 'willcall' ? 'WILLCALL' : 'STAGING';
   for (const ln of packLines) {
     const staging = await getBalance(env, ln.code, ln.size, 'STAGING');
@@ -581,20 +569,13 @@ export async function packOrder(env, orderId, auth, { lines, note, method } = {}
     }
   }
 
-  await setOrderFulfillment(env, orderId, allShipped ? 'packed' : 'packed', {
+  // packed ≠ delivered: classic admin stays partially_shipped until POD.
+  await setOrderFulfillment(env, orderId, 'packed', {
     actor,
     action: 'pack',
     note: shipId,
-    legacyStatus: allShipped ? 'delivered' : 'partially_shipped',
+    legacyStatus: 'partially_shipped',
   });
-  // packed ≠ delivered: keep legacy partially_shipped until POD unless will-call complete later
-  if (!allShipped) {
-    await env.DB.prepare(`UPDATE orders SET status = 'partially_shipped' WHERE id = ?`).bind(orderId).run();
-  } else {
-    await env.DB.prepare(`UPDATE orders SET status = 'partially_shipped', fulfillment_status = 'packed' WHERE id = ?`)
-      .bind(orderId)
-      .run();
-  }
 
   await logEvent(env, {
     entityType: 'shipment',
@@ -1318,7 +1299,5 @@ export {
   listLocations,
   inventorySnapshot,
   cycleCount,
-  onPhysicalReceive,
-  onPhysicalAdjust,
   atpForSku,
 };
