@@ -47,6 +47,7 @@
       <span class="theme-toggle-text">Light</span>
     </button>
     <a href="index.html" class="nav-cta" style="background:transparent;border:1px solid var(--silver);color:var(--silver);">← Back to Site</a>
+    <a href="ops.html" id="ops-os-link" class="nav-cta" style="display:none;background:var(--gold);color:var(--on-gold);">All Pro OS (TEST)</a>
   </div>
 </nav>
 
@@ -852,6 +853,10 @@
 
 <script>
 const API_BASE = window.APBS_API_BASE || 'https://allpro-api.baruch-6d5.workers.dev/api';
+if (window.APBS_IS_TEST) {
+  const opsLink = document.getElementById('ops-os-link');
+  if (opsLink) opsLink.style.display = 'inline-flex';
+}
 function getAdminHeaders(extra) {
   return window.apbsAdminHeaders ? window.apbsAdminHeaders(extra || { 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' };
 }

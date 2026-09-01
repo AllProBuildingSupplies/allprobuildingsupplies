@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>All Pro OS — TEST</title>
+<script src="assets/theme-init.js"></script>
+<link rel="stylesheet" href="assets/style.css"/>
+<link rel="stylesheet" href="assets/ops/style.css"/>
+<meta name="robots" content="noindex"/>
+<meta name="theme-color" content="#0C1117"/>
+</head>
+<body class="ops-body">
+<div id="ops-login" class="ops-login" hidden>
+  <div class="ops-login-card">
+    <img src="images/logo.png" alt="All Pro" width="120"/>
+    <p class="ops-login-kicker">TEST · All Pro OS</p>
+    <h1>Operations</h1>
+    <p class="ops-login-lead">Same admin password as the test Worker. Live site is not connected.</p>
+    <input type="password" id="ops-pin" class="data-input" placeholder="Admin password" autocomplete="current-password"/>
+    <button type="button" class="ops-btn ops-btn-gold" id="ops-login-btn">Enter All Pro OS</button>
+    <p id="ops-login-err" class="ops-error" hidden></p>
+    <a href="admin.html">Classic admin →</a>
+  </div>
+</div>
+
+<div id="ops-app" class="ops-app" hidden>
+  <aside class="ops-rail" aria-label="Modules">
+    <a class="ops-brand" href="#/inbox">
+      <img src="images/logo.png" alt=""/>
+      <span>All Pro <em>OS</em><small>TEST</small></span>
+    </a>
+    <nav class="ops-nav">
+      <a href="#/inbox" data-nav="inbox">Inbox</a>
+      <a href="#/orders" data-nav="orders">Orders</a>
+      <a href="#/warehouse" data-nav="warehouse">Warehouse</a>
+      <a href="#/shipments" data-nav="shipments">Shipments</a>
+      <a href="#/loads" data-nav="loads">Loads</a>
+      <a href="#/driver" data-nav="driver">Driver</a>
+      <a href="#/inbound" data-nav="inbound">Inbound</a>
+      <a href="#/purchasing" data-nav="purchasing">Purchasing</a>
+      <a href="#/inventory" data-nav="inventory">Inventory</a>
+      <a href="#/finance" data-nav="finance">Finance</a>
+      <a href="#/exceptions" data-nav="exceptions">Exceptions</a>
+    </nav>
+    <div class="ops-rail-foot">
+      <button type="button" class="ops-cmd-hint" id="ops-cmd-open">⌘K command</button>
+      <select id="ops-role" class="ops-role" aria-label="Role"></select>
+      <a href="admin.html" class="ops-quiet">Classic admin</a>
+    </div>
+  </aside>
+  <main class="ops-main">
+    <header class="ops-top">
+      <button type="button" class="ops-menu" id="ops-menu" aria-label="Menu">☰</button>
+      <div class="ops-crumb" id="ops-crumb">Inbox</div>
+      <input type="search" id="ops-search" class="ops-search" placeholder="Search orders, shipments, loads, POs…" autocomplete="off"/>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">Light</button>
+    </header>
+    <div id="ops-flash" class="ops-flash" hidden></div>
+    <div id="ops-view" class="ops-view">Loading…</div>
+  </main>
+</div>
+
+<div id="ops-palette" class="ops-palette" hidden>
+  <div class="ops-palette-box">
+    <input type="search" id="ops-palette-input" placeholder="Confirm, pack, load, receive, hold…" autocomplete="off"/>
+    <div id="ops-palette-list"></div>
+  </div>
+</div>
+
+<script src="assets/main.js"></script>
+<script src="assets/ops/app.js" type="module"></script>
+</body>
+</html>

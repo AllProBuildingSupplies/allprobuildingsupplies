@@ -3,6 +3,13 @@
 // =====================================================================
 
 import { seedFactoryCodes } from './factoryCodes.js';
+import {
+  handleOpsRequest,
+  ensureOpsSchema,
+  syncOrderIntoOps,
+  enrichOrdersForCustomer,
+} from './ops/router.js';
+import { addBalance } from './ops/inventory.js';
 
 const encoder = new TextEncoder();
 
@@ -1345,6 +1352,7 @@ async function ensureRuntimeSchema(env) {
       await ensureStockMovementsTable(env);
       await ensureInboundShipmentsTable(env);
       await ensureInvoiceDocsTable(env);
+      await ensureOpsSchema(env);
       try {
         await backfillLegacyOrderShipments(env);
       } catch (_) {}
@@ -2501,6 +2509,10 @@ export default {
       const auth = await authFromRequest(request, env);
       await ensureRuntimeSchema(env);
 
+      if (path.startsWith('/api/ops')) {
+        return handleOpsRequest(request, env, auth, url);
+      }
+
       // ---------------------------------------------------------
       // PUBLIC ROUTES
       // ---------------------------------------------------------
@@ -2798,6 +2810,10 @@ export default {
           }
         }
 
+        try {
+          await syncOrderIntoOps(env, orderId, customerEmail);
+        } catch (_) {}
+
         return jsonResponse({ success: true, orderId, total: priced.total, items: priced.validated });
       }
 
@@ -2922,7 +2938,12 @@ export default {
           const orderItems = items.results.filter((it) => it.order_id === o.id).map((it) => mapOrderItem(it, prods.results));
           return formatOrderRow(o, orderItems);
         });
-        return jsonResponse(formattedOrders);
+        try {
+          const enriched = await enrichOrdersForCustomer(env, formattedOrders);
+          return jsonResponse(enriched);
+        } catch (_) {
+          return jsonResponse(formattedOrders);
+        }
       }
 
       // ---------------------------------------------------------
@@ -3313,6 +3334,9 @@ export default {
             qtyBefore: a.before,
             qtyAfter: a.after,
           });
+          try {
+            await addBalance(env, a.code, a.size, 'FLOOR', a.delta);
+          } catch (_) {}
         }
         return jsonResponse({ success: true, updated, applied, missing });
       }
@@ -3373,6 +3397,9 @@ export default {
             qtyBefore: a.before,
             qtyAfter: a.after,
           });
+          try {
+            await addBalance(env, a.code, a.size, 'FLOOR', a.after - a.before);
+          } catch (_) {}
         }
         return jsonResponse({ success: true, updated, applied, missing });
       }
@@ -3478,6 +3505,15 @@ export default {
             qtyAfter: a.after,
             note,
           });
+          try {
+            await addBalance(env, a.code, a.size, 'FLOOR', a.delta);
+            await env.DB.prepare(
+              `UPDATE inbound_lines SET qty_received = COALESCE(qty_received, 0) + ?
+               WHERE inbound_id = ? AND code = ? AND size = ?`
+            )
+              .bind(a.delta, id, a.code, a.size)
+              .run();
+          } catch (_) {}
         }
         const now = new Date().toISOString();
         await env.DB.prepare(
@@ -3695,6 +3731,10 @@ export default {
             } catch (_) {}
           }
         }
+
+        try {
+          await syncOrderIntoOps(env, o.id, 'admin');
+        } catch (_) {}
 
         return jsonResponse({ success: true, orderId: o.id, total: priced.total || 0 });
       }
