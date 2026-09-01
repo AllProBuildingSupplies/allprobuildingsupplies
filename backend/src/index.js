@@ -90,12 +90,12 @@ function productInsertBinds(p, sizeOverride) {
   const cats = productCategoryFields(p);
   return [
     normalizeProductCode(p.code),
-    p.description,
+    p.description != null ? String(p.description) : '',
     sizeOverride != null ? sizeOverride : canonicalizeSize(p.size),
-    p.pack,
+    p.pack == null || p.pack === '' ? 0 : p.pack,
     p.qty == null || p.qty === '' ? 0 : p.qty,
     roundMoney(p.price),
-    p.image,
+    p.image != null ? String(p.image) : '',
     cats.material,
     cats.main_category,
     cats.sub_category,
