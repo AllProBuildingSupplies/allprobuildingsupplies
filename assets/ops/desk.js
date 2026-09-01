@@ -1308,8 +1308,29 @@ export async function handleDeskClick(t) {
         method: 'POST',
         body: JSON.stringify({ email, fullAddress: full, phone: val('o-phone') }),
       });
-      await loadOrderSavedAddresses(email, full);
+      const sel = $('o-saved-addr');
+      if (sel) {
+        const exists = Array.from(sel.options).some(
+          (o) => normAddr(o.getAttribute('data-full') || '') === normAddr(full)
+        );
+        if (!exists) {
+          const opt = document.createElement('option');
+          opt.value = full;
+          opt.setAttribute('data-full', full);
+          opt.textContent = full;
+          sel.appendChild(opt);
+        }
+        const chosen = Array.from(sel.options).find(
+          (o) => normAddr(o.getAttribute('data-full') || '') === normAddr(full)
+        );
+        if (chosen) {
+          chosen.selected = true;
+          sel.value = chosen.value;
+        }
+      }
+      syncOrderAddressBookUi();
       flash('Added to address book');
+      loadOrderSavedAddresses(email, full).catch(() => {});
       return true;
     }
     if (t.dataset.saveOrder != null) {
