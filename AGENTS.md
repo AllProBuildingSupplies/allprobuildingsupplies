@@ -38,3 +38,5 @@ From `brochure/`: `npm run sell-sheets` regenerates one PDF per catalog category
 
 ### Finding Cursor agent work
 Agent deliverables live under `cursor/` (see `cursor/README.md`). GitHub should stay on `main` only. Archive finished Cursor cloud agents in the Agents dashboard; do not recreate long-lived `cursor/*` feature branches for work that already landed.
+
+Do **not** commit `.cursor/environment.json`. Cloud Agents for this storefront use the existing personal environment tied to GitHub `AllProBuildingSupplies/allprobuildingsupplies`. A committed environment file made Cursor create a second environment (`allprobuildingsupplies/allprobuildingsupplies`) and broke new chats.

@@ -12,6 +12,10 @@ backend/.wrangler/
 # Cloudflare Worker local dev secrets (never commit)
 backend/.dev.vars
 
+# Cloud Agent environment is the existing personal dashboard env.
+# Committing this file made Cursor spin up a second repo/environment.
+.cursor/environment.json
+
 # OS / editor
 .DS_Store
 Thumbs.db

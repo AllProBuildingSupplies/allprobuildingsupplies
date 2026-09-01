@@ -18,5 +18,5 @@ Open the live site: [allprobuildingsupplies.com](https://allprobuildingsupplies.
 Leftover draft PRs that were **not** merged because `main` already had a newer version of the same fix:
 
 - PR #28 order backorder stock — `main` already allows admin backorders (`checkStock: false`)
-- PR #26 Cloud Agent env — files were copied to `.cursor/environment.json` and `scripts/cloud-agent-install.sh`
+- PR #26 Cloud Agent env — do not restore `.cursor/environment.json`; it split Cloud chats into a second environment
 - PR #7 follow-on excel sizes commit — decimal size matching is already in `assets/main.js`
