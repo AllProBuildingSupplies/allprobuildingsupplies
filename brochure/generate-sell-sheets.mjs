@@ -131,6 +131,7 @@ function productFamilies(rows) {
   const byCode = new Map();
   for (const r of rows) {
     const code = r.Code || 'UNKNOWN';
+    const unit = priceUnitFor(r);
     if (!byCode.has(code)) {
       byCode.set(code, {
         code,
@@ -139,19 +140,42 @@ function productFamilies(rows) {
         image: r.Image,
         family: r.sub_sub_sub_category || r.Description,
         pack: r.Pack,
-        sizes: [],
+        unit,
+        sizePrices: [],
         standards: standardsForSku(r),
       });
     }
     const fam = byCode.get(code);
-    if (r.Size && !fam.sizes.includes(r.Size)) fam.sizes.push(r.Size);
+    const size = (r.Size || '').trim();
+    if (size && !fam.sizePrices.some((sp) => sp.size === size)) {
+      fam.sizePrices.push({
+        size,
+        price: parseFloat(r.Price),
+        unit,
+      });
+    }
     if (r.Pack) fam.pack = r.Pack;
     if (r.Image && !fam.image) fam.image = r.Image;
   }
-  for (const fam of byCode.values()) fam.sizes.sort(sizeSort);
+  for (const fam of byCode.values()) {
+    fam.sizePrices.sort((a, b) => sizeSort(a.size, b.size));
+    fam.sizes = fam.sizePrices.map((sp) => sp.size);
+  }
   return [...byCode.values()].sort(
     (a, b) => a.family.localeCompare(b.family) || a.code.localeCompare(b.code)
   );
+}
+
+function priceUnitFor(row) {
+  const sub = (row.sub_category || '').toLowerCase();
+  if (sub === 'pipes') return '/ft';
+  return '/ea';
+}
+
+function fmtPrice(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return '—';
+  return `$${v.toFixed(2)}`;
 }
 
 function sizeValue(s) {
@@ -639,25 +663,25 @@ const SHARED_CSS = `
   .fill-body { display: flex; flex-direction: column; height: 100%; min-height: 0; }
   .size-chips {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(0.72in, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(0.78in, 1fr));
     gap: 8px;
     margin-top: 2px;
     flex: 1;
     align-content: start;
   }
   .size-chips.compact {
-    grid-template-columns: repeat(auto-fill, minmax(0.40in, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(0.48in, 1fr));
     gap: 3px;
     margin-top: 2px;
   }
   .size-chip {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 0.42in;
-    padding: 6px 4px;
+    min-height: 0.52in;
+    padding: 5px 3px 4px;
     font-family: 'DM Mono', monospace;
-    font-size: 9px;
     font-weight: 500;
     letter-spacing: 0;
     line-height: 1.15;
@@ -666,21 +690,58 @@ const SHARED_CSS = `
     background: #fff;
     border: 1.5px solid var(--navy);
     box-sizing: border-box;
+    gap: 2px;
+  }
+  .size-chip .sz {
+    font-size: 8.5px;
+    color: var(--navy);
+  }
+  .size-chip .pr {
+    font-size: 8px;
+    font-weight: 600;
+    color: var(--gold2);
+  }
+  .size-chip .pr .u {
+    font-size: 6px;
+    font-weight: 400;
+    color: var(--muted);
   }
   .size-chips.compact .size-chip {
-    min-height: 0.22in;
-    font-size: 6px;
+    min-height: 0.34in;
     padding: 2px 1px;
     border-width: 1px;
+    gap: 1px;
   }
+  .size-chips.compact .size-chip .sz { font-size: 6px; }
+  .size-chips.compact .size-chip .pr { font-size: 6px; }
+  .size-chips.compact .size-chip .pr .u { font-size: 5px; }
   .prod-grid.ultra .size-chips.compact {
-    grid-template-columns: repeat(auto-fill, minmax(0.34in, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(0.40in, 1fr));
     gap: 2px;
   }
   .prod-grid.ultra .size-chips.compact .size-chip {
-    min-height: 0.18in;
-    font-size: 5.5px;
+    min-height: 0.30in;
     padding: 1px;
+  }
+  .prod-grid.ultra .size-chips.compact .size-chip .sz { font-size: 5.5px; }
+  .prod-grid.ultra .size-chips.compact .size-chip .pr { font-size: 5.5px; }
+  .wholesale-banner {
+    background: linear-gradient(90deg, rgba(200,152,31,.12), rgba(26,51,80,.06));
+    border: 1px solid rgba(200,152,31,.35);
+    border-left: 3px solid var(--gold);
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    font-size: 8.5px;
+    line-height: 1.4;
+    color: var(--navy);
+  }
+  .wholesale-banner strong {
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--gold2);
+    font-size: 9px;
+    margin-right: 6px;
   }
   .pg-item .size-chips {
     margin-top: 2px;
@@ -751,66 +812,153 @@ const SHARED_CSS = `
   .footer .right { color: rgba(255,255,255,.7); }
   .footer .right strong { color: var(--gold-soft); font-weight: 500; }
 
-  /* ── INDEX PAGE ── */
+  /* ── CATALOG COVER ── */
   .index-page {
     width: 8.5in;
     height: 11in;
     background: var(--cream);
     page-break-after: always;
     display: grid;
-    grid-template-columns: 2.2in 1fr;
+    grid-template-columns: 2.35in 1fr;
     grid-template-rows: 1fr 0.42in;
     overflow: hidden;
   }
-  .index-main {
-    padding: 0.28in 0.32in 0.18in 0.3in;
+  .cover-sidebar {
+    grid-row: 1 / 2;
+    background: var(--navy);
+    padding: 0.22in 0.16in;
     display: flex;
     flex-direction: column;
+    gap: 0.12in;
+  }
+  .cover-collage {
+    flex: 1;
+    min-height: 0;
+    border: 1px solid rgba(200,152,31,.4);
+    overflow: hidden;
+    background: #0f2438;
+  }
+  .cover-collage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+  .cover-side-feats .feat { margin-bottom: 6px; }
+  .cover-side-feats .feat:last-child { margin-bottom: 0; }
+  .index-main {
+    padding: 0.28in 0.28in 0.16in 0.26in;
+    display: flex;
+    flex-direction: column;
+  }
+  .cover-brand-bar {
+    text-align: center;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+  }
+  .cover-brand-bar .brand-top {
+    font-family: 'Oswald', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .cover-brand-bar .brand-top span { color: var(--gold2); }
+  .cover-logo-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 6px 0 4px;
+  }
+  .cover-logo-wrap img {
+    height: 0.72in;
+    width: auto;
+  }
+  .cover-sub {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--navy);
+    margin-top: 2px;
+  }
+  .cover-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 7.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .index-main > .wholesale-banner {
+    flex-shrink: 0;
+    margin-bottom: 8px;
+    padding: 5px 9px;
   }
   .cat-cards {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     flex: 1;
-    align-content: start;
+    align-content: stretch;
+    grid-auto-rows: 1fr;
+    min-height: 0;
+  }
+  a.cat-card {
+    text-decoration: none;
+    color: inherit;
   }
   .cat-card {
-    background: var(--paper);
+    background: var(--soft);
     border: 1px solid var(--line);
-    border-left: 3px solid var(--gold);
+    border-left: 4px solid var(--gold);
     padding: 8px 9px;
     display: grid;
-    grid-template-columns: 0.72in 1fr;
-    gap: 8px;
+    grid-template-columns: 1.15in 1fr;
+    gap: 9px;
     align-items: center;
+    height: 100%;
+    min-height: 0;
   }
   .cat-card img {
-    width: 0.72in;
-    height: 0.72in;
+    width: 1.15in;
+    height: 1.15in;
     object-fit: cover;
     border: 1px solid var(--line);
+    background: #fff;
   }
   .cat-card h3 {
     font-family: 'Oswald', sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.5px;
+    font-size: 15px;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
     color: var(--ink);
     line-height: 1.1;
     margin-bottom: 3px;
   }
   .cat-card p {
-    font-size: 7.5px;
+    font-size: 8.5px;
     color: var(--muted);
-    line-height: 1.35;
+    line-height: 1.3;
   }
   .cat-card .meta {
     font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
+    font-size: 7.5px;
     letter-spacing: 0.8px;
     color: var(--gold2);
     margin-top: 4px;
     text-transform: uppercase;
+  }
+  .cat-card .jump {
+    font-family: 'DM Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-top: 3px;
   }
 `;
 
@@ -856,10 +1004,20 @@ function renderSidebar(meta) {
   </aside>`;
 }
 
-function renderSizeChips(sizes, { compact = false } = {}) {
-  if (!sizes?.length) return '<div class="size-chips"><div class="size-chip">—</div></div>';
-  const chips = sizes
-    .map((s) => `<div class="size-chip">${esc(s)}</div>`)
+function renderSizeChips(sizePrices, { compact = false } = {}) {
+  const list = Array.isArray(sizePrices) ? sizePrices : [];
+  if (!list.length) return '<div class="size-chips"><div class="size-chip"><span class="sz">—</span></div></div>';
+  const chips = list
+    .map((sp) => {
+      const size = typeof sp === 'string' ? sp : sp.size;
+      const price = typeof sp === 'string' ? null : sp.price;
+      const unit = typeof sp === 'string' ? '' : sp.unit || '';
+      const priceHtml =
+        price == null || !Number.isFinite(Number(price))
+          ? ''
+          : `<span class="pr">${esc(fmtPrice(price))}<span class="u">${esc(unit)}</span></span>`;
+      return `<div class="size-chip"><span class="sz">${esc(size)}</span>${priceHtml}</div>`;
+    })
     .join('');
   return `<div class="size-chips${compact ? ' compact' : ''}">${chips}</div>`;
 }
@@ -874,8 +1032,8 @@ function renderProductTable(families, mode) {
           ${url ? `<img class="thumb" src="${url}" alt=""/>` : '<div></div>'}
           <div>
             <div class="pname">${esc(f.family)}</div>
-            <div class="sku">${esc(f.code)}${f.pack ? ` · Pk ${esc(f.pack)}` : ''}</div>
-            ${renderSizeChips(f.sizes, { compact: true })}
+            <div class="sku">${esc(f.code)}${f.pack ? ` · Pk ${esc(f.pack)}` : ''} · ${esc(f.unit || '/ea')}</div>
+            ${renderSizeChips(f.sizePrices, { compact: true })}
           </div>
         </div>`;
       })
@@ -893,8 +1051,8 @@ function renderProductTable(families, mode) {
           <div class="fill-body">
             <div class="pname">${esc(f.family)}</div>
             <div class="sku">${esc(f.code)} · ${esc(f.description)}</div>
-            <div class="sizes-label">Available sizes · ${f.sizes.length}</div>
-            ${renderSizeChips(f.sizes)}
+            <div class="sizes-label">Sizes &amp; suggested wholesale · ${f.sizePrices.length} · ${esc(f.unit || '/ea')}</div>
+            ${renderSizeChips(f.sizePrices)}
             <div class="stds">Pack ${esc(f.pack || '—')} · ${esc((f.standards || []).join(' · ') || '—')}</div>
           </div>
         </div>`;
@@ -910,9 +1068,9 @@ function renderProductTable(families, mode) {
         <td style="width:0.32in">${url ? `<img class="thumb" src="${url}" alt=""/>` : ''}</td>
         <td style="width:1.15in"><div class="sku">${esc(f.code)}</div><div class="pname">${esc(f.family)}</div></td>
         <td>${esc(f.description)}</td>
-        <td style="width:2.1in">${renderSizeChips(f.sizes, { compact: true })}</td>
+        <td style="width:2.3in">${renderSizeChips(f.sizePrices, { compact: true })}</td>
         <td class="pack" style="width:0.35in">${esc(f.pack || '—')}</td>
-        <td class="stds" style="width:1in">${esc((f.standards || []).join(' · ') || '—')}</td>
+        <td class="stds" style="width:0.9in">${esc((f.standards || []).join(' · ') || '—')}</td>
       </tr>`;
     })
     .join('');
@@ -920,11 +1078,54 @@ function renderProductTable(families, mode) {
   return `<table class="prod">
     <thead>
       <tr>
-        <th></th><th>Code / Type</th><th>Description</th><th>Sizes</th><th>Pack</th><th>Standard</th>
+        <th></th><th>Code / Type</th><th>Description</th><th>Size / Price</th><th>Pack</th><th>Standard</th>
       </tr>
     </thead>
     <tbody>${rows}</tbody>
   </table>`;
+}
+
+/** Pack families onto pages by size-chip budget so dense grids never clip. */
+function paginateFamilies(families) {
+  // Small SKUs first so page 1 keeps construction/standards; large grids
+  // (e.g. reducing tee) land on continuation pages without the mid block.
+  const ordered = [...families].sort(
+    (a, b) =>
+      (a.sizePrices?.length || 0) - (b.sizePrices?.length || 0) ||
+      a.family.localeCompare(b.family) ||
+      a.code.localeCompare(b.code)
+  );
+  const pages = [];
+  let bucket = [];
+  let cost = 0;
+  const maxForPage = () => (pages.length === 0 ? 28 : 48);
+  for (const f of ordered) {
+    const chipCost = Math.max(3, f.sizePrices?.length || 0);
+    const limit = maxForPage();
+    if (bucket.length && cost + chipCost > limit) {
+      pages.push(bucket);
+      bucket = [];
+      cost = 0;
+    }
+    bucket.push(f);
+    cost += chipCost;
+    if (chipCost >= maxForPage() && bucket.length === 1) {
+      pages.push(bucket);
+      bucket = [];
+      cost = 0;
+    }
+  }
+  if (bucket.length) pages.push(bucket);
+  return pages.length ? pages : [families];
+}
+
+function modeForFamilies(families) {
+  const totalSizes = families.reduce((n, f) => n + (f.sizePrices?.length || 0), 0);
+  if (families.length >= 12 || totalSizes >= 40 || families.some((f) => (f.sizePrices?.length || 0) >= 20)) {
+    return 'ultra';
+  }
+  if (families.length >= 7 || totalSizes >= 18) return 'dense';
+  return 'fill';
 }
 
 function renderCategoryPage(meta, families, rowCount) {
@@ -943,24 +1144,97 @@ function renderCategoryPage(meta, families, rowCount) {
     .map((s) => `<span class="badge">${esc(s.code)}</span>`)
     .join('');
 
-  const mode = families.length >= 18 ? 'ultra' : families.length >= 9 ? 'dense' : 'fill';
+  const unitNote = families.some((f) => f.unit === '/ft')
+    ? 'Pipe priced per foot; fittings & accessories per each.'
+    : 'Priced per each unless noted.';
+
+  const pages = paginateFamilies(families);
+  const pageCount = pages.length;
+
+  return pages
+    .map((pageFamilies, idx) => {
+      const mode = modeForFamilies(pageFamilies);
+      const sectionLabel =
+        idx === 0
+          ? mode === 'fill'
+            ? 'Products & Specs'
+            : 'Product Line'
+          : `${meta.title} · Continued`;
+      const mainClass = mode === 'ultra' || mode === 'dense' ? 'main compact-mid' : 'main';
+      const remaining = pages.slice(idx + 1).reduce((n, p) => n + p.length, 0);
+      return renderCategoryPageSingle(meta, pageFamilies, rowCount, {
+        mainClass,
+        mode,
+        sectionLabel,
+        unitNote,
+        allSizes,
+        construction: idx === 0 ? construction : '',
+        standards: idx === 0 ? standards : '',
+        apps: idx === 0 ? apps : '',
+        badges,
+        pageLabel: pageCount > 1 ? `${idx + 1} / ${pageCount}` : '',
+        hideMid: idx > 0,
+        contNote:
+          idx === 0 && remaining
+            ? `Continued · ${remaining} more product type${remaining === 1 ? '' : 's'}`
+            : '',
+        pageSuffix: idx === 0 ? '' : `-${idx + 1}`,
+      });
+    })
+    .join('\n');
+}
+
+function renderCategoryPageSingle(meta, families, rowCount, opts) {
+  const {
+    mainClass,
+    mode,
+    sectionLabel,
+    unitNote,
+    allSizes,
+    construction,
+    standards,
+    apps,
+    badges,
+    pageLabel,
+    hideMid,
+    contNote,
+    pageSuffix = '',
+  } = opts;
   const productBlock = renderProductTable(families, mode);
-  const sectionLabel = mode === 'fill' ? 'Products & Specs' : 'Product Line';
-  const mainClass = mode === 'ultra' ? 'main compact-mid' : 'main';
+  const mid = hideMid
+    ? ''
+    : `<div class="mid">
+      <div>
+        <div class="sec-lbl">Construction / Specs</div>
+        <table class="construction">${construction}</table>
+        <div class="apps">${apps}</div>
+      </div>
+      <div class="std-box">
+        <h4>Applicable Standards</h4>
+        ${standards}
+        ${meta.notes ? `<div class="note">${esc(meta.notes)}</div>` : ''}
+      </div>
+    </div>`;
 
   return `
-<section class="page">
+<section class="page" id="${esc(meta.slug)}${esc(pageSuffix)}">
   ${renderSidebar(meta)}
   <div class="${mainClass}">
     <div class="main-head">
-      <h1 class="main-title">${esc(meta.title)}</h1>
-      <div class="main-meta">Spec Sheet / Updated ${esc(COMPANY.updated)}<br/><strong>Call for Pricing</strong></div>
+      <h1 class="main-title">${esc(meta.title)}${hideMid ? ' <em style="color:var(--gold2);font-style:normal;font-size:18px">Cont.</em>' : ''}</h1>
+      <div class="main-meta">Spec Sheet / Updated ${esc(COMPANY.updated)}${pageLabel ? ` · ${esc(pageLabel)}` : ''}<br/><strong>Suggested Wholesale</strong></div>
     </div>
 
-    <div class="stats">
+    <div class="wholesale-banner">
+      <strong>Suggested Wholesale</strong>
+      These are suggested wholesale list prices. Call or email for bulk / volume quotes.
+      ${esc(unitNote)}
+    </div>
+
+    ${hideMid ? '' : `<div class="stats">
       <div class="stat">
         <div class="stat-v">${families.length}</div>
-        <div class="stat-l">Product Types</div>
+        <div class="stat-l">${pageLabel ? 'On This Page' : 'Product Types'}</div>
       </div>
       <div class="stat">
         <div class="stat-v">${rowCount}</div>
@@ -972,32 +1246,21 @@ function renderCategoryPage(meta, families, rowCount) {
       </div>
       <div class="stat">
         <div class="stat-v"><span class="gold">Trade</span></div>
-        <div class="stat-l">Volume Pricing</div>
+        <div class="stat-l">Bulk Quotes Available</div>
       </div>
-    </div>
+    </div>`}
 
-    <div class="mid">
-      <div>
-        <div class="sec-lbl">Construction / Specs</div>
-        <table class="construction">${construction}</table>
-        <div class="apps">${apps}</div>
-      </div>
-      <div class="std-box">
-        <h4>Applicable Standards</h4>
-        ${standards}
-        ${meta.notes ? `<div class="note">${esc(meta.notes)}</div>` : ''}
-      </div>
-    </div>
+    ${mid}
 
     <div class="prod-lbl">
-      <div class="sec-lbl">${sectionLabel} — ${families.length} Available</div>
+      <div class="sec-lbl">${esc(sectionLabel)} — ${families.length} Available${contNote ? ` · ${esc(contNote)}` : ''}</div>
       <span>${esc(COMPANY.phone)} · ${esc(COMPANY.email)}</span>
     </div>
     ${productBlock}
     <div class="order-bar">
       <div>
         <div class="ob-t">Ready to Order?</div>
-        <div class="ob-s">Send item codes, sizes &amp; quantities — fast trade pricing.</div>
+        <div class="ob-s">Send item codes, sizes &amp; quantities — ask for bulk pricing.</div>
       </div>
       <div class="ob-c">
         <span>Direct Line</span>${esc(COMPANY.phone)}
@@ -1006,57 +1269,62 @@ function renderCategoryPage(meta, families, rowCount) {
     </div>
   </div>
   <div class="footer">
-    <div>Spec Sheet · Rev. ${esc(COMPANY.updated)}</div>
+    <div>Spec Sheet · Rev. ${esc(COMPANY.updated)}${pageLabel ? ` · ${esc(pageLabel)}` : ''}</div>
     <div class="mid-badges">${badges}</div>
     <div class="right"><strong>${esc(COMPANY.short)}</strong> · ${esc(meta.title)}</div>
   </div>
 </section>`;
 }
 
-function renderIndex(categories) {
+function renderIndex(categories, { linked = false } = {}) {
+  const logo = logoUrl();
+  const collage = heroImgUrl('cover-collage.jpg');
   const cards = categories
     .map((c) => {
       const hero = heroImgUrl(c.hero);
-      return `<div class="cat-card">
+      const inner = `
         ${hero ? `<img src="${hero}" alt="${esc(c.title)}"/>` : '<div></div>'}
         <div>
           <h3>${esc(c.title)}</h3>
           <p>${esc(c.tagline)}</p>
-          <div class="meta">${c.familyCount} types · ${c.rowCount} SKUs · ${esc(c.pdfName)}</div>
-        </div>
-      </div>`;
+          <div class="meta">${c.familyCount} types · ${c.rowCount} SKUs</div>
+          ${linked ? `<div class="jump">Open section →</div>` : ''}
+        </div>`;
+      if (linked) {
+        return `<a class="cat-card" href="#${esc(c.slug)}">${inner}</a>`;
+      }
+      return `<div class="cat-card">${inner}</div>`;
     })
     .join('');
 
-  const meta = {
-    collection: 'COMPLETE LINE CARD',
-    hero: categories[0]?.hero || 'hero-pvc-pipes.jpg',
-    heroCaption: 'FACTORY-SOURCED CATALOG',
-    highlights: [
-      { title: '8 Categories', sub: 'Full Plumbing Line' },
-      { title: 'ASTM / NSF', sub: 'Code-Ready Specs' },
-      { title: 'Trade Pricing', sub: 'Call or Email' },
-    ],
-    title: 'Catalog Index',
-    material: 'ALL PRO',
-  };
-
   return `
-<section class="index-page">
-  ${renderSidebar(meta)}
-  <div class="index-main">
-    <div class="main-head">
-      <h1 class="main-title">Category Sell Sheets</h1>
-      <div class="main-meta">Line Card / Updated ${esc(COMPANY.updated)}<br/><strong>${esc(COMPANY.web)}</strong></div>
+<section class="index-page" id="catalog-cover">
+  <aside class="cover-sidebar">
+    <div class="cover-collage">
+      ${collage ? `<img src="${collage}" alt="All Pro product lines"/>` : ''}
     </div>
-    <p style="font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:10px;max-width:5.8in">
-      One dense spec sheet per category — product codes, sizes, packs,
-      and governing ASTM / ASME / NSF standards. Pricing on request.
-    </p>
+    <div class="cover-side-feats">
+      <div class="feat"><div class="feat-t">8 Categories</div><div class="feat-s">Full Plumbing Line</div></div>
+      <div class="feat"><div class="feat-t">Suggested Wholesale</div><div class="feat-s">Call for Bulk Quotes</div></div>
+      <div class="feat"><div class="feat-t">ASTM / NSF</div><div class="feat-s">Code-Ready Specs</div></div>
+    </div>
+  </aside>
+  <div class="index-main">
+    <div class="cover-brand-bar">
+      <div class="brand-top">All Pro <span>Building Supplies</span></div>
+      <div class="cover-logo-wrap">${logo ? `<img src="${logo}" alt="All Pro"/>` : ''}</div>
+      <div class="cover-sub">Product Catalog · Spec Sheets &amp; Wholesale Pricing</div>
+      <div class="cover-meta">Updated ${esc(COMPANY.updated)} · ${esc(COMPANY.web)} · ${esc(COMPANY.phone)}</div>
+    </div>
+    <div class="wholesale-banner">
+      <strong>Suggested Wholesale</strong>
+      Prices shown are suggested wholesale list pricing. Call or email for bulk / volume quotes.
+      Pipe is priced per foot; fittings &amp; accessories per each.
+    </div>
     <div class="cat-cards">${cards}</div>
   </div>
   <div class="footer">
-    <div>Spec Sheet Index · Rev. ${esc(COMPANY.updated)}</div>
+    <div>Catalog Cover · Rev. ${esc(COMPANY.updated)}</div>
     <div class="mid-badges">
       <span class="badge">${esc(COMPANY.phone)}</span>
       <span class="badge">${esc(COMPANY.email)}</span>
@@ -1089,10 +1357,10 @@ async function main() {
       hero: 'hero-pvc-pipes.jpg',
       heroCaption: catKey,
       tagline: `${catKey} from the All Pro catalog.`,
-      overview: `Factory-sourced ${catKey}.`,
+      overview: `${catKey} from the All Pro catalog.`,
       standards: [],
       highlights: [
-        { title: 'Factory Sourced', sub: 'Trade Ready' },
+        { title: 'Trade Ready', sub: 'Spec Sheet' },
         { title: 'Call for Pricing', sub: COMPANY.phone },
         { title: 'New Jersey', sub: 'Fast Response' },
       ],
@@ -1117,20 +1385,40 @@ async function main() {
       rowCount: rows.length,
       pdfName,
       hero: meta.hero,
+      slug: meta.slug,
       standards: meta.standards || [],
+      pageHtml: renderCategoryPage(meta, families, rows.length),
     });
-    console.log(`HTML: ${htmlName} (${families.length} types, ${rows.length} rows, 1 page)`);
+    console.log(
+      `HTML: ${htmlName} (${families.length} types, ${rows.length} rows, ~${paginateFamilies(families).length} page(s))`
+    );
   }
 
   const indexHtmlPath = path.join(htmlDir, '00-sell-sheet-index.html');
-  fs.writeFileSync(indexHtmlPath, wrapHtml(`${COMPANY.name} — Sell Sheet Index`, renderIndex(indexMeta)));
+  fs.writeFileSync(
+    indexHtmlPath,
+    wrapHtml(`${COMPANY.name} — Catalog Cover`, renderIndex(indexMeta, { linked: false }))
+  );
+
+  // Full catalog: cover (with internal links) + every category page
+  const catalogBody =
+    renderIndex(indexMeta, { linked: true }) + indexMeta.map((c) => c.pageHtml).join('\n');
+  const catalogHtmlPath = path.join(htmlDir, 'allpro-product-catalog.html');
+  fs.writeFileSync(
+    catalogHtmlPath,
+    wrapHtml(`${COMPANY.name} — Product Catalog`, catalogBody)
+  );
 
   const mdLines = [
     '# All Pro Building Supplies — Category Sell Sheets',
     '',
-    'Light, single-page Alveron-style spec sheets. Rebuild: `npm run sell-sheets` from `brochure/`.',
+    'Suggested wholesale prices from `assets/products.csv`. Rebuild: `npm run sell-sheets` from `brochure/`.',
     '',
-    '## PDFs',
+    '## Full catalog',
+    '',
+    '- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf` — cover + all category sheets (tiles link to sections)',
+    '',
+    '## Individual PDFs',
     '',
     '| Category | PDF | Types | SKUs |',
     '|---|---|---:|---:|',
@@ -1156,7 +1444,7 @@ async function main() {
 
   async function htmlToPdf(htmlPath, pdfPath) {
     const page = await browser.newPage();
-    await page.goto(`file://${htmlPath}`, { waitUntil: 'networkidle0', timeout: 120000 });
+    await page.goto(`file://${htmlPath}`, { waitUntil: 'networkidle0', timeout: 180000 });
     await page.pdf({
       path: pdfPath,
       format: 'Letter',
@@ -1171,8 +1459,9 @@ async function main() {
   for (const g of generated) {
     await htmlToPdf(g.htmlPath, path.join(pdfDir, g.pdfName));
   }
+  await htmlToPdf(catalogHtmlPath, path.join(pdfDir, 'allpro-product-catalog.pdf'));
   await browser.close();
-  console.log(`\nDone. ${generated.length} one-page sell sheets + index → ${pdfDir}`);
+  console.log(`\nDone. ${generated.length} category sheets + cover + full catalog → ${pdfDir}`);
 }
 
 main().catch((err) => {

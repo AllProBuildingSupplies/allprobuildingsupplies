@@ -1,8 +1,12 @@
 # All Pro Building Supplies — Category Sell Sheets
 
-Light, single-page Alveron-style spec sheets. Rebuild: `npm run sell-sheets` from `brochure/`.
+Suggested wholesale prices from `assets/products.csv`. Rebuild: `npm run sell-sheets` from `brochure/`.
 
-## PDFs
+## Full catalog
+
+- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf` — cover + all category sheets (tiles link to sections)
+
+## Individual PDFs
 
 | Category | PDF | Types | SKUs |
 |---|---|---:|---:|
