@@ -134,3 +134,9 @@ Do **not** treat Alibaba “NSF certificated” text as proof. Marketing claims 
 - Catalog & sell-sheet standards in `assets/products.csv` and `brochure/category-standards.js`
 
 This memo is procurement guidance, not a legal code opinion. Re-verify listings the day you cut a PO.
+
+---
+
+## Public pricing ballpark
+
+See **[PUBLIC_PRICING_BALLPARK.md](PUBLIC_PRICING_BALLPARK.md)** for Alibaba / web teaser prices vs your current Tommur FOBs (ERA, LESSO, Rifeng, Hailiang).
