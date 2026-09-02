@@ -140,3 +140,7 @@ This memo is procurement guidance, not a legal code opinion. Re-verify listings 
 ## Public pricing ballpark
 
 See **[PUBLIC_PRICING_BALLPARK.md](PUBLIC_PRICING_BALLPARK.md)** for Alibaba / web teaser prices vs your current Tommur FOBs (ERA, LESSO, Rifeng, Hailiang).
+
+## RFQ contacts + attach lists
+
+See **[RFQ_CONTACTS_AND_LISTS.md](RFQ_CONTACTS_AND_LISTS.md)** and CSVs in [`rfq/`](rfq/).

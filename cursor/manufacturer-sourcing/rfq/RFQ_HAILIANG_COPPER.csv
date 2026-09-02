@@ -1,0 +1,97 @@
+APBS_Code,Material,Description,Size,Target_Unit,Pack_Qty,Qty_Wanted_Pcs,Tommur_Code,Lesso_Code,Sub_Sub_Category
+COPPER-K-90,Copper,ELBOW 90,"1""",pc,100,,Copper Type K Soft - ELBOW 90,,Copper Fittings
+COPPER-K-90,Copper,ELBOW 90,"1/2""",pc,100,,Copper Type K Soft - ELBOW 90,,Copper Fittings
+COPPER-K-90,Copper,ELBOW 90,"1-1/2""",pc,100,,Copper Type K Soft - ELBOW 90,,Copper Fittings
+COPPER-K-90,Copper,ELBOW 90,"1-1/4""",pc,100,,Copper Type K Soft - ELBOW 90,,Copper Fittings
+COPPER-K-90,Copper,ELBOW 90,"2""",pc,100,,Copper Type K Soft - ELBOW 90,,Copper Fittings
+COPPER-K-90,Copper,ELBOW 90,"3""",pc,100,,Copper Type K Soft - ELBOW 90,,Copper Fittings
+COPPER-K-90,Copper,ELBOW 90,"3/4""",pc,100,,Copper Type K Soft - ELBOW 90,,Copper Fittings
+COPPER-K-90,Copper,ELBOW 90,"4""",pc,100,,Copper Type K Soft - ELBOW 90,,Copper Fittings
+COPPER-K-PIPE,Copper,COPPER PIPE K,"1/2""",ft,1,,Copper Type K Soft - Pipe - COPPER PIPE K,,Copper Pipes
+COPPER-K-REDUCER,Copper,REDUCER,"1"" x 3/4""",pc,100,,Copper Type K Soft - REDUCER,,Copper Fittings
+COPPER-K-REDUCER,Copper,REDUCER,"1-1/2"" x 1-1/4""",pc,100,,Copper Type K Soft - REDUCER,,Copper Fittings
+COPPER-K-REDUCER,Copper,REDUCER,"1-1/4"" x 3/4""",pc,100,,Copper Type K Soft - REDUCER,,Copper Fittings
+COPPER-K-REDUCER,Copper,REDUCER,"2"" x 1-1/2""",pc,100,,Copper Type K Soft - REDUCER,,Copper Fittings
+COPPER-K-REDUCER,Copper,REDUCER,"2-1/2"" x 2""",pc,100,,Copper Type K Soft - REDUCER,,Copper Fittings
+COPPER-K-REDUCER,Copper,REDUCER,"3"" x 2-1/2""",pc,100,,Copper Type K Soft - REDUCER,,Copper Fittings
+COPPER-K-REDUCER,Copper,REDUCER,"3/4"" x 1/2""",pc,100,,Copper Type K Soft - REDUCER,,Copper Fittings
+COPPER-K-REDUCER,Copper,REDUCER,"4"" x 3""",pc,100,,Copper Type K Soft - REDUCER,,Copper Fittings
+COPPER-K-TEE,Copper,TEE,"1""",pc,100,,Copper Type K Soft - TEE,,Copper Fittings
+COPPER-K-TEE,Copper,TEE,"1"" x 3/4""",pc,100,,Copper Type K Soft - TEE,,Copper Fittings
+COPPER-K-TEE,Copper,TEE,"1/2""",pc,100,,Copper Type K Soft - TEE,,Copper Fittings
+COPPER-K-TEE,Copper,TEE,"3/4""",pc,100,,Copper Type K Soft - TEE,,Copper Fittings
+COPPER-K-TEE,Copper,TEE,"3/4"" x 1/2"" x 1/2""",pc,100,,Copper Type K Soft - TEE,,Copper Fittings
+COPPER-K-TEE,Copper,TEE,"3/4"" x 3/4"" x 1/2""",pc,100,,Copper Type K Soft - TEE,,Copper Fittings
+COPPER-L-90,Copper,ELBOW 90,"1/2""",pc,100,,Copper Type L Hard - ELBOW 90,,Copper Fittings
+COPPER-L-90,Copper,ELBOW 90,"1-1/2""",pc,100,,Copper Type L Hard - ELBOW 90,,Copper Fittings
+COPPER-L-90,Copper,ELBOW 90,"1-1/4""",pc,100,,Copper Type L Hard - ELBOW 90,,Copper Fittings
+COPPER-L-90,Copper,ELBOW 90,"2""",pc,100,,Copper Type L Hard - ELBOW 90,,Copper Fittings
+COPPER-L-90,Copper,ELBOW 90,"3/4""",pc,100,,Copper Type L Hard - ELBOW 90,,Copper Fittings
+COPPER-L-90,Copper,ELBOW 90,"4""",pc,100,,Copper Type L Hard - ELBOW 90,,Copper Fittings
+COPPER-L-CPLNG,Copper,COUPLING,"1-1/2""",pc,100,,Copper Type L Hard - COUPLING,,Copper Fittings
+COPPER-L-CPLNG,Copper,COUPLING,"1-1/4""",pc,100,,Copper Type L Hard - COUPLING,,Copper Fittings
+COPPER-L-CPLNG,Copper,COUPLING,"2""",pc,100,,Copper Type L Hard - COUPLING,,Copper Fittings
+COPPER-L-CPLNG,Copper,COUPLING,"2-1/2""",pc,100,,Copper Type L Hard - COUPLING,,Copper Fittings
+COPPER-L-CPLNG,Copper,COUPLING,"3""",pc,50,,Copper Type L Hard - COUPLING,,Copper Fittings
+COPPER-L-CPLNG,Copper,COUPLING,"4""",pc,50,,Copper Type L Hard - COUPLING,,Copper Fittings
+COPPER-L-PEXADPTR,Copper,Adapter (Copper to Pex),"1-1/2""",pc,1,,Copper Type L Hard - Adapter (Copper to Pex),,Copper Fittings
+COPPER-L-PEXADPTR,Copper,Adapter (Copper to Pex),"2""",pc,1,,Copper Type L Hard - Adapter (Copper to Pex),,Copper Fittings
+COPPER-L-PEXADPTR,Copper,Adapter (Copper to Pex),"2-1/2""",pc,1,,Copper Type L Hard - Adapter (Copper to Pex),,Copper Fittings
+COPPER-L-PEXADPTR,Copper,Adapter (Copper to Pex),"3/4""",pc,1,,Copper Type L Hard - Adapter (Copper to Pex),,Copper Fittings
+COPPER-L-PIPE,Copper,COPPER PIPE L,"1""",ft,1,,Copper Type L Hard - COPPER PIPE L,,Copper Pipes
+COPPER-L-PIPE,Copper,COPPER PIPE L,"1/2""",ft,1,,Copper Type L Hard - COPPER PIPE L,,Copper Pipes
+COPPER-L-PIPE,Copper,COPPER PIPE L,"1-1/2""",ft,1,,Copper Type L Hard - COPPER PIPE L,,Copper Pipes
+COPPER-L-PIPE,Copper,COPPER PIPE L,"1-1/4""",ft,1,,Copper Type L Hard - COPPER PIPE L,,Copper Pipes
+COPPER-L-PIPE,Copper,COPPER PIPE L,"2""",ft,1,,Copper Type L Hard - COPPER PIPE L,,Copper Pipes
+COPPER-L-PIPE,Copper,COPPER PIPE L,"2-1/2""",ft,1,,Copper Type L Hard - COPPER PIPE L,,Copper Pipes
+COPPER-L-PIPE,Copper,COPPER PIPE L,"3/4""",ft,1,,Copper Type L Hard - COPPER PIPE L,,Copper Pipes
+COPPER-L-REDTEE,Copper,RED TEE,"1"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"1/2"" x 1/2"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"1-1/2"" x 1-1/2"" x 1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"1-1/2"" x 1-1/2"" x 1-1/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"1-1/2"" x 1-1/2"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"1-1/4"" x 1-1/4"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2"" x 2"" x 1-1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2"" x 2"" x 1-1/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2"" x 2"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2"" x 3/4"" x 2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2"" x 1-1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2"" x 2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2"" x 2"" x 2-1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2"" x 2-1/2"" x 1-1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2"" x 2-1/2"" x 2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2"" x 2-1/2"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"2-1/2"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3"" x 1-1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3"" x 2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3"" x 3"" x 1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3"" x 3"" x 2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3"" x 3"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3/4"" x 1"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3/4"" x 1/2"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"3/4"" x 3/4"" x 1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"4"" x 1-1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"4"" x 2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"4"" x 3"" x 2-1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"4"" x 4"" x 1-1/2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"4"" x 4"" x 2""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"4"" x 4"" x 3""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDTEE,Copper,RED TEE,"4"" x 4"" x 3/4""",pc,100,,Copper Type L Hard - RED TEE,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"1"" x 3/4""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"1-1/2"" x 1-1/4""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"2"" x 1-1/2""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"2-1/2"" x 2""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"3"" x 2""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"3"" x 2-1/2""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"3/4"" x 1/2""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"4"" x 2""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-REDUCER,Copper,REDUCER,"4"" x 3""",pc,100,,Copper Type L Hard - REDUCER,,Copper Fittings
+COPPER-L-STUB,Copper,Copper Elbow Stub out,"1/2""",pc,1,,Copper Type L Hard - Copper Elbow Stub out,,Copper Fittings
+COPPER-L-TEE,Copper,TEE,"1""",pc,100,,Copper Type L Hard - TEE,,Copper Fittings
+COPPER-L-TEE,Copper,TEE,"1/2""",pc,100,,Copper Type L Hard - TEE,,Copper Fittings
+COPPER-L-TEE,Copper,TEE,"1-1/2""",pc,100,,Copper Type L Hard - TEE,,Copper Fittings
+COPPER-L-TEE,Copper,TEE,"2""",pc,100,,Copper Type L Hard - TEE,,Copper Fittings
+COPPER-L-TEE,Copper,TEE,"3/4""",pc,100,,Copper Type L Hard - TEE,,Copper Fittings
+COPPER-L-TEE,Copper,TEE,"4""",pc,100,,Copper Type L Hard - TEE,,Copper Fittings
