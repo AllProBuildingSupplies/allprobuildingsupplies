@@ -2,10 +2,9 @@
  * Category / product family standards & selling copy for sell sheets.
  * Keys match products.csv `sub_sub_category` values.
  *
- * ASTM/ASME lines describe the product class matching Tommur factory SKUs.
- * NSF / cUPC / CSA listing numbers are NOT printed as hard claims here —
- * Tommur/TOMEX had no verified NSF company listings as of 2026-09-02.
- * Ask Tommur for listing certificates before potable / code submittals.
+ * CUSTOMER-FACING RULE: never mention factories, suppliers, Tommur, Lesso,
+ * factory SKUs/order codes, competitor brands, or internal sourcing notes
+ * in any string that renders into HTML/PDF.
  */
 export const CATEGORY_META = {
   'PVC Pipes': {
@@ -37,7 +36,7 @@ export const CATEGORY_META = {
     ],
     applications: ['DWV systems', 'Drainage & vent', 'Above / below grade', 'Res & commercial'],
     notes:
-      'Confirm local code acceptance for foam-core DWV before install. Request factory NSF/cUPC listing docs when required for submittals.',
+      'Confirm local code acceptance for foam-core DWV before install.',
   },
   'PVC Fittings': {
     slug: 'pvc-fittings',
@@ -48,7 +47,7 @@ export const CATEGORY_META = {
     heroCaption: 'HUB & STREET · SOLVENT WELD',
     tagline: 'Hub & street DWV fittings — elbows, tees, wyes, traps, adapters, and more.',
     overview:
-      'Full line of PVC DWV fittings for solvent-cement joining: bends, sanitary tees, wyes, P-traps, couplings, bushings, caps, closet flanges, and cleanouts. Tommur DWV series (Dxxx factory codes).',
+      'Full line of PVC DWV fittings for solvent-cement joining: bends, sanitary tees, wyes, P-traps, couplings, bushings, caps, closet flanges, and cleanouts.',
     standards: [
       { code: 'ASTM D2665', name: 'PVC Plastic Drain, Waste & Vent Pipe and Fittings' },
       { code: 'ASTM D1785', name: 'Compatible with Sch 40 PVC pipe systems' },
@@ -99,7 +98,7 @@ export const CATEGORY_META = {
     ],
     applications: ['Potable water', 'Hydronic heating', 'Mechanical piping', 'Repair & remodel'],
     notes:
-      'Type K for underground / severe service; Type L for indoor water. Request mill NSF/ANSI 61 listing certificates for potable submittals.',
+      'Type K for underground / severe service; Type L for indoor water. Confirm potable listing requirements with local code before install.',
   },
   'Copper Fittings': {
     slug: 'copper-fittings',
@@ -129,7 +128,7 @@ export const CATEGORY_META = {
     ],
     applications: ['Potable water', 'Branch & reducer runs', 'Remodel', 'Cu-to-PEX transitions'],
     notes:
-      'Use lead-free solder/flux for potable water per local code. Request NSF/ANSI 61 listing certificates when required for submittals.',
+      'Use lead-free solder/flux for potable water per local code. Confirm potable listing requirements before install.',
   },
   'CPVC Pipes': {
     slug: 'cpvc-pipes',
@@ -159,7 +158,7 @@ export const CATEGORY_META = {
     ],
     applications: ['Hot & cold water', 'Res & light commercial', 'CTS systems', 'Sch 80 pressure'],
     notes:
-      'SDR sizes listed as nominal × OD. Use temperature-rated CPVC cement. Request NSF/ANSI 14 & 61 listing certificates for potable code installs.',
+      'SDR sizes listed as nominal × OD. Use temperature-rated CPVC cement. Confirm potable listing requirements with local code before install.',
   },
   'PEX Pipes': {
     slug: 'pex-pipes',
@@ -190,7 +189,7 @@ export const CATEGORY_META = {
     ],
     applications: ['Potable distribution', 'Manifold / home-run', 'Retrofit', 'Hot & cold supply'],
     notes:
-      'Factory line: Tommur PEX-B (order code 4B200B). Pair with F2159 poly-alloy crimp fittings — not F1960 cold-expansion. Request NSF/cUPC listing certificates before potable submittals.',
+      'Use with ASTM F2159 poly-alloy crimp/clamp fittings — not F1960 cold-expansion systems. Protect tubing from sunlight. Confirm potable listing requirements with local code before install.',
   },
   'PEX Fittings': {
     slug: 'pex-fittings',
@@ -201,7 +200,7 @@ export const CATEGORY_META = {
     heroCaption: 'PPSU · ASTM F2159 CRIMP',
     tagline: 'Poly-alloy (PPSU) barb elbows and reducers for PEX-B crimp / clamp systems.',
     overview:
-      'ASTM F2159 poly-alloy insert fittings for PEX-B SDR-9 tubing. Barb ends seal with a copper crimp ring or stainless steel clamp — the same system as common Bluefin-style poly crimp fittings. Not cold-expansion (F1960) and not brass metal-insert (F1807).',
+      'ASTM F2159 poly-alloy insert fittings for PEX-B SDR-9 tubing. Barb ends seal with a copper crimp ring or stainless steel clamp. Not cold-expansion (F1960) and not brass metal-insert (F1807).',
     standards: [
       { code: 'ASTM F2159', name: 'Plastic Insert Fittings Utilizing Copper Crimp Ring for SDR9 PEX' },
       { code: 'ASTM F877', name: 'PEX Hot- and Cold-Water Distribution Systems' },
@@ -221,7 +220,7 @@ export const CATEGORY_META = {
     ],
     applications: ['Direction changes', 'Size reductions', 'PEX-B distribution', 'Retrofit'],
     notes:
-      'Tommur F2159 poly-alloy (PPSU) crimp fittings for PEX-B — not F1960 cold-expansion. Use copper crimp rings or stainless clamps rated for F2159. Request NSF listing certificates when required for submittals.',
+      'ASTM F2159 poly-alloy (PPSU) crimp fittings for PEX-B — not F1960 cold-expansion. Use copper crimp rings or stainless clamps rated for F2159. Confirm potable listing requirements with local code before install.',
   },
   Insulation: {
     slug: 'insulation',

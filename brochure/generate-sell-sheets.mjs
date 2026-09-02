@@ -1357,10 +1357,10 @@ async function main() {
       hero: 'hero-pvc-pipes.jpg',
       heroCaption: catKey,
       tagline: `${catKey} from the All Pro catalog.`,
-      overview: `Factory-sourced ${catKey}.`,
+      overview: `${catKey} from the All Pro catalog.`,
       standards: [],
       highlights: [
-        { title: 'Factory Sourced', sub: 'Trade Ready' },
+        { title: 'Trade Ready', sub: 'Spec Sheet' },
         { title: 'Call for Pricing', sub: COMPANY.phone },
         { title: 'New Jersey', sub: 'Fast Response' },
       ],
