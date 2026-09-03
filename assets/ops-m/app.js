@@ -61,7 +61,7 @@ function mRoute() {
 }
 
 function setTab(view) {
-  document.querySelectorAll('.m-tabbar a').forEach((a) => {
+  document.querySelectorAll('.m-tabbar [data-tab]').forEach((a) => {
     a.classList.toggle('is-on', a.getAttribute('data-tab') === view);
   });
   const titles = {
