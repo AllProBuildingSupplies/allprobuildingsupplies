@@ -44,6 +44,10 @@ window.apbsSyncThemeLogos = function apbsSyncThemeLogos() {
     var src = img.getAttribute('src') || '';
     if (!/logo\.png(\?|$)/.test(src) && !/images\/logo\.png/.test(src) && img.dataset.logoDark == null) return;
     if (!img.dataset.logoDark) img.dataset.logoDark = src;
+    if (img.closest('.ops-body') || img.closest('.m-body')) {
+      img.src = img.dataset.logoDark;
+      return;
+    }
     img.src = light ? 'images/logo-email-white.png' : img.dataset.logoDark;
   });
 };

@@ -12,6 +12,11 @@
   --line:rgba(200,152,31,.18);
   --nav-bg:rgba(12,17,23,.97);
   --shadow:0 16px 40px rgba(0,0,0,.55);
+  --page:var(--ink);
+  --surface:var(--ink2);
+  --input-bg:var(--ink3);
+  --text:var(--white);
+  --text-muted:var(--silver);
   --tr:cubic-bezier(.22,.68,0,1.2);
   color-scheme:dark;
   /* Desktop: use the full viewport (small gutters only) so wide monitors show more data */
@@ -3920,6 +3925,11 @@ html.theme-light{
   --shadow:0 16px 40px rgba(26,51,80,.12);
   --apbs-dark-blue:#1A3350;
   --apbs-slate-blue:#243F5C;
+  --page:#F4F7FA;
+  --surface:#FFFFFF;
+  --input-bg:#FFFFFF;
+  --text:#0C1117;
+  --text-muted:#5C6B7A;
 }
 html.theme-light body{cursor:auto}
 html.theme-light #cursor,

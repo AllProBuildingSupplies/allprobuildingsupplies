@@ -14,6 +14,7 @@ There is no test suite, linter, or CI configured anywhere in this repo, and the 
 Run both at once; the frontend calls the backend over HTTP.
 - Backend: from `backend/`, run `npm run dev` (alias for `wrangler dev`; defaults to `http://127.0.0.1:8787`). Local dev secrets are read from `backend/.dev.vars` (gitignored) — it must define at least `ADMIN_TOKEN` and `JWT_SECRET`. Recreate it if missing.
 - Frontend: from the repo root, run `python3 -m http.server 8080` (or any static server).
+- All Pro OS (TEST only): open `ops.html`. Classic `admin.html` stays as fallback. New tables live in the Worker (`backend/src/ops/`). Do not treat this as live until the test branch is soaked.
 
 ### Non-obvious gotchas
 - The frontend picks the API from hostname in `assets/main.js` (`window.APBS_API_BASE`). Live domain → production Worker. Test hosts (`allpro-test.pages.dev`, `test.allprobuildingsupplies.com`) → test Worker. Local override: `?apbs_env=test` or temporarily point at `http://127.0.0.1:8787/api` (do NOT commit a hardcoded local URL).

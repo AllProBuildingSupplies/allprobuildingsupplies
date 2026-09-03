@@ -467,9 +467,30 @@ function toggleOrderDetails(orderId){
 }
 
 function statusClassFor(status){
-  if (status === 'confirmed' || status === 'shipped' || status === 'completed') return 'status-confirmed';
-  if (status === 'cancelled') return 'status-cancelled';
+  var st = String(status || '').toLowerCase();
+  if (st === 'confirmed' || st === 'released' || st === 'shipped' || st === 'completed' || st === 'delivered' || st === 'invoiced') return 'status-confirmed';
+  if (st === 'cancelled' || st === 'on_hold' || st === 'refused') return 'status-cancelled';
+  if (st === 'packed' || st === 'staged' || st === 'loaded' || st === 'out_for_delivery' || st === 'picking') return 'status-confirmed';
   return 'status-pending';
+}
+
+function fulfillmentLabel(o){
+  return o.fulfillment || o.status || 'pending';
+}
+
+function trackingHtml(o){
+  var ships = Array.isArray(o.outboundShipments) ? o.outboundShipments : [];
+  var loads = Array.isArray(o.loads) ? o.loads : [];
+  if (!ships.length && !loads.length && !o.promisedAt) return '';
+  var bits = [];
+  if (o.promisedAt) bits.push('Promised ' + new Date(o.promisedAt).toLocaleDateString());
+  ships.forEach(function(s){
+    bits.push((s.id || 'Shipment') + ' · ' + String(s.status || '').replace(/_/g, ' '));
+  });
+  loads.forEach(function(l){
+    if (l.run_date) bits.push('Load ' + (l.load_id || '') + ' · ' + l.run_date);
+  });
+  return '<div class="order-hist-meta" style="margin-top:6px">' + bits.map(function(b){ return esc(b); }).join(' · ') + '</div>';
 }
 
 async function loadOrders() {
@@ -494,7 +515,7 @@ async function loadOrders() {
     }
 
     list.innerHTML = myOrders.map(function(o) {
-      var statusClass = statusClassFor(o.status);
+      var statusClass = statusClassFor(o.fulfillment || o.status);
       var items = Array.isArray(o.items) ? o.items : [];
       var itemsCount = items.reduce(function(sum, i){ return sum + (parseInt(i.qty, 10) || 0); }, 0);
       var dateStr = o.placedAt ? new Date(o.placedAt).toLocaleDateString() : '—';
@@ -526,8 +547,9 @@ async function loadOrders() {
         + '<div class="order-hist-head">'
         + '<div class="order-hist-id">' + oid + '</div>'
         + '<div class="order-hist-meta">' + dateStr + ' · ' + itemsCount + ' pcs · $' + total.toFixed(2) + '</div>'
-        + '<span class="status-badge ' + statusClass + '">' + esc(o.status || 'pending') + '</span>'
+        + '<span class="status-badge ' + statusClass + '">' + esc(fulfillmentLabel(o)) + '</span>'
         + '</div>'
+        + trackingHtml(o)
         + '<div class="order-hist-actions">'
         + '<button type="button" class="btn-gold order-hist-reorder" onclick="reorderOrder(\'' + oid + '\',this)">Reorder all →</button>'
         + '<button type="button" class="btn-ghost order-hist-toggle" aria-expanded="false" onclick="toggleOrderDetails(\'' + oid + '\')">View lines</button>'
