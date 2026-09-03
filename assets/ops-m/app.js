@@ -179,44 +179,50 @@ async function login(password) {
   sessionStorage.setItem('apbs_admin_token', data.token);
 }
 
+let renderGen = 0;
+
 async function render() {
+  const gen = ++renderGen;
   flash('');
-  const { view, id, extra, parts } = mRoute();
+  const { view, id, extra } = mRoute();
   const tab = ['today', 'orders', 'floor', 'run', 'more'].includes(view) ? view : 'today';
   setTab(tab);
   const root = $('ops-view');
   try {
-    if (view === 'today' || !view) return void (root.innerHTML = await viewToday());
-    if (view === 'orders' && id === 'new') return void (root.innerHTML = await viewOrderDesk('new'));
-    if (view === 'orders' && id) return void (root.innerHTML = await viewOrderDesk(id));
-    if (view === 'orders') return void (root.innerHTML = await viewOrdersList());
-    if (view === 'floor' && id === 'dock' && extra[0]) return void (root.innerHTML = await viewInboundDesk(extra[0]));
-    if (view === 'floor' && id === 'dock') return void (root.innerHTML = await viewInboundList());
-    if (view === 'floor' && id === 'stock') return void (root.innerHTML = await viewFloorStock());
-    if (view === 'floor') return void (root.innerHTML = await viewFloorTasks());
-    if (view === 'run' && id === 'loads' && extra[0]) return void (root.innerHTML = await viewLoad(extra[0]));
-    if (view === 'run' && id === 'loads') return void (root.innerHTML = await viewLoads());
-    if (view === 'run' && id === 'shipments' && extra[0]) return void (root.innerHTML = await viewShipment(extra[0]));
-    if (view === 'run' && id === 'shipments') return void (root.innerHTML = await viewShipments());
-    if (view === 'run') return void (root.innerHTML = await viewDriver());
-    if (view === 'more' && id === 'purchasing' && extra[0]) return void (root.innerHTML = await viewPoDesk(extra[0]));
-    if (view === 'more' && id === 'purchasing') return void (root.innerHTML = await viewPurchasingList());
-    if (view === 'more' && id === 'inventory' && extra[0] === 'edit') return void (root.innerHTML = await viewProduct('edit', extra.slice(1)));
-    if (view === 'more' && id === 'inventory' && extra[0] === 'new') return void (root.innerHTML = await viewProduct('new', []));
-    if (view === 'more' && id === 'inventory') return void (root.innerHTML = await viewInventory());
-    if (view === 'more' && id === 'finance') return void (root.innerHTML = await viewFinance(extra[0] || 'open'));
-    if (view === 'more' && id === 'customers' && extra[0]) return void (root.innerHTML = await viewCustomer(extra[0]));
-    if (view === 'more' && id === 'customers') return void (root.innerHTML = await viewCustomers());
-    if (view === 'more' && id === 'exceptions') return void (root.innerHTML = await viewExceptions());
-    if (view === 'more') {
-      root.innerHTML = await viewMore();
+    let html = '';
+    if (view === 'today' || !view) html = await viewToday();
+    else if (view === 'orders' && id === 'new') html = await viewOrderDesk('new');
+    else if (view === 'orders' && id) html = await viewOrderDesk(id);
+    else if (view === 'orders') html = await viewOrdersList();
+    else if (view === 'floor' && id === 'dock' && extra[0]) html = await viewInboundDesk(extra[0]);
+    else if (view === 'floor' && id === 'dock') html = await viewInboundList();
+    else if (view === 'floor' && id === 'stock') html = await viewFloorStock();
+    else if (view === 'floor') html = await viewFloorTasks();
+    else if (view === 'run' && id === 'loads' && extra[0]) html = await viewLoad(extra[0]);
+    else if (view === 'run' && id === 'loads') html = await viewLoads();
+    else if (view === 'run' && id === 'shipments' && extra[0]) html = await viewShipment(extra[0]);
+    else if (view === 'run' && id === 'shipments') html = await viewShipments();
+    else if (view === 'run') html = await viewDriver();
+    else if (view === 'more' && id === 'purchasing' && extra[0]) html = await viewPoDesk(extra[0]);
+    else if (view === 'more' && id === 'purchasing') html = await viewPurchasingList();
+    else if (view === 'more' && id === 'inventory' && extra[0] === 'edit') html = await viewProduct('edit', extra.slice(1));
+    else if (view === 'more' && id === 'inventory' && extra[0] === 'new') html = await viewProduct('new', []);
+    else if (view === 'more' && id === 'inventory') html = await viewInventory();
+    else if (view === 'more' && id === 'finance') html = await viewFinance(extra[0] || 'open');
+    else if (view === 'more' && id === 'customers' && extra[0]) html = await viewCustomer(extra[0]);
+    else if (view === 'more' && id === 'customers') html = await viewCustomers();
+    else if (view === 'more' && id === 'exceptions') html = await viewExceptions();
+    else if (view === 'more') html = await viewMore();
+    else html = await viewToday();
+    if (gen !== renderGen) return;
+    root.innerHTML = html;
+    if (view === 'more' && !id) {
       bindRole();
       const desk = $('m-desk-link');
       if (desk) desk.href = keepQuery('ops.html');
-      return;
     }
-    root.innerHTML = await viewToday();
   } catch (e) {
+    if (gen !== renderGen) return;
     root.innerHTML = `<div class="m-empty">${esc(e.message)}</div>`;
   }
 }
