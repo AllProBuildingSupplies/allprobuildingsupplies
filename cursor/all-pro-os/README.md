@@ -4,7 +4,8 @@ New operations suite on branch `cursor/all-pro-os-test-0a19`. **Does not replace
 
 | Open this | What it is |
 |---|---|
-| [`ops.html`](../../ops.html) | All Pro OS UI — inbox, orders (create/edit/docs/pay), warehouse, shipments, loads, driver, inbound, purchasing, inventory/catalog, finance, customers |
+| [`ops.html`](../../ops.html) | All Pro OS UI — inbox, orders, warehouse, shipments, loads, driver, inbound, purchasing, inventory, finance, customers |
+| [`ops-m.html`](../../ops-m.html) | Phone OS — separate mobile app (same TEST API). Desktop `ops.html` is unchanged. |
 | [`backend/src/ops/`](../../backend/src/ops/) | D1 tables + `/api/ops/*` Worker routes |
 
 Classic `admin.html` stays as fallback. OS calls the same `/api/admin/*` endpoints for master data, invoices, email, and payments.
@@ -14,8 +15,9 @@ Classic `admin.html` stays as fallback. OS calls the same `/api/admin/*` endpoin
 1. Backend: `cd backend && npm run dev` (needs `backend/.dev.vars` with `ADMIN_TOKEN`)
 2. Frontend: from repo root, `python3 -m http.server 8080`
 3. Open `http://127.0.0.1:8080/ops.html?apbs_api=http://127.0.0.1:8787/api`
+4. Phone OS: `http://127.0.0.1:8080/ops-m.html?apbs_api=http://127.0.0.1:8787/api`
 
-Test Pages (`allpro-test.pages.dev/ops.html`) talks to the **test** Worker automatically.
+Test Pages (`allpro-test.pages.dev/ops.html`) talks to the **test** Worker automatically. Phone: `https://allpro-test.pages.dev/ops-m.html`.
 
 ## Modules
 

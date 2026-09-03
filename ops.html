@@ -22,6 +22,8 @@
     <button type="button" class="ops-btn ops-btn-gold" id="ops-login-btn" onclick="window.opsDoLogin && window.opsDoLogin()">Enter All Pro OS</button>
     <p id="ops-login-err" class="ops-error" hidden></p>
     <a href="admin.html">Classic admin →</a>
+    ·
+    <a data-ops-m href="ops-m.html">Phone OS →</a>
   </div>
 </div>
 
@@ -49,6 +51,7 @@
       <button type="button" class="ops-cmd-hint" id="ops-cmd-open">⌘K command</button>
       <select id="ops-role" class="ops-role" aria-label="Role"></select>
       <a href="admin.html" class="ops-quiet">Classic admin</a>
+      <a data-ops-m href="ops-m.html" class="ops-quiet">Phone OS</a>
     </div>
   </aside>
   <main class="ops-main">
@@ -77,5 +80,10 @@
 <script src="assets/main.js"></script>
 <script src="assets/order-docs.js?v=os6"></script>
 <script src="assets/ops/app.js?v=os6" type="module"></script>
+<script>
+document.querySelectorAll('[data-ops-m]').forEach(function (a) {
+  a.href = 'ops-m.html' + (location.search || '');
+});
+</script>
 </body>
 </html>
