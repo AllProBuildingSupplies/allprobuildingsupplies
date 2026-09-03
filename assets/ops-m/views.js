@@ -543,7 +543,7 @@ export async function viewInventory() {
         <div class="m-actions m-split" style="margin-top:10px">
           ${stepper('count', '', `data-count-sku="${esc(p.code)}" data-count-size="${esc(p.size || '')}" placeholder="#"`)}
           <button class="m-btn" data-count-save="${esc(p.code)}" data-size="${esc(p.size || '')}">Count</button>
-        </div>`
+        </div>
       </button>`
     )
     .join('');
