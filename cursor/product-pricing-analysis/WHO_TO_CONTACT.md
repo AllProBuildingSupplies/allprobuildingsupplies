@@ -54,6 +54,10 @@ Their fittings are mostly **brass F1807**, not F2159 poly — skip fittings here
 
 Rings are **ASTM F1807 copper**, not PPSU. Ask Zhenpeng if they supply rings; if not: **Shangrao Olde** listed **$0.08–$0.10** (MOQ 3k–30k) or **JKL Ningbo** (`jkl@jtgroup.com.cn`, +86 199 7532 9386).
 
+## Not Zhenpeng (misnamed PDF)
+
+`All products - Ningbo Zhenpeng Plumbing Fittings Co., Ltd_.pdf` is **Zhejiang Green Valve** PI `YMF26060303X` — **PVC DWV + 6m pipe, EXW Taizhou**. Zero PEX. Fittings EXW is ~40–50% under Tommur FOB; landed still beats Tommur DDP on matched DWV except the 2" P-trap. See `GREEN_VALVE_VS_TOMMUR.md`. Useful as a **PVC cost-down quote**, not as the Everflow fittings mill.
+
 ## Do not use for production
 
 - **King Smart** — trader + WA warehouse. Fast samples only. USA-stock fittings go underwater at NJPD prices.

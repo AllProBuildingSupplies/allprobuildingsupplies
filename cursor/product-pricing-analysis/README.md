@@ -19,6 +19,8 @@ Agent: [Product pricing analysis](https://cursor.com/agents/bc-dcaa793d-4f8b-42c
 | `WHO_TO_CONTACT.md` | Factories to email: Zhenpeng fittings first, Tommur pipe DDP, Palconn backup |
 | `KING_SMART_ALIBABA_REVIEW.md` | Alibaba store `kingsmartplumbing` vs NJPD Everflow — USA stock vs 50–75% target |
 | `KingSmart_vs_NJPD.xlsx` | SKU-level King Smart list vs Gator sell vs Tommur vs Zhenpeng |
+| `GREEN_VALVE_VS_TOMMUR.md` | Misnamed “Zhenpeng” PDF = Green Valve PVC PI vs Tommur FOB/DDP |
+| `GreenValve_vs_Tommur.xlsx` | SKU-level Green EXW → landed vs Tommur PVC fittings + pipe |
 
 ## Tommur workbook rules
 
