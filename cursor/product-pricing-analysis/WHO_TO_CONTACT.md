@@ -58,9 +58,17 @@ Rings are **ASTM F1807 copper**, not PPSU. Ask Zhenpeng if they supply rings; if
 
 `All products - Ningbo Zhenpeng Plumbing Fittings Co., Ltd_.pdf` is **Zhejiang Green Valve** PI `YMF26060303X` — **PVC DWV + 6m pipe, EXW Taizhou**. Zero PEX. Fittings EXW is ~40–50% under Tommur FOB; landed still beats Tommur DDP on matched DWV except the 2" P-trap. See `GREEN_VALVE_VS_TOMMUR.md`. Useful as a **PVC cost-down quote**, not as the Everflow fittings mill.
 
+## Keep in the bake-off (not a production buy yet)
+
+**King Smart** — trader (Ningbo, 2024, ~5 people) + **Washington warehouse**. Catalog at `https://www.king-smart.cn/products/46.html` is the right family (**F2159 PPSU crimp**). They are sending **FOB CN Monday** — keep that list in the comparison.
+
+Do **not** use **today’s USA-delivered** prices for production. Those already include ocean + 42.8% duty + WA warehouse + trader markup. Published USA-stock / small-qty numbers sit at Tommur DDP and go **underwater vs NJPD** (3/4" elbow $0.83 vs sell $0.66 = −26%; 1/2" tee $0.49 vs $0.45 = −9%). Even their previously published **China FOB lows** ($0.51 3/4" elbow, $0.38 1/2" tee) land at ~$0.76 / ~$0.57 after duty and still lose.
+
+Walk the Monday FOB if 1/2" F2159 elbow is not **under ~$0.12** FOB (Zhenpeng already prints $0.10 mill). Samples from WA are fine. No 20 ft PEX-B sticks in their catalog — pipe stays Tommur DDP.
+
 ## Do not use for production
 
-- **King Smart** — trader + WA warehouse. Fast samples only. USA-stock fittings go underwater at NJPD prices.
+- **King Smart USA warehouse** (the live site with a US location selected) — fill-in / samples only.
 - **IFAN / Zhuji Fengfan** — cheap Alibaba pipe, mostly metric floor-heat, not CTS 20 ft NSF sticks.
 - Anyone selling **F1960 / Uponor-style** PPSU as if it were Everflow.
 

@@ -2,7 +2,7 @@
 
 Alibaba short link `https://x.alibaba.com/B2OigE?ck=minisite` → **Ningbo King Smart Trading Co., Ltd.** storefront `kingsmartplumbing.en.alibaba.com`.
 
-**Verdict: do not buy US-warehouse stock from them for the NJPD Everflow program.** They have *some* of the right F2159 PPSU fittings. They do **not** have 20 ft PEX-B red/blue sticks. USA-stock prices cannot hit the **50–75%** margin target at Gator/NJPD street. They are a 2024 trading company with a Washington warehouse, not a mill.
+**Verdict: do not buy the USA-delivered catalog for production. Do keep Monday’s FOB CN list in the bake-off.** Site category `https://www.king-smart.cn/products/46.html` is the right family (41 F2159 PPSU SKUs). Prices on that page with a US location selected are **WA warehouse**, not factory FOB. They have *some* of the right F2159 PPSU fittings. They do **not** have 20 ft PEX-B red/blue sticks. USA-stock prices cannot hit the **50–75%** margin target at Gator/NJPD street. They are a 2024 trading company with a Washington warehouse, not a mill. Monday FOB still has to beat Zhenpeng (~$0.10 on 1/2" elbow) after 42.8% duty.
 
 Workbook: `KingSmart_vs_NJPD.xlsx`.
 
