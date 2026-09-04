@@ -16,6 +16,7 @@ Agent: [Product pricing analysis](https://cursor.com/agents/bc-dcaa793d-4f8b-42c
 | `Competitive_Margin_Sheet.xlsx` | FOB → landed vs cheapest online price |
 | `COMPETITIVE_MARGINS.md` | How to read the margin sheet |
 | `FACTORY_ORDER_README.md` | How the 3-month container projection was built |
+| `WHO_TO_CONTACT.md` | Factories to email: Zhenpeng fittings first, Tommur pipe DDP, Palconn backup |
 | `KING_SMART_ALIBABA_REVIEW.md` | Alibaba store `kingsmartplumbing` vs NJPD Everflow — USA stock vs 50–75% target |
 | `KingSmart_vs_NJPD.xlsx` | SKU-level King Smart list vs Gator sell vs Tommur vs Zhenpeng |
 
