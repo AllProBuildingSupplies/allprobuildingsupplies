@@ -619,11 +619,17 @@ function rowsToGroups(rows) {
       qty: parseInt(row.qty, 10) || 0,
       inStock: row.inStock !== undefined ? !!row.inStock : (parseInt(row.qty, 10) || 0) > 0,
       price: parseFloat(row.price) || 0,
+      image: row.image || groups[code].image || 'images/logo.png',
       material: row.material != null ? String(row.material).trim() : groups[code].material,
       subCat: row.sub_category != null ? String(row.sub_category).trim() : groups[code].subCat,
       subSubCat: row.sub_sub_category != null ? String(row.sub_sub_category).trim() : groups[code].subSubCat,
       typeCat: row.sub_sub_sub_category != null ? String(row.sub_sub_sub_category).trim() : groups[code].typeCat
     });
+    if (row.image && String(row.image).indexOf('logo.png') === -1) {
+      if (!groups[code].image || String(groups[code].image).indexOf('logo.png') !== -1) {
+        groups[code].image = row.image;
+      }
+    }
   }
   return groups;
 }
@@ -640,7 +646,7 @@ function groupsToSkuItems(groups) {
       items.push({
         code: code,
         desc: data.desc || '',
-        image: data.image || 'images/logo.png',
+        image: item.image || data.image || 'images/logo.png',
         material: item.material || data.material || '',
         mainKey: catMainKey(data.mainCat),
         mainLabel: (data.mainCat === '' || data.mainCat == null) ? 'Other' : String(data.mainCat),

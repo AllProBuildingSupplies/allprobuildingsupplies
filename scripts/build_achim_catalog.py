@@ -10,11 +10,13 @@ Re-run is idempotent: existing ACH-* rows are replaced.
 from __future__ import annotations
 
 import csv
+import json
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "assets" / "products.csv"
+IMAGE_MAP_PATH = ROOT / "assets" / "achim-image-map.json"
 
 HEADERS = [
     "Material",
@@ -34,6 +36,10 @@ HEADERS = [
 ]
 
 IMG = "images/logo.png"
+IMAGE_MAP: dict = {}
+if IMAGE_MAP_PATH.exists():
+    raw = json.loads(IMAGE_MAP_PATH.read_text())
+    IMAGE_MAP = raw.get("images", raw) if isinstance(raw, dict) else {}
 
 
 def slug(text: str, limit: int = 28) -> str:
@@ -61,6 +67,14 @@ def rows_for(
         if not size or size in seen:
             continue
         seen.add(size)
+        key = f"{code}|{size}"
+        image = IMG
+        if IMAGE_MAP:
+            meta = IMAGE_MAP.get(key)
+            if isinstance(meta, dict):
+                image = meta.get("file") or IMG
+            elif isinstance(meta, str) and meta:
+                image = meta
         out.append(
             {
                 "Material": material,
@@ -70,7 +84,7 @@ def rows_for(
                 "Pack": str(pack),
                 "Qty": "0",
                 "Price": "",
-                "Image": IMG,
+                "Image": image,
                 "main_category": main,
                 "sub_category": sub,
                 "sub_sub_category": subsub,
