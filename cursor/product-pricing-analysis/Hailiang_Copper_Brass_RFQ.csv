@@ -1,0 +1,97 @@
+Factory_Item_No,Factory_Name,Factory_Size,Catalog_Page,Match,APBS_Code,APBS_Description,APBS_Size,Type_K_or_L,Qty,Unit_Price_FOB_USD,Notes
+L-101,90° Elbow / 90°弯头,φ28,19,MATCH,COPPER-K-90,ELBOW 90,"1""",Type K,,,
+L-101,90° Elbow / 90°弯头,φ15,19,MATCH,COPPER-K-90,ELBOW 90,"1/2""",Type K,,,
+L-101,90° Elbow / 90°弯头,φ42,19,MATCH,COPPER-K-90,ELBOW 90,"1-1/2""",Type K,,,
+L-101,90° Elbow / 90°弯头,φ35,19,MATCH,COPPER-K-90,ELBOW 90,"1-1/4""",Type K,,,
+L-101,90° Elbow / 90°弯头,φ54,19,MATCH,COPPER-K-90,ELBOW 90,"2""",Type K,,,
+L-101,90° Elbow / 90°弯头,φ76,19,MATCH — confirm ASTM vs metric OD,COPPER-K-90,ELBOW 90,"3""",Type K,,,"3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+L-101,90° Elbow / 90°弯头,φ22,19,MATCH,COPPER-K-90,ELBOW 90,"3/4""",Type K,,,
+L-101,90° Elbow / 90°弯头,φ108,19,MATCH — confirm ASTM vs metric OD,COPPER-K-90,ELBOW 90,"4""",Type K,,,"4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size."
+,,,,NOT IN THIS CATALOG,COPPER-K-PIPE,COPPER PIPE K,"1/2""",Type K,,,This PDF is fittings only (catalog pp. 19–25). Hailiang makes copper tube — request ASTM B88 Type L hard 10 ft sticks and Type K (soft coil / hard) separately.
+S-102,Reducing Coupling / 异径直接头,φ28×22,19,MATCH,COPPER-K-REDUCER,REDUCER,"1"" x 3/4""",Type K,,,
+S-102,Reducing Coupling / 异径直接头,φ42×35,19,MATCH,COPPER-K-REDUCER,REDUCER,"1-1/2"" x 1-1/4""",Type K,,,
+S-102,Reducing Coupling / 异径直接头,φ35×22,19,MATCH,COPPER-K-REDUCER,REDUCER,"1-1/4"" x 3/4""",Type K,,,
+S-102,Reducing Coupling / 异径直接头,φ54×42,19,MATCH,COPPER-K-REDUCER,REDUCER,"2"" x 1-1/2""",Type K,,,
+S-102,Reducing Coupling / 异径直接头,φ67×54,19,MATCH,COPPER-K-REDUCER,REDUCER,"2-1/2"" x 2""",Type K,,,
+S-102,Reducing Coupling / 异径直接头,φ76×67,19,MATCH — confirm ASTM vs metric OD,COPPER-K-REDUCER,REDUCER,"3"" x 2-1/2""",Type K,,,"3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+S-102,Reducing Coupling / 异径直接头,φ22×15,19,MATCH,COPPER-K-REDUCER,REDUCER,"3/4"" x 1/2""",Type K,,,
+S-102,Reducing Coupling / 异径直接头,φ108×76,19,MATCH — confirm ASTM vs metric OD,COPPER-K-REDUCER,REDUCER,"4"" x 3""",Type K,,,"4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size. 3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+T-101,Equal Tee / 正三通,φ28×28×28,20,MATCH,COPPER-K-TEE,TEE,"1""",Type K,,,
+T-102,Tee — reduced branch / 异径(中小)三通,φ28×22×28,21,MATCH,COPPER-K-TEE,TEE,"1"" x 3/4""",Type K,,,"Interpreted 1"" x 3/4"" as equal-run reducing tee 1"" x 1"" x 3/4"" → factory 1×2×3 = φ28×22×28."
+T-101,Equal Tee / 正三通,φ15×15×15,20,MATCH,COPPER-K-TEE,TEE,"1/2""",Type K,,,
+T-101,Equal Tee / 正三通,φ22×22×22,20,MATCH,COPPER-K-TEE,TEE,"3/4""",Type K,,,
+T-104,Tee — reduced end and branch / 异径(侧)三通,φ22×15×15,20,MATCH,COPPER-K-TEE,TEE,"3/4"" x 1/2"" x 1/2""",Type K,,,
+T-102,Tee — reduced branch / 异径(中小)三通,φ22×15×22,21,MATCH,COPPER-K-TEE,TEE,"3/4"" x 3/4"" x 1/2""",Type K,,,"US 3/4""×3/4""×1/2"" = factory T-102 φ22×15×22 (run×branch×run)."
+L-101,90° Elbow / 90°弯头,φ15,19,MATCH,COPPER-L-90,ELBOW 90,"1/2""",Type L,,,
+L-101,90° Elbow / 90°弯头,φ42,19,MATCH,COPPER-L-90,ELBOW 90,"1-1/2""",Type L,,,
+L-101,90° Elbow / 90°弯头,φ35,19,MATCH,COPPER-L-90,ELBOW 90,"1-1/4""",Type L,,,
+L-101,90° Elbow / 90°弯头,φ54,19,MATCH,COPPER-L-90,ELBOW 90,"2""",Type L,,,
+L-101,90° Elbow / 90°弯头,φ22,19,MATCH,COPPER-L-90,ELBOW 90,"3/4""",Type L,,,
+L-101,90° Elbow / 90°弯头,φ108,19,MATCH — confirm ASTM vs metric OD,COPPER-L-90,ELBOW 90,"4""",Type L,,,"4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size."
+S-101,Straight Coupling / 直接头,φ42,19,MATCH,COPPER-L-CPLNG,COUPLING,"1-1/2""",Type L,,,
+S-101,Straight Coupling / 直接头,φ35,19,MATCH,COPPER-L-CPLNG,COUPLING,"1-1/4""",Type L,,,
+S-101,Straight Coupling / 直接头,φ54,19,MATCH,COPPER-L-CPLNG,COUPLING,"2""",Type L,,,
+S-101,Straight Coupling / 直接头,φ67,19,MATCH,COPPER-L-CPLNG,COUPLING,"2-1/2""",Type L,,,
+S-101,Straight Coupling / 直接头,φ76,19,MATCH — confirm ASTM vs metric OD,COPPER-L-CPLNG,COUPLING,"3""",Type L,,,"3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+S-101,Straight Coupling / 直接头,φ108,19,MATCH — confirm ASTM vs metric OD,COPPER-L-CPLNG,COUPLING,"4""",Type L,,,"4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size."
+,,,,NOT IN THIS CATALOG,COPPER-L-PEXADPTR,Adapter (Copper to Pex),"1-1/2""",Type L,,,Copper-to-PEX adapter is not on catalog pages 19–25. Ask if they mold/machine this (F1807 crimp or press).
+,,,,NOT IN THIS CATALOG,COPPER-L-PEXADPTR,Adapter (Copper to Pex),"2""",Type L,,,Copper-to-PEX adapter is not on catalog pages 19–25. Ask if they mold/machine this (F1807 crimp or press).
+,,,,NOT IN THIS CATALOG,COPPER-L-PEXADPTR,Adapter (Copper to Pex),"2-1/2""",Type L,,,Copper-to-PEX adapter is not on catalog pages 19–25. Ask if they mold/machine this (F1807 crimp or press).
+,,,,NOT IN THIS CATALOG,COPPER-L-PEXADPTR,Adapter (Copper to Pex),"3/4""",Type L,,,Copper-to-PEX adapter is not on catalog pages 19–25. Ask if they mold/machine this (F1807 crimp or press).
+,,,,NOT IN THIS CATALOG,COPPER-L-PIPE,COPPER PIPE L,"1""",Type L,,,This PDF is fittings only (catalog pp. 19–25). Hailiang makes copper tube — request ASTM B88 Type L hard 10 ft sticks and Type K (soft coil / hard) separately.
+,,,,NOT IN THIS CATALOG,COPPER-L-PIPE,COPPER PIPE L,"1/2""",Type L,,,This PDF is fittings only (catalog pp. 19–25). Hailiang makes copper tube — request ASTM B88 Type L hard 10 ft sticks and Type K (soft coil / hard) separately.
+,,,,NOT IN THIS CATALOG,COPPER-L-PIPE,COPPER PIPE L,"1-1/2""",Type L,,,This PDF is fittings only (catalog pp. 19–25). Hailiang makes copper tube — request ASTM B88 Type L hard 10 ft sticks and Type K (soft coil / hard) separately.
+,,,,NOT IN THIS CATALOG,COPPER-L-PIPE,COPPER PIPE L,"1-1/4""",Type L,,,This PDF is fittings only (catalog pp. 19–25). Hailiang makes copper tube — request ASTM B88 Type L hard 10 ft sticks and Type K (soft coil / hard) separately.
+,,,,NOT IN THIS CATALOG,COPPER-L-PIPE,COPPER PIPE L,"2""",Type L,,,This PDF is fittings only (catalog pp. 19–25). Hailiang makes copper tube — request ASTM B88 Type L hard 10 ft sticks and Type K (soft coil / hard) separately.
+,,,,NOT IN THIS CATALOG,COPPER-L-PIPE,COPPER PIPE L,"2-1/2""",Type L,,,This PDF is fittings only (catalog pp. 19–25). Hailiang makes copper tube — request ASTM B88 Type L hard 10 ft sticks and Type K (soft coil / hard) separately.
+,,,,NOT IN THIS CATALOG,COPPER-L-PIPE,COPPER PIPE L,"3/4""",Type L,,,This PDF is fittings only (catalog pp. 19–25). Hailiang makes copper tube — request ASTM B88 Type L hard 10 ft sticks and Type K (soft coil / hard) separately.
+T-102,Tee — reduced branch / 异径(中小)三通,φ28×22×28,21,MATCH,COPPER-L-REDTEE,RED TEE,"1"" x 3/4""",Type L,,,"Interpreted 1"" x 3/4"" as equal-run reducing tee 1"" x 1"" x 3/4"" → factory 1×2×3 = φ28×22×28."
+T-103,Tee — reduced both ends (bullhead) / 异径(中大)三通,φ15×22×15,20,MATCH,COPPER-L-REDTEE,RED TEE,"1/2"" x 1/2"" x 3/4""",Type L,,,"US 1/2""×1/2""×3/4"" bullhead = factory T-103 φ15×22×15."
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"1-1/2"" x 1-1/2"" x 1/2""",Type L,,,No T-101/102/103/104 listing for φ42×42×15. Confirm orientation (run×run×branch vs factory 1×2×3).
+T-102,Tee — reduced branch / 异径(中小)三通,φ42×35×42,21,MATCH,COPPER-L-REDTEE,RED TEE,"1-1/2"" x 1-1/2"" x 1-1/4""",Type L,,,"US 1-1/2""×1-1/2""×1-1/4"" = factory T-102 φ42×35×42 (run×branch×run)."
+T-102,Tee — reduced branch / 异径(中小)三通,φ42×22×42,21,MATCH,COPPER-L-REDTEE,RED TEE,"1-1/2"" x 1-1/2"" x 3/4""",Type L,,,"US 1-1/2""×1-1/2""×3/4"" = factory T-102 φ42×22×42 (run×branch×run)."
+T-102,Tee — reduced branch / 异径(中小)三通,φ35×22×35,21,MATCH,COPPER-L-REDTEE,RED TEE,"1-1/4"" x 1-1/4"" x 3/4""",Type L,,,"US 1-1/4""×1-1/4""×3/4"" = factory T-102 φ35×22×35 (run×branch×run)."
+T-102,Tee — reduced branch / 异径(中小)三通,φ54×42×54,21,MATCH,COPPER-L-REDTEE,RED TEE,"2"" x 2"" x 1-1/2""",Type L,,,"US 2""×2""×1-1/2"" = factory T-102 φ54×42×54 (run×branch×run)."
+T-102,Tee — reduced branch / 异径(中小)三通,φ54×35×54,21,MATCH,COPPER-L-REDTEE,RED TEE,"2"" x 2"" x 1-1/4""",Type L,,,"US 2""×2""×1-1/4"" = factory T-102 φ54×35×54 (run×branch×run)."
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"2"" x 2"" x 3/4""",Type L,,,No T-101/102/103/104 listing for φ54×54×22. Confirm orientation (run×run×branch vs factory 1×2×3).
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"2"" x 3/4""",Type L,,,No T-102/T-103 for φ54×22. Factory reduced-branch list does not include this combo.
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"2"" x 3/4"" x 2""",Type L,,,No T-101/102/103/104 listing for φ54×22×54. Confirm orientation (run×run×branch vs factory 1×2×3).
+T-102,Tee — reduced branch / 异径(中小)三通,φ67×42×67,21,MATCH,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 1-1/2""",Type L,,,"Interpreted 2-1/2"" x 1-1/2"" as equal-run reducing tee 2-1/2"" x 2-1/2"" x 1-1/2"" → factory 1×2×3 = φ67×42×67."
+T-102,Tee — reduced branch / 异径(中小)三通,φ67×54×67,21,MATCH,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2""",Type L,,,"Interpreted 2-1/2"" x 2"" as equal-run reducing tee 2-1/2"" x 2-1/2"" x 2"" → factory 1×2×3 = φ67×54×67."
+T-102,Tee — reduced branch / 异径(中小)三通,φ67×54×67,21,MATCH,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2"" x 2-1/2""",Type L,,,
+T-102,Tee — reduced branch / 异径(中小)三通,φ67×42×67,21,MATCH,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2-1/2"" x 1-1/2""",Type L,,,"US 2-1/2""×2-1/2""×1-1/2"" = factory T-102 φ67×42×67 (run×branch×run)."
+T-102,Tee — reduced branch / 异径(中小)三通,φ67×54×67,21,MATCH,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2-1/2"" x 2""",Type L,,,"US 2-1/2""×2-1/2""×2"" = factory T-102 φ67×54×67 (run×branch×run)."
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 2-1/2"" x 3/4""",Type L,,,No T-101/102/103/104 listing for φ67×67×22. Confirm orientation (run×run×branch vs factory 1×2×3).
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"2-1/2"" x 3/4""",Type L,,,No T-102/T-103 for φ67×22. Factory reduced-branch list does not include this combo.
+T-102,Tee — reduced branch / 异径(中小)三通,φ76×42×76,21,MATCH — confirm ASTM vs metric OD,COPPER-L-REDTEE,RED TEE,"3"" x 1-1/2""",Type L,,,"Interpreted 3"" x 1-1/2"" as equal-run reducing tee 3"" x 3"" x 1-1/2"" → factory 1×2×3 = φ76×42×76. 3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+T-102,Tee — reduced branch / 异径(中小)三通,φ76×54×76,21,MATCH — confirm ASTM vs metric OD,COPPER-L-REDTEE,RED TEE,"3"" x 2""",Type L,,,"Interpreted 3"" x 2"" as equal-run reducing tee 3"" x 3"" x 2"" → factory 1×2×3 = φ76×54×76. 3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"3"" x 3"" x 1/2""",Type L,,,No T-101/102/103/104 listing for φ76×76×15. Confirm orientation (run×run×branch vs factory 1×2×3).
+T-102,Tee — reduced branch / 异径(中小)三通,φ76×54×76,21,MATCH — confirm ASTM vs metric OD,COPPER-L-REDTEE,RED TEE,"3"" x 3"" x 2""",Type L,,,"US 3""×3""×2"" = factory T-102 φ76×54×76 (run×branch×run). 3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size. 3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"3"" x 3"" x 3/4""",Type L,,,No T-101/102/103/104 listing for φ76×76×22. Confirm orientation (run×run×branch vs factory 1×2×3).
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"3"" x 3/4""",Type L,,,No T-102/T-103 for φ76×22. Factory reduced-branch list does not include this combo.
+T-103,Tee — reduced both ends (bullhead) / 异径(中大)三通,φ22×28×22,20,MATCH,COPPER-L-REDTEE,RED TEE,"3/4"" x 1"" x 3/4""",Type L,,,
+T-102,Tee — reduced branch / 异径(中小)三通,φ22×15×22,21,MATCH,COPPER-L-REDTEE,RED TEE,"3/4"" x 1/2"" x 3/4""",Type L,,,
+T-102,Tee — reduced branch / 异径(中小)三通,φ22×15×22,21,MATCH,COPPER-L-REDTEE,RED TEE,"3/4"" x 3/4"" x 1/2""",Type L,,,"US 3/4""×3/4""×1/2"" = factory T-102 φ22×15×22 (run×branch×run)."
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"4"" x 1-1/2""",Type L,,,No T-102/T-103 for φ108×42. Factory reduced-branch list does not include this combo.
+T-102,Tee — reduced branch / 异径(中小)三通,φ108×54×108,21,MATCH — confirm ASTM vs metric OD,COPPER-L-REDTEE,RED TEE,"4"" x 2""",Type L,,,"Interpreted 4"" x 2"" as equal-run reducing tee 4"" x 4"" x 2"" → factory 1×2×3 = φ108×54×108. 4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size."
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"4"" x 3"" x 2-1/2""",Type L,,,No T-101/102/103/104 listing for φ108×76×67. Confirm orientation (run×run×branch vs factory 1×2×3).
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"4"" x 4"" x 1-1/2""",Type L,,,No T-101/102/103/104 listing for φ108×108×42. Confirm orientation (run×run×branch vs factory 1×2×3).
+T-102,Tee — reduced branch / 异径(中小)三通,φ108×54×108,21,MATCH — confirm ASTM vs metric OD,COPPER-L-REDTEE,RED TEE,"4"" x 4"" x 2""",Type L,,,"US 4""×4""×2"" = factory T-102 φ108×54×108 (run×branch×run). 4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size. 4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size."
+T-102,Tee — reduced branch / 异径(中小)三通,φ108×76×108,21,MATCH — confirm ASTM vs metric OD,COPPER-L-REDTEE,RED TEE,"4"" x 4"" x 3""",Type L,,,"US 4""×4""×3"" = factory T-102 φ108×76×108 (run×branch×run). 4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size. 4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size. 3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+,,,,NOT IN THIS CATALOG,COPPER-L-REDTEE,RED TEE,"4"" x 4"" x 3/4""",Type L,,,No T-101/102/103/104 listing for φ108×108×22. Confirm orientation (run×run×branch vs factory 1×2×3).
+S-102,Reducing Coupling / 异径直接头,φ28×22,19,MATCH,COPPER-L-REDUCER,REDUCER,"1"" x 3/4""",Type L,,,
+S-102,Reducing Coupling / 异径直接头,φ42×35,19,MATCH,COPPER-L-REDUCER,REDUCER,"1-1/2"" x 1-1/4""",Type L,,,
+S-102,Reducing Coupling / 异径直接头,φ54×42,19,MATCH,COPPER-L-REDUCER,REDUCER,"2"" x 1-1/2""",Type L,,,
+S-102,Reducing Coupling / 异径直接头,φ67×54,19,MATCH,COPPER-L-REDUCER,REDUCER,"2-1/2"" x 2""",Type L,,,
+S-102,Reducing Coupling / 异径直接头,φ76×54,19,MATCH — confirm ASTM vs metric OD,COPPER-L-REDUCER,REDUCER,"3"" x 2""",Type L,,,"3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+S-102,Reducing Coupling / 异径直接头,φ76×67,19,MATCH — confirm ASTM vs metric OD,COPPER-L-REDUCER,REDUCER,"3"" x 2-1/2""",Type L,,,"3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+S-102,Reducing Coupling / 异径直接头,φ22×15,19,MATCH,COPPER-L-REDUCER,REDUCER,"3/4"" x 1/2""",Type L,,,
+S-102,Reducing Coupling / 异径直接头,φ108×54,19,MATCH — confirm ASTM vs metric OD,COPPER-L-REDUCER,REDUCER,"4"" x 2""",Type L,,,"4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size."
+S-102,Reducing Coupling / 异径直接头,φ108×76,19,MATCH — confirm ASTM vs metric OD,COPPER-L-REDUCER,REDUCER,"4"" x 3""",Type L,,,"4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size. 3"" CTS OD is 79.375 mm (ASTM B88); catalog lists φ76 (EN 1057). Confirm they make US tube size."
+,,,,NOT IN THIS CATALOG,COPPER-L-STUB,Copper Elbow Stub out,"1/2""",Type L,,,"Stub-out elbow is not on catalog pages 19–25. Ask if they make 1/2"" Type L 7×6 (or similar) stub-outs."
+T-101,Equal Tee / 正三通,φ28×28×28,20,MATCH,COPPER-L-TEE,TEE,"1""",Type L,,,
+T-101,Equal Tee / 正三通,φ15×15×15,20,MATCH,COPPER-L-TEE,TEE,"1/2""",Type L,,,
+T-101,Equal Tee / 正三通,φ42×42×42,20,MATCH,COPPER-L-TEE,TEE,"1-1/2""",Type L,,,
+T-101,Equal Tee / 正三通,φ54×54×54,20,MATCH,COPPER-L-TEE,TEE,"2""",Type L,,,
+T-101,Equal Tee / 正三通,φ22×22×22,20,MATCH,COPPER-L-TEE,TEE,"3/4""",Type L,,,
+T-101,Equal Tee / 正三通,φ108×108×108,20,MATCH — confirm ASTM vs metric OD,COPPER-L-TEE,TEE,"4""",Type L,,,"4"" CTS OD is 104.775 mm (ASTM B88); catalog lists φ108 (EN 1057). Confirm they make US tube size."
