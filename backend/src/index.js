@@ -14,6 +14,143 @@ const corsHeaders = {
 
 /** Isolate-scoped: schema/migration boot is expensive (~dozens of D1 round-trips). Run once per isolate. */
 let schemaReadyPromise = null;
+let achimSeedPromise = null;
+
+function parseCsvRows(text) {
+  const rows = [];
+  let field = '';
+  let row = [];
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += c;
+      }
+      continue;
+    }
+    if (c === '"') {
+      inQuotes = true;
+      continue;
+    }
+    if (c === ',') {
+      row.push(field);
+      field = '';
+      continue;
+    }
+    if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(field);
+      if (row.some((x) => x !== '')) rows.push(row);
+      row = [];
+      field = '';
+      continue;
+    }
+    field += c;
+  }
+  if (field.length || row.length) {
+    row.push(field);
+    if (row.some((x) => x !== '')) rows.push(row);
+  }
+  return rows;
+}
+
+async function fetchMainProductsCsv() {
+  const urls = [
+    'https://raw.githubusercontent.com/AllProBuildingSupplies/allprobuildingsupplies/main/assets/products.csv',
+    'https://raw.githubusercontent.com/allprobuildingsupplies/allprobuildingsupplies/main/assets/products.csv',
+  ];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { headers: { 'User-Agent': 'allpro-api-catalog-seed' } });
+      if (r.ok) return await r.text();
+    } catch (_) {}
+  }
+  return '';
+}
+
+/** Insert Achim rows from the public main-branch CSV. Never deletes plumbing stock. */
+async function ensureAchimCatalogSeed(env) {
+  if (!env || !env.DB) return;
+  if (achimSeedPromise) return achimSeedPromise;
+  achimSeedPromise = (async () => {
+    const existing = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM products WHERE code LIKE 'ACH-%'"
+    ).first();
+    if (existing && Number(existing.n) > 0) return;
+    const csvText = await fetchMainProductsCsv();
+    if (!csvText) return;
+    const table = parseCsvRows(csvText);
+    if (table.length < 2) return;
+    const headers = table[0].map((h) => String(h || '').trim());
+    const idx = (name) => headers.indexOf(name);
+    const iCode = idx('Code');
+    const iDesc = idx('Description');
+    const iSize = idx('Size');
+    const iPack = idx('Pack');
+    const iPrice = idx('Price');
+    const iImage = idx('Image');
+    const iMat = idx('Material');
+    const iMain = idx('main_category');
+    const iSub = idx('sub_category');
+    const iSssub = idx('sub_sub_category');
+    const iSss = idx('sub_sub_sub_category');
+    const iTom = idx('Tommur-Code');
+    const iLesso = idx('Lesso-Code');
+    if (iCode < 0 || iSize < 0) return;
+    const stmts = [];
+    const seen = new Set();
+    for (let r = 1; r < table.length; r++) {
+      const cols = table[r];
+      const code = normalizeProductCode(cols[iCode]);
+      if (!code || !code.startsWith('ACH-')) continue;
+      const size = canonicalizeSize(cols[iSize]);
+      if (!size) continue;
+      const key = code + '\0' + size;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const priceRaw = iPrice >= 0 ? cols[iPrice] : '';
+      stmts.push(
+        env.DB.prepare(
+          `INSERT OR REPLACE INTO products (${PRODUCT_INSERT_COLS}) VALUES (${PRODUCT_INSERT_PLACEHOLDERS})`
+        ).bind(
+          ...productInsertBinds(
+            {
+              code,
+              description: iDesc >= 0 ? cols[iDesc] : '',
+              pack: iPack >= 0 ? cols[iPack] : 1,
+              qty: 0,
+              price: priceRaw,
+              image: iImage >= 0 ? cols[iImage] : 'images/logo.png',
+              material: iMat >= 0 ? cols[iMat] : '',
+              main_category: iMain >= 0 ? cols[iMain] : '',
+              sub_category: iSub >= 0 ? cols[iSub] : '',
+              sub_sub_category: iSssub >= 0 ? cols[iSssub] : '',
+              sub_sub_sub_category: iSss >= 0 ? cols[iSss] : '',
+              tommur_code: iTom >= 0 ? cols[iTom] : '',
+              lesso_code: iLesso >= 0 ? cols[iLesso] : '',
+            },
+            size
+          )
+        )
+      );
+    }
+    for (let i = 0; i < stmts.length; i += 40) {
+      await env.DB.batch(stmts.slice(i, i + 40));
+    }
+  })().catch((err) => {
+    achimSeedPromise = null;
+    throw err;
+  });
+  return achimSeedPromise;
+}
 
 function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -1363,6 +1500,9 @@ async function ensureRuntimeSchema(env) {
       try {
         await seedFactoryCodes(env, canonicalizeSize);
       } catch (_) {}
+      try {
+        await ensureAchimCatalogSeed(env);
+      } catch (_) {}
     })().catch((err) => {
       schemaReadyPromise = null;
       throw err;
@@ -1382,6 +1522,9 @@ const PRODUCTS_SELECT_ADMIN =
    FROM products`;
 
 async function productsCatalogResponse(env, auth) {
+  try {
+    await ensureAchimCatalogSeed(env);
+  } catch (_) {}
   if (auth.admin) {
     const { results } = await env.DB.prepare(PRODUCTS_SELECT_ADMIN).all();
     return jsonResponse(results, 200, { 'Cache-Control': 'private, no-store' });
