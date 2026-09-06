@@ -250,7 +250,7 @@ async function renderCart(){
     var tr = document.createElement('tr');
     var esc = window.apbsEscapeHtml || function(s){ return String(s); };
     tr.innerHTML =
-      '<td><div class="cart-prod-name">'+esc(item.description)+' '+esc(item.size)+(item.color ? ' · '+esc(item.color) : '')+'</div>'
+      '<td><div class="cart-prod-name"><a href="' + (window.apbsProductUrl ? window.apbsProductUrl(item.code, { color: item.color, size: item.size }) : 'product.html?code=' + encodeURIComponent(item.code)) + '" style="color:inherit;text-decoration:none">' + esc(item.description)+' '+esc(item.size)+(item.color ? ' · '+esc(item.color) : '') + '</a></div>'
       +'<div class="cart-prod-sub">'+esc(item.code)+' &nbsp;|&nbsp; '+item.pcsPerCtn+' pcs/ctn'
       +(isBackorder ? ' &nbsp;|&nbsp; <span class="cart-bo-tag">BACKORDER</span>' : '')
       +'</div></td>'

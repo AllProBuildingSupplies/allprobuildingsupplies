@@ -245,10 +245,16 @@ window.APBS_QUOTE_ONLY_MAINS = {};
 window.apbsIsQuoteOnlyMain = function apbsIsQuoteOnlyMain(main) {
   return !!window.APBS_QUOTE_ONLY_MAINS[String(main || '').trim().toLowerCase()];
 };
-/** Quote-only when the SKU has no selling price (curtains/rugs still Call for pricing). */
+/** Quote-only when a selling price is present and is not > 0 (blank CSV / $0).
+ *  Public API omits `price` entirely — that is Login for price, not Call for pricing. */
 window.apbsIsQuoteOnlyItem = function apbsIsQuoteOnlyItem(item) {
-  if (!item) return true;
+  if (!item) return false;
+  var hasPrice = Object.prototype.hasOwnProperty.call(item, 'price') ||
+    Object.prototype.hasOwnProperty.call(item, 'Price');
+  if (!hasPrice) return false;
   var price = item.price != null ? item.price : item.Price;
+  if (price == null) return false;
+  if (price === '') return true;
   return !(parseFloat(price) > 0);
 };
 window.apbsCatalogItemMatchesMain = function apbsCatalogItemMatchesMain(it, main) {
@@ -385,6 +391,209 @@ window.apbsProductKey = function apbsProductKey(code, size) {
   var c = window.normalizeProductCode ? window.normalizeProductCode(code) : String(code || '').trim();
   var sz = window.apbsSizeToCatalog ? window.apbsSizeToCatalog(size) : window.normalizeProductSize(size);
   return c + '|' + sz;
+};
+
+/** Keep local/test query flags when jumping between catalog pages. */
+window.apbsWithEnvQuery = function apbsWithEnvQuery(url) {
+  try {
+    var cur = new URLSearchParams(window.location.search || '');
+    var u = new URL(url, window.location.href);
+    ['apbs_csv', 'apbs_api', 'apbs_env'].forEach(function (k) {
+      var v = cur.get(k);
+      if (v && !u.searchParams.get(k)) u.searchParams.set(k, v);
+    });
+    var path = u.pathname.split('/').pop() || 'index.html';
+    return path + u.search + (u.hash || '');
+  } catch (_) {
+    return url;
+  }
+};
+
+window.apbsProductUrl = function apbsProductUrl(code, opts) {
+  opts = opts || {};
+  var q = 'code=' + encodeURIComponent(code || '');
+  if (opts.color) q += '&color=' + encodeURIComponent(opts.color);
+  if (opts.size) q += '&size=' + encodeURIComponent(opts.size);
+  return window.apbsWithEnvQuery('product.html?' + q);
+};
+
+window.apbsCanonSize = function apbsCanonSize(size) {
+  if (window.apbsSizeToCatalog) return window.apbsSizeToCatalog(size);
+  if (window.normalizeProductSize) return window.normalizeProductSize(size);
+  return String(size == null ? '' : size).trim().replace(/"/g, '');
+};
+
+window.apbsIsApprovedSession = function apbsIsApprovedSession() {
+  try {
+    var user = JSON.parse(sessionStorage.getItem('apbs_user') || 'null');
+    if (user && window.apbsNormalizeUser) window.apbsNormalizeUser(user);
+    return !!(user && user.status === 'approved');
+  } catch (_) {
+    return false;
+  }
+};
+
+window.apbsRowsToGroups = function apbsRowsToGroups(rows) {
+  var groups = {};
+  var sizeDisp = window.apbsSizeToDisplay || function (s) { return String(s || ''); };
+  for (var i = 0; i < (rows || []).length; i++) {
+    var row = rows[i];
+    if (!row || !row.code) continue;
+    var code = window.normalizeProductCode ? window.normalizeProductCode(row.code) : String(row.code).trim();
+    if (!groups[code]) {
+      groups[code] = {
+        desc: row.description,
+        image: row.image || 'images/logo.png',
+        rows: [],
+        material: row.material != null ? String(row.material).trim() : '',
+        mainCat: row.main_category != null ? String(row.main_category).trim() : '',
+        subCat: row.sub_category != null ? String(row.sub_category).trim() : '',
+        subSubCat: row.sub_sub_category != null ? String(row.sub_sub_category).trim() : '',
+        typeCat: row.sub_sub_sub_category != null ? String(row.sub_sub_sub_category).trim() : ''
+      };
+    }
+    var hasPrice = Object.prototype.hasOwnProperty.call(row, 'price') ||
+      Object.prototype.hasOwnProperty.call(row, 'Price');
+    var priceRaw = row.price != null ? row.price : row.Price;
+    groups[code].rows.push({
+      size: row.size,
+      color: row.color || '',
+      sizeDisplay: row.size_display || sizeDisp(row.size),
+      pack: row.pack,
+      qty: parseInt(row.qty, 10) || 0,
+      inStock: row.inStock !== undefined ? !!row.inStock : (parseInt(row.qty, 10) || 0) > 0,
+      price: hasPrice ? (parseFloat(priceRaw) || 0) : null,
+      image: row.image || groups[code].image || 'images/logo.png',
+      material: row.material != null ? String(row.material).trim() : groups[code].material,
+      subCat: row.sub_category != null ? String(row.sub_category).trim() : groups[code].subCat,
+      subSubCat: row.sub_sub_category != null ? String(row.sub_sub_category).trim() : groups[code].subSubCat,
+      typeCat: row.sub_sub_sub_category != null ? String(row.sub_sub_sub_category).trim() : groups[code].typeCat
+    });
+    if (row.image && String(row.image).indexOf('logo.png') === -1) {
+      if (!groups[code].image || String(groups[code].image).indexOf('logo.png') !== -1) {
+        groups[code].image = row.image;
+      }
+    }
+  }
+  return groups;
+};
+
+window.apbsFamilyStats = function apbsFamilyStats(rows, isLoggedIn) {
+  rows = rows || [];
+  var colors = {};
+  var sizes = {};
+  var priced = [];
+  var inStockCount = 0;
+  var quoteCount = 0;
+  rows.forEach(function (r) {
+    var col = String(r.color || '').trim();
+    if (col) colors[col] = true;
+    var sz = window.apbsCanonSize(r.size);
+    if (sz) sizes[sz] = true;
+    var quote = r.price == null ? false : !(parseFloat(r.price) > 0);
+    if (quote) quoteCount += 1;
+    else if (r.price != null && parseFloat(r.price) > 0) priced.push(parseFloat(r.price));
+    var stock = isLoggedIn ? (parseInt(r.qty, 10) || 0) > 0 : !!r.inStock;
+    if (quote || stock) inStockCount += 1;
+  });
+  var colorN = Object.keys(colors).length;
+  var sizeN = Object.keys(sizes).length;
+  var bits = [];
+  if (sizeN) bits.push(sizeN + (sizeN === 1 ? ' size' : ' sizes'));
+  if (colorN) bits.push(colorN + (colorN === 1 ? ' color' : ' colors'));
+  if (!bits.length) bits.push(rows.length + (rows.length === 1 ? ' option' : ' options'));
+  var allQuote = rows.length > 0 && quoteCount === rows.length;
+  var priceMin = priced.length ? Math.min.apply(null, priced) : 0;
+  var priceMax = priced.length ? Math.max.apply(null, priced) : 0;
+  return {
+    colorN: colorN,
+    sizeN: sizeN,
+    colors: Object.keys(colors),
+    sizes: Object.keys(sizes),
+    variantCount: rows.length,
+    inStockCount: inStockCount,
+    allQuote: allQuote,
+    priceMin: priceMin,
+    priceMax: priceMax,
+    label: bits.join(' · ')
+  };
+};
+
+window.apbsFamilyHasMatchingVariant = function apbsFamilyHasMatchingVariant(data, opts) {
+  opts = opts || {};
+  var rows = (data && data.rows) || [];
+  var sizeKeys = opts.sizeKeys || [];
+  var colorKeys = opts.colorKeys || [];
+  var stockOnly = !!opts.stockOnly;
+  var isLoggedIn = !!opts.isLoggedIn;
+  if (!rows.length) return false;
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var sz = window.apbsCanonSize(r.size);
+    var col = String(r.color || '').trim();
+    var quote = r.price == null ? false : !(parseFloat(r.price) > 0);
+    var stock = quote ? true : (isLoggedIn ? (parseInt(r.qty, 10) || 0) > 0 : !!r.inStock);
+    if (sizeKeys.length && sizeKeys.indexOf(sz) === -1) continue;
+    if (colorKeys.length && colorKeys.indexOf(col) === -1) continue;
+    if (stockOnly && !stock) continue;
+    return true;
+  }
+  return false;
+};
+
+window.apbsCartKey = 'apbs_cart';
+window.apbsGetCart = function apbsGetCart() {
+  try { return JSON.parse(localStorage.getItem(window.apbsCartKey) || '[]'); } catch (e) { return []; }
+};
+window.apbsSaveCart = function apbsSaveCart(cart) {
+  localStorage.setItem(window.apbsCartKey, JSON.stringify(cart || []));
+  var total = (cart || []).reduce(function (s, i) { return s + (parseInt(i.qty, 10) || 0); }, 0);
+  var el = document.getElementById('nav-cart-count');
+  if (el) el.textContent = total > 0 ? total : '';
+};
+window.apbsAddCartItem = function apbsAddCartItem(opts) {
+  opts = opts || {};
+  if (!window.apbsIsApprovedSession()) {
+    alert('You must be logged into an approved trade account to add items to your cart.');
+    window.location.href = window.apbsWithEnvQuery('login.html');
+    return { ok: false, reason: 'auth' };
+  }
+  var code = window.normalizeProductCode ? window.normalizeProductCode(opts.code) : String(opts.code || '').trim();
+  var size = window.apbsCanonSize(opts.size);
+  var color = String(opts.color || '').trim();
+  var desc = opts.description || opts.desc || '';
+  var pcs = parseInt(opts.pcsPerCtn != null ? opts.pcsPerCtn : opts.pcs, 10) || 1;
+  var price = parseFloat(opts.unitPrice != null ? opts.unitPrice : opts.price) || 0;
+  var onHand = parseInt(opts.maxQty != null ? opts.maxQty : opts.qty, 10);
+  if (!Number.isFinite(onHand) || onHand < 0) onHand = 0;
+  var isBackorder = !!opts.backorder || onHand <= 0;
+  var sess = null;
+  try { sess = JSON.parse(sessionStorage.getItem('apbs_user')); } catch (e) {}
+  var cartonOnly = !!opts.cartonOnly ||
+    (sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess));
+  var want = parseInt(opts.addQty, 10);
+  if (!Number.isFinite(want) || want < 1) want = 1;
+  var addPieces = cartonOnly ? (want * pcs) : want;
+  if (addPieces < 1) return { ok: false, reason: 'qty' };
+  var cart = window.apbsGetCart();
+  var existing = cart.find(function (i) {
+    return i.code === code && i.size === size && String(i.color || '') === color;
+  });
+  if (existing) {
+    existing.qty = existing.qty + addPieces;
+    existing.maxQty = onHand;
+    existing.backorder = isBackorder || existing.qty > onHand;
+    if (!existing.unit) existing.unit = cartonOnly ? 'carton' : 'piece';
+    if (color && !existing.color) existing.color = color;
+  } else {
+    cart.push({
+      code: code, size: size, color: color, description: desc, pcsPerCtn: pcs,
+      unitPrice: price, qty: addPieces, unit: cartonOnly ? 'carton' : 'piece',
+      maxQty: onHand, backorder: isBackorder || addPieces > onHand
+    });
+  }
+  window.apbsSaveCart(cart);
+  return { ok: true, backorder: isBackorder };
 };
 
 window.apbsFindProduct = function apbsFindProduct(products, code, size, color) {
@@ -837,6 +1046,7 @@ function apbsCatalogHints(qt, rows) {
     if (!code || seen[code]) continue;
     var hay = (
       code + ' ' + (r.description || '') + ' ' + (r.size || '') + ' ' +
+      (r.color || '') + ' ' +
       (r.main_category || '') + ' ' + (r.sub_category || '')
     ).toLowerCase();
     if (hay.indexOf(qt) === -1) continue;
@@ -845,7 +1055,7 @@ function apbsCatalogHints(qt, rows) {
       code: code,
       desc: r.description || code,
       main: r.main_category || '',
-      href: 'products.html?q=' + encodeURIComponent(code)
+      href: window.apbsProductUrl ? window.apbsProductUrl(code) : ('product.html?code=' + encodeURIComponent(code))
     });
   }
   return out;
@@ -882,7 +1092,8 @@ function bindCatalogSuggestInput(input, suggest) {
     }
     suggest.innerHTML = items.map(function (it) {
       return '<button type="button" class="nav-search-hit" data-suggest-q="' +
-        window.apbsEscapeHtml(it.code).replace(/"/g, '&quot;') + '">' +
+        window.apbsEscapeHtml(it.code).replace(/"/g, '&quot;') + '"' +
+        (it.href ? ' data-href="' + window.apbsEscapeHtml(it.href).replace(/"/g, '&quot;') + '"' : '') + '>' +
         '<span class="nav-search-hit-code">' + window.apbsEscapeHtml(it.code) + '</span>' +
         '<span class="nav-search-hit-desc">' + window.apbsEscapeHtml(it.desc) + '</span>' +
         (it.main ? '<span class="nav-search-hit-cat">' + window.apbsEscapeHtml(it.main) + '</span>' : '') +
@@ -914,8 +1125,13 @@ function bindCatalogSuggestInput(input, suggest) {
     var hit = e.target.closest ? e.target.closest('[data-suggest-q]') : null;
     if (!hit) return;
     var q = hit.getAttribute('data-suggest-q') || '';
+    var href = hit.getAttribute('data-href') || '';
     input.value = q;
     hideSuggest();
+    if (href && /product\.html/.test(href)) {
+      window.location.href = href;
+      return;
+    }
     var form = input.form || input.closest('form');
     if (form) {
       if (typeof form.requestSubmit === 'function') form.requestSubmit();
