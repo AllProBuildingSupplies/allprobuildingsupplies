@@ -1030,12 +1030,12 @@ function renderIndex(categories) {
 
   const meta = {
     collection: 'COMPLETE LINE CARD',
-    hero: categories[0]?.hero || 'hero-pvc-pipes.jpg',
-    heroCaption: 'FACTORY-SOURCED CATALOG',
+    hero: categories[0]?.hero || 'hero-achim.png',
+    heroCaption: 'FLOORING · PLUMBING · WINDOWS',
     highlights: [
-      { title: '8 Categories', sub: 'Full Plumbing Line' },
-      { title: 'ASTM / NSF', sub: 'Code-Ready Specs' },
-      { title: 'Trade Pricing', sub: 'Call or Email' },
+      { title: '3 Departments', sub: 'Flooring · Plumbing · Windows' },
+      { title: 'Call for Pricing', sub: 'Trade & Volume' },
+      { title: 'New Jersey', sub: 'Fast Response' },
     ],
     title: 'Catalog Index',
     material: 'ALL PRO',
@@ -1086,7 +1086,7 @@ async function main() {
       title: catKey,
       material: rows[0]?.Material || '',
       collection: String(catKey).toUpperCase(),
-      hero: 'hero-pvc-pipes.jpg',
+      hero: 'hero-achim.png',
       heroCaption: catKey,
       tagline: `${catKey} from the All Pro catalog.`,
       overview: `Factory-sourced ${catKey}.`,

@@ -243,6 +243,274 @@ export const CATEGORY_META = {
     applications: ['Cold water supply', 'Condensation control', 'Mechanical rooms', 'Exposed piping'],
     notes: 'Select ID to match pipe OD; seal longitudinal seams.',
   },
+  'Vinyl Tiles': {
+    slug: 'vinyl-tiles',
+    title: 'Vinyl Floor Tiles',
+    material: 'Vinyl Tiles',
+    collection: 'ACHIM VINYL TILE COLLECTION',
+    hero: 'hero-achim.png',
+    heroCaption: 'PEEL & STICK · DIY FLOORING',
+    tagline: 'Self-adhesive vinyl floor tiles — Portfolio, Sterling, Tivoli, Nexus, Retro, Palazzo, and more.',
+    overview:
+      'Achim Home Decor peel-and-stick vinyl tiles for kitchens, baths, basements, and unit turns. Commercial-gauge 2.0mm Portfolio through 12x12 Nexus and 12x24 Palazzo planks-look tiles.',
+    standards: [
+      { code: 'Peel & Stick', name: 'No extra adhesive on flat, dry subfloors' },
+      { code: 'DIY / Reno', name: 'Cut with a utility knife' },
+    ],
+    highlights: [
+      { title: 'Achim Line', sub: 'Family Pricing' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Multi-Series', sub: '12" / 18" / 12x24"' },
+    ],
+    construction: [
+      { label: 'Install', value: 'Self-adhesive vinyl' },
+      { label: 'Series', value: 'Portfolio · Sterling · Tivoli · Nexus · Retro · Palazzo' },
+      { label: 'Also', value: 'OutdoorZ deck tiles · interlocking foam' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Kitchens & baths', 'Basements', 'Unit turns', 'Retail / DIY'],
+    notes: 'Confirm subfloor is flat, dry, and clean. Call for carton counts, coverage, and trade pricing.',
+  },
+  'Vinyl Planks': {
+    slug: 'vinyl-planks',
+    title: 'Vinyl Floor Planks',
+    material: 'Vinyl Planks',
+    collection: 'ACHIM VINYL PLANK COLLECTION',
+    hero: 'hero-achim.png',
+    heroCaption: '6x36 PEEL & STICK · 9x48 LOOSELAY',
+    tagline: 'Self-adhesive and looselay vinyl planks — Tivoli II, Sterling, Nexus, and Flex Flor.',
+    overview:
+      'Achim vinyl plank flooring in 6x36 peel-and-stick (Tivoli II, Sterling 2.0mm / 1.2mm, Nexus) and 9x48 Flex Flor looselay.',
+    standards: [
+      { code: 'Peel & Stick', name: 'Tivoli II / Sterling / Nexus 6x36' },
+      { code: 'Looselay', name: 'Flex Flor 9x48' },
+    ],
+    highlights: [
+      { title: 'Wood Looks', sub: 'Oak · Walnut · Maple' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Formats', value: '6x36 self-adhesive · 9x48 looselay' },
+      { label: 'Gauges', value: '1.2mm and 2.0mm Sterling' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Living areas', 'Bedrooms', 'Unit turns', 'Retail / DIY'],
+    notes: 'Looselay vs peel-and-stick install methods differ — confirm the series before quoting labor.',
+  },
+  'Carpet Tiles': {
+    slug: 'carpet-tiles',
+    title: 'Carpet Tiles',
+    material: 'Carpet Tiles',
+    collection: 'ACHIM NEXUS CARPET TILES',
+    hero: 'hero-achim.png',
+    heroCaption: '12x12 PEEL & STICK POLYESTER',
+    tagline: 'Nexus self-adhesive 12x12 carpet tiles — mix colors or run a solid field.',
+    overview:
+      'Achim Nexus polyester peel-and-stick carpet tiles, 12 tiles per carton (12 sq ft). Ribbed texture for offices, playrooms, basements, and garages.',
+    standards: [
+      { code: 'Peel & Stick', name: 'Flat, dry subfloor' },
+      { code: '12 / ctn', name: '12 sq ft per carton' },
+    ],
+    highlights: [
+      { title: '6 Colors', sub: 'Mix or Match' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Material', value: 'Polyester carpet tile' },
+      { label: 'Size', value: '12x12' },
+      { label: 'Pack', value: '12 tiles / 12 sq ft' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Offices', 'Playrooms', 'Basements', 'Garages'],
+    notes: 'Vacuum regularly; spot clean. Call for availability by color.',
+  },
+  Rugs: {
+    slug: 'rugs',
+    title: 'Area Rug Sets',
+    material: 'Rugs',
+    collection: 'ACHIM CAPRI RUG SETS',
+    hero: 'hero-achim.png',
+    heroCaption: '5x7 + RUNNER + MAT',
+    tagline: 'Capri 3-piece rug sets — 5x7 rug, 22x59 runner, and 22x31 mat.',
+    overview:
+      'Achim Capri coordinated 3-piece rug sets for living rooms, hallways, and entries. Seven current colorways.',
+    standards: [{ code: '3-Piece Set', name: 'Rug + runner + mat' }],
+    highlights: [
+      { title: '3-Piece', sub: 'Rug · Runner · Mat' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Set', value: '5x7 rug, 22x59 runner, 22x31 mat' },
+      { label: 'Line', value: 'Capri' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Living rooms', 'Hallways', 'Entries', 'Unit staging'],
+    notes: 'Call for current colorways and pack-out.',
+  },
+  Mats: {
+    slug: 'mats',
+    title: 'Entrance & Kitchen Mats',
+    material: 'Mats',
+    collection: 'ACHIM MATS COLLECTION',
+    hero: 'hero-achim.png',
+    heroCaption: 'COIR · RUBBER · MEMORY FOAM · ANTI-FATIGUE',
+    tagline: 'Door mats, coco and rubber entrance mats, memory foam, and anti-fatigue kitchen mats.',
+    overview:
+      'Achim printed coir, welcome rubber, coco, wrought-iron rubber, memory foam, anti-fatigue kitchen prints, and woven-embossed faux-leather mats.',
+    standards: [{ code: 'Common Sizes', name: '18x30 · 17x24 · 20x39' }],
+    highlights: [
+      { title: 'Indoor / Outdoor', sub: 'Entry & Kitchen' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Types', value: 'Coir · rubber · coco · memory foam · anti-fatigue · faux-leather' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Entries', 'Kitchens', 'Mudrooms', 'Retail / staging'],
+    notes: 'Seasonal coir prints rotate. Call for current art and carton packs.',
+  },
+  Blinds: {
+    slug: 'blinds',
+    title: 'Window Blinds',
+    material: 'Blinds',
+    collection: 'ACHIM BLINDS COLLECTION',
+    hero: 'hero-achim.png',
+    heroCaption: 'CORDLESS · VINYL · FAUX WOOD · MINI',
+    tagline: 'Cordless vinyl roll-up, 2" venetian, faux-wood plantation, and 1" mini blinds.',
+    overview:
+      'Achim cordless GII blinds: Veranda and Solstice roll-up, Luna 2" vinyl venetian, Madera Falsa 2" faux wood, Morningstar light-filtering mini, and Deluxe Sundown room-darkening mini.',
+    standards: [{ code: 'Cordless', name: 'Child-safer cord-free operation' }],
+    highlights: [
+      { title: 'Cordless', sub: 'GII Families' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Types', value: 'Roll-up · venetian · faux wood · mini' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Apartments', 'Unit turns', 'Retail / DIY', 'Light commercial'],
+    notes: 'Stock widths — call for the cut chart and colors. Do not add to cart until priced.',
+  },
+  Shades: {
+    slug: 'shades',
+    title: 'Window Shades',
+    material: 'Shades',
+    collection: 'ACHIM SHADES COLLECTION',
+    hero: 'hero-achim.png',
+    heroCaption: 'ROLLER · CELLULAR · PLEATED · ROMAN',
+    tagline: 'Cordless roller, honeycomb cellular, pleated, roman, jute, and tear-down shades.',
+    overview:
+      'Achim cordless and cords-free shades including Glide n\' Go blackout roller, honeycomb cellular (including top-down/bottom-up), 1-2-3 room-darkening pleated, Celestial sheer, blackout roman, privacy jute, and tear-down light-filtering / room-darkening.',
+    standards: [{ code: 'Cordless / Cords Free', name: 'Child-safer operation' }],
+    highlights: [
+      { title: 'Blackout & Light Filter', sub: 'Multiple Families' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Types', value: 'Roller · cellular · pleated · roman · jute · tear-down' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Bedrooms', 'Living areas', 'Unit turns', 'Retail / DIY'],
+    notes: 'Stock widths — call for the cut chart, opacity, and colors.',
+  },
+  'Curtain Panels': {
+    slug: 'curtain-panels',
+    title: 'Curtain Panels',
+    material: 'Curtains',
+    collection: 'ACHIM CURTAIN PANELS',
+    hero: 'hero-achim.png',
+    heroCaption: 'GROMMET · ROD POCKET · PINCH PLEAT · FRENCH DOOR',
+    tagline: 'Named Achim curtain panel lines — grommet, rod pocket, pinch pleat, and French door.',
+    overview:
+      'Achim decorative curtain panels including Constellation, Gramercy, Bordeaux, Darcy and Buffalo Check French door sizes, and a full list of named room panels.',
+    standards: [{ code: 'Ready-Made', name: 'Named styles; call for sizes/colors' }],
+    highlights: [
+      { title: 'Named Lines', sub: 'Trade Ready' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Headings', value: 'Grommet · rod pocket · pinch pleat · French door' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Living rooms', 'Bedrooms', 'French doors', 'Unit staging'],
+    notes: 'Colors and exact lengths vary by style. Call before quoting a job pack.',
+  },
+  'Kitchen Curtains': {
+    slug: 'kitchen-curtains',
+    title: 'Kitchen Curtains',
+    material: 'Curtains',
+    collection: 'ACHIM KITCHEN CURTAINS',
+    hero: 'hero-achim.png',
+    heroCaption: 'TIER · VALANCE · COTTAGE SETS',
+    tagline: 'Cottage, tier-and-valance, and printed kitchen curtain sets.',
+    overview:
+      'Achim kitchen and cottage window sets — Bon Appetit, Napa, farmhouse, sunflower, Tuscany, and matching printed tier/valance collections.',
+    standards: [{ code: 'Sets', name: 'Tier + valance / swag / multi-piece' }],
+    highlights: [
+      { title: 'Kitchen Looks', sub: 'Printed & Cottage' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Typical', value: 'Tier pair + valance or cottage set' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Kitchens', 'Breakfast nooks', 'Unit staging', 'Retail'],
+    notes: 'Many prints match Achim kitchen mats. Call to coordinate a package.',
+  },
+  'Valances & Tiers': {
+    slug: 'valances-tiers',
+    title: 'Valances & Tiers',
+    material: 'Curtains',
+    collection: 'ACHIM VALANCES & TIERS',
+    hero: 'hero-achim.png',
+    heroCaption: 'VALANCE · TIER · SCARF · TIE-UP',
+    tagline: 'Standalone valances, tier pairs, scarves, and tie-up shades.',
+    overview:
+      'Achim mix-and-match window toppers: Bordeaux, Gramercy, Oakwood, Ombre, Darcy, Buffalo Check, and Charlotte valances, tiers, scarves, and tie-ups.',
+    standards: [{ code: 'Mix & Match', name: 'Pair with Achim panels or kitchen sets' }],
+    highlights: [
+      { title: 'Toppers', sub: 'Valance · Tier · Tie-Up' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Pieces', value: 'Valance, tier pair, scarf, tie-up shade' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Kitchens', 'Baths', 'French doors', 'Layered treatments'],
+    notes: 'Call for size (e.g. 52x14, 58x14, 58x24) before a job quote.',
+  },
+  Rods: {
+    slug: 'rods',
+    title: 'Curtain Rods & Finials',
+    material: 'Rods',
+    collection: 'ACHIM ROD & FINIAL SETS',
+    hero: 'hero-achim.png',
+    heroCaption: 'BUONO II · CAMINO · METALLO',
+    tagline: 'Decorative rod and finial sets — Buono II, Camino, and Metallo.',
+    overview:
+      'Achim decorative drapery hardware: Buono II (13 finial styles), Camino (Lincroft, Fairmont, Ava), and Metallo (Lexus, Leaf, Ilana, Carrera).',
+    standards: [{ code: 'Sets', name: 'Rod + finials; call for lengths/finishes' }],
+    highlights: [
+      { title: '3 Collections', sub: 'Buono II · Camino · Metallo' },
+      { title: 'Call for Pricing', sub: '732-734-1123' },
+      { title: 'Achim', sub: 'Family Pricing' },
+    ],
+    construction: [
+      { label: 'Collections', value: 'Buono II, Camino, Metallo' },
+      { label: 'Source', value: 'Achim Importing Co. / Achim Home Decor' },
+    ],
+    applications: ['Panels', 'Sheers', 'Layered treatments', 'Unit staging'],
+    notes: 'Call for rod lengths and finish options.',
+  },
 };
 
 /** Per-SKU standard overlays when description / code implies a specific spec. */
@@ -265,6 +533,7 @@ export function standardsForSku(row) {
   if (code.includes('INSLTN') || (row.Material || '').toUpperCase() === 'INSULATION') {
     return ['Cold-water insulation'];
   }
+  if (code.startsWith('ACH-')) return ['Achim Home Decor'];
   return [];
 }
 
@@ -275,5 +544,5 @@ export const COMPANY = {
   email: 'info@allprobuildingsupplies.com',
   web: 'allprobuildingsupplies.com',
   tag: 'Trade & Volume Pricing · New Jersey',
-  updated: '08.2026',
+  updated: '09.2026',
 };
