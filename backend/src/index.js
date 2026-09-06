@@ -76,7 +76,7 @@ async function fetchMainProductsCsv() {
   return '';
 }
 
-const ACHIM_SEED_VERSION = 'pricebook-v2-color';
+const ACHIM_SEED_VERSION = 'pricebook-v3-color-images';
 
 /** Insert Achim/Alveron rows from the public main-branch CSV. Never deletes plumbing stock. */
 async function ensureAchimCatalogSeed(env) {

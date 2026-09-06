@@ -182,7 +182,7 @@ function paintPdp() {
     : rows);
   var allSizes = uniqueSizes(rows);
   var variant = selectedVariant();
-  var img = (variant && variant.image) || (pdpState.color && colorImage(pdpState.color)) || group.image || 'images/logo.png';
+  var img = (pdpState.color && colorImage(pdpState.color)) || (variant && variant.image) || group.image || 'images/logo.png';
   var title = group.desc || pdpState.code;
   document.title = title + ' — All Pro Building Supplies LLC';
   document.getElementById('pdp-title').innerHTML = esc(title);

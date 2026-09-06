@@ -64,22 +64,38 @@ def resolve_image(code: str, size: str, color: str) -> str:
     size = str(size or "").strip()
     if color:
         candidates.append(f"{code}|{color}")
+        candidates.append(f"{code}|{color.replace('-', ' ')}")
+        candidates.append(f"{code}|{color.replace(' ', '-')}")
         candidates.append(f"{code}|{size}|{color}")
         m = re.match(r"^(#\d+)\s+(.*)$", color)
         if m:
             candidates.append(f"{code}|{m.group(1)}")
-            candidates.append(f"{code}|{m.group(2)}")
+            name = m.group(2).strip()
+            candidates.append(f"{code}|{name}")
+            candidates.append(f"{code}|{name.replace('-', ' ')}")
+            candidates.append(f"{code}|{name.replace(' ', '-')}")
         if re.match(r"^#\d+$", color):
             candidates.append(f"{code}|{color}")
+        if code == "ACH-TIVOLI2-PLANK" and color == "3 Plank Maple":
+            candidates.append(f"{code}|Maple")
     candidates.append(f"{code}|{size}")
     candidates.append(f"{code}|Stock widths")
+    seen: set[str] = set()
     for key in candidates:
+        if not key or key in seen:
+            continue
+        seen.add(key)
         meta = IMAGE_MAP.get(key)
         if isinstance(meta, dict) and meta.get("file"):
             return meta["file"]
         if isinstance(meta, str) and meta:
             return meta
     color_l = slug_tokens(color)
+    color_tokens = set(color_l.split())
+    num = ""
+    nm = re.search(r"\b(\d{3})\b", color)
+    if nm:
+        num = nm.group(1)
     prefix = code + "|"
     best = ""
     best_score = 0
@@ -87,11 +103,18 @@ def resolve_image(code: str, size: str, color: str) -> str:
         if not str(key).startswith(prefix):
             continue
         rest = slug_tokens(str(key)[len(prefix) :])
-        if not rest:
+        if not rest or rest in {"stock widths", "stock", "standard"}:
             continue
+        rest_tokens = set(rest.split())
         score = 0
-        if color_l and (rest == color_l or rest in color_l or color_l in rest):
-            score = 40 + min(len(rest), 20)
+        if color_l and rest == color_l:
+            score = 80
+        elif color_tokens and rest_tokens == color_tokens:
+            score = 70
+        elif num and num in rest_tokens:
+            score = 65
+        elif color_tokens and len(rest_tokens) >= 2 and rest_tokens <= color_tokens:
+            score = 50 + min(len(rest), 15)
         if score > best_score:
             file = ""
             if isinstance(meta, dict):
