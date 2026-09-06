@@ -16,6 +16,7 @@ Agent: [Product pricing analysis](https://cursor.com/agents/bc-dcaa793d-4f8b-42c
 | `Competitive_Margin_Sheet.xlsx` | FOB → landed vs cheapest online price |
 | `COMPETITIVE_MARGINS.md` | How to read the margin sheet |
 | `FACTORY_ORDER_README.md` | How the 3-month container projection was built |
+| **`EXCLUSIVE_SUPPLIER_ROADMAP.md`** | Ashland Lakes / Pedcor exclusive-supplier kit: what we import vs buy US, wave order |
 
 ## Tommur workbook rules
 
