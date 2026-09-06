@@ -351,6 +351,7 @@
           <th>Type</th>
           <th>Description</th>
           <th>Size</th>
+          <th>Color</th>
           <th>Pieces / Carton</th>
           <th>Inventory Qty</th>
           <th>Unit Price ($)</th>
@@ -895,18 +896,23 @@ function escAttr(val) {
     .replace(/</g, '&lt;');
 }
 
-function productOptionKey(code, size) {
-  return encodeURIComponent(String(code || '').trim() + '\x1e' + (window.normalizeProductSize ? window.normalizeProductSize(size) : String(size || '').trim()));
+function productOptionKey(code, size, color) {
+  return encodeURIComponent(
+    String(code || '').trim() + '\x1e' +
+    (window.normalizeProductSize ? window.normalizeProductSize(size) : String(size || '').trim()) +
+    '\x1e' + String(color || '').trim()
+  );
 }
 
 function productFromOptionKey(key) {
   if (!key) return null;
   const parts = decodeURIComponent(key).split('\x1e');
   const code = parts[0];
-  const size = parts.slice(1).join('\x1e');
-  return (window.apbsFindProduct || function(prods, c, s) {
-    return prods.find(p => p.code === c && p.size === s);
-  })(masterProducts, code, size);
+  const size = parts[1] || '';
+  const color = parts.slice(2).join('\x1e');
+  return (window.apbsFindProduct || function(prods, c, s, col) {
+    return prods.find(p => p.code === c && p.size === s && String(p.color || '') === String(col || ''));
+  })(masterProducts, code, size, color);
 }
 
 // --- ADMIN AUTH GATE ---
@@ -1353,6 +1359,7 @@ async function loadProducts() {
         size: window.apbsSizeToCatalog
           ? window.apbsSizeToCatalog(p.size)
           : (window.normalizeProductSize ? window.normalizeProductSize(p.size) : (p.size || '')),
+        color: p.color || '',
         pack: p.pack,
         stock: parseInt(p.qty, 10) || 0,
         price: parseFloat(p.price) || 0,
@@ -1372,6 +1379,7 @@ async function loadProducts() {
         <td data-label="Type"><input class="data-input" data-field="sub_sub_sub_category" value="${escAttr(p.sub_sub_sub_category)}"></td>
         <td data-label="Description"><input class="data-input" data-field="description" value="${escAttr(p.description)}"></td>
         <td data-label="Size"><input class="data-input" data-field="size" value="${escAttr(p.size)}"></td>
+        <td data-label="Color"><input class="data-input" data-field="color" value="${escAttr(p.color)}"></td>
         <td data-label="Pieces / Carton"><input type="number" class="data-input" data-field="pack" value="${escAttr(p.pack)}"></td>
         <td data-label="Inventory Qty"><input type="number" class="data-input" data-field="qty" value="${escAttr(p.stock)}"></td>
         <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" data-field="price" value="${escAttr(p.price)}"></td>
@@ -2199,6 +2207,7 @@ function addProductRow() {
     <td data-label="Type"><input class="data-input" data-field="sub_sub_sub_category" value=""></td>
     <td data-label="Description"><input class="data-input" data-field="description" value=""></td>
     <td data-label="Size"><input class="data-input" data-field="size" value=""></td>
+    <td data-label="Color"><input class="data-input" data-field="color" value=""></td>
     <td data-label="Pieces / Carton"><input type="number" class="data-input" data-field="pack" value=""></td>
     <td data-label="Inventory Qty"><input type="number" class="data-input" data-field="qty" value=""></td>
     <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" data-field="price" value=""></td>
@@ -2213,8 +2222,8 @@ function populateProductDropdown() {
   if(!sel) return;
   let html = '<option value="">-- Select Product to Add --</option>';
   masterProducts.forEach((p) => {
-    const key = productOptionKey(p.code, p.size);
-    const label = `${p.code} - ${p.description} ${p.size} ($${p.price.toFixed(2)}) [Stock: ${p.stock}]`;
+    const key = productOptionKey(p.code, p.size, p.color);
+    const label = `${p.code} - ${p.description} ${p.size}${p.color ? ' · ' + p.color : ''} ($${p.price.toFixed(2)}) [Stock: ${p.stock}]`;
     html += `<option value="${escAttr(key)}">${escAttr(label)}</option>`;
   });
   sel.innerHTML = html;
@@ -2243,6 +2252,7 @@ async function saveProducts() {
             sub_sub_sub_category: field('sub_sub_sub_category'),
             description: field('description'),
             size: norm(field('size')),
+            color: field('color'),
             pack: parseInt(field('pack'), 10) || 1,
             qty: parseInt(field('qty'), 10) || 0,
             price: parseFloat(field('price')) || 0,
@@ -2272,6 +2282,7 @@ function productsCsvHeaderMap(headerRow) {
     else if (key === 'lesso' || key === 'lessocode' || key === 'lessoscode') map.lesso_code = i;
     else if (key === 'description' || key === 'desc' || key === 'name') map.description = i;
     else if (key === 'size') map.size = i;
+    else if (key === 'color' || key === 'colour' || key === 'finish' || key === 'pattern') map.color = i;
     else if (key === 'pack' || key === 'pcsperctn' || key === 'pcspctn') map.pack = i;
     else if (key === 'qty' || key === 'quantity' || key === 'stock' || key === 'inventory' || key === 'inventoryqty') map.qty = i;
     else if (key === 'addqty' || key === 'qtyadd' || key === 'received' || key === 'receive' || key === 'shipment' || key === 'shipmentqty' || key === 'delta') map.addQty = i;
@@ -2299,7 +2310,7 @@ function exportProductsCsv() {
     return;
   }
   const headers = [
-    'Material', 'Code', 'Tommur-Code', 'Lesso-Code', 'Description', 'Size', 'Pack', 'Qty', 'AddQty',
+    'Material', 'Code', 'Tommur-Code', 'Lesso-Code', 'Description', 'Size', 'Color', 'Pack', 'Qty', 'AddQty',
     'Price', 'Image', 'main_category', 'sub_category', 'sub_sub_category', 'sub_sub_sub_category'
   ];
   const lines = [headers.join(',')];
@@ -2311,6 +2322,7 @@ function exportProductsCsv() {
       csvEscape(p.lesso_code || ''),
       csvEscape(p.description || ''),
       csvEscape(p.size || ''),
+      csvEscape(p.color || ''),
       csvEscape(p.pack != null ? p.pack : ''),
       csvEscape(p.stock != null ? p.stock : 0),
       '', // AddQty — fill with pieces received, then use Receive Shipment CSV
@@ -2415,7 +2427,7 @@ function processReceiveShipmentCsv(event) {
         return;
       }
 
-      payload.push({ code: code, size: size, qty: addQty });
+      payload.push({ code: code, size: size, color: cell(cols, map.color), qty: addQty });
       preview.push(code + ' / ' + size + ' +' + addQty);
     }
 
@@ -2522,6 +2534,7 @@ function processCSVUpload(event) {
         code: window.normalizeProductCode ? window.normalizeProductCode(code) : code,
         description: cleanText(cell(cols, map.description)),
         size: cleanCsvSize(cell(cols, map.size)),
+        color: cleanText(cell(cols, map.color)),
         pack: parseInt(cell(cols, map.pack), 10) || 1,
         qty: parseInt(cell(cols, map.qty), 10) || 0,
         price: Math.round(((parseFloat(cell(cols, map.price)) || 0) + Number.EPSILON) * 100) / 100,

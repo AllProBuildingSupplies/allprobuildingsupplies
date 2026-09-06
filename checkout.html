@@ -367,7 +367,7 @@ function renderSummary(cart){
     var boTag = bo ? ' <span class="cart-bo-tag">BACKORDER</span>' : '';
     linesEl.innerHTML +=
       '<div class="order-line">'
-      +'<div><div class="order-line-name">'+esc(item.description)+' '+esc(item.size)+boTag+'</div>'
+      +'<div><div class="order-line-name">'+esc(item.description)+' '+esc(item.size)+(item.color ? ' · '+esc(item.color) : '')+boTag+'</div>'
       +'<div class="order-line-sub">'+unitLabel+' × $'+parseFloat(item.unitPrice).toFixed(2)+'</div></div>'
       +'<div class="order-line-price">$'+lineTotal.toFixed(2)+'</div>'
       +'</div>';
@@ -452,6 +452,7 @@ async function placeOrder(){
         code: item.code,
         description: item.description,
         size: norm(item.size),
+        color: String(item.color || '').trim(),
         qty: item.qty,
         unit: item.unit,
         pcsPerCtn: item.pcsPerCtn,

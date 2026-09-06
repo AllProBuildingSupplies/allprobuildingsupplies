@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Product — All Pro Building Supplies LLC</title>
+<meta name="description" content="Choose color and size for this All Pro Building Supplies product line."/>
+<script src="assets/theme-init.js"></script>
+<link rel="stylesheet" href="assets/style.css"/>
+<meta name="theme-color" content="#0C1117"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+</head>
+<body class="page-product">
+
+<div id="cursor"></div><div id="cursor-ring"></div>
+<div id="global-header"></div>
+
+<div class="page-hero page-hero-compact">
+  <div class="page-hero-inner">
+    <div class="page-breadcrumb" id="pdp-crumb"><a href="products.html">Products</a></div>
+    <div class="page-title" id="pdp-title" data-r>Product</div>
+    <p class="page-subtitle" id="pdp-code"></p>
+  </div>
+</div>
+
+<section class="sec" style="background:var(--ink)">
+  <div class="sec-inner">
+    <div id="pdp-root" class="pdp">
+      <div class="catalog-empty">Loading product…</div>
+    </div>
+  </div>
+</section>
+
+<div id="img-lightbox" onclick="closeLightbox()">
+  <div id="img-lb-inner" onclick="event.stopPropagation()">
+    <img id="img-lb-img" src="" alt=""/>
+    <div id="img-lb-title"></div>
+  </div>
+</div>
+
+<div id="global-footer"></div>
+<script src="assets/main.js"></script>
+<script>
+var isLoggedIn = false;
+(function(){
+  var sess = sessionStorage.getItem('apbs_user');
+  var user = null; try{ if(sess) user = JSON.parse(sess); if(user && window.apbsNormalizeUser) window.apbsNormalizeUser(user); }catch(e){}
+  isLoggedIn = !!(user && user.status === 'approved');
+  var acctBtn = document.getElementById('nav-account-btn');
+  var loginBtn = document.getElementById('nav-login-btn');
+  var nameEl = document.getElementById('nav-logged-in-name');
+  if (isLoggedIn) {
+    if (acctBtn) acctBtn.style.display = 'inline-flex';
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (nameEl) nameEl.textContent = user.name || ((user.fname||'') + ' ' + (user.lname||'')).trim();
+  }
+})();
+
+function esc(s) { return window.apbsEscapeHtml ? window.apbsEscapeHtml(s) : String(s == null ? '' : s); }
+function escAttr(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+function envUrl(url) { return window.apbsWithEnvQuery ? window.apbsWithEnvQuery(url) : url; }
+function canonSize(s) { return window.apbsCanonSize ? window.apbsCanonSize(s) : String(s || ''); }
+function sizeLabel(s) {
+  if (window.apbsSizeToDisplay) return window.apbsSizeToDisplay(s);
+  return String(s || '');
+}
+function sizeSortKey(size) {
+  var norm = window.normalizeProductSize ? window.normalizeProductSize(size) : String(size || '');
+  var m = String(norm).match(/^(\d+(?:\.\d+)?)/);
+  var n = m ? parseFloat(m[1]) : 0;
+  return [n, String(size || '')];
+}
+function uniqueSorted(values, cmp) {
+  var seen = {};
+  var out = [];
+  (values || []).forEach(function(v) {
+    var k = String(v);
+    if (!k || seen[k]) return;
+    seen[k] = true;
+    out.push(v);
+  });
+  out.sort(cmp || function(a, b) { return String(a).localeCompare(String(b)); });
+  return out;
+}
+
+var pdpState = {
+  code: '',
+  group: null,
+  color: '',
+  size: '',
+  rows: []
+};
+
+function params() {
+  try { return new URLSearchParams(window.location.search || ''); } catch (e) { return new URLSearchParams(); }
+}
+
+function catalogBackUrl(group) {
+  var q = [];
+  var main = group && group.mainCat;
+  var sub = group && group.subCat;
+  if (main) q.push('main=' + encodeURIComponent(main));
+  if (sub) q.push('sub=' + encodeURIComponent(sub));
+  return envUrl('products.html' + (q.length ? ('?' + q.join('&')) : ''));
+}
+
+function selectedVariant() {
+  var rows = pdpState.rows || [];
+  var needColor = hasColors(rows);
+  if (needColor && !pdpState.color) return null;
+  var sizes = uniqueSizes(rows);
+  if (sizes.length > 1 && !pdpState.size) return null;
+  var hits = rows.filter(function(r) {
+    if (needColor && String(r.color || '').trim() !== pdpState.color) return false;
+    if (pdpState.size && canonSize(r.size) !== pdpState.size) return false;
+    return true;
+  });
+  return hits[0] || null;
+}
+
+function hasColors(rows) {
+  return (rows || []).some(function(r) { return String(r.color || '').trim(); });
+}
+function uniqueColors(rows) {
+  return uniqueSorted((rows || []).map(function(r) { return String(r.color || '').trim(); }).filter(Boolean));
+}
+function uniqueSizes(rows) {
+  return uniqueSorted((rows || []).map(function(r) { return canonSize(r.size); }).filter(Boolean), function(a, b) {
+    var ka = sizeSortKey(a), kb = sizeSortKey(b);
+    if (ka[0] !== kb[0]) return ka[0] - kb[0];
+    return ka[1].localeCompare(kb[1]);
+  });
+}
+function colorImage(color) {
+  var row = pdpState.rows.find(function(r) {
+    return String(r.color || '').trim() === color && r.image && String(r.image).indexOf('logo.png') === -1;
+  });
+  return row ? row.image : '';
+}
+
+function setSelection(next, pushUrl) {
+  if (next.color != null) pdpState.color = String(next.color || '');
+  if (next.size != null) pdpState.size = String(next.size || '');
+  var sizesForColor = uniqueSizes(pdpState.color
+    ? pdpState.rows.filter(function(r) { return String(r.color || '').trim() === pdpState.color; })
+    : pdpState.rows);
+  if (pdpState.size && sizesForColor.indexOf(pdpState.size) === -1) {
+    pdpState.size = sizesForColor.length === 1 ? sizesForColor[0] : '';
+  }
+  if (!pdpState.size && sizesForColor.length === 1) pdpState.size = sizesForColor[0];
+  var colorsForSize = uniqueColors(pdpState.size
+    ? pdpState.rows.filter(function(r) { return canonSize(r.size) === pdpState.size; })
+    : pdpState.rows);
+  if (pdpState.color && colorsForSize.length && colorsForSize.indexOf(pdpState.color) === -1) {
+    pdpState.color = colorsForSize.length === 1 ? colorsForSize[0] : '';
+  }
+  if (!pdpState.color && colorsForSize.length === 1 && hasColors(pdpState.rows)) pdpState.color = colorsForSize[0];
+  paintPdp();
+  try {
+    var u = 'product.html?code=' + encodeURIComponent(pdpState.code);
+    if (pdpState.color) u += '&color=' + encodeURIComponent(pdpState.color);
+    if (pdpState.size) u += '&size=' + encodeURIComponent(pdpState.size);
+    u = envUrl(u);
+    if (pushUrl) history.pushState({ pdp: 1 }, '', u);
+    else history.replaceState({ pdp: 1 }, '', u);
+  } catch (_) {}
+}
+
+function paintPdp() {
+  var root = document.getElementById('pdp-root');
+  var group = pdpState.group;
+  if (!root || !group) return;
+  var rows = pdpState.rows;
+  var colors = uniqueColors(rows);
+  var sizes = uniqueSizes(pdpState.color
+    ? rows.filter(function(r) { return String(r.color || '').trim() === pdpState.color; })
+    : rows);
+  var allSizes = uniqueSizes(rows);
+  var variant = selectedVariant();
+  var img = (variant && variant.image) || (pdpState.color && colorImage(pdpState.color)) || group.image || 'images/logo.png';
+  var title = group.desc || pdpState.code;
+  document.title = title + ' — All Pro Building Supplies LLC';
+  document.getElementById('pdp-title').innerHTML = esc(title);
+  document.getElementById('pdp-code').textContent = pdpState.code;
+  var crumb = document.getElementById('pdp-crumb');
+  var back = catalogBackUrl(group);
+  var bits = ['<a href="' + envUrl('index.html') + '">Home</a>',
+    '<a href="' + envUrl('products.html') + '">Products</a>'];
+  if (group.mainCat) bits.push('<a href="' + envUrl('products.html?main=' + encodeURIComponent(group.mainCat)) + '">' + esc(group.mainCat) + '</a>');
+  if (group.subCat) bits.push('<a href="' + back + '">' + esc(group.subCat) + '</a>');
+  if (group.subSubCat) bits.push(esc(group.subSubCat));
+  crumb.innerHTML = bits.join(' <span class="catalog-crumb-sep">›</span> ');
+
+  var colorHtml = '';
+  if (colors.length) {
+    colorHtml = '<div class="pdp-field"><div class="pdp-label">Color' +
+      (pdpState.color ? ' · <strong>' + esc(pdpState.color) + '</strong>' : ' · choose one') +
+      '</div><div class="pdp-swatches" role="listbox" aria-label="Color">';
+    colors.forEach(function(col) {
+      var available = !pdpState.size || rows.some(function(r) {
+        return String(r.color || '').trim() === col && canonSize(r.size) === pdpState.size;
+      });
+      var thumb = colorImage(col);
+      colorHtml += '<button type="button" class="pdp-swatch' + (pdpState.color === col ? ' on' : '') +
+        (available ? '' : ' is-off') + '" ' + (available ? '' : 'disabled ') +
+        'onclick="pickColor(\'' + String(col).replace(/\\/g,'\\\\').replace(/'/g, "\\'") + '\')">' +
+        (thumb ? '<img src="' + escAttr(thumb) + '" alt="">' : '') +
+        '<span>' + esc(col) + '</span></button>';
+    });
+    colorHtml += '</div></div>';
+  }
+
+  var sizeHtml = '';
+  if (allSizes.length) {
+    var useSelect = allSizes.length > 12;
+    sizeHtml = '<div class="pdp-field"><div class="pdp-label">Size' +
+      (pdpState.size ? ' · <strong>' + esc(sizeLabel(pdpState.size)) + '</strong>' : (allSizes.length === 1 ? '' : ' · choose one')) +
+      '</div>';
+    if (useSelect) {
+      sizeHtml += '<select class="pdp-select" id="pdp-size-select" onchange="pickSize(this.value)" aria-label="Size">' +
+        '<option value="">Select size…</option>';
+      allSizes.forEach(function(sz) {
+        var available = !pdpState.color || sizes.indexOf(sz) !== -1;
+        sizeHtml += '<option value="' + escAttr(sz) + '"' +
+          (pdpState.size === sz ? ' selected' : '') +
+          (available ? '' : ' disabled') + '>' +
+          esc(sizeLabel(sz)) + (available ? '' : ' — not in this color') + '</option>';
+      });
+      sizeHtml += '</select>';
+    } else {
+      sizeHtml += '<div class="pdp-sizes">';
+      allSizes.forEach(function(sz) {
+        var available = !pdpState.color || sizes.indexOf(sz) !== -1;
+        sizeHtml += '<button type="button" class="pdp-size' + (pdpState.size === sz ? ' on' : '') +
+          (available ? '' : ' is-off') + '" ' + (available ? '' : 'disabled ') +
+          'onclick="pickSize(\'' + String(sz).replace(/'/g, "\\'") + '\')">' +
+          esc(sizeLabel(sz)) + '</button>';
+      });
+      sizeHtml += '</div>';
+    }
+    sizeHtml += '</div>';
+  }
+
+  var needColor = colors.length > 0 && !pdpState.color;
+  var needSize = allSizes.length > 1 && !pdpState.size;
+  var priceBlock = '';
+  var buyBlock = '';
+  if (needColor || needSize) {
+    priceBlock = '<div class="pdp-price-wait">Select ' +
+      (needColor && needSize ? 'color and size' : (needColor ? 'a color' : 'a size')) +
+      ' to see price</div>';
+  } else if (variant) {
+    var isQuote = window.apbsIsQuoteOnlyItem ? window.apbsIsQuoteOnlyItem(variant) : !(parseFloat(variant.price) > 0);
+    var isOOS = isQuote ? false : (isLoggedIn ? variant.qty <= 0 : !variant.inStock);
+    if (isQuote) {
+      priceBlock = (window.apbsQuotePriceHtml ? window.apbsQuotePriceHtml() : '<span class="price-locked price-quote">Call for pricing</span>');
+      buyBlock = window.apbsQuoteCtaHtml ? window.apbsQuoteCtaHtml() : '';
+    } else if (!isLoggedIn) {
+      priceBlock = '<span class="price-locked">Login for price</span>';
+      buyBlock = '<a class="add-to-cart-btn" href="' + envUrl('login.html') + '">Log in to order</a>';
+    } else {
+      priceBlock = '<span class="shop-price pdp-price">$' + Number(variant.price).toFixed(2) + '</span>';
+      var pack = variant.pack != null ? variant.pack : '';
+      var stockHtml = isOOS
+        ? '<span class="shop-stock shop-stock-out">Out of stock · backorder OK</span>'
+        : '<span class="shop-stock shop-stock-in">In stock · ' + variant.qty + '</span>';
+      var sess = null;
+      try { sess = JSON.parse(sessionStorage.getItem('apbs_user')); } catch (e) {}
+      var cartonOnly = !!(sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess));
+      var qtyLabel = cartonOnly ? 'Ctns' : 'Qty';
+      buyBlock =
+        '<div class="pdp-pack">' + (pack !== '' ? esc(String(pack)) + ' / CTN · ' : '') + stockHtml + '</div>' +
+        '<div class="shop-buy pdp-buy">' +
+        '<label class="shop-qty-wrap"><span class="shop-qty-label">' + qtyLabel + '</span>' +
+        '<input class="shop-qty" id="pdp-qty" type="number" min="1" step="1" value="1" inputmode="numeric"/></label>' +
+        '<button type="button" class="add-to-cart-btn' + (isOOS ? ' shop-backorder-btn' : '') + '" id="pdp-add">' +
+        (isOOS ? 'Backorder' : 'Add to cart') + '</button></div>';
+    }
+  } else {
+    priceBlock = '<div class="pdp-price-wait">That color and size combination is not available</div>';
+  }
+
+  var stats = window.apbsFamilyStats ? window.apbsFamilyStats(rows, isLoggedIn) : null;
+  var meta = group.typeCat || group.subSubCat || '';
+  root.innerHTML =
+    '<div class="pdp-grid">' +
+    '<button type="button" class="pdp-photo" onclick="openLightbox(\'' + escAttr(img).replace(/'/g, "\\'") + '\',\'' + escAttr(title).replace(/'/g, "\\'") + '\')">' +
+    '<img id="pdp-img" src="' + escAttr(img) + '" alt="' + escAttr(title) + '"/></button>' +
+    '<div class="pdp-info">' +
+    (meta ? '<div class="pdp-kicker">' + esc(meta) + '</div>' : '') +
+    (stats ? '<div class="pdp-stats">' + esc(stats.label) + '</div>' : '') +
+    colorHtml + sizeHtml +
+    '<div class="pdp-offer">' + priceBlock + buyBlock + '</div>' +
+    '<a class="pdp-back" href="' + back + '">← Back to catalog</a>' +
+    '</div></div>';
+
+  var addBtn = document.getElementById('pdp-add');
+  if (addBtn && variant) {
+    addBtn.addEventListener('click', function() {
+      var qtyEl = document.getElementById('pdp-qty');
+      var want = qtyEl ? parseInt(qtyEl.value, 10) : 1;
+      var sess = null;
+      try { sess = JSON.parse(sessionStorage.getItem('apbs_user')); } catch (e) {}
+      var cartonOnly = !!(sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess));
+      var isOOS = (parseInt(variant.qty, 10) || 0) <= 0;
+      var result = window.apbsAddCartItem({
+        code: pdpState.code,
+        size: variant.size,
+        color: variant.color || '',
+        description: group.desc || pdpState.code,
+        pcs: variant.pack,
+        price: variant.price,
+        qty: variant.qty,
+        backorder: isOOS,
+        cartonOnly: cartonOnly,
+        addQty: want
+      });
+      if (!result || !result.ok) return;
+      var prev = addBtn.textContent;
+      addBtn.textContent = result.backorder ? 'Backordered!' : 'Added!';
+      addBtn.style.background = 'rgba(46,204,113,.15)';
+      addBtn.style.borderColor = '#2ecc71';
+      addBtn.style.color = '#2ecc71';
+      setTimeout(function() {
+        addBtn.textContent = prev;
+        addBtn.style.background = '';
+        addBtn.style.borderColor = '';
+        addBtn.style.color = '';
+      }, 1200);
+    });
+  }
+}
+
+function pickColor(color) { setSelection({ color: color }); }
+function pickSize(size) { setSelection({ size: size }); }
+
+function openLightbox(src, title){
+  if(!src) return;
+  var lb = document.getElementById('img-lightbox');
+  var img = document.getElementById('img-lb-img');
+  var ttl = document.getElementById('img-lb-title');
+  if(!lb||!img) return;
+  img.src = src; img.alt = title||'';
+  if(ttl) ttl.textContent = title||'';
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(){
+  var lb = document.getElementById('img-lightbox');
+  if(lb) lb.style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeLightbox(); });
+
+async function boot() {
+  var q = params();
+  var code = window.normalizeProductCode
+    ? window.normalizeProductCode(q.get('code') || q.get('id') || '')
+    : String(q.get('code') || q.get('id') || '').trim();
+  var root = document.getElementById('pdp-root');
+  if (!code) {
+    root.innerHTML = '<div class="catalog-empty">No product selected. <a href="' + envUrl('products.html') + '">Back to catalog</a></div>';
+    return;
+  }
+  var rows;
+  try {
+    rows = await window.apbsFetchCatalogRows();
+  } catch (e) {
+    root.innerHTML = '<div class="catalog-empty">Could not load catalog. <a href="' + envUrl('products.html') + '">Back to catalog</a></div>';
+    return;
+  }
+  var groups = window.apbsRowsToGroups(rows);
+  var group = groups[code];
+  if (!group) {
+    root.innerHTML = '<div class="catalog-empty">Product ' + esc(code) + ' was not found. <a href="' + envUrl('products.html') + '">Back to catalog</a></div>';
+    return;
+  }
+  pdpState.code = code;
+  pdpState.group = group;
+  pdpState.rows = group.rows || [];
+  var wantColor = String(q.get('color') || '').trim();
+  var wantSize = canonSize(q.get('size') || '');
+  var colors = uniqueColors(pdpState.rows);
+  var sizes = uniqueSizes(pdpState.rows);
+  if (wantColor && colors.indexOf(wantColor) === -1) wantColor = '';
+  if (wantSize && sizes.indexOf(wantSize) === -1) wantSize = '';
+  if (!wantColor && colors.length === 1) wantColor = colors[0];
+  if (!wantSize && sizes.length === 1) wantSize = sizes[0];
+  pdpState.color = wantColor;
+  pdpState.size = wantSize;
+  paintPdp();
+  if (window.apbsSaveCart) window.apbsSaveCart(window.apbsGetCart());
+}
+
+boot();
+</script>
+</body>
+</html>
