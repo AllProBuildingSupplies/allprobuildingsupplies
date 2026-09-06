@@ -21,6 +21,8 @@ Agent: [Product pricing analysis](https://cursor.com/agents/bc-dcaa793d-4f8b-42c
 | `KingSmart_vs_NJPD.xlsx` | SKU-level King Smart list vs Gator sell vs Tommur vs Zhenpeng |
 | `GREEN_VALVE_VS_TOMMUR.md` | Misnamed “Zhenpeng” PDF = Green Valve PVC PI vs Tommur FOB/DDP |
 | `GreenValve_vs_Tommur.xlsx` | SKU-level Green EXW → landed vs Tommur PVC fittings + pipe |
+| `ZHENPENG_FOB_QUOTE.md` | Real Zhenpeng FOB 2026-09-05 vs NJPD / Tommur DDP (23 F2159 SKUs) |
+| `Zhenpeng_FOB_vs_NJPD.xlsx` | Line-level FOB → landed → Gator sell, Tommur, King Smart |
 
 ## Tommur workbook rules
 

@@ -6,7 +6,7 @@ Split the buy. One factory will not win both pipe and fittings.
 
 **Ningbo Zhenpeng Plumbing Fittings Co., Ltd.** (also Cixi Zhenpeng) — **F2159 poly-alloy / PPSU crimp only**
 
-This is the factory whose catalog is the Everflow clone: `1/2"PEX × 1/2"PEX Crimp Elbow, Poly Alloy, F2159`. Published **1/2" elbow $0.10 FOB**, MOQ 3000 (part B121290). That is the only public number in the ~50% band vs NJPD $0.33. Tommur DDP on that SKU is $0.49 (−48%). King Smart USA stock cannot touch this.
+This is the factory whose catalog is the Everflow clone: `1/2"PEX × 1/2"PEX Crimp Elbow, Poly Alloy, F2159`. **FOB quote 2026-09-05** (Baruch / All Pro): 23 F2159 SKUs, **$16,686 / 55,100 pcs**. Landed **beats Tommur DDP on 11/11** matched fittings, **0 underwater** at NJPD, order margin **~27%**. Does **not** hit 50%. Catalog **B121290 $0.10** came back at **$0.172 FOB**. Counter toward $0.10–$0.12. Full sheet: `ZHENPENG_FOB_QUOTE.md`.
 
 | | |
 |--|--|
@@ -17,9 +17,7 @@ This is the factory whose catalog is the Everflow clone: `1/2"PEX × 1/2"PEX Cri
 | Site | https://www.ppsu-pex-fittings.com/ · https://www.cxzhnp.com/ |
 | Addr | 358 Weiyi W. Road, Chongshou Industrial Zone, Cixi, Ningbo, Zhejiang 315334 |
 
-Ask for: full **F2159 CTS inch** pricelist (elbows, couplings, tees, reducing tees, plugs 1/2" / 3/4" / 1") matching Gator `PP*` list. NSF/cUPC/CSA certificates **in their name**. PPSU resin (Solvay Acudel / BASF). FOB Ningbo. Walk if 1/2" elbow FOB is not **under ~$0.12**.
-
-They also mold F1960 — do not order that series.
+Quote is in. Counter: honor **B121290 $0.10** (or ≤ $0.12) on the 9,000 1/2" elbows; NSF/cUPC in **their name**; copper F1807 rings; lock USD (drop ±1% FX clause). Do not PO until King Smart FOB CN is compared. They also mold F1960 — do not order that series.
 
 ## Keep (pipe)
 
