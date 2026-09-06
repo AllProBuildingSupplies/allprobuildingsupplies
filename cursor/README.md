@@ -7,6 +7,7 @@ GitHub now has **one branch: `main`**. Agent deliverables that are not the live 
 | [product-pricing-analysis/](product-pricing-analysis/) | Factory orders, margins, Tommur cost workbook | `Factory_Order_PVC_PEX_45HQ.csv` |
 | [sell-sheets/](sell-sheets/) | Category sell-sheet PDFs | `brochure/sell-sheets/pdf/` |
 | [inbound-container-tracking/](inbound-container-tracking/) | Containers 3 & 4 | `data/inbound-containers.json` and Admin → Stock |
+| [all-pro-os/](all-pro-os/) | TEST ops suite (OMS/WMS/loads) | `ops.html` — branch `cursor/all-pro-os-test-0a19` |
 | [storefront/](storefront/) | Catalog / admin / invoices (already the live site) | [allprobuildingsupplies.com](https://allprobuildingsupplies.com) |
 
 ## Cloud agents — keep vs archive
