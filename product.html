@@ -217,33 +217,17 @@ function paintPdp() {
 
   var sizeHtml = '';
   if (allSizes.length) {
-    var useSelect = allSizes.length > 12;
     sizeHtml = '<div class="pdp-field"><div class="pdp-label">Size' +
       (pdpState.size ? ' · <strong>' + esc(sizeLabel(pdpState.size)) + '</strong>' : (allSizes.length === 1 ? '' : ' · choose one')) +
-      '</div>';
-    if (useSelect) {
-      sizeHtml += '<select class="pdp-select" id="pdp-size-select" onchange="pickSize(this.value)" aria-label="Size">' +
-        '<option value="">Select size…</option>';
-      allSizes.forEach(function(sz) {
-        var available = !pdpState.color || sizes.indexOf(sz) !== -1;
-        sizeHtml += '<option value="' + escAttr(sz) + '"' +
-          (pdpState.size === sz ? ' selected' : '') +
-          (available ? '' : ' disabled') + '>' +
-          esc(sizeLabel(sz)) + (available ? '' : ' — not in this color') + '</option>';
-      });
-      sizeHtml += '</select>';
-    } else {
-      sizeHtml += '<div class="pdp-sizes">';
-      allSizes.forEach(function(sz) {
-        var available = !pdpState.color || sizes.indexOf(sz) !== -1;
-        sizeHtml += '<button type="button" class="pdp-size' + (pdpState.size === sz ? ' on' : '') +
-          (available ? '' : ' is-off') + '" ' + (available ? '' : 'disabled ') +
-          'onclick="pickSize(\'' + String(sz).replace(/'/g, "\\'") + '\')">' +
-          esc(sizeLabel(sz)) + '</button>';
-      });
-      sizeHtml += '</div>';
-    }
-    sizeHtml += '</div>';
+      '</div><div class="pdp-sizes' + (allSizes.length > 16 ? ' pdp-sizes-dense' : '') + '">';
+    allSizes.forEach(function(sz) {
+      var available = !pdpState.color || sizes.indexOf(sz) !== -1;
+      sizeHtml += '<button type="button" class="pdp-size' + (pdpState.size === sz ? ' on' : '') +
+        (available ? '' : ' is-off') + '" ' + (available ? '' : 'disabled ') +
+        'onclick="pickSize(\'' + String(sz).replace(/'/g, "\\'") + '\')">' +
+        esc(sizeLabel(sz)) + '</button>';
+    });
+    sizeHtml += '</div></div>';
   }
 
   var needColor = colors.length > 0 && !pdpState.color;
