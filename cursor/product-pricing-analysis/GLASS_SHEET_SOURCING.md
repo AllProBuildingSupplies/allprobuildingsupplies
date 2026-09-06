@@ -1,6 +1,8 @@
 # Clear float glass sheets — non-China container sourcing
 
-Need: **1/4", 3/8", 1/2" clear** large sheets, container loads. China is out. Spec does not need to clone a US mill brand — decent ASTM float, much cheaper.
+Need: **1/4", 3/8", 1/2" clear** sheets, container loads. China is out.
+
+**Do not match US mill spec.** No jumbo, no low-iron, no ASTM certificate hunt, no 12.7 mm true 1/2". Buy **standard commercial clear float** in the metric sizes mills already run. Decent optical quality (windows / storefront / shower / table tops). Much cheaper.
 
 ## Why China (and Malaysia) are dead
 
@@ -21,11 +23,13 @@ US inch vs what every mill actually makes:
 |---|---|---|
 | 1/4" | **6 mm** (true 1/4" is 6.35 mm — mills sell 6 mm) | ~15 kg/m² |
 | 3/8" | **10 mm** (true 3/8" is 9.53 mm) | ~25 kg/m² |
-| 1/2" | **12 mm** (true 1/2" is 12.7 mm — ask if they can run 12.7) | ~30 kg/m² |
+| 1/2" | **12 mm** (true 1/2" is 12.7 mm — **do not pay extra for 12.7**) | ~30 kg/m² |
 
-Quality: **ASTM C1036 Type I, Class 1 (clear), Q3 or Q4 glazing**. Annealed float, not tempered unless he asks later.
+Quality bar: **standard commercial clear**, EN 572-2 or equivalent. **Not** ultra-clear / low-iron / coated / tempered / laminated. A few bubbles or a green edge is normal soda-lime float — that is not a defect.
 
-**Large sheets:** ask for jumbo **3210 × 6000 mm** (or US stock **96" × 130" / 84" × 120"**). Glass is **weight-limited**. Ship **20 ft** A-frame crates, not 40HQ. A 20 ft of 12 mm is roughly **700–800 m²**; 6 mm roughly **1,400–1,600 m²**.
+**Sizes (cheap path):** mill **stock** sheets, not jumbo. Typical: **2140 × 3210**, **2250 × 3210**, **1830 × 2440** (about 6×10, 7×10, 6×8 ft). Jumbo 3210 × 6000 costs more to pack and is heavier to handle. Only ask jumbo if a job actually needs it.
+
+Glass is **weight-limited**. Ship **20 ft** A-frame crates, not 40HQ. A 20 ft of 12 mm is roughly **700–800 m²**; 6 mm roughly **1,400–1,600 m²**. **6 mm is the volume SKU** — buy that first.
 
 ## Duty (non-China) — still not free
 
@@ -40,23 +44,9 @@ Turkey / India / Egypt / Indonesia are **not** on the float-glass AD/CVD orders.
 
 ---
 
-## Option 1 (send first) — Şişecam Flat Glass, Turkey
+**Price first, then brand.** Independent mills (Sphinx, Gold Plus) will chase a new importer. Şişecam is the quality mill — they may quote architectural money. Send all three; pick the cheapest landed 6 mm that is clear and flat.
 
-World’s ~5th largest float mill. Plants in Turkey (and Egypt/India/Italy). Already has an **Americas sales desk**. Quality is real architectural float, not trader glass.
-
-| | |
-|---|---|
-| HQ | İçmeler Mah., D-100 Karayolu Cad. No: 44A, 34947 Tuzla / Istanbul |
-| Flat-glass sales | `archglass@sisecam.com` · **+90 850 206 47 22** |
-| Switchboard | +90 850 206 50 50 · https://www.sisecam.com/en/flat-glass |
-| US / Americas | Şişecam USA, 400 Perimeter Center Terrace NE, Suite 350, Atlanta, GA 30346 · **+1 770 375 2300** |
-| Americas people | Ronny Cain, North American Sales Manager (Atlanta) · Emre İskender, Flatglass Americas Sales Supervisor — reach via `archglass@sisecam.com` |
-
-Ask: FOB Mersin / Izmir / Gemlik, 6 / 10 / 12 mm clear, jumbo sizes, $/m², 20 ft crate packing, MOQ, ASTM C1036 certs. East Coast ocean from Turkey is the natural lane for Memphis.
-
----
-
-## Option 2 — Sphinx Glass, Egypt (independent mill)
+## Option 1 (price) — Sphinx Glass, Egypt (independent mill)
 
 Egypt’s independent float line (Sadat City). Brand **Trulite** clear. Saint-Gobain Egypt (same country, different mill) is **already stuffing 20 ft crates of Planilux clear into Newark** — so the Egypt → US glass lane is proven. Sphinx will usually quote a new importer faster than a global group mill.
 
@@ -69,11 +59,11 @@ Egypt’s independent float line (Sadat City). Brand **Trulite** clear. Saint-Go
 | Plant | **+20 48 262 5225** |
 | Site | https://www.sphinxglass.com |
 
-Ask: FOB Alexandria / Damietta, same 6 / 10 / 12 mm jumbo, 20 ft A-frames.
+Ask: FOB Alexandria / Damietta, **stock sizes**, 6 / 10 / 12 mm standard clear (not Trulite premium if they have a cheaper grade), 20 ft A-frames.
 
 ---
 
-## Backup if those two are slow — Gold Plus, India
+## Option 2 (price) — Gold Plus, India
 
 Fully Indian-owned float mill (Roorkee, Belagavi, Kalamb). Expanding hard, more likely to chase an export container than Saint-Gobain India. No US AD/CVD on Indian float.
 
@@ -84,9 +74,25 @@ Fully Indian-owned float mill (Roorkee, Belagavi, Kalamb). Expanding hard, more 
 | Raghav Kant | `raghav.kant@goldplusgroup.com` · **+91 93192 72347** |
 | Site | https://goldplusgroup.com |
 
-FOB Nhava Sheva / Mundra. Longer ocean than Turkey/Egypt to the East Coast — still beats China duty.
+FOB Nhava Sheva / Mundra. Longer ocean than Egypt to the East Coast — still beats China duty. They already export **stock sizes** (e.g. 1220 × 1830) to Sri Lanka; ask for 6×8 / 6×10 ft clear, cheapest commercial grade.
 
 Other India mill (if Gold Plus no-quotes): AIS / Asahi India, Gurugram, **+91 124 406 2212**, https://www.aisglass.com.
+
+---
+
+## Option 3 (quality / if the others ghost) — Şişecam Flat Glass, Turkey
+
+World’s ~5th largest float mill. Already has an **Americas sales desk**. Tell them you want **standard clear**, not Ultra Clear, stock sizes, container economics. If they only quote jumbo architectural, walk.
+
+| | |
+|---|---|
+| HQ | İçmeler Mah., D-100 Karayolu Cad. No: 44A, 34947 Tuzla / Istanbul |
+| Flat-glass sales | `archglass@sisecam.com` · **+90 850 206 47 22** |
+| Switchboard | +90 850 206 50 50 · https://www.sisecam.com/en/flat-glass |
+| US / Americas | Şişecam USA, 400 Perimeter Center Terrace NE, Suite 350, Atlanta, GA 30346 · **+1 770 375 2300** |
+| Americas people | Ronny Cain, North American Sales Manager (Atlanta) · Emre İskender, Flatglass Americas Sales Supervisor — reach via `archglass@sisecam.com` |
+
+Ask: FOB Mersin / Izmir / Gemlik, 6 / 10 / 12 mm **standard clear stock**, $/m², 20 ft crate packing, MOQ. East Coast ocean from Turkey is the natural lane for Memphis.
 
 ---
 
@@ -103,23 +109,23 @@ Other India mill (if Gold Plus no-quotes): AIS / Asahi India, Gurugram, **+91 12
 
 ## Copy-paste RFQ
 
-Subject: RFQ — container loads of 6 / 10 / 12 mm clear float, jumbo sheets, FOB
+Subject: RFQ — 20 ft loads of standard 6 / 10 / 12 mm clear float, stock sizes, cheapest commercial grade
 
-We are a US B2B building-supplies importer. We need mill pricing (not a trader) for annealed clear float glass:
+We are a US B2B building-supplies importer. We need mill pricing for ordinary annealed **clear float** — commercial / window grade, not architectural jumbo, not low-iron:
 
-- Thickness: **6 mm, 10 mm, 12 mm** (quote 12.7 mm if you can run true 1/2")
-- Color: clear (not low-iron unless you list it as an alternate)
-- Quality: ASTM C1036 Type I Class 1, Q3 or Q4
-- Size: jumbo **3210 × 6000 mm** and/or cut sizes **96" × 130"** and **84" × 120"**
-- Packing: seaworthy **A-frame crates**, 20 ft container
-- Need per thickness: USD/m² FOB named port, kg/m², m² per 20 ft, crate count, MOQ, lead time, mill test cert
+- Thickness: **6 mm, 10 mm, 12 mm** (6 mm is the main volume)
+- Color: standard clear only. Do **not** quote ultra-clear, coated, tempered, or laminated unless listed as a cheaper leftover
+- Quality: EN 572-2 or your standard commercial grade is enough. Green edge is fine
+- Size: **stock sheets you already cut** (2140×3210, 2250×3210, 1830×2440, or closest). Do not quote jumbo unless it is cheaper per m²
+- Packing: seaworthy A-frame crates, **20 ft**
+- Need per thickness: USD/m² FOB named port, kg/m², m² per 20 ft, crate count, MOQ, lead time
 - Confirm the **tin-bath country** (must not be China or Malaysia)
 
 ---
 
 ## How to play this
 
-1. Email **Şişecam `archglass@sisecam.com`** and **Sphinx `sales@sphinxglass.com`** the same day. CC Gold Plus if you want a third number.
-2. Compare **landed East Coast** (FOB + ocean on 20 ft + MFN + ~12.5% overlay), not FOB. Glass freight is weight, not CBM.
+1. Email **Sphinx `sales@sphinxglass.com`** and **Gold Plus `info@goldplusgroup.com`** the same day. Şişecam `archglass@sisecam.com` is the quality check — walk if they only quote Ultra Clear / jumbo.
+2. Compare **landed East Coast** (FOB + ocean on 20 ft + MFN + ~12.5% overlay), not FOB. Glass freight is weight, not CBM. Pick the cheapest **6 mm** that is clear and flat.
 3. Do not mix origins in one entry — CBP origin is the float line.
-4. First PO is one 20 ft of 6 mm (easiest to sell / lightest) plus a mixed 10/12 mm 20 ft once sizes are confirmed with the customer.
+4. First PO is **one 20 ft of 6 mm stock**. Add 10/12 mm only after that sells.
