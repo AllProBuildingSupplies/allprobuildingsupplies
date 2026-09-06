@@ -250,7 +250,7 @@ async function renderCart(){
     var tr = document.createElement('tr');
     var esc = window.apbsEscapeHtml || function(s){ return String(s); };
     tr.innerHTML =
-      '<td><div class="cart-prod-name">'+esc(item.description)+' '+esc(item.size)+'</div>'
+      '<td><div class="cart-prod-name">'+esc(item.description)+' '+esc(item.size)+(item.color ? ' · '+esc(item.color) : '')+'</div>'
       +'<div class="cart-prod-sub">'+esc(item.code)+' &nbsp;|&nbsp; '+item.pcsPerCtn+' pcs/ctn'
       +(isBackorder ? ' &nbsp;|&nbsp; <span class="cart-bo-tag">BACKORDER</span>' : '')
       +'</div></td>'

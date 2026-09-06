@@ -76,15 +76,24 @@ async function fetchMainProductsCsv() {
   return '';
 }
 
-/** Insert Achim rows from the public main-branch CSV. Never deletes plumbing stock. */
+const ACHIM_SEED_VERSION = 'pricebook-v2-color';
+
+/** Insert Achim/Alveron rows from the public main-branch CSV. Never deletes plumbing stock. */
 async function ensureAchimCatalogSeed(env) {
   if (!env || !env.DB) return;
   if (achimSeedPromise) return achimSeedPromise;
   achimSeedPromise = (async () => {
-    const existing = await env.DB.prepare(
-      "SELECT COUNT(*) AS n FROM products WHERE code LIKE 'ACH-%'"
-    ).first();
-    if (existing && Number(existing.n) > 0) return;
+    await env.DB.prepare(
+      `CREATE TABLE IF NOT EXISTS app_meta (key TEXT PRIMARY KEY, value TEXT)`
+    ).run();
+    let current = null;
+    try {
+      current = await env.DB.prepare(
+        `SELECT value FROM app_meta WHERE key = 'achim_catalog'`
+      ).first();
+    } catch (_) {}
+    if (current && String(current.value) === ACHIM_SEED_VERSION) return;
+
     const csvText = await fetchMainProductsCsv();
     if (!csvText) return;
     const table = parseCsvRows(csvText);
@@ -94,6 +103,7 @@ async function ensureAchimCatalogSeed(env) {
     const iCode = idx('Code');
     const iDesc = idx('Description');
     const iSize = idx('Size');
+    const iColor = idx('Color');
     const iPack = idx('Pack');
     const iPrice = idx('Price');
     const iImage = idx('Image');
@@ -104,16 +114,20 @@ async function ensureAchimCatalogSeed(env) {
     const iSss = idx('sub_sub_sub_category');
     const iTom = idx('Tommur-Code');
     const iLesso = idx('Lesso-Code');
-    if (iCode < 0 || iSize < 0) return;
-    const stmts = [];
+    if (iCode < 0 || iSize < 0 || iColor < 0) return;
+
+    const stmts = [
+      env.DB.prepare(`DELETE FROM products WHERE code LIKE 'ACH-%' OR code LIKE 'ALV-%'`),
+    ];
     const seen = new Set();
     for (let r = 1; r < table.length; r++) {
       const cols = table[r];
       const code = normalizeProductCode(cols[iCode]);
-      if (!code || !code.startsWith('ACH-')) continue;
+      if (!code || (!code.startsWith('ACH-') && !code.startsWith('ALV-'))) continue;
       const size = canonicalizeSize(cols[iSize]);
       if (!size) continue;
-      const key = code + '\0' + size;
+      const color = normalizeColor(iColor >= 0 ? cols[iColor] : '');
+      const key = code + '\0' + size + '\0' + color;
       if (seen.has(key)) continue;
       seen.add(key);
       const priceRaw = iPrice >= 0 ? cols[iPrice] : '';
@@ -125,6 +139,7 @@ async function ensureAchimCatalogSeed(env) {
             {
               code,
               description: iDesc >= 0 ? cols[iDesc] : '',
+              color,
               pack: iPack >= 0 ? cols[iPack] : 1,
               qty: 0,
               price: priceRaw,
@@ -142,6 +157,13 @@ async function ensureAchimCatalogSeed(env) {
         )
       );
     }
+    if (seen.size < 1) return;
+    stmts.push(
+      env.DB.prepare(
+        `INSERT INTO app_meta (key, value) VALUES ('achim_catalog', ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+      ).bind(ACHIM_SEED_VERSION)
+    );
     for (let i = 0; i < stmts.length; i += 40) {
       await env.DB.batch(stmts.slice(i, i + 40));
     }
@@ -203,8 +225,7 @@ function formatSizeDisplay(size) {
 }
 
 function isQuoteOnlyProduct(p) {
-  const main = String(p && p.main_category != null ? p.main_category : '').trim().toLowerCase();
-  return main === 'flooring' || main === 'windows';
+  return !(parseFloat(p && p.price) > 0);
 }
 
 function roundMoney(n) {
@@ -225,8 +246,12 @@ function productCategoryFields(p) {
 }
 
 const PRODUCT_INSERT_COLS =
-  'code, description, size, pack, qty, price, image, material, main_category, sub_category, sub_sub_category, sub_sub_sub_category, tommur_code, lesso_code';
-const PRODUCT_INSERT_PLACEHOLDERS = '?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?';
+  'code, description, size, color, pack, qty, price, image, material, main_category, sub_category, sub_sub_category, sub_sub_sub_category, tommur_code, lesso_code';
+const PRODUCT_INSERT_PLACEHOLDERS = '?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?';
+
+function normalizeColor(color) {
+  return String(color == null ? '' : color).trim();
+}
 
 function productInsertBinds(p, sizeOverride) {
   const cats = productCategoryFields(p);
@@ -234,6 +259,7 @@ function productInsertBinds(p, sizeOverride) {
     normalizeProductCode(p.code),
     p.description,
     sizeOverride != null ? sizeOverride : canonicalizeSize(p.size),
+    normalizeColor(p.color),
     p.pack,
     p.qty == null || p.qty === '' ? 0 : p.qty,
     roundMoney(p.price),
@@ -343,16 +369,23 @@ function sizeMatchCandidates(size) {
   return out;
 }
 
-function findProduct(prods, code, size) {
+function findProduct(prods, code, size, color) {
   if (!Array.isArray(prods) || !prods.length) return null;
   const c = normalizeProductCode(code);
   const want = canonicalizeSize(size);
   if (!c || !want) return null;
-  return (
-    prods.find(
-      (p) => normalizeProductCode(p.code) === c && canonicalizeSize(p.size) === want
-    ) || null
+  const col = normalizeColor(color);
+  const matches = prods.filter(
+    (p) => normalizeProductCode(p.code) === c && canonicalizeSize(p.size) === want
   );
+  if (!matches.length) return null;
+  if (col) {
+    const exact = matches.find((p) => normalizeColor(p.color) === col);
+    if (exact) return exact;
+  }
+  if (matches.length === 1) return matches[0];
+  const blank = matches.find((p) => !normalizeColor(p.color));
+  return blank || matches[0];
 }
 
 /**
@@ -504,7 +537,7 @@ async function loadOwnedOrder(env, orderId, userEmail) {
 }
 
 function mapOrderItem(it, prods) {
-  const match = findProduct(prods, it.product_sku, it.size);
+  const match = findProduct(prods, it.product_sku, it.size, it.color);
   const canonSize = match ? match.size : normalizeSize(it.size);
   const qty = parseInt(it.quantity, 10) || 0;
   let qtyShipped = parseInt(it.qty_shipped, 10);
@@ -513,6 +546,7 @@ function mapOrderItem(it, prods) {
   return {
     code: it.product_sku,
     size: canonSize,
+    color: match ? normalizeColor(match.color) : normalizeColor(it.color),
     qty,
     qtyShipped,
     qtyBackordered: Math.max(0, qty - qtyShipped),
@@ -623,6 +657,7 @@ function toPublicProduct(p) {
     code: p.code,
     description: p.description,
     size: p.size,
+    color: p.color || '',
     size_display: formatSizeDisplay(p.size),
     pack: p.pack,
     image: p.image,
@@ -850,6 +885,7 @@ async function ensureCoreSchema(env) {
       code                   TEXT NOT NULL,
       description            TEXT,
       size                   TEXT NOT NULL DEFAULT '',
+      color                  TEXT NOT NULL DEFAULT '',
       pack                   INTEGER,
       qty                    INTEGER,
       price                  REAL,
@@ -861,7 +897,7 @@ async function ensureCoreSchema(env) {
       sub_sub_sub_category   TEXT DEFAULT '',
       tommur_code            TEXT DEFAULT '',
       lesso_code             TEXT DEFAULT '',
-      PRIMARY KEY (code, size)
+      PRIMARY KEY (code, size, color)
     )
   `).run();
   await env.DB.prepare(`
@@ -900,6 +936,7 @@ async function ensureCoreSchema(env) {
       order_id          TEXT NOT NULL,
       product_sku       TEXT,
       size              TEXT,
+      color             TEXT DEFAULT '',
       quantity          INTEGER,
       price_at_purchase REAL,
       qty_shipped       INTEGER DEFAULT 0
@@ -936,6 +973,69 @@ async function ensureProductCategoryColumns(env) {
       `ALTER TABLE products ADD COLUMN sub_sub_sub_category TEXT DEFAULT ''`
     ).run();
   } catch (_) {}
+}
+
+/** Color column + unique key (code, size, color). Plumbing keeps color ''. */
+async function ensureProductColorSchema(env) {
+  try {
+    await env.DB.prepare(`ALTER TABLE products ADD COLUMN color TEXT DEFAULT ''`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`UPDATE products SET color = '' WHERE color IS NULL`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE order_items ADD COLUMN color TEXT DEFAULT ''`).run();
+  } catch (_) {}
+
+  let pkCols = [];
+  try {
+    const info = await env.DB.prepare(`PRAGMA table_info(products)`).all();
+    pkCols = (info.results || [])
+      .filter((c) => Number(c.pk) > 0)
+      .sort((a, b) => Number(a.pk) - Number(b.pk))
+      .map((c) => String(c.name));
+  } catch (_) {
+    return;
+  }
+  if (pkCols.length === 3 && pkCols[0] === 'code' && pkCols[1] === 'size' && pkCols[2] === 'color') {
+    return;
+  }
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS products_color_pk (
+      code                   TEXT NOT NULL,
+      description            TEXT,
+      size                   TEXT NOT NULL DEFAULT '',
+      color                  TEXT NOT NULL DEFAULT '',
+      pack                   INTEGER,
+      qty                    INTEGER,
+      price                  REAL,
+      image                  TEXT,
+      material               TEXT DEFAULT '',
+      main_category          TEXT DEFAULT '',
+      sub_category           TEXT DEFAULT '',
+      sub_sub_category       TEXT DEFAULT '',
+      sub_sub_sub_category   TEXT DEFAULT '',
+      tommur_code            TEXT DEFAULT '',
+      lesso_code             TEXT DEFAULT '',
+      PRIMARY KEY (code, size, color)
+    )
+  `).run();
+  await env.DB.prepare(`
+    INSERT OR IGNORE INTO products_color_pk (
+      code, description, size, color, pack, qty, price, image, material,
+      main_category, sub_category, sub_sub_category, sub_sub_sub_category,
+      tommur_code, lesso_code
+    )
+    SELECT
+      code, description, size, COALESCE(color, ''), pack, qty, price, image,
+      COALESCE(material, ''), COALESCE(main_category, ''), COALESCE(sub_category, ''),
+      COALESCE(sub_sub_category, ''), COALESCE(sub_sub_sub_category, ''),
+      COALESCE(tommur_code, ''), COALESCE(lesso_code, '')
+    FROM products
+  `).run();
+  await env.DB.prepare(`DROP TABLE products`).run();
+  await env.DB.prepare(`ALTER TABLE products_color_pk RENAME TO products`).run();
 }
 
 /**
@@ -1488,6 +1588,7 @@ async function ensureRuntimeSchema(env) {
       await ensureAddressesTable(env);
       await ensureProductFactoryColumns(env);
       await ensureProductCategoryColumns(env);
+      await ensureProductColorSchema(env);
       await ensureUsersCompatColumns(env);
       await ensureOrderShipmentColumns(env);
       await ensureOrderPaymentColumns(env);
@@ -1512,11 +1613,11 @@ async function ensureRuntimeSchema(env) {
 }
 
 const PRODUCTS_SELECT =
-  `SELECT code, description, size, pack, qty, price, image, material,
+  `SELECT code, description, size, color, pack, qty, price, image, material,
           main_category, sub_category, sub_sub_category, sub_sub_sub_category
    FROM products`;
 const PRODUCTS_SELECT_ADMIN =
-  `SELECT code, description, size, pack, qty, price, image, material,
+  `SELECT code, description, size, color, pack, qty, price, image, material,
           main_category, sub_category, sub_sub_category, sub_sub_sub_category,
           tommur_code, lesso_code
    FROM products`;
@@ -1983,6 +2084,7 @@ function toTradeProduct(p) {
     code: p.code,
     description: p.description,
     size: p.size,
+    color: p.color || '',
     size_display: formatSizeDisplay(p.size),
     pack: p.pack,
     qty: p.qty,
@@ -2217,7 +2319,7 @@ function validateAndPriceItems(allProds, items) {
   for (const i of items) {
     const qty = parseInt(i.qty, 10);
     if (!qty || qty < 1) return { error: `Invalid quantity for ${i.code || 'item'}` };
-    const match = findProduct(allProds, i.code, i.size);
+    const match = findProduct(allProds, i.code, i.size, i.color);
     if (!match) return { error: `Product not found: ${i.code} ${i.size}` };
     if (isQuoteOnlyProduct(match)) {
       return { error: `Call for pricing: ${match.code} ${match.size}` };
@@ -2230,6 +2332,7 @@ function validateAndPriceItems(allProds, items) {
     validated.push({
       code: match.code,
       size: match.size,
+      color: normalizeColor(match.color),
       description: match.description,
       qty,
       unitPrice,
@@ -2251,7 +2354,7 @@ function validateAdminOrderItems(allProds, items, options = {}) {
   for (const i of items) {
     const qty = parseInt(i.qty, 10);
     if (!qty || qty < 1) return { error: `Invalid quantity for ${i.code || 'item'}` };
-    const match = findProduct(allProds, i.code, i.size);
+    const match = findProduct(allProds, i.code, i.size, i.color);
     if (!match) return { error: `Product not found: ${i.code} ${i.size}` };
     if (checkStock) {
       const stock = parseInt(match.qty, 10) || 0;
@@ -2274,6 +2377,7 @@ function validateAdminOrderItems(allProds, items, options = {}) {
     validated.push({
       code: match.code,
       size: match.size,
+      color: normalizeColor(match.color),
       description: match.description,
       qty,
       qtyShipped,
@@ -2288,7 +2392,12 @@ function validateAdminOrderItems(allProds, items, options = {}) {
 async function restoreOrderItemsStock(env, orderId) {
   const { results: oldItems } = await env.DB.prepare('SELECT * FROM order_items WHERE order_id = ?').bind(orderId).all();
   const stmts = oldItems.map((it) =>
-    env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(it.quantity, it.product_sku, it.size)
+    env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ? AND color = ?').bind(
+      it.quantity,
+      it.product_sku,
+      it.size,
+      normalizeColor(it.color)
+    )
   );
   if (stmts.length) await env.DB.batch(stmts);
   return oldItems;
@@ -2296,7 +2405,12 @@ async function restoreOrderItemsStock(env, orderId) {
 
 async function applyOrderItemsStock(env, items) {
   const stmts = items.map((it) =>
-    env.DB.prepare('UPDATE products SET qty = MAX(0, qty - ?) WHERE code = ? AND size = ?').bind(it.qty, it.code, it.size)
+    env.DB.prepare('UPDATE products SET qty = MAX(0, qty - ?) WHERE code = ? AND size = ? AND color = ?').bind(
+      it.qty,
+      it.code,
+      it.size,
+      normalizeColor(it.color)
+    )
   );
   if (stmts.length) await env.DB.batch(stmts);
 }
@@ -2919,8 +3033,8 @@ export default {
             for (const i of priced.validated) {
               stmts.push(
                 env.DB.prepare(
-                  'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)'
-                ).bind(orderId, i.code, i.size, i.qty, i.unitPrice)
+                  'INSERT INTO order_items (order_id, product_sku, size, color, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?, ?)'
+                ).bind(orderId, i.code, i.size, normalizeColor(i.color), i.qty, i.unitPrice)
               );
             }
             await env.DB.batch(stmts);
@@ -3316,7 +3430,7 @@ export default {
           const code = normalizeProductCode(p.code);
           const size = canonicalizeSize(p.size);
           if (!code || !size) continue;
-          const key = code + '\0' + size;
+          const key = code + '\0' + size + '\0' + normalizeColor(p.color);
           if (seen.has(key)) continue;
           seen.add(key);
           stmts.push(
@@ -3342,10 +3456,11 @@ export default {
           const size = canonicalizeSize(p.size);
           if (!code || !size) continue;
           const cats = productCategoryFields(p);
-          incoming.set(code + '\0' + size, {
+          incoming.set(code + '\0' + size + '\0' + normalizeColor(p.color), {
             code,
             description: p.description,
             size,
+            color: normalizeColor(p.color),
             pack: p.pack,
             qty: p.qty == null || p.qty === '' ? 0 : p.qty,
             price: roundMoney(p.price),
@@ -3384,14 +3499,18 @@ export default {
             if (canonicalizeSize(row.size) !== p.size) continue;
             if (normalizeSize(row.size) === p.size) continue;
             stmts.push(
-              env.DB.prepare('DELETE FROM products WHERE code = ? AND size = ?').bind(row.code, row.size)
+              env.DB.prepare('DELETE FROM products WHERE code = ? AND size = ? AND color = ?').bind(
+                row.code,
+                row.size,
+                normalizeColor(row.color)
+              )
             );
           }
           stmts.push(
             env.DB.prepare(`
             INSERT INTO products (${PRODUCT_INSERT_COLS})
             VALUES (${PRODUCT_INSERT_PLACEHOLDERS})
-            ON CONFLICT(code, size) DO UPDATE SET
+            ON CONFLICT(code, size, color) DO UPDATE SET
               description=excluded.description, pack=excluded.pack,
               qty=excluded.qty, price=excluded.price, image=excluded.image,
               material=excluded.material,
@@ -3424,7 +3543,7 @@ export default {
           return jsonResponse({ error: 'No items to receive' }, 400);
         }
 
-        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, color, qty FROM products').all();
         const stmts = [];
         const missing = [];
         const applied = [];
@@ -3442,7 +3561,7 @@ export default {
             missing.push({ code, size, qty: addQty, error: 'Invalid qty (must be positive)' });
             continue;
           }
-          const match = findProduct(allProds, code, size);
+          const match = findProduct(allProds, code, size, raw.color);
           if (!match) {
             missing.push({ code, size, qty: addQty, error: 'Product not found' });
             continue;
@@ -3450,10 +3569,11 @@ export default {
           const before = parseInt(match.qty, 10) || 0;
           const after = before + addQty;
           stmts.push(
-            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(
+            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ? AND color = ?').bind(
               addQty,
               match.code,
-              match.size
+              match.size,
+              normalizeColor(match.color)
             )
           );
           applied.push({ code: match.code, size: match.size, before, delta: addQty, after });
@@ -3484,7 +3604,7 @@ export default {
           return jsonResponse({ error: 'No items to adjust' }, 400);
         }
 
-        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, color, qty FROM products').all();
         const stmts = [];
         const missing = [];
         const applied = [];
@@ -3502,7 +3622,7 @@ export default {
             missing.push({ code, size, delta, error: 'Invalid delta (must be non-zero integer)' });
             continue;
           }
-          const match = findProduct(allProds, code, size);
+          const match = findProduct(allProds, code, size, raw.color);
           if (!match) {
             missing.push({ code, size, delta, error: 'Product not found' });
             continue;
@@ -3510,10 +3630,11 @@ export default {
           const before = parseInt(match.qty, 10) || 0;
           const after = Math.max(0, before + delta);
           stmts.push(
-            env.DB.prepare('UPDATE products SET qty = ? WHERE code = ? AND size = ?').bind(
+            env.DB.prepare('UPDATE products SET qty = ? WHERE code = ? AND size = ? AND color = ?').bind(
               after,
               match.code,
-              match.size
+              match.size,
+              normalizeColor(match.color)
             )
           );
           applied.push({ code: match.code, size: match.size, before, delta, after });
@@ -3600,13 +3721,13 @@ export default {
         const items = parseInboundItems(row.items_json);
         if (!items.length) return jsonResponse({ error: 'No line items to receive' }, 400);
 
-        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, color, qty FROM products').all();
         const stmts = [];
         const missing = [];
         const applied = [];
         let updated = 0;
         for (const raw of items) {
-          const match = findProduct(allProds, raw.code, raw.size);
+          const match = findProduct(allProds, raw.code, raw.size, raw.color);
           if (!match) {
             missing.push({ code: raw.code, size: raw.size, qty: raw.qty, error: 'Product not found' });
             continue;
@@ -3614,10 +3735,11 @@ export default {
           const before = parseInt(match.qty, 10) || 0;
           const after = before + raw.qty;
           stmts.push(
-            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(
+            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ? AND color = ?').bind(
               raw.qty,
               match.code,
-              match.size
+              match.size,
+              normalizeColor(match.color)
             )
           );
           applied.push({ code: match.code, size: match.size, before, delta: raw.qty, after });
@@ -3803,8 +3925,8 @@ export default {
         for (const i of itemsToSave) {
           stmts.push(
             env.DB.prepare(
-              'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase, qty_shipped) VALUES (?, ?, ?, ?, ?, ?)'
-            ).bind(o.id, i.code, i.size, i.qty, i.unitPrice, i.qtyShipped || 0)
+              'INSERT INTO order_items (order_id, product_sku, size, color, quantity, price_at_purchase, qty_shipped) VALUES (?, ?, ?, ?, ?, ?, ?)'
+            ).bind(o.id, i.code, i.size, normalizeColor(i.color), i.qty, i.unitPrice, i.qtyShipped || 0)
           );
         }
 
@@ -3819,6 +3941,7 @@ export default {
               qty: parseInt(it.quantity, 10) || 0,
               code: it.product_sku,
               size: it.size,
+              color: it.color,
             }))
           );
         };

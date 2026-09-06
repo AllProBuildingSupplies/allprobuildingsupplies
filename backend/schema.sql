@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS products (
   code                   TEXT NOT NULL,
   description            TEXT,
   size                   TEXT NOT NULL DEFAULT '',
+  color                  TEXT NOT NULL DEFAULT '',
   pack                   INTEGER,
   qty                    INTEGER,
   price                  REAL,
@@ -18,7 +19,7 @@ CREATE TABLE IF NOT EXISTS products (
   sub_sub_sub_category   TEXT DEFAULT '',
   tommur_code            TEXT DEFAULT '',
   lesso_code             TEXT DEFAULT '',
-  PRIMARY KEY (code, size)
+  PRIMARY KEY (code, size, color)
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -54,6 +55,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   order_id          TEXT NOT NULL,
   product_sku       TEXT,
   size              TEXT,
+  color             TEXT DEFAULT '',
   quantity          INTEGER,
   price_at_purchase REAL,
   qty_shipped       INTEGER DEFAULT 0

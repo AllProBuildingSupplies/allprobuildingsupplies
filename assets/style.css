@@ -1062,6 +1062,54 @@ h1.htitle strong { color: var(--gold); }
   overflow:auto;
   padding-bottom:4px;
 }
+.windows-subnav{
+  margin: 0 0 22px;
+}
+.windows-subnav-lead{
+  font-family:'Oswald',sans-serif;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-size:13px;
+  color:var(--gold);
+  margin:0 0 12px;
+}
+.windows-subnav-row{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.windows-subnav-btn{
+  font-family:'Oswald',sans-serif;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-size:18px;
+  padding:22px 16px;
+  border:1px solid rgba(200,152,31,.45);
+  background:var(--ink2);
+  color:var(--white);
+  cursor:pointer;
+}
+.windows-subnav-btn:hover,
+.windows-subnav-btn.on{
+  border-color:var(--gold);
+  color:var(--gold);
+}
+.windows-subnav-pick{
+  margin: 8px 0 40px;
+}
+.windows-subnav-pick .windows-subnav-btn{
+  min-height:120px;
+  font-size:22px;
+}
+.sku-card-color{
+  display:inline-block;
+  font-size:12px;
+  color:var(--gold);
+  margin-right:8px;
+}
+@media (max-width: 700px){
+  .windows-subnav-row{ grid-template-columns:1fr; }
+}
 .catalog-type-chip{
   font-family:'Oswald',sans-serif;
   font-size:11px;

@@ -77,6 +77,7 @@ window.apbsCsvToCatalogRows = function apbsCsvToCatalogRows(csvRows) {
       code: r.Code || r.code || '',
       description: r.Description || r.description || '',
       size: r.Size || r.size || '',
+      color: r.Color || r.color || '',
       pack: r.Pack != null ? r.Pack : r.pack,
       qty: qty,
       price: priceRaw,
@@ -240,9 +241,15 @@ window.apbsIsDimensionalSizePart = function apbsIsDimensionalSizePart(p) {
   return /^(\d+(\.\d+)?|\d+-\d+\/\d+|\d+\/\d+)$/.test(s);
 };
 
-window.APBS_QUOTE_ONLY_MAINS = { flooring: true, windows: true };
+window.APBS_QUOTE_ONLY_MAINS = {};
 window.apbsIsQuoteOnlyMain = function apbsIsQuoteOnlyMain(main) {
   return !!window.APBS_QUOTE_ONLY_MAINS[String(main || '').trim().toLowerCase()];
+};
+/** Quote-only when the SKU has no selling price (curtains/rugs still Call for pricing). */
+window.apbsIsQuoteOnlyItem = function apbsIsQuoteOnlyItem(item) {
+  if (!item) return true;
+  var price = item.price != null ? item.price : item.Price;
+  return !(parseFloat(price) > 0);
 };
 window.apbsCatalogItemMatchesMain = function apbsCatalogItemMatchesMain(it, main) {
   main = main == null ? window.catActiveMain : main;
@@ -380,7 +387,7 @@ window.apbsProductKey = function apbsProductKey(code, size) {
   return c + '|' + sz;
 };
 
-window.apbsFindProduct = function apbsFindProduct(products, code, size) {
+window.apbsFindProduct = function apbsFindProduct(products, code, size, color) {
   if (!Array.isArray(products)) return null;
   const c = window.normalizeProductCode
     ? window.normalizeProductCode(code)
@@ -389,7 +396,8 @@ window.apbsFindProduct = function apbsFindProduct(products, code, size) {
     ? window.apbsSizeToCatalog(size)
     : window.normalizeProductSize(size);
   if (!c || !want) return null;
-  return products.find(function (p) {
+  const col = String(color == null ? '' : color).trim();
+  const matches = products.filter(function (p) {
     var pc = window.normalizeProductCode
       ? window.normalizeProductCode(p.code)
       : String(p.code || '').trim();
@@ -398,7 +406,14 @@ window.apbsFindProduct = function apbsFindProduct(products, code, size) {
       ? window.apbsSizeToCatalog(p.size)
       : window.normalizeProductSize(p.size);
     return ps === want;
-  }) || null;
+  });
+  if (!matches.length) return null;
+  if (col) {
+    var exact = matches.find(function (p) { return String(p.color || '').trim() === col; });
+    if (exact) return exact;
+  }
+  if (matches.length === 1) return matches[0];
+  return matches.find(function (p) { return !String(p.color || '').trim(); }) || matches[0];
 };
 
 window.apbsHashPassword = async function apbsHashPassword(password) {
