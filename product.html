@@ -217,7 +217,7 @@ function paintPdp() {
 
   var sizeHtml = '';
   if (allSizes.length) {
-    var useSelect = allSizes.length > 16;
+    var useSelect = allSizes.length > 12;
     sizeHtml = '<div class="pdp-field"><div class="pdp-label">Size' +
       (pdpState.size ? ' · <strong>' + esc(sizeLabel(pdpState.size)) + '</strong>' : (allSizes.length === 1 ? '' : ' · choose one')) +
       '</div>';
