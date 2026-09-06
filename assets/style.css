@@ -4208,6 +4208,8 @@ html.theme-light .adm-nav-item{
 .pdp-swatch.on{border-color:var(--gold);color:var(--gold)}
 .pdp-swatch.is-off{opacity:.35;cursor:not-allowed}
 .pdp-sizes{display:flex;flex-wrap:wrap;gap:8px}
+.pdp-sizes-dense{gap:6px}
+.pdp-sizes-dense .pdp-size{padding:6px 8px;font-size:11px}
 .pdp-size{
   background:transparent;
   border:1px solid rgba(139,160,178,.28);

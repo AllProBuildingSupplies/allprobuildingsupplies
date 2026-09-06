@@ -2631,6 +2631,306 @@
       "page": "https://www.achimhomedecor.com/product-page/metallo-decorative-rod-finial-carrera",
       "score": 20,
       "file": "images/achim/a5fda5_b203c8ebce0949bd8ae376df6b04ffa5.jpg"
+    },
+    "ACH-SHADE-ROLLER-LF|White": {
+      "file": "images/achim/pdf-ach-shade-roller-lf-white.jpg",
+      "source": "pdf",
+      "note": "roller-hero-white"
+    },
+    "ACH-SHADE-ROLLER-LF|Ivory": {
+      "file": "images/achim/pdf-ach-shade-roller-lf-ivory.jpg",
+      "source": "pdf",
+      "note": "roller-linen-ivory"
+    },
+    "ACH-SHADE-ROLLER-RD|White": {
+      "file": "images/achim/pdf-ach-shade-roller-lf-white.jpg",
+      "source": "pdf",
+      "note": "roller-hero-white"
+    },
+    "ACH-SHADE-ROLLER-RD|Ivory": {
+      "file": "images/achim/pdf-ach-shade-roller-lf-ivory.jpg",
+      "source": "pdf",
+      "note": "roller-linen-ivory"
+    },
+    "ACH-BLIND-HORIZON|White": {
+      "file": "images/achim/pdf-ach-blind-horizon-white.jpg",
+      "source": "pdf",
+      "note": "horizon-left"
+    },
+    "ACH-BLIND-HORIZON|Alabaster": {
+      "file": "images/achim/pdf-ach-blind-horizon-alabaster.jpg",
+      "source": "pdf",
+      "note": "horizon-alabaster-chip"
+    },
+    "ACH-BLIND-MONACO|White": {
+      "file": "images/achim/pdf-ach-blind-monaco-white.jpg",
+      "source": "pdf",
+      "note": "monaco-right"
+    },
+    "ACH-BLIND-MORNINGSTAR|Woodtone": {
+      "file": "images/achim/pdf-ach-blind-morningstar-woodtone.jpg",
+      "source": "pdf",
+      "note": "ms-woodtone"
+    },
+    "ACH-BLIND-MORNINGSTAR|Alabaster": {
+      "file": "images/achim/pdf-ach-blind-morningstar-alabaster.jpg",
+      "source": "pdf",
+      "note": "ms-alabaster"
+    },
+    "ACH-BLIND-MORNINGSTAR|White": {
+      "file": "images/achim/pdf-ach-blind-morningstar-white.jpg",
+      "source": "pdf",
+      "note": "ms-white"
+    },
+    "ACH-BLIND-MORNINGSTAR|Black": {
+      "file": "images/achim/pdf-ach-blind-morningstar-black.jpg",
+      "source": "pdf",
+      "note": "ms-black"
+    },
+    "ACH-BLIND-MORNINGSTAR|Grey": {
+      "file": "images/achim/pdf-ach-blind-morningstar-grey.jpg",
+      "source": "pdf",
+      "note": "ms-grey"
+    },
+    "ACH-BLIND-SUNDOWN|White": {
+      "file": "images/achim/pdf-ach-blind-sundown-white.jpg",
+      "source": "pdf",
+      "note": "dist=2.3"
+    },
+    "ACH-BLIND-SUNDOWN|Latte": {
+      "file": "images/achim/pdf-ach-blind-sundown-latte.jpg",
+      "source": "pdf",
+      "note": "dist=2.5"
+    },
+    "ACH-BLIND-SUNDOWN|Alabaster": {
+      "file": "images/achim/pdf-ach-blind-sundown-alabaster.jpg",
+      "source": "pdf",
+      "note": "dist=2.6"
+    },
+    "ACH-BLIND-SUNDOWN|Mahogany": {
+      "file": "images/achim/pdf-ach-blind-sundown-mahogany.jpg",
+      "source": "pdf",
+      "note": "dist=2.7"
+    },
+    "ACH-BLIND-SUNDOWN|Black": {
+      "file": "images/achim/pdf-ach-blind-sundown-black.jpg",
+      "source": "pdf",
+      "note": "dist=2.8"
+    },
+    "ACH-BLIND-SUNDOWN|Grey": {
+      "file": "images/achim/pdf-ach-blind-sundown-grey.jpg",
+      "source": "pdf",
+      "note": "dist=2.9"
+    },
+    "ACH-BLIND-LUNA|White": {
+      "file": "images/achim/pdf-ach-blind-luna-white.jpg",
+      "source": "pdf",
+      "note": "dist=1.5"
+    },
+    "ACH-BLIND-LUNA|Mahogany": {
+      "file": "images/achim/pdf-ach-blind-luna-mahogany.jpg",
+      "source": "pdf",
+      "note": "dist=2.5"
+    },
+    "ACH-BLIND-MADERA|Grey": {
+      "file": "images/achim/pdf-ach-blind-madera-grey.jpg",
+      "source": "pdf",
+      "note": "madera-ltr"
+    },
+    "ACH-BLIND-MADERA|Mahogany": {
+      "file": "images/achim/pdf-ach-blind-madera-mahogany.jpg",
+      "source": "pdf",
+      "note": "madera-ltr"
+    },
+    "ACH-BLIND-MADERA|White": {
+      "file": "images/achim/pdf-ach-blind-madera-white.jpg",
+      "source": "pdf",
+      "note": "madera-ltr"
+    },
+    "ACH-SHADE-HONEYCOMB|White": {
+      "file": "images/achim/pdf-ach-shade-honeycomb-white.jpg",
+      "source": "pdf",
+      "note": "dist=3.0"
+    },
+    "ACH-SHADE-HONEYCOMB|Alabaster": {
+      "file": "images/achim/pdf-ach-shade-honeycomb-alabaster.jpg",
+      "source": "pdf",
+      "note": "dist=3.9"
+    },
+    "ACH-SHADE-TDBU-CELL|White": {
+      "file": "images/achim/pdf-ach-shade-tdbu-cell-white.jpg",
+      "source": "pdf",
+      "note": "dist=2.6"
+    },
+    "ACH-SHADE-TDBU-CELL|Dove Grey": {
+      "file": "images/achim/pdf-ach-shade-tdbu-cell-dove-grey.jpg",
+      "source": "pdf",
+      "note": "dist=2.8"
+    },
+    "ACH-SHADE-TDBU-CELL|Alabaster": {
+      "file": "images/achim/pdf-ach-shade-tdbu-cell-alabaster.jpg",
+      "source": "pdf",
+      "note": "dist=3.0"
+    },
+    "ACH-SHADE-TDBU-CELL|Wheat": {
+      "file": "images/achim/pdf-ach-shade-tdbu-cell-wheat.jpg",
+      "source": "pdf",
+      "note": "dist=3.9"
+    },
+    "ACH-SHADE-CELESTIAL|Grey": {
+      "file": "images/achim/pdf-ach-shade-celestial-grey.jpg",
+      "source": "pdf",
+      "note": "dist=2.2"
+    },
+    "ACH-SHADE-CELESTIAL|White": {
+      "file": "images/achim/pdf-ach-shade-celestial-white.jpg",
+      "source": "pdf",
+      "note": "dist=2.4"
+    },
+    "ACH-SHADE-CELESTIAL|Linen": {
+      "file": "images/achim/pdf-ach-shade-celestial-linen.jpg",
+      "source": "pdf",
+      "note": "dist=2.7"
+    },
+    "ACH-SHADE-GLIDENGO|Ivory": {
+      "file": "images/achim/pdf-ach-shade-glidengo-ivory.jpg",
+      "source": "pdf",
+      "note": "dist=2.9"
+    },
+    "ACH-SHADE-GLIDENGO|White": {
+      "file": "images/achim/pdf-ach-shade-glidengo-white.jpg",
+      "source": "pdf",
+      "note": "dist=2.9"
+    },
+    "ACH-SHADE-ROMAN-BO|Grey": {
+      "file": "images/achim/pdf-ach-shade-roman-bo-grey.jpg",
+      "source": "pdf",
+      "note": "dist=3.0"
+    },
+    "ACH-SHADE-ROMAN-BO|White": {
+      "file": "images/achim/pdf-ach-shade-roman-bo-white.jpg",
+      "source": "pdf",
+      "note": "dist=3.7"
+    },
+    "ACH-SHADE-ROMAN-BO|Ivory": {
+      "file": "images/achim/pdf-ach-shade-roman-bo-ivory.jpg",
+      "source": "pdf",
+      "note": "dist=4.2"
+    },
+    "ALV-CLICK-PLANK|Natural Drift": {
+      "file": "images/achim/pdf-alv-click-plank-natural-drift.jpg",
+      "source": "pdf",
+      "note": "alveron-chip"
+    },
+    "ALV-CLICK-PLANK|Canyon Hickory": {
+      "file": "images/achim/pdf-alv-click-plank-canyon-hickory.jpg",
+      "source": "pdf",
+      "note": "alveron-chip"
+    },
+    "ALV-CLICK-PLANK|Whiskey Oak": {
+      "file": "images/achim/pdf-alv-click-plank-whiskey-oak.jpg",
+      "source": "pdf",
+      "note": "alveron-chip"
+    },
+    "ALV-CLICK-PLANK|Cashmere Oak": {
+      "file": "images/achim/pdf-alv-click-plank-cashmere-oak.jpg",
+      "source": "pdf",
+      "note": "alveron-chip"
+    },
+    "ALV-CLICK-PLANK|Heritage Mahogany": {
+      "file": "images/achim/pdf-alv-click-plank-heritage-mahogany.jpg",
+      "source": "pdf",
+      "note": "alveron-chip"
+    },
+    "ALV-CLICK-PLANK|Seaside Linen": {
+      "file": "images/achim/pdf-alv-click-plank-seaside-linen.jpg",
+      "source": "pdf",
+      "note": "alveron-chip"
+    },
+    "ACH-TIVOLI-TILE|#450 Carrera Marble": {
+      "file": "images/achim/pdf-ach-tivoli-tile-450-carrera-marble.jpg",
+      "source": "pdf",
+      "note": "dist=5.8"
+    },
+    "ACH-TIVOLI-TILE|#214 Light Oak Plank Look": {
+      "file": "images/achim/pdf-ach-tivoli-tile-214-light-oak-plank-look.jpg",
+      "source": "pdf",
+      "note": "dist=6.6"
+    },
+    "ACH-TIVOLI-TILE|#205 White Border Classic Inlaid Parquet": {
+      "file": "images/achim/pdf-ach-tivoli-tile-205-white-border-classic-inlaid-parquet.jpg",
+      "source": "pdf",
+      "note": "dist=8.8"
+    },
+    "ACH-RETRO-TILE|#606 Navy Pearl": {
+      "file": "images/achim/pdf-ach-retro-tile-606-navy-pearl.jpg",
+      "source": "pdf",
+      "note": "dist=3.0"
+    },
+    "ACH-RETRO-TILE|#603 Burch": {
+      "file": "images/achim/pdf-ach-retro-tile-603-burch.jpg",
+      "source": "pdf",
+      "note": "dist=3.0"
+    },
+    "ACH-RETRO-TILE|#611 Octagon": {
+      "file": "images/achim/pdf-ach-retro-tile-611-octagon.jpg",
+      "source": "pdf",
+      "note": "dist=2.0"
+    },
+    "ACH-RETRO-TILE|#612 Affinity": {
+      "file": "images/achim/pdf-ach-retro-tile-612-affinity.jpg",
+      "source": "pdf",
+      "note": "dist=2.2"
+    },
+    "ACH-RETRO-TILE|#610 Chevron": {
+      "file": "images/achim/pdf-ach-retro-tile-610-chevron.jpg",
+      "source": "pdf",
+      "note": "dist=2.3"
+    },
+    "ACH-RETRO-TILE|#609 Carerra": {
+      "file": "images/achim/pdf-ach-retro-tile-609-carerra.jpg",
+      "source": "pdf",
+      "note": "dist=3.0"
+    },
+    "ACH-RETRO-TILE|#618 Watercolor Check": {
+      "file": "images/achim/pdf-ach-retro-tile-618-watercolor-check.jpg",
+      "source": "pdf",
+      "note": "dist=2.7"
+    },
+    "ACH-RETRO-TILE|#626 Arabesque": {
+      "file": "images/achim/pdf-ach-retro-tile-626-arabesque.jpg",
+      "source": "pdf",
+      "note": "dist=3.1"
+    },
+    "ACH-RETRO-TILE|#629 Whitewash Chevron": {
+      "file": "images/achim/pdf-ach-retro-tile-629-whitewash-chevron.jpg",
+      "source": "pdf",
+      "note": "dist=3.1"
+    },
+    "ACH-PALAZZO-TILE|#806 City Scape Concrete": {
+      "file": "images/achim/pdf-ach-palazzo-tile-806-city-scape-concrete.jpg",
+      "source": "pdf",
+      "note": "dist=0.0"
+    },
+    "ACH-TIVOLI2-PLANK|Medium Oak": {
+      "file": "images/achim/pdf-ach-tivoli2-plank-medium-oak.jpg",
+      "source": "pdf",
+      "note": "tivoli2-strip"
+    },
+    "ACH-TIVOLI2-PLANK|Redwood": {
+      "file": "images/achim/pdf-ach-tivoli2-plank-redwood.jpg",
+      "source": "pdf",
+      "note": "tivoli2-strip"
+    },
+    "ACH-NEXUS-CARPET-50|Smoke": {
+      "file": "images/achim/pdf-ach-nexus-carpet-50-smoke.jpg",
+      "source": "pdf",
+      "note": "dist=2.5"
+    },
+    "ACH-NEXUS-CARPET-50|Jet": {
+      "file": "images/achim/pdf-ach-nexus-carpet-50-jet.jpg",
+      "source": "pdf",
+      "note": "dist=3.4"
     }
   },
   "unmatched": [
