@@ -96,7 +96,7 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
 .home-search .nav-search-suggest{z-index:10050}
 .nav-links{display:flex;gap:0;list-style:none;height:76px;flex-shrink:0}
 .nav-links li{display:flex}
-.nav-links a{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;font-weight:400;color:var(--silver);display:flex;align-items:center;padding:0 14px;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
+.nav-links a{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:400;color:var(--silver);display:flex;align-items:center;padding:0 10px;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
 .nav-links a:hover,.nav-links a.active{color:var(--white);border-bottom-color:var(--gold)}
 .nav-actions{display:flex;gap:12px;align-items:center;flex-shrink:0}
 .nav-tel{font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;letter-spacing:.5px;color:var(--gold2);display:flex;align-items:center;gap:7px}
@@ -613,7 +613,7 @@ h1.htitle strong { color: var(--gold); }
 }
 .home-cat-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 28px;
 }
@@ -1870,6 +1870,8 @@ h1.htitle strong { color: var(--gold); }
 .price-col-hdr{text-align:right!important}
 .prod-inner-table td.price{text-align:right}
 .price-locked{display:inline-flex;align-items:center;gap:6px;background:rgba(200,152,31,.07);border:1px solid rgba(200,152,31,.2);color:var(--silver);font-size:11px;font-family:'DM Mono',monospace;padding:3px 8px;letter-spacing:.4px}
+.price-quote{color:var(--gold);border-color:rgba(200,152,31,.45)}
+.shop-quote-btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .add-to-cart-btn{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border:1px solid rgba(200,152,31,.4);color:var(--gold);background:transparent;cursor:none;transition:all .2s;white-space:nowrap}
 .add-to-cart-btn:hover:not([disabled]){background:rgba(200,152,31,.1);border-color:var(--gold)}
 .add-to-cart-btn[disabled]{cursor:not-allowed;opacity:.5}

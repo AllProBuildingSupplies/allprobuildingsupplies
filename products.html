@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Products — All Pro Building Supplies LLC</title>
-<meta name="description" content="Browse All Pro Building Supplies product catalog — PVC pipe, DWV fittings, bends, tees, wyes, and more. Call 732-734-1123 for pricing."/>
+<meta name="description" content="Browse All Pro Building Supplies — flooring, plumbing, and window coverings. Call 732-734-1123 for pricing."/>
 <script src="assets/theme-init.js"></script>
 <link rel="stylesheet" href="assets/style.css"/>
 <meta name="theme-color" content="#0C1117"/>
@@ -24,7 +24,7 @@
   <div class="page-hero-inner">
     <div class="page-breadcrumb"><a href="index.html">Home</a> › Products</div>
     <div class="page-title" data-r>Product <span>Catalog</span></div>
-    <p class="page-subtitle desktop-only-block" data-r>Search, set qty, add to cart — shop tiles with every size ready to order.</p>
+    <p class="page-subtitle desktop-only-block" data-r>Flooring, plumbing, and window coverings — search, filter, and request a trade quote.</p>
   </div>
 </div>
 
@@ -82,6 +82,10 @@
         <div class="catalog-sidebar-head">
           <strong>Filters</strong>
           <button type="button" class="catalog-sidebar-close" onclick="closeCatalogFilters()" aria-label="Close filters">×</button>
+        </div>
+        <div class="catalog-facet" id="facet-main">
+          <div class="catalog-facet-title">Department</div>
+          <div class="catalog-facet-opts" id="facet-main-opts"></div>
         </div>
         <div class="catalog-facet" id="facet-availability">
           <div class="catalog-facet-title">Availability</div>
@@ -166,7 +170,7 @@ window.catActiveMaterial = 'all';
 window.catActiveSizes = {};
 
 window.catCollapsedMaterials = window.catCollapsedMaterials || {};
-var MATERIAL_ORDER = ['Copper', 'PVC', 'CPVC', 'PEX', 'INSULATION'];
+var MATERIAL_ORDER = ['Copper', 'PVC', 'CPVC', 'PEX', 'INSULATION', 'Vinyl Tiles', 'Vinyl Planks', 'Deck Tiles', 'Foam Tiles', 'Carpet Tiles', 'Rugs', 'Mats', 'Blinds', 'Shades', 'Curtains', 'Rods'];
 
 function toggleMaterialSection(material) {
   var key = String(material || '');
@@ -274,9 +278,10 @@ function applyCatalogFilters() {
   var sizeMap = window.catActiveSizes || {};
   var sizeKeys = Object.keys(sizeMap).filter(function(k){ return sizeMap[k]; });
   var stockOnly = !!(document.getElementById('filter-instock') || {}).checked;
-  var shown = 0;
+    var shown = 0;
   var total = 0;
   var matchByMaterial = {};
+  var main = window.catActiveMain;
 
   document.querySelectorAll('.sku-card').forEach(function(card) {
     total += 1;
@@ -285,14 +290,16 @@ function applyCatalogFilters() {
     var typeK = card.getAttribute('data-type') || '';
     var size = card.getAttribute('data-size') || '';
     var mat = card.getAttribute('data-material') || '';
+    var mainK = card.getAttribute('data-main') || '';
     var subOk = (sub === 'all' || sk === sub);
     var subSubOk = (subSub === 'all' || ssk === subSub);
     var typeOk = (type === 'all' || typeK === type);
     var matOk = (material === 'all' || mat.toLowerCase() === String(material).toLowerCase());
+    var mainOk = (main === 'all' || mainK.toLowerCase() === String(main).toLowerCase());
     var sizeOk = !sizeKeys.length || sizeKeys.indexOf(size) !== -1;
     var stockOk = !stockOnly || card.getAttribute('data-instock') === '1';
     var searchOk = catalogSearchMatches(card, qt);
-    var filterOk = subOk && subSubOk && typeOk && matOk && sizeOk && stockOk && searchOk;
+    var filterOk = mainOk && subOk && subSubOk && typeOk && matOk && sizeOk && stockOk && searchOk;
     if (filterOk) matchByMaterial[mat] = (matchByMaterial[mat] || 0) + 1;
     var collapsed = isMaterialCollapsed(mat);
     var show = filterOk && !collapsed;
@@ -327,6 +334,10 @@ function updateCatalogCrumb() {
   var searchEl = document.getElementById('prod-search');
   var qt = (searchEl && searchEl.value) ? searchEl.value.trim() : '';
   var parts = ['<a href="products.html" onclick="event.preventDefault();clearAllCatalogFilters();">All products</a>'];
+  if (window.catActiveMain && window.catActiveMain !== 'all') {
+    parts.push('<span class="catalog-crumb-sep">›</span>');
+    parts.push('<a href="#" onclick="event.preventDefault();setCatMain(\'' + String(window.catActiveMain).replace(/'/g, "\\'") + '\');">' + catEscHtml(window.catActiveMain) + '</a>');
+  }
   if (sub && sub !== 'all') {
     parts.push('<span class="catalog-crumb-sep">›</span>');
     parts.push('<a href="#" onclick="event.preventDefault();setCatSub(\'' + String(sub).replace(/'/g, "\\'") + '\');">' + catEscHtml(sub) + '</a>');
@@ -354,6 +365,22 @@ function updateCatalogResultMeta(shown, total, qt) {
   var bits = [shown + ' of ' + total + ' items'];
   if (qt) bits.push('matching “' + qt + '”');
   el.textContent = bits.join(' · ');
+}
+
+function setCatMain(main) {
+  window.catActiveMain = main || 'all';
+  window.catActiveSub = 'all';
+  window.catActiveSubSub = 'all';
+  window.catActiveType = 'all';
+  window.catActiveMaterial = 'all';
+  window.catActiveSizes = {};
+  rebuildFacetUI();
+  applyCatalogFilters();
+  closeCatalogFilters();
+  try {
+    var url = (!main || main === 'all') ? 'products.html' : ('products.html?main=' + encodeURIComponent(main));
+    history.replaceState(null, '', url);
+  } catch (_) {}
 }
 
 function setCatSub(sub) {
@@ -386,6 +413,10 @@ function toggleSizeFilter(size, checked) {
 }
 
 function syncFacetCheckedState() {
+  document.querySelectorAll('#facet-main-opts input[data-main]').forEach(function(inp) {
+    var s = inp.getAttribute('data-main');
+    inp.checked = (s === 'all' && window.catActiveMain === 'all') || (s === window.catActiveMain);
+  });
   document.querySelectorAll('#facet-sub-opts input[data-sub]').forEach(function(inp) {
     var s = inp.getAttribute('data-sub');
     inp.checked = (s === 'all' && window.catActiveSub === 'all') || (s === window.catActiveSub);
@@ -408,6 +439,7 @@ function rebuildTypeChips() {
   var subSub = window.catActiveSubSub;
   var counts = {};
   items.forEach(function(it) {
+    if (window.apbsCatalogItemMatchesMain && !window.apbsCatalogItemMatchesMain(it)) return;
     if (sub !== 'all' && it.sub !== sub) return;
     if (subSub !== 'all' && it.subSub !== subSub) return;
     var t = it.type || '';
@@ -426,16 +458,20 @@ function rebuildTypeChips() {
 }
 
 function rebuildFacetUI() {
+  var mainOpts = document.getElementById('facet-main-opts');
   var subOpts = document.getElementById('facet-sub-opts');
   var subSubOpts = document.getElementById('facet-subsub-opts');
   var sizeOpts = document.getElementById('facet-size-opts');
   if (!subOpts || !subSubOpts || !sizeOpts) return;
   var items = window.catSkuItems || [];
 
+  var mainsMap = {};
   var subsMap = {};
   var subSubsMap = {};
   var sizesMap = {};
   items.forEach(function(it) {
+    if (it.mainLabel) mainsMap[it.mainLabel] = (mainsMap[it.mainLabel] || 0) + 1;
+    if (window.apbsCatalogItemMatchesMain && !window.apbsCatalogItemMatchesMain(it)) return;
     if (it.sub) subsMap[it.sub] = (subsMap[it.sub] || 0) + 1;
     if (window.catActiveSub === 'all' || it.sub === window.catActiveSub) {
       if (it.subSub) subSubsMap[it.subSub] = (subSubsMap[it.subSub] || 0) + 1;
@@ -444,6 +480,27 @@ function rebuildFacetUI() {
       }
     }
   });
+
+  if (mainOpts) {
+    var mainHtml = '<label class="catalog-check"><input type="radio" name="cat-main" data-main="all" ' +
+      (window.catActiveMain === 'all' ? 'checked ' : '') +
+      'onchange="setCatMain(\'all\')"/><span>All</span></label>';
+    ['Flooring', 'Plumbing', 'Windows'].forEach(function(k) {
+      if (!mainsMap[k]) return;
+      mainHtml += '<label class="catalog-check"><input type="radio" name="cat-main" data-main="' + catEscAttr(k) + '" ' +
+        (window.catActiveMain === k ? 'checked ' : '') +
+        'onchange="setCatMain(\'' + String(k).replace(/'/g, "\\'") + '\')"/><span>' +
+        catEscHtml(k) + ' <em>(' + mainsMap[k] + ')</em></span></label>';
+    });
+    Object.keys(mainsMap).sort().forEach(function(k) {
+      if (k === 'Flooring' || k === 'Plumbing' || k === 'Windows') return;
+      mainHtml += '<label class="catalog-check"><input type="radio" name="cat-main" data-main="' + catEscAttr(k) + '" ' +
+        (window.catActiveMain === k ? 'checked ' : '') +
+        'onchange="setCatMain(\'' + String(k).replace(/'/g, "\\'") + '\')"/><span>' +
+        catEscHtml(k) + ' <em>(' + mainsMap[k] + ')</em></span></label>';
+    });
+    mainOpts.innerHTML = mainHtml;
+  }
 
   var subHtml = '<label class="catalog-check"><input type="radio" name="cat-sub" data-sub="all" ' +
     (window.catActiveSub === 'all' ? 'checked ' : '') +
@@ -487,7 +544,7 @@ function rebuildFacetUI() {
 }
 
 function catalogCacheKey() {
-  return 'apbs_catalog_cache_v2';
+  return 'apbs_catalog_cache_v3';
 }
 
 function applyUrlCategoryFilter() {
@@ -505,12 +562,16 @@ function applyUrlCategoryFilter() {
     if (typeQ) window.catActiveType = typeQ;
     if (matQ) window.catActiveMaterial = matQ;
     var mainQ = params.get('main');
-    // Map legacy home-category links onto materials / categories when possible
     if (mainQ) {
-      var m = String(mainQ).trim().toLowerCase();
-      if (m === 'plumbing') window.catActiveMaterial = 'all';
-      else if (m === 'copper' || m === 'pvc' || m === 'cpvc' || m === 'pex' || m === 'insulation') {
-        window.catActiveMaterial = mainQ;
+      var m = String(mainQ).trim();
+      var ml = m.toLowerCase();
+      if (ml === 'flooring') window.catActiveMain = 'Flooring';
+      else if (ml === 'windows') window.catActiveMain = 'Windows';
+      else if (ml === 'plumbing') window.catActiveMain = 'Plumbing';
+      else if (ml === 'copper' || ml === 'pvc' || ml === 'cpvc' || ml === 'pex' || ml === 'insulation') {
+        window.catActiveMaterial = m;
+      } else {
+        window.catActiveMain = m;
       }
     }
   } catch (_) {}
@@ -642,16 +703,21 @@ function paintCatalogGroups(groups) {
         '</button></div>'
       );
     }
-    var isOOS = isLoggedIn ? it.qty <= 0 : !it.inStock;
-    var inStockFlag = isLoggedIn ? (it.qty > 0 ? '1' : '0') : (it.inStock ? '1' : '0');
-    var availHtml = isOOS
+    var isQuote = !!(window.apbsIsQuoteOnlyMain && window.apbsIsQuoteOnlyMain(it.mainLabel));
+    var isOOS = isQuote ? false : (isLoggedIn ? it.qty <= 0 : !it.inStock);
+    var inStockFlag = isQuote ? '1' : (isLoggedIn ? (it.qty > 0 ? '1' : '0') : (it.inStock ? '1' : '0'));
+    var availHtml = isQuote
+      ? '<span class="shop-stock">Quote · call for availability</span>'
+      : (isOOS
       ? '<span class="shop-stock shop-stock-out">Out of stock · backorder OK</span>'
       : (isLoggedIn
         ? '<span class="shop-stock shop-stock-in">In stock · ' + it.qty + '</span>'
-        : '<span class="shop-stock shop-stock-in">In stock</span>');
-    var priceHtml = isLoggedIn
-      ? '<span class="shop-price">$' + Number(it.price).toFixed(2) + '</span>'
-      : '<span class="price-locked">Login for price</span>';
+        : '<span class="shop-stock shop-stock-in">In stock</span>'));
+    var priceHtml = isQuote
+      ? (window.apbsQuotePriceHtml ? window.apbsQuotePriceHtml() : '<span class="price-locked price-quote">Call for pricing</span>')
+      : (isLoggedIn
+        ? '<span class="shop-price">$' + Number(it.price).toFixed(2) + '</span>'
+        : '<span class="price-locked">Login for price</span>');
     var sizeAttr = String(it.size).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
     var descClean = String(it.desc).replace(/"/g,'&quot;');
     var title = (it.desc + ' — ' + (it.sizeDisplay || catDisplaySize(it.size))).trim();
@@ -664,7 +730,9 @@ function paintCatalogGroups(groups) {
       if (window.apbsSizeToExcelSafe) searchBits.push(window.apbsSizeToExcelSafe(it.size));
     }
     var searchAttr = searchBits.join(' ').toLowerCase().replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    var buyHtml = shopQtyControlsHtml(it, {
+    var buyHtml = isQuote
+      ? (window.apbsQuoteCtaHtml ? window.apbsQuoteCtaHtml() : '')
+      : shopQtyControlsHtml(it, {
       isOOS: isOOS,
       code: it.code,
       sizeAttr: sizeAttr,
@@ -675,6 +743,7 @@ function paintCatalogGroups(groups) {
       '<article class="sku-card' + (isOOS ? ' sku-card-oos' : '') + '"' +
       ' data-code="' + catEscAttr(it.code) + '"' +
       ' data-material="' + catEscAttr(mat) + '"' +
+      ' data-main="' + catEscAttr(it.mainLabel || '') + '"' +
       ' data-main-key="' + catEscAttr(it.mainKey) + '"' +
       ' data-sub="' + catEscAttr(it.sub) + '"' +
       ' data-subsub="' + catEscAttr(it.subSub || '') + '"' +
@@ -704,21 +773,20 @@ function paintCatalogGroups(groups) {
 async function fetchAndRenderProducts() {
   // Instant paint from last visit while live inventory refreshes in the background.
   try {
-    var cached = sessionStorage.getItem(catalogCacheKey());
-    if (cached) {
-      var cachedRows = JSON.parse(cached);
-      if (Array.isArray(cachedRows) && cachedRows.length) {
-        paintCatalogGroups(rowsToGroups(cachedRows));
+    if (!(window.apbsShouldUseCsvCatalog && window.apbsShouldUseCsvCatalog())) {
+      var cached = sessionStorage.getItem(catalogCacheKey());
+      if (cached) {
+        var cachedRows = JSON.parse(cached);
+        if (Array.isArray(cachedRows) && cachedRows.length) {
+          paintCatalogGroups(rowsToGroups(cachedRows));
+        }
       }
     }
   } catch (_) {}
 
   try {
-    const apiURL = window.APBS_API_BASE ? window.APBS_API_BASE + '/products' : 'https://allpro-api.baruch-6d5.workers.dev/api/products';
-    const r = await fetch(apiURL, { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const rows = await r.json();
-    if (!Array.isArray(rows)) throw new Error(rows.error || 'Invalid catalog response');
+    const rows = await window.apbsFetchCatalogRows();
+    if (!Array.isArray(rows)) throw new Error('Invalid catalog response');
     try {
       sessionStorage.setItem(catalogCacheKey(), JSON.stringify(rows));
       window.__apbsSuggestCatalog = rows;
@@ -764,11 +832,12 @@ if(searchInput){
     searchDebounce = setTimeout(function(){
       applyCatalogFilters();
       try {
-        var q = self.value.trim();
-        var url = q ? ('products.html?q=' + encodeURIComponent(q)) : 'products.html';
-        if (!q && window.catActiveSub && window.catActiveSub !== 'all') {
-          url = 'products.html?sub=' + encodeURIComponent(window.catActiveSub);
-        }
+        var url = 'products.html';
+        var bits = [];
+        if (window.catActiveMain && window.catActiveMain !== 'all') bits.push('main=' + encodeURIComponent(window.catActiveMain));
+        if (q) bits.push('q=' + encodeURIComponent(q));
+        if (!q && window.catActiveSub && window.catActiveSub !== 'all') bits.push('sub=' + encodeURIComponent(window.catActiveSub));
+        if (bits.length) url += '?' + bits.join('&');
         history.replaceState(null, '', url);
       } catch (_) {}
       var navInput = document.getElementById('nav-search-input');
@@ -819,6 +888,10 @@ function addToCart(btn){
   var sess  = null;
   try{ sess = JSON.parse(sessionStorage.getItem('apbs_user')); }catch(e){}
   
+  if (btn.dataset.quote === '1') {
+    window.location.href = 'contact.html';
+    return;
+  }
   if(!isLoggedIn) {
      alert("You must be logged into an approved trade account to add items to your cart.");
      window.location.href = "login.html";

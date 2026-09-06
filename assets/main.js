@@ -31,6 +31,94 @@
   } catch (_) {}
 })();
 
+window.apbsParseCsv = function apbsParseCsv(text) {
+  var rows = [];
+  var i = 0;
+  var field = '';
+  var row = [];
+  var inQuotes = false;
+  while (i < text.length) {
+    var c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    }
+    if (c === '"') { inQuotes = true; i++; continue; }
+    if (c === ',') { row.push(field); field = ''; i++; continue; }
+    if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(field);
+      if (row.some(function (x) { return x !== ''; })) rows.push(row);
+      row = []; field = ''; i++; continue;
+    }
+    field += c; i++;
+  }
+  if (field.length || row.length) {
+    row.push(field);
+    if (row.some(function (x) { return x !== ''; })) rows.push(row);
+  }
+  if (!rows.length) return [];
+  var headers = rows[0];
+  return rows.slice(1).map(function (cols) {
+    var obj = {};
+    headers.forEach(function (h, idx) { obj[h] = cols[idx] ?? ''; });
+    return obj;
+  });
+};
+
+window.apbsCsvToCatalogRows = function apbsCsvToCatalogRows(csvRows) {
+  return (csvRows || []).map(function (r) {
+    var qty = parseInt(r.Qty != null ? r.Qty : r.qty, 10) || 0;
+    var priceRaw = r.Price != null ? r.Price : r.price;
+    return {
+      code: r.Code || r.code || '',
+      description: r.Description || r.description || '',
+      size: r.Size || r.size || '',
+      pack: r.Pack != null ? r.Pack : r.pack,
+      qty: qty,
+      price: priceRaw,
+      image: r.Image || r.image || 'images/logo.png',
+      material: r.Material || r.material || '',
+      main_category: r.main_category || '',
+      sub_category: r.sub_category || '',
+      sub_sub_category: r.sub_sub_category || '',
+      sub_sub_sub_category: r.sub_sub_sub_category || '',
+      inStock: qty > 0
+    };
+  }).filter(function (r) { return !!r.code; });
+};
+
+/** Local static preview (no Worker): load assets/products.csv when on localhost
+ *  without ?apbs_api=, or when ?apbs_csv=1. Live/test hosts keep using the API. */
+window.apbsShouldUseCsvCatalog = function apbsShouldUseCsvCatalog() {
+  try {
+    var q = new URLSearchParams(window.location.search || '');
+    if (q.get('apbs_csv') === '1') return true;
+    if (q.get('apbs_api')) return false;
+    var host = String(window.location.hostname || '').toLowerCase();
+    return host === '127.0.0.1' || host === 'localhost';
+  } catch (_) { return false; }
+};
+
+window.apbsFetchCatalogRows = async function apbsFetchCatalogRows() {
+  if (window.apbsShouldUseCsvCatalog()) {
+    var csvRes = await fetch('assets/products.csv', { cache: 'no-store' });
+    if (!csvRes.ok) throw new Error('CSV HTTP ' + csvRes.status);
+    return window.apbsCsvToCatalogRows(window.apbsParseCsv(await csvRes.text()));
+  }
+  var apiURL = window.APBS_API_BASE
+    ? window.APBS_API_BASE + '/products'
+    : 'https://allpro-api.baruch-6d5.workers.dev/api/products';
+  var r = await fetch(apiURL, { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  var rows = await r.json();
+  if (!Array.isArray(rows)) throw new Error(rows.error || 'Invalid catalog response');
+  return rows;
+};
+
 window.APBS_THEME_KEY = 'apbs_theme';
 window.apbsGetTheme = function apbsGetTheme() {
   try { return localStorage.getItem(window.APBS_THEME_KEY) === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; }
@@ -146,12 +234,39 @@ window.normalizeProductCode = function normalizeProductCode(code) {
   return map[c] || map[c.toUpperCase()] || c;
 };
 
-/** Front-facing size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2" */
+/** True when a size segment is a pipe/tile dimension, not a color or pattern name. */
+window.apbsIsDimensionalSizePart = function apbsIsDimensionalSizePart(p) {
+  var s = String(p || '').replace(/["″]$/, '').trim();
+  return /^(\d+(\.\d+)?|\d+-\d+\/\d+|\d+\/\d+)$/.test(s);
+};
+
+window.APBS_QUOTE_ONLY_MAINS = { flooring: true, windows: true };
+window.apbsIsQuoteOnlyMain = function apbsIsQuoteOnlyMain(main) {
+  return !!window.APBS_QUOTE_ONLY_MAINS[String(main || '').trim().toLowerCase()];
+};
+window.apbsCatalogItemMatchesMain = function apbsCatalogItemMatchesMain(it, main) {
+  main = main == null ? window.catActiveMain : main;
+  if (!main || main === 'all') return true;
+  var label = (it && (it.mainLabel || it.main_category || it.main || '')) || '';
+  return String(label).toLowerCase() === String(main).toLowerCase();
+};
+window.apbsQuotePriceHtml = function apbsQuotePriceHtml() {
+  return '<span class="price-locked price-quote">Call for pricing</span>';
+};
+window.apbsQuoteCtaHtml = function apbsQuoteCtaHtml() {
+  return '<div class="shop-buy shop-buy-quote">' +
+    '<a class="add-to-cart-btn shop-quote-btn" href="contact.html">Request quote</a></div>';
+};
+
+/** Front-facing size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2".
+ *  Color / pattern names (Walnut, #337, Stock widths) stay unmarked. */
 window.apbsSizeToDisplay = function apbsSizeToDisplay(size) {
   var raw = window.normalizeProductSize(size);
   if (!raw) return '';
   var parts = raw.split(/\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/).filter(Boolean);
   if (!parts.length) return raw;
+  var dimensional = parts.every(window.apbsIsDimensionalSizePart);
+  if (!dimensional) return raw;
   return parts.map(function (p) {
     return /["″]$/.test(p) ? p : (p + '"');
   }).join(' x ');
@@ -377,7 +492,10 @@ function loadGlobalLayout() {
         <div class="nav-search-suggest" id="nav-search-suggest" hidden></div>
       </form>
       <ul class="nav-links">
-        <li><a href="products.html" style="cursor:none;">Products</a></li>
+        <li><a href="products.html?main=Flooring" style="cursor:none;">Flooring</a></li>
+        <li><a href="products.html?main=Plumbing" style="cursor:none;">Plumbing</a></li>
+        <li><a href="products.html?main=Windows" style="cursor:none;">Windows</a></li>
+        <li><a href="products.html" style="cursor:none;">Catalog</a></li>
         <li><a href="about.html" style="cursor:none;">About</a></li>
         <li><a href="contact.html" style="cursor:none;">Contact</a></li>
       </ul>
@@ -406,7 +524,10 @@ function loadGlobalLayout() {
       </form>
       <div class="mob-theme-row">${window.apbsThemeToggleHtml()}</div>
       <a href="index.html" style="cursor:none;">Home</a>
-      <a href="products.html" style="cursor:none;">Products</a>
+      <a href="products.html?main=Flooring" style="cursor:none;">Flooring</a>
+      <a href="products.html?main=Plumbing" style="cursor:none;">Plumbing</a>
+      <a href="products.html?main=Windows" style="cursor:none;">Windows</a>
+      <a href="products.html" style="cursor:none;">Catalog</a>
       <a href="about.html" style="cursor:none;">About</a>
       <a href="contact.html" style="cursor:none;">Contact</a>
       <a href="account.html" style="cursor:none;">Account</a>
@@ -421,7 +542,7 @@ function loadGlobalLayout() {
       <div class="ft-top">
         <div class="ft-brand">
           <img src="images/logo.png" alt="All Pro Building Supplies" class="ft-logo" onerror="this.style.display='none'"/>
-          <p class="ft-txt desktop-only-block">Contractor-grade building materials, plumbing, hardware, and contractor supplies. Fast response, real people, reliable service.</p>
+          <p class="ft-txt desktop-only-block">Building supplies and home furnishings — flooring, plumbing, and window coverings. Fast response, real people, reliable service.</p>
           <p class="ft-txt mobile-only-block">Contractor-grade materials. Fast response. Real people.</p>
           <div class="ft-socials">
             <a href="mailto:info@allprobuildingsupplies.com" class="soc">✉</a>
@@ -431,10 +552,10 @@ function loadGlobalLayout() {
         <div class="ft-col">
           <h4>Products</h4>
           <ul>
-            <li><a href="products.html?main=Building%20Materials">Building Materials</a></li>
+            <li><a href="products.html?main=Flooring">Flooring</a></li>
             <li><a href="products.html?main=Plumbing">Plumbing</a></li>
-            <li><a href="products.html?main=Hardware">Hardware</a></li>
-            <li><a href="products.html?main=Contractor%20Supplies">Contractor Supplies</a></li>
+            <li><a href="products.html?main=Windows">Windows</a></li>
+            <li><a href="products.html">Full catalog</a></li>
           </ul>
         </div>
         <div class="ft-col">
@@ -663,21 +784,18 @@ function apbsReadCachedCatalog() {
 }
 
 function apbsLoadSuggestCatalog(forceNetwork) {
-  var cached = apbsReadCachedCatalog();
+  var csvMode = window.apbsShouldUseCsvCatalog && window.apbsShouldUseCsvCatalog();
+  var cached = csvMode ? null : apbsReadCachedCatalog();
   if (cached && !forceNetwork) return Promise.resolve(cached);
   if (window.__apbsSuggestCatalogPromise) return window.__apbsSuggestCatalogPromise;
-  if (!window.APBS_API_BASE) return Promise.resolve(cached || []);
+  if (!window.apbsFetchCatalogRows) return Promise.resolve(cached || []);
 
-  window.__apbsSuggestCatalogPromise = fetch(window.APBS_API_BASE + '/products', {
-    headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {}
-  })
-    .then(function (r) { return r.ok ? r.json() : null; })
+  window.__apbsSuggestCatalogPromise = window.apbsFetchCatalogRows()
     .then(function (rows) {
       window.__apbsSuggestCatalogPromise = null;
       if (!Array.isArray(rows) || !rows.length) return cached || [];
       window.__apbsSuggestCatalog = rows;
       try { sessionStorage.setItem(apbsCatalogCacheKey(), JSON.stringify(rows)); } catch (_) {}
-      // If user is mid-typing, refresh the open dropdown now that data arrived.
       var active = window.__apbsSuggestActiveInput;
       if (active && document.activeElement === active && active.__apbsRenderSuggest) {
         active.__apbsRenderSuggest(active.value);

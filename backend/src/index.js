@@ -48,14 +48,26 @@ function normalizeProductCode(code) {
   return PRODUCT_CODE_ALIASES[c] || PRODUCT_CODE_ALIASES[c.toUpperCase()] || c;
 }
 
-/** Display size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2" */
+function isDimensionalSizePart(p) {
+  const s = String(p || '').replace(/["″]$/, '').trim();
+  return /^(\d+(\.\d+)?|\d+-\d+\/\d+|\d+\/\d+)$/.test(s);
+}
+
+/** Display size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2".
+ *  Color / pattern names are left unmarked. */
 function formatSizeDisplay(size) {
   const raw = normalizeSize(size);
   if (!raw) return '';
   const sep = /\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/;
   const parts = raw.split(sep).filter(Boolean);
   if (!parts.length) return raw;
+  if (!parts.every(isDimensionalSizePart)) return raw;
   return parts.map((p) => (/["″]$/.test(p) ? p : `${p}"`)).join(' x ');
+}
+
+function isQuoteOnlyProduct(p) {
+  const main = String(p && p.main_category != null ? p.main_category : '').trim().toLowerCase();
+  return main === 'flooring' || main === 'windows';
 }
 
 function roundMoney(n) {
@@ -2064,6 +2076,9 @@ function validateAndPriceItems(allProds, items) {
     if (!qty || qty < 1) return { error: `Invalid quantity for ${i.code || 'item'}` };
     const match = findProduct(allProds, i.code, i.size);
     if (!match) return { error: `Product not found: ${i.code} ${i.size}` };
+    if (isQuoteOnlyProduct(match)) {
+      return { error: `Call for pricing: ${match.code} ${match.size}` };
+    }
     // Customer orders may backorder when qty exceeds on-hand (stock floored at 0 on deduct).
     const stock = parseInt(match.qty, 10) || 0;
     const unitPrice = parseFloat(match.price) || 0;

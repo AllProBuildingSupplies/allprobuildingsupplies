@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Products — All Pro Building Supplies LLC</title>
-<meta name="description" content="Browse All Pro Building Supplies product catalog — PVC pipe, DWV fittings, bends, tees, wyes, and more. Call 732-734-1123 for pricing."/>
+<meta name="description" content="Browse All Pro Building Supplies — flooring, plumbing, and window coverings. Call 732-734-1123 for pricing."/>
 <script src="assets/theme-init.js"></script>
 <link rel="stylesheet" href="assets/style.css"/>
 <meta name="theme-color" content="#0C1117"/>
@@ -82,6 +82,10 @@
         <div class="catalog-sidebar-head">
           <strong>Filters</strong>
           <button type="button" class="catalog-sidebar-close" onclick="closeCatalogFilters()" aria-label="Close filters">×</button>
+        </div>
+        <div class="catalog-facet" id="facet-main">
+          <div class="catalog-facet-title">Department</div>
+          <div class="catalog-facet-opts" id="facet-main-opts"></div>
         </div>
         <div class="catalog-facet" id="facet-availability">
           <div class="catalog-facet-title">Availability</div>
@@ -166,7 +170,7 @@ window.catActiveMaterial = 'all';
 window.catActiveSizes = {};
 
 window.catCollapsedMaterials = window.catCollapsedMaterials || {};
-var MATERIAL_ORDER = ['Copper', 'PVC', 'CPVC', 'PEX', 'INSULATION'];
+var MATERIAL_ORDER = ['Copper', 'PVC', 'CPVC', 'PEX', 'INSULATION', 'Vinyl Tiles', 'Vinyl Planks', 'Deck Tiles', 'Foam Tiles', 'Carpet Tiles', 'Rugs', 'Mats', 'Blinds', 'Shades', 'Curtains', 'Rods'];
 
 function toggleMaterialSection(material) {
   var key = String(material || '');
@@ -277,6 +281,7 @@ function applyCatalogFilters() {
   var shown = 0;
   var total = 0;
   var matchByMaterial = {};
+  var main = window.catActiveMain;
 
   document.querySelectorAll('.classic-tile').forEach(function(tile) {
     total += 1;
@@ -284,10 +289,12 @@ function applyCatalogFilters() {
     var ssk = tile.getAttribute('data-subsub') || '';
     var typeK = tile.getAttribute('data-type') || '';
     var mat = tile.getAttribute('data-material') || '';
+    var mainK = tile.getAttribute('data-main') || '';
     var subOk = (sub === 'all' || sk === sub);
     var subSubOk = (subSub === 'all' || ssk === subSub);
     var typeOk = (type === 'all' || typeK === type);
     var matOk = (material === 'all' || mat.toLowerCase() === String(material).toLowerCase());
+    var mainOk = (main === 'all' || mainK.toLowerCase() === String(main).toLowerCase());
     var stockOk = !stockOnly || tile.getAttribute('data-instock') === '1';
     var searchOk = true;
     if (qt) {
@@ -309,7 +316,7 @@ function applyCatalogFilters() {
       if (showLine) visibleSizes += 1;
     });
 
-    var filterOk = subOk && subSubOk && typeOk && matOk && stockOk && searchOk && visibleSizes > 0;
+    var filterOk = mainOk && subOk && subSubOk && typeOk && matOk && stockOk && searchOk && visibleSizes > 0;
     if (filterOk) matchByMaterial[mat] = (matchByMaterial[mat] || 0) + 1;
     var collapsed = isMaterialCollapsed(mat);
     var show = filterOk && !collapsed;
@@ -344,6 +351,10 @@ function updateCatalogCrumb() {
   var searchEl = document.getElementById('prod-search');
   var qt = (searchEl && searchEl.value) ? searchEl.value.trim() : '';
   var parts = ['<a href="products.html" onclick="event.preventDefault();clearAllCatalogFilters();">All products</a>'];
+  if (window.catActiveMain && window.catActiveMain !== 'all') {
+    parts.push('<span class="catalog-crumb-sep">›</span>');
+    parts.push('<a href="#" onclick="event.preventDefault();setCatMain(\'' + String(window.catActiveMain).replace(/'/g, "\\'") + '\');">' + catEscHtml(window.catActiveMain) + '</a>');
+  }
   if (sub && sub !== 'all') {
     parts.push('<span class="catalog-crumb-sep">›</span>');
     parts.push('<a href="#" onclick="event.preventDefault();setCatSub(\'' + String(sub).replace(/'/g, "\\'") + '\');">' + catEscHtml(sub) + '</a>');
@@ -371,6 +382,22 @@ function updateCatalogResultMeta(shown, total, qt) {
   var bits = [shown + ' of ' + total + ' items'];
   if (qt) bits.push('matching “' + qt + '”');
   el.textContent = bits.join(' · ');
+}
+
+function setCatMain(main) {
+  window.catActiveMain = main || 'all';
+  window.catActiveSub = 'all';
+  window.catActiveSubSub = 'all';
+  window.catActiveType = 'all';
+  window.catActiveMaterial = 'all';
+  window.catActiveSizes = {};
+  rebuildFacetUI();
+  applyCatalogFilters();
+  closeCatalogFilters();
+  try {
+    var url = (!main || main === 'all') ? 'products-classic.html' : ('products-classic.html?main=' + encodeURIComponent(main));
+    history.replaceState(null, '', url);
+  } catch (_) {}
 }
 
 function setCatSub(sub) {
@@ -403,6 +430,10 @@ function toggleSizeFilter(size, checked) {
 }
 
 function syncFacetCheckedState() {
+  document.querySelectorAll('#facet-main-opts input[data-main]').forEach(function(inp) {
+    var s = inp.getAttribute('data-main');
+    inp.checked = (s === 'all' && window.catActiveMain === 'all') || (s === window.catActiveMain);
+  });
   document.querySelectorAll('#facet-sub-opts input[data-sub]').forEach(function(inp) {
     var s = inp.getAttribute('data-sub');
     inp.checked = (s === 'all' && window.catActiveSub === 'all') || (s === window.catActiveSub);
@@ -425,6 +456,7 @@ function rebuildTypeChips() {
   var subSub = window.catActiveSubSub;
   var counts = {};
   items.forEach(function(it) {
+    if (window.apbsCatalogItemMatchesMain && !window.apbsCatalogItemMatchesMain(it)) return;
     if (sub !== 'all' && it.sub !== sub) return;
     if (subSub !== 'all' && it.subSub !== subSub) return;
     var t = it.type || '';
@@ -443,16 +475,20 @@ function rebuildTypeChips() {
 }
 
 function rebuildFacetUI() {
+  var mainOpts = document.getElementById('facet-main-opts');
   var subOpts = document.getElementById('facet-sub-opts');
   var subSubOpts = document.getElementById('facet-subsub-opts');
   var sizeOpts = document.getElementById('facet-size-opts');
   if (!subOpts || !subSubOpts || !sizeOpts) return;
   var items = window.catSkuItems || [];
 
+  var mainsMap = {};
   var subsMap = {};
   var subSubsMap = {};
   var sizesMap = {};
   items.forEach(function(it) {
+    if (it.mainLabel) mainsMap[it.mainLabel] = (mainsMap[it.mainLabel] || 0) + 1;
+    if (window.apbsCatalogItemMatchesMain && !window.apbsCatalogItemMatchesMain(it)) return;
     if (it.sub) subsMap[it.sub] = (subsMap[it.sub] || 0) + 1;
     if (window.catActiveSub === 'all' || it.sub === window.catActiveSub) {
       if (it.subSub) subSubsMap[it.subSub] = (subSubsMap[it.subSub] || 0) + 1;
@@ -461,6 +497,27 @@ function rebuildFacetUI() {
       }
     }
   });
+
+  if (mainOpts) {
+    var mainHtml = '<label class="catalog-check"><input type="radio" name="cat-main" data-main="all" ' +
+      (window.catActiveMain === 'all' ? 'checked ' : '') +
+      'onchange="setCatMain(\'all\')"/><span>All</span></label>';
+    ['Flooring', 'Plumbing', 'Windows'].forEach(function(k) {
+      if (!mainsMap[k]) return;
+      mainHtml += '<label class="catalog-check"><input type="radio" name="cat-main" data-main="' + catEscAttr(k) + '" ' +
+        (window.catActiveMain === k ? 'checked ' : '') +
+        'onchange="setCatMain(\'' + String(k).replace(/'/g, "\\'") + '\')"/><span>' +
+        catEscHtml(k) + ' <em>(' + mainsMap[k] + ')</em></span></label>';
+    });
+    Object.keys(mainsMap).sort().forEach(function(k) {
+      if (k === 'Flooring' || k === 'Plumbing' || k === 'Windows') return;
+      mainHtml += '<label class="catalog-check"><input type="radio" name="cat-main" data-main="' + catEscAttr(k) + '" ' +
+        (window.catActiveMain === k ? 'checked ' : '') +
+        'onchange="setCatMain(\'' + String(k).replace(/'/g, "\\'") + '\')"/><span>' +
+        catEscHtml(k) + ' <em>(' + mainsMap[k] + ')</em></span></label>';
+    });
+    mainOpts.innerHTML = mainHtml;
+  }
 
   var subHtml = '<label class="catalog-check"><input type="radio" name="cat-sub" data-sub="all" ' +
     (window.catActiveSub === 'all' ? 'checked ' : '') +
@@ -504,7 +561,7 @@ function rebuildFacetUI() {
 }
 
 function catalogCacheKey() {
-  return 'apbs_catalog_cache_classic_v1';
+  return 'apbs_catalog_cache_classic_v2';
 }
 
 function applyUrlCategoryFilter() {
@@ -522,12 +579,16 @@ function applyUrlCategoryFilter() {
     if (typeQ) window.catActiveType = typeQ;
     if (matQ) window.catActiveMaterial = matQ;
     var mainQ = params.get('main');
-    // Map legacy home-category links onto materials / categories when possible
     if (mainQ) {
-      var m = String(mainQ).trim().toLowerCase();
-      if (m === 'plumbing') window.catActiveMaterial = 'all';
-      else if (m === 'copper' || m === 'pvc' || m === 'cpvc' || m === 'pex' || m === 'insulation') {
-        window.catActiveMaterial = mainQ;
+      var m = String(mainQ).trim();
+      var ml = m.toLowerCase();
+      if (ml === 'flooring') window.catActiveMain = 'Flooring';
+      else if (ml === 'windows') window.catActiveMain = 'Windows';
+      else if (ml === 'plumbing') window.catActiveMain = 'Plumbing';
+      else if (ml === 'copper' || ml === 'pvc' || ml === 'cpvc' || ml === 'pex' || ml === 'insulation') {
+        window.catActiveMaterial = m;
+      } else {
+        window.catActiveMain = m;
       }
     }
   } catch (_) {}
@@ -671,13 +732,16 @@ function paintCatalogGroups(groups) {
       if (ka[0] !== kb[0]) return ka[0] - kb[0];
       return ka[1].localeCompare(kb[1]);
     });
+    var isQuote = !!(window.apbsIsQuoteOnlyMain && window.apbsIsQuoteOnlyMain(data.mainCat));
     var sizeCount = rows.length;
-    var inStockCount = rows.filter(function(r) {
+    var inStockCount = isQuote ? sizeCount : rows.filter(function(r) {
       return isLoggedIn ? r.qty > 0 : !!r.inStock;
     }).length;
-    var oosCount = sizeCount - inStockCount;
+    var oosCount = isQuote ? 0 : (sizeCount - inStockCount);
     var statsLabel = sizeCount + (sizeCount === 1 ? ' size' : ' sizes');
-    if (isLoggedIn) {
+    if (isQuote) {
+      statsLabel += ' · Call for pricing';
+    } else if (isLoggedIn) {
       if (inStockCount > 0) statsLabel += ' · ' + inStockCount + ' in stock';
       if (oosCount > 0) statsLabel += ' · ' + oosCount + ' backorder';
     }
@@ -692,7 +756,20 @@ function paintCatalogGroups(groups) {
     var img = data.image || 'images/logo.png';
     var sizeBody = '';
 
-    if (!isLoggedIn) {
+    if (isQuote) {
+      var chips = rows.map(function(item) {
+        var sizeCanon = window.apbsSizeToCatalog
+          ? window.apbsSizeToCatalog(item.size)
+          : (window.normalizeProductSize || function(s){ return String(s||'').trim().replace(/"/g,''); })(item.size);
+        var sizeShow = item.sizeDisplay || catDisplaySize(sizeCanon || item.size);
+        return '<span class="classic-guest-size" data-size="' + catEscAttr(sizeCanon) + '" data-instock="1">' +
+          catEscHtml(sizeShow) + '</span>';
+      }).join('');
+      sizeBody = '<div class="sku-card-buy" style="margin:8px 0 10px;">' +
+        (window.apbsQuotePriceHtml ? window.apbsQuotePriceHtml() : '<span class="price-locked price-quote">Call for pricing</span>') +
+        (window.apbsQuoteCtaHtml ? window.apbsQuoteCtaHtml() : '') +
+        '</div><div class="classic-guest-sizes" aria-label="Available sizes">' + chips + '</div>';
+    } else if (!isLoggedIn) {
       // Guest catalog: size chips only — no prices, stock, backorder, or cart per size.
       var chips = rows.map(function(item) {
         var isOOS = !item.inStock;
@@ -738,6 +815,7 @@ function paintCatalogGroups(groups) {
     chunks.push(
       '<div class="prod-section shop-list-item shop-tile classic-tile' + (isLoggedIn ? ' open classic-tile-logged' : ' classic-tile-guest') + '" data-code="' + catEscAttr(code) + '"' +
       ' data-material="' + catEscAttr(mat) + '"' +
+      ' data-main="' + catEscAttr(data.mainCat || '') + '"' +
       ' data-sub="' + catEscAttr(data.subCat || '') + '"' +
       ' data-subsub="' + catEscAttr(data.subSubCat || '') + '"' +
       ' data-type="' + catEscAttr(data.typeCat || '') + '"' +
@@ -768,21 +846,20 @@ function paintCatalogGroups(groups) {
 async function fetchAndRenderProducts() {
   // Instant paint from last visit while live inventory refreshes in the background.
   try {
-    var cached = sessionStorage.getItem(catalogCacheKey());
-    if (cached) {
-      var cachedRows = JSON.parse(cached);
-      if (Array.isArray(cachedRows) && cachedRows.length) {
-        paintCatalogGroups(rowsToGroups(cachedRows));
+    if (!(window.apbsShouldUseCsvCatalog && window.apbsShouldUseCsvCatalog())) {
+      var cached = sessionStorage.getItem(catalogCacheKey());
+      if (cached) {
+        var cachedRows = JSON.parse(cached);
+        if (Array.isArray(cachedRows) && cachedRows.length) {
+          paintCatalogGroups(rowsToGroups(cachedRows));
+        }
       }
     }
   } catch (_) {}
 
   try {
-    const apiURL = window.APBS_API_BASE ? window.APBS_API_BASE + '/products' : 'https://allpro-api.baruch-6d5.workers.dev/api/products';
-    const r = await fetch(apiURL, { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const rows = await r.json();
-    if (!Array.isArray(rows)) throw new Error(rows.error || 'Invalid catalog response');
+    const rows = await window.apbsFetchCatalogRows();
+    if (!Array.isArray(rows)) throw new Error('Invalid catalog response');
     try {
       sessionStorage.setItem(catalogCacheKey(), JSON.stringify(rows));
       window.__apbsSuggestCatalog = rows;
@@ -882,6 +959,11 @@ function addToCart(btn){
   var isBackorderBtn = btn.dataset.backorder === '1' || onHand <= 0;
   var sess  = null;
   try{ sess = JSON.parse(sessionStorage.getItem('apbs_user')); }catch(e){}
+
+  if (btn.dataset.quote === '1') {
+    window.location.href = 'contact.html';
+    return;
+  }
   
   if(!isLoggedIn) {
      alert("You must be logged into an approved trade account to add items to your cart.");
