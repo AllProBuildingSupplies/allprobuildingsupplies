@@ -16,6 +16,7 @@ Agent: [Product pricing analysis](https://cursor.com/agents/bc-dcaa793d-4f8b-42c
 | `Competitive_Margin_Sheet.xlsx` | FOB → landed vs cheapest online price |
 | `COMPETITIVE_MARGINS.md` | How to read the margin sheet |
 | `FACTORY_ORDER_README.md` | How the 3-month container projection was built |
+| **`GLASS_SHEET_SOURCING.md`** | Non-China mills for 6/10/12 mm clear float sheets (Şişecam, Sphinx, Gold Plus) |
 
 ## Tommur workbook rules
 
