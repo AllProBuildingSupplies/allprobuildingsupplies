@@ -36,7 +36,14 @@ From `brochure/`: `npm install` then `npm run build`. `npm install` downloads a 
 ### Category sell sheets
 From `brochure/`: `npm run sell-sheets` regenerates one PDF per catalog category (plus an index) under `brochure/sell-sheets/pdf/`, driven by `assets/products.csv` and standards in `brochure/category-standards.js`.
 
-### Finding Cursor agent work
-Agent deliverables live under `cursor/` (see `cursor/README.md`). GitHub should stay on `main` only. Archive finished Cursor cloud agents in the Agents dashboard; do not recreate long-lived `cursor/*` feature branches for work that already landed.
+### Shipping site and catalog changes
+When the user asks to update the live website, catalog, products, homepage, or storefront: work and test on a branch if needed, then **always merge to `main` and push** before finishing. Do not leave the work only on a PR branch. The user needs to open `https://allprobuildingsupplies.com` and see the change.
+
+After merging to `main`:
+- Static frontend deploys from GitHub Pages on `main`. Confirm the live HTML/JS/images actually updated.
+- If `backend/` changed, deploy the production Worker: from `backend/`, `npx wrangler deploy` (not `--env test`).
+- If catalog SKUs, images, or categories changed, upsert into **production D1**. Do not `DELETE` the live `products` table and replace it from CSV — that would wipe on-hand plumbing qty. Insert/update the new or changed rows only (Achim/`ACH-*` upserts are the usual case). Then confirm `GET https://allpro-api.baruch-6d5.workers.dev/api/products` includes the new items.
+
+GitHub should stay on `main` only. Archive finished Cursor cloud agents in the Agents dashboard; do not recreate long-lived `cursor/*` feature branches for work that already landed.
 
 Do **not** commit `.cursor/environment.json`. Cloud Agents for this storefront use the existing personal environment tied to GitHub `AllProBuildingSupplies/allprobuildingsupplies`. A committed environment file made Cursor create a second environment (`allprobuildingsupplies/allprobuildingsupplies`) and broke new chats.
