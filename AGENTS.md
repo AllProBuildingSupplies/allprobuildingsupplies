@@ -54,6 +54,14 @@ All mill contacts, RFQ wording, specs, and factory-order sheets live in **`curso
 - If the platform forces a feature branch, reuse the existing open sourcing branch if there is one. Otherwise use a single long-lived branch `cursor/supplier-sourcing-d7cc`, put the files in `cursor/product-pricing-analysis/`, and **merge it to `main` before finishing**. Do not leave a second copy only on the PR.
 - Site/catalog SKU work still merges to `main` as already documented above. Do not invent glass/carpet/pad prices until a mill quote is in.
 
+### Factory emails, WeChat, WhatsApp, and forms (must be forwardable)
+
+Anything Baruch will send or attach to a mill must be **ready to forward with no edits**. Write in All Pro’s voice, to the factory.
+
+- Do **not** address Baruch. Do **not** include agent notes, status, strategy, “tell them,” “we already said,” “do not nag,” home vs warehouse asides, “yellow cells = our answers,” “please sign before sending,” competitor names (Artisent, NJPD, Mortisay), or later routing (Florida/Memphis jobs).
+- Put internal commentary only in the `.md` memos. Put the sendable piece in a `*_SEND.xlsx` / `*_SEND.txt` (or a workbook that contains **only** mill-facing sheets).
+- Sign-off: Baruch Grossman, Founder & Owner, All Pro Building Supplies LLC, +1 732-734-1123, info@allprobuildingsupplies.com, warehouse **1600 Livingston Ave, North Brunswick, NJ 08902**. Leave a blank signature cell if the mill’s form needs a wet signature.
+
 **PVC pipe + DWV fittings:** mill is **Tommur / Lesso**.
 
 **PEX:** mill is **Ningbo Zhenpeng**. Sizes **½ / ¾ / 1" only** — do not order 1¼ / 1½ / 2" PEX. No factory POs until every mill quote is in; then place orders together so production lines up.

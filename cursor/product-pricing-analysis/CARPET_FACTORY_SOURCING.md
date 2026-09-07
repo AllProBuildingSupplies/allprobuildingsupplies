@@ -137,7 +137,7 @@ Subject: RFQ — 3/8" 5 lb rebond carpet pad, 6 ft rolls, FOB
 ```
 Hi Kash,
 
-We are All Pro Building Supplies, a US B2B building-supplies importer. We need a factory quote for residential rebond carpet pad — not PU chip foam sold as “underlay” unless it is true US-style rebond.
+We need mill pricing for residential rebond carpet pad.
 
 Please quote:
 
@@ -153,33 +153,43 @@ Need from you:
 - FOB Shanghai, USD per SY and per m² for each density / with vs without film
 - kg/roll, CBM/roll, rolls per 40HQ, 40HQ price
 - MOQ
-- Sample: one roll or a cut of 3/8" 5 lb with film — sample cost + DHL to NJ, USA
-- Production lead time after deposit (factory days, FOB Shanghai; ocean to NJ)
-- Confirm you are the mill (Nantong Anerte, 166 Qiuhong Road, Hai’an)
+- Sample: one 20 × 30 cm piece and one full 5 lb film roll — sample cost + DHL to 1600 Livingston Ave, North Brunswick, NJ 08902, USA
+- Production lead time after deposit (factory days, FOB Shanghai)
+- Confirm mill address: Nantong Anerte, 166 Qiuhong Road, Hai’an
 
-We will compare landed cost to US builder pad at about $1.70/SY. If 3/8" 5 lb with film cannot land under that, say so and quote the closest spec that can.
+Please quote FOB Shanghai.
 
-Thanks,
-[name]
-All Pro Building Supplies
+Thank you.
+
+Baruch Grossman
+Founder & Owner
+All Pro Building Supplies LLC
++1 732-734-1123
+info@allprobuildingsupplies.com
 ```
 
-### Copy-paste follow-up (Kash — FOB not EXW + NJ sample)
+### Copy-paste follow-up (Kash) — send `anerte-pad/Kash_whatsapp_SEND.txt`
 
 WhatsApp **+86 177 0151 5750**
 
 ```
-Thanks Kash. Roll 1.83 × 13.7 m at $22, 20 kg, MOQ 1000 m², 280–290 rolls / 40HQ regular pack — confirmed.
+Thanks Kash. Confirmed: 1.83 m × 13.7 m rolls at USD 22, 20 kg per roll, MOQ 1,000 m², 280–290 rolls per 40HQ with regular packing.
 
-Please lock:
-- SKU = 5 lb, 9.5 mm, PE film one side, mixed-color chip
-- Regular packing only. No vacuum (recovery problem).
-- Terms = FOB Shanghai (or FCA Shanghai). We will NOT pick up EXW at the factory. Our forwarder books the ocean to Newark / Elizabeth, NJ, USA. Do not quote DDP. Do not need a US door address for freight.
-- Sample DHL to New Jersey: 20×30 cm + one full 5 lb film roll. Sample $ + DHL $. Address: **1600 Livingston Ave, North Brunswick, NJ 08902, USA** (warehouse — not Hope Hill).
-- Gripper / tackstrip: send FOB Shanghai price later (per box / per 1000 LF). Pad is first.
-- No SPC / LVT from you — we already have plank.
+Please confirm:
+• Specification: 5 lb, 9.5 mm, PE film one side, mixed-color chip
+• Regular packing only (no vacuum packing)
+• FOB Shanghai (FCA Shanghai is acceptable). We will arrange ocean freight to Newark / Elizabeth, NJ, USA. Please quote FOB, not EXW or DDP.
+• Sample by DHL to 1600 Livingston Ave, North Brunswick, NJ 08902, USA — one 20 × 30 cm piece and one full 5 lb film roll. Please send the sample price and DHL cost.
+• Carpet gripper / tackstrip: please send FOB Shanghai pricing separately (per box and per 1,000 LF) when convenient.
+• We do not need LVT or SPC on this inquiry.
 
-We are not placing a PO yet.
+Thank you.
+
+Baruch Grossman
+Founder & Owner
+All Pro Building Supplies LLC
++1 732-734-1123
+info@allprobuildingsupplies.com
 ```
 
 ---
@@ -259,17 +269,21 @@ Also confirm:
 - FOB Shanghai or Ningbo, USD per box and per 1,000 LF
 - MOQ (we saw ~100 boxes)
 - 40HQ mix (mostly concrete-nail 1" plus some 7/8" wood)
-- Sample: 1 box of each type — sample cost + DHL to NJ, USA
-- Production lead time after deposit (factory days, FOB Shanghai; ocean to NJ)
+- Sample: 1 box of each type — sample cost + DHL to 1600 Livingston Ave, North Brunswick, NJ 08902, USA
+- Production lead time after deposit (factory days, FOB Shanghai)
 - Confirm mill: Suqian Halex, Fudan Road, Sucheng ETDZ, Suqian, Jiangsu
 
 Private label on the box is fine. We do not need transitions, naplock, or quarter-round from you.
 
 Please reply with your direct email and WeChat/WhatsApp.
 
-Thanks,
-[name]
-All Pro Building Supplies
+Thank you.
+
+Baruch Grossman
+Founder & Owner
+All Pro Building Supplies LLC
++1 732-734-1123
+info@allprobuildingsupplies.com
 ```
 
 ---

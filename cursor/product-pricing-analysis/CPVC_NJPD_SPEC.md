@@ -53,6 +53,6 @@ SCH80 FOB is a different wall/OD. Do not substitute.
 >
 > Sizes: ½, ¾, 1, 1¼, 1½, 2 inch. 10 ft and/or 20 ft sticks. Confirm **UPC, NSF/ANSI 61, ICC-ES PMG, ASTM E84 25/50**.
 >
-> Also fill **FOB Ningbo** on the full **CPVC 2846 SCH40** fittings list (CTS D2846 — elbows, tees, couplings, adapters, unions). Socket must fit SDR-11 CTS, not SCH80 IPS.
+> Please also quote **FOB Ningbo** on the full **CPVC 2846 SCH40** fittings list (CTS D2846 — elbows, tees, couplings, adapters, unions). Sockets must fit SDR-11 CTS, not SCH80 IPS.
 >
-> Photos of the competitor stick we must match are attached.
+> Photos of the pipe specification we need are attached.
