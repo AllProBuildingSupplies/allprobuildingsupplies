@@ -2415,6 +2415,21 @@ async function applyOrderItemsStock(env, items) {
   if (stmts.length) await env.DB.batch(stmts);
 }
 
+/** Packing-list POs for Containers 3–5 (ETA 2026-09-18). All fittings on these are NJPD APBS-000005. */
+const NJPD_C345_INBOUND_IDS = [
+  'inbound-whsu9010053',
+  'inbound-whsu9004718',
+  'inbound-container-5',
+];
+const NJPD_C345_INVOICE_REFS = ['260509-003-SG', '260430-010-SG'];
+
+function isNjpdC345Inbound(row) {
+  if (!row) return false;
+  const id = String(row.id || '').trim().toLowerCase();
+  const inv = String(row.invoice_ref || row.invoiceRef || '').trim();
+  return NJPD_C345_INBOUND_IDS.includes(id) || NJPD_C345_INVOICE_REFS.includes(inv);
+}
+
 /** Set an open order's remaining qty to inbound fittings (C3/C4/C5). Does not touch on-hand. */
 async function syncOrderBackorderFromInbound(env, orderId) {
   await ensureInboundShipmentsTable(env);
@@ -2425,7 +2440,10 @@ async function syncOrderBackorderFromInbound(env, orderId) {
     `SELECT * FROM inbound_shipments WHERE status != 'received'`
   ).all();
   const incoming = new Map();
+  const usedIds = [];
   for (const row of inboundRows || []) {
+    if (!isNjpdC345Inbound(row)) continue;
+    usedIds.push(row.id);
     for (const it of parseInboundItems(row.items_json)) {
       if (!it.code || it.code === 'PVC-PIPE-FOAM') continue;
       const key = it.code + '\t' + canonicalizeSize(it.size);
@@ -2502,6 +2520,7 @@ async function syncOrderBackorderFromInbound(env, orderId) {
     lines: itemsToSave.length,
     backorderPcs,
     inboundFittingPcs: [...incoming.values()].reduce((s, n) => s + n, 0),
+    inboundIds: usedIds,
     total: priced.total || 0,
   };
 }

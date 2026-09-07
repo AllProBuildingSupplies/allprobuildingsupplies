@@ -247,7 +247,7 @@
             <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="loadInboundShipments()">Refresh</button>
           </div>
         </div>
-        <p class="wms-hint" style="margin-bottom:10px;">Containers 3, 4 &amp; 5 — packing-list pieces, ETA 9/18. Fittings are allocated to NJPD APBS-000005. Stock stays off on-hand until you receive the container.</p>
+        <p class="wms-hint" style="margin-bottom:10px;">Containers 3, 4 &amp; 5 — packing-list pieces, ETA 9/18. Every fitting on these three POs is allocated to NJPD APBS-000005 (nothing on them is for anyone else). Foam pipe stays inbound stock, not extra PO lines. Do not receive into on-hand until the boxes land.</p>
         <div id="wms-inbound" class="wms-inbound" aria-live="polite">Loading…</div>
       </div>
 
@@ -1532,9 +1532,27 @@ async function importInboundSeed() {
   }
 }
 
+var NJPD_C345_INBOUND_IDS = {
+  'inbound-whsu9010053': true,
+  'inbound-whsu9004718': true,
+  'inbound-container-5': true
+};
+var NJPD_C345_INVOICE_REFS = {
+  '260509-003-SG': true,
+  '260430-010-SG': true
+};
+
+function isNjpdC345Inbound(s) {
+  if (!s) return false;
+  var id = String(s.id || '').trim().toLowerCase();
+  var inv = String(s.invoiceRef || s.invoice_ref || '').trim();
+  return !!(NJPD_C345_INBOUND_IDS[id] || NJPD_C345_INVOICE_REFS[inv]);
+}
+
 async function inboundFittingTotals(shipments) {
   const totals = {};
   (shipments || []).forEach(function (s) {
+    if (!isNjpdC345Inbound(s)) return;
     (s.items || []).forEach(function (it) {
       const code = String(it.code || '').trim();
       if (!code || code === 'PVC-PIPE-FOAM') return;
