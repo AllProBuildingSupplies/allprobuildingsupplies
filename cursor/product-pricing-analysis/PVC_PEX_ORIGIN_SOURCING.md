@@ -101,7 +101,7 @@ Expect **higher FOB** than China. Use this as a replenishment / tariff hedge, no
 | Phone | **+52 55 5899 4600** |
 | Site | https://wavin.com/mx |
 
-Tell them you are a **US importer**, not a Mexican distributor, and you need a **USMCA-origin** quote into a Texas / East Coast warehouse.
+Tell them you are a **US importer**, not a Mexican distributor, and you need a **USMCA-origin** quote into **NJ** (NY/NJ port).
 
 Do not bother US mills (Charlotte, JM Eagle) for this — they price like US mills.
 

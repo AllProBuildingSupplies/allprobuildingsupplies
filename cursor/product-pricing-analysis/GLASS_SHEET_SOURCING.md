@@ -92,7 +92,7 @@ World’s ~5th largest float mill. Already has an **Americas sales desk**. Tell 
 | US / Americas | Şişecam USA, 400 Perimeter Center Terrace NE, Suite 350, Atlanta, GA 30346 · **+1 770 375 2300** |
 | Americas people | Ronny Cain, North American Sales Manager (Atlanta) · Emre İskender, Flatglass Americas Sales Supervisor — reach via `archglass@sisecam.com` |
 
-Ask: FOB Mersin / Izmir / Gemlik, 6 / 10 / 12 mm **standard clear stock**, $/m², 20 ft crate packing, MOQ. East Coast ocean from Turkey is the natural lane for Memphis.
+Ask: FOB Mersin / Izmir / Gemlik, 6 / 10 / 12 mm **standard clear stock**, $/m², 20 ft crate packing, MOQ. Ocean to NJ (NY/NJ).
 
 ---
 

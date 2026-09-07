@@ -4,6 +4,8 @@
 
 When mill quotes come back: landed check first, then ordering sheet in this folder, then sell sheets / catalog / site. Do not invent SKU prices.
 
+**All quotes:** FOB origin (usually China) with inbound to **NJ USA**. Samples DHL to NJ. Memphis is a job, not the warehouse.
+
 ## Start here
 
 | File | What it is |

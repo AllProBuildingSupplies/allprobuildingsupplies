@@ -54,4 +54,8 @@ All mill contacts, RFQ wording, specs, and factory-order sheets live in **`curso
 - If the platform forces a feature branch, reuse the existing open sourcing branch if there is one. Otherwise use a single long-lived branch `cursor/supplier-sourcing-d7cc`, put the files in `cursor/product-pricing-analysis/`, and **merge it to `main` before finishing**. Do not leave a second copy only on the PR.
 - Site/catalog SKU work still merges to `main` as already documented above. Do not invent glass/carpet/pad prices until a mill quote is in.
 
+### Import destination (all mill quotes)
+
+Baruch / All Pro is based in **New Jersey**. Every factory RFQ, sample, and landed-cost check uses **FOB China (or the origin port)** with inbound to **NJ USA** (NY/NJ — Newark / Elizabeth). Sample courier is DHL to NJ. Do **not** quote door-to-door Memphis, Texas, or “Southeast.” Memphis is a customer job only, not the warehouse.
+
 Do **not** commit `.cursor/environment.json`. Cloud Agents for this storefront use the existing personal environment tied to GitHub `AllProBuildingSupplies/allprobuildingsupplies`. A committed environment file made Cursor create a second environment (`allprobuildingsupplies/allprobuildingsupplies`) and broke new chats.
