@@ -60,8 +60,15 @@ All mill contacts, RFQ wording, specs, and factory-order sheets live in **`curso
 
 ### Import destination (all mill quotes)
 
-Baruch / All Pro is based in **New Jersey**. Every factory RFQ, sample, and landed-cost check uses **FOB China (or the origin port)** with inbound to **NJ USA** (NY/NJ — Newark / Elizabeth). Sample courier is DHL to NJ. Do **not** quote door-to-door Memphis, Texas, or “Southeast.” Memphis is a customer job only, not the warehouse.
+**Delivery / warehouse (use this on every RFQ, sample, and mill form):**  
+**1600 Livingston Ave, North Brunswick, NJ 08902, USA.**
 
-Preferred Incoterms: **FOB Ningbo or Shanghai**. **FCA Ningbo** is acceptable (same as FOB for a container — they deliver to the port/forwarder, we book ocean). Do **not** take **EXW** factory. Do **not** take **DDP NJ** from a new mill unless they give an all-in price that already includes US MFN + Section 301 + overlay, and we still prefer our own forwarder on first orders.
+**Do not use 35 Hope Hill Lane.** That is Baruch’s home. Never put it on factory quotes, DHL samples, prospect forms, or commercial invoices as the ship-to.
+
+Baruch / All Pro is based in **New Jersey**. Every factory RFQ, sample, and landed-cost check uses **FOB origin port** with inbound to **NJ USA** (NY/NJ — Newark / Elizabeth), then to **1600 Livingston Ave**. Sample courier is DHL to that Livingston address.
+
+Do **not** quote door-to-door Memphis, Texas, Florida, or “Southeast” as the default. Those are **customer jobs**, not the warehouse. Example: a glass container *might* later go straight to a Florida customer — still get **FOB + ocean to NJ** first, then change routing. Memphis is a job only.
+
+Preferred Incoterms: **FOB Ningbo or Shanghai** (glass: **FOB Alexandria / Damietta** or the mill’s origin port). **FCA** same ports is OK. Do **not** take **EXW** factory. Do **not** take **DDP** from a new mill unless they give an all-in price that already includes US MFN + Section 301 + overlay, and we still prefer our own forwarder on first orders.
 
 Do **not** commit `.cursor/environment.json`. Cloud Agents for this storefront use the existing personal environment tied to GitHub `AllProBuildingSupplies/allprobuildingsupplies`. A committed environment file made Cursor create a second environment (`allprobuildingsupplies/allprobuildingsupplies`) and broke new chats.

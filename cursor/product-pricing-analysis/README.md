@@ -4,7 +4,7 @@
 
 When mill quotes come back: landed check first, then ordering sheet in this folder, then sell sheets / catalog / site. Do not invent SKU prices. **Do not place factory POs until all quotes are in** — one combined order window.
 
-**All quotes:** **FOB Ningbo/Shanghai** (or **FCA Ningbo**) with inbound to **NJ USA**. Samples DHL to NJ. Not EXW factory. Not DDP from a new mill. Memphis is a job, not the warehouse.
+**All quotes:** **FOB origin port** with inbound to **NJ USA** (Newark / Elizabeth), then **1600 Livingston Ave, North Brunswick, NJ 08902**. Samples DHL to that address. **Never use 35 Hope Hill Lane** (home). Not EXW factory. Not DDP from a new mill. Memphis / Florida are customer jobs — still price FOB to NJ first.
 
 ## Start here
 

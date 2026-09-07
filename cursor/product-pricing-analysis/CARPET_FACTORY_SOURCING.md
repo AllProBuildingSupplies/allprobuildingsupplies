@@ -175,7 +175,7 @@ Please lock:
 - SKU = 5 lb, 9.5 mm, PE film one side, mixed-color chip
 - Regular packing only. No vacuum (recovery problem).
 - Terms = FOB Shanghai (or FCA Shanghai). We will NOT pick up EXW at the factory. Our forwarder books the ocean to Newark / Elizabeth, NJ, USA. Do not quote DDP. Do not need a US door address for freight.
-- Sample DHL to New Jersey: 20×30 cm + one full 5 lb film roll. Sample $ + DHL $. Address: 35 Hope Hill Lane, Lakewood NJ 08701, USA.
+- Sample DHL to New Jersey: 20×30 cm + one full 5 lb film roll. Sample $ + DHL $. Address: **1600 Livingston Ave, North Brunswick, NJ 08902, USA** (warehouse — not Hope Hill).
 - Gripper / tackstrip: send FOB Shanghai price later (per box / per 1000 LF). Pad is first.
 - No SPC / LVT from you — we already have plank.
 
