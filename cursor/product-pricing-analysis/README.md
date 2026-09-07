@@ -14,6 +14,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`EXCLUSIVE_SUPPLIER_ROADMAP.md`** | One-vendor play (Ashland Lakes → every category) |
 | **`GLASS_SHEET_SOURCING.md`** | Egypt / India / Turkey contacts + RFQ (China AD/CVD) |
 | **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / Dongsheng + **pad (Anerte) + tackstrip (Halex) RFQs** + Ablaze 451 photo |
+| **`CPVC_NJPD_SPEC.md`** | NJPD stick = **D2846 SDR-11 CTS**, not SCH80. Tommur already has FOB. Photos in `njpd-cpvc/` |
 | **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC pipe + DWV. Zhenpeng = PEX (½–1" only).** No POs until all mill quotes are in |
 | **`HAILIANG_COPPER_RFQ.md`** | Copper/brass RFQ workbook vs live copper SKUs |
 | **`Factory_Order_PVC_PEX_45HQ.csv`** | Current plumbing 45'HQ order (inch sizes, FOB/DDP) |

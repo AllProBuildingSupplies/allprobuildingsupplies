@@ -91,7 +91,7 @@ Achim also sells other décor (pillows, lighting, etc.) that is **not SKU’d ye
 | Material | What | Factory notes |
 |---|---|---|
 | **PVC** | Sch 40 pipe + DWV fittings | **Tommur / Lesso.** India / Mexico / Vietnam = tariff hedge only. Memo: `PVC_PEX_ORIGIN_SOURCING.md` |
-| **CPVC** | Sch 80 + SDR-11 / SDR-13.5 | Tommur until a better mill is locked |
+| **CPVC** | **NJPD = D2846 SDR-11 CTS** (cream, yellow stripe) — not SCH80 | **Tommur.** Pipe FOB is in. Fittings they call “CPVC 2846 SCH40.” Memo: `CPVC_NJPD_SPEC.md` |
 | **PEX** | **½ / ¾ / 1" only — Zhenpeng.** Drop 1¼ / 1½ / 2" from orders. Fittings REV PI locked; no PO until all mills quote. |
 | **Copper** | Type K soft / Type L hard tube + wrought fittings | Hailiang RFQ in this folder: `HAILIANG_COPPER_RFQ.md` |
 | **Insulation** | Cold-water pipe insulation | On site |
