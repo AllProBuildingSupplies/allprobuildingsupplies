@@ -56,7 +56,12 @@ English site explicitly lists **3.66 m / 12 ft** nylon **and** solution-dyed PET
 | 12 ft cut pile | https://qianqiaocarpet.com/product/cut-pile-tufting-plain-nylon-carpet-roll/ |
 | PET page | https://qianqiaocarpet.com/solution-dyed-pet-polyester-carpet/ |
 | Email | `info@qianqiaocorp.com` |
-| Phone / WhatsApp / WeChat | **+86 133 3134 0215** |
+| Switchboard / first WhatsApp | **+86 133 3134 0215** |
+| **Linda (sales mgr)** | WhatsApp **+86 180 3240 3168** — she has the color boards |
+
+**Reply (WhatsApp, 7 Sep 2026):** Linda quoted **USD 8.92/sqm** on a 4-swatch board (DY01 grey, DY02 navy, **DY04 cream**, DY05 rust; DY06 on the edge). Second board = higher density, higher cost. Volume discount “if more quantity.” Spec (PET vs nylon, oz, 12 ft, FOB vs CIF) **not stated**.
+
+**Math:** $8.92/m² = **~$7.46/SY FOB**. Artisent is **$5.92/SY** already on the job. After China duty (~43%) this lands ~**$10.60/SY** — does **not** beat Artisent. Ask for the cheap 12 ft **solution-dyed PET** apartment line (25–35 oz), FOB Shanghai, 40HQ price. DY04 is the closest color to Ablaze. Keep Kaili in parallel.
 
 If they will not show a mill address / video, use **Dongsheng** instead (below). Still worth a sample RFQ because 12 ft PET is what we need.
 
