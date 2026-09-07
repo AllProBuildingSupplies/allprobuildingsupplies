@@ -4,7 +4,7 @@ GitHub now has **one branch: `main`**. Agent deliverables that are not the live 
 
 | Folder | What it is | Open this first |
 |---|---|---|
-| [product-pricing-analysis/](product-pricing-analysis/) | Factory orders, margins, Tommur cost workbook | `Factory_Order_PVC_PEX_45HQ.csv` |
+| [product-pricing-analysis/](product-pricing-analysis/) | Factory orders, margins, Tommur cost workbook, PVC/PEX origin backup contacts | `Factory_Order_PVC_PEX_45HQ.csv` · `PVC_PEX_ORIGIN_SOURCING.md` |
 | [sell-sheets/](sell-sheets/) | Category sell-sheet PDFs | `brochure/sell-sheets/pdf/` |
 | [inbound-container-tracking/](inbound-container-tracking/) | Containers 3 & 4 | `data/inbound-containers.json` and Admin → Stock |
 | [storefront/](storefront/) | Catalog / admin / invoices (already the live site) | [allprobuildingsupplies.com](https://allprobuildingsupplies.com) |

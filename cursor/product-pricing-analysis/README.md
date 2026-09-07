@@ -17,6 +17,7 @@ Agent: [Product pricing analysis](https://cursor.com/agents/bc-dcaa793d-4f8b-42c
 | `COMPETITIVE_MARGINS.md` | How to read the margin sheet |
 | `FACTORY_ORDER_README.md` | How the 3-month container projection was built |
 | **`SELLABLE_CATALOG.md`** | What we can sell now: plumbing + Achim flooring/windows; glass/carpet/bath still in progress |
+| **`PVC_PEX_ORIGIN_SOURCING.md`** | Keep China (Tommur/Lesso) as primary; India / Mexico / Vietnam / Turkey contacts for tariff-hedge quotes |
 
 ## Tommur workbook rules
 
