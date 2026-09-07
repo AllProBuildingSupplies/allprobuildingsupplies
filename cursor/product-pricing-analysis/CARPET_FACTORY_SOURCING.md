@@ -73,13 +73,13 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 |---|---|
 | Factory | South of Shanhai 2nd Rd, west of Chaoshi Rd, Heshan Industrial Park, Rizhao, Shandong |
 | Sites | https://www.dongshengcarpet.com · http://www.dongsheng.com/en |
-| Julia Yuan (export) | `Julia.yuan@dongsheng.com` · WhatsApp **+86 152 1021 2718** |
+| **Selena** (export — **use this name**) | Same desk as the quote: `julia.yuan@dongsheng.com` · WhatsApp **+86 152 1021 2718**. Quote PI still shows Julia Yuan; all further messages: **Hi Selena**. |
 | Group / other | `mj@dongsheng.com` · **+86 153 7633 5686** · `marketing@dongsheng.com` · `International@dongsheng.com` |
 | Sales hotline | +86-633-8688096 |
 
 **Reply (Sep 2026):** They have 13 tufting machines; **3.66 m and 4 m** both available. They recommend **3.66 m** for a 40HQ (3 rows, more m²). **Take 3.66 m.** That is US **12 ft** (same as Artisent `12.00`). Do not buy 4 m / 13.1 ft for apartment stretch-in.
 
-**Quote in (Julia Yuan, DS-2060903, 3 Sep 2026, valid to 15 Sep):** PDF `dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903.pdf`. **EXW** — do not accept. Spec is right: 3.66 m, solution-dyed PET, textured cut pile, 850 / 1000 / 1200 g/m² (≈25 / 30 / 35 oz). Backing column blank — confirm ActionBac. Pattern TBD.
+**Quote in (Selena / desk `julia.yuan@dongsheng.com`, DS-2060903, 3 Sep 2026, valid to 15 Sep):** PDF `dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903.pdf`. **EXW** — do not accept. Spec is right: 3.66 m, solution-dyed PET, textured cut pile, 850 / 1000 / 1200 g/m² (≈25 / 30 / 35 oz). Backing column blank — confirm ActionBac. Pattern TBD. **Write Selena, not Julia.** FOB ask already sent (`dongsheng/Dongsheng_FOB_ask_SEND.txt` — next notes use Selena).
 
 | Face | g/m² | EXW USD/m² | EXW $/SY | 40HQ qty |
 |---|---:|---:|---:|---:|

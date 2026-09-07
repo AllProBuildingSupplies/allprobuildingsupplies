@@ -120,7 +120,7 @@ Price the **kit**, not 40 line items. Match floorplan names they already use (`3
 |---|---|---|
 | PEX / PVC / copper | **In house** | Tommur, Zhenpeng, Hailiang, etc. |
 | Glue-down plank | **In house** | Existing |
-| 12 ft PET carpet | RFQ | Kaili Jessica `jessicachan10@foxmail.com`; Qianqiao `info@qianqiaocorp.com` |
+| 12 ft PET carpet | RFQ | **Dongsheng Selena** `julia.yuan@dongsheng.com`; Kaili Jessica `jessicachan10@foxmail.com`; Qianqiao `info@qianqiaocorp.com` |
 | Rebond pad | **Packing in** — $22/roll (30 SY / $0.73/SY), 280–290 rolls/40HQ regular. FOB Shanghai, not EXW. No vacuum. No PO. | Anerte Kash WhatsApp +86 177 0151 5750 |
 | Clear glass 6/10/12 mm | RFQ | Sphinx `sales@sphinxglass.com`; Gold Plus `info@goldplusgroup.com` |
 | 1/4-round / cove | **Next scour** | Vietnam MDF / PVC extrusion |
