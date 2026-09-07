@@ -87,7 +87,14 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 | 30 oz | 1000 | $5.95 | $4.98 | 7,000 m² |
 | 35 oz | 1200 | $6.73 | $5.63 | 6,200 m² |
 
-They also listed “local charges + ocean + insurance 1×40HQ ≈ **USD 9,800**” (not FOB). Even the cheap line: EXW $4.50/SY × ~1.43 duty ≈ **$6.43/SY** before ocean — already **over Artisent $5.92/SY**. Inland to port makes FOB higher. Send the FOB restatement (`dongsheng/Dongsheng_FOB_ask_SEND.txt`). Keep Kaili in parallel. No PO.
+They also listed “local charges + ocean + insurance 1×40HQ ≈ **USD 9,800**” (not FOB). Even the cheap line: EXW $4.50/SY × ~1.43 duty ≈ **$6.43/SY** before ocean — already **over Artisent $5.92/SY**. Inland to port makes FOB higher. FOB ask sent. Keep Kaili in parallel. No PO.
+
+**Backing (WhatsApp, Selena, 7 Sep 2026):** Screenshot `dongsheng/selena-whatsapp-backing-options.jpg`. She sent three:
+1. White open-grid **woven PP** (ActionBac type) — **this one**
+2. Tan burlap / **jute** — no (hospitality, not US stretch-in)
+3. White mesh with red/black yarns, “cotton on PP scrim” — no (not US builder ActionBac)
+
+Send `dongsheng/Dongsheng_backing_FOB_SEND.txt`.
 
 ---
 
