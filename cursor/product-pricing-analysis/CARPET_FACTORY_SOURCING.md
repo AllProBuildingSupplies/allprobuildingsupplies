@@ -95,9 +95,28 @@ Dedicated underlay mill since ~2007. Rebond + moisture-barrier, exports to North
 | Phone / WhatsApp | **+86 177 0151 5750** · landline **+86 513 8841 8007** |
 | Skype | kash-smile18 |
 
-**Reply (WhatsApp, 7 Sep 2026):** Kash confirmed they make **PU foam chip** underlay and sent warehouse + red-film roll photos. That is bonded PU chip (same family as US rebond), usually **white foam + colored PE film**, not mottled mixed-color scrap. **No FOB yet.** Next: density / 1.83 m width / 9.5 mm / $/SY.
+**Reply (WhatsApp, 7 Sep 2026):** Kash confirmed they make **PU foam chip** underlay and sent warehouse + red-film roll photos. That is bonded PU chip (same family as US rebond).
 
-Alt (if Anerte is slow): Changzhou Anyway / Tony Xu `tony@czanyway.com` · WhatsApp **+86 189 6141 9868** — they sell underlay but are mainly an SPC mill/trader.
+**FOB in (WhatsApp, 9 Sep 2026):** Screenshot `anerte-pad/kash-whatsapp-fob-9sep2026.jpg`. **9.5 mm (3/8")**, width **1.83 m (6 ft)**, **FOB Shanghai**, full-container. Mixed-color chip (not white) + blue PE film on the photo — that is the US rebond look. Production **2–3 weeks** after deposit. Sample **20×30 cm**. Roll length 10 / 11 / 12 / 15 m or custom.
+
+| Density | No film | One-side PE film | No film $/SY | Film $/SY | Film ×1.43 duty |
+|---|---:|---:|---:|---:|---:|
+| **5 lb** (the Artisent spec) | **$0.73/m²** | **$0.88/m²** | $0.61 | **$0.74** | **~$1.05** |
+| 6 lb | $0.87/m² | $1.02/m² | $0.73 | $0.85 | ~$1.22 |
+| 8 lb | $1.15/m² | $1.30/m² | $0.96 | $1.09 | ~$1.55 |
+
+`$ / SY = $ / m² ÷ 1.196`. Duty stack is the same China ~43% used on carpet (confirm HTS with the broker — pad is likely 3921 cellular PU, not 5703). Ocean **not in yet** (need CBM / rolls per 40HQ). Even with ~$0.40–0.50/SY ocean, **5 lb with film** still lands under Artisent **$1.70/SY**. 8 lb with film is the one that can blow the target once freight is on.
+
+**Buy for Ashland / Artisent beat:** 3/8" **5 lb, 1.83 m, PE film one side.** Do not pay up to 8 lb unless a job spec says so.
+
+**Still missing — send the follow-up below, then hold the PO:**
+- Lock roll length **13.7 m (45 ft / 30 SY)** — US standard; he said customizable
+- kg/roll, CBM/roll, **rolls per 40HQ**, 40HQ $
+- MOQ if not a full container
+- DHL **to NJ**: 20×30 cm plus one full 5 lb film roll if they will
+- Confirm mill: Nantong Anerte, 166 Qiuhong Road, Hai’an
+
+Alt (only if Anerte falls over): Changzhou Anyway / Tony Xu `tony@czanyway.com` · WhatsApp **+86 189 6141 9868** — they sell underlay but are mainly an SPC mill/trader.
 
 ### Copy-paste RFQ (pad — Kash)
 
@@ -133,6 +152,26 @@ We will compare landed cost to US builder pad at about $1.70/SY. If 3/8" 5 lb wi
 Thanks,
 [name]
 All Pro Building Supplies
+```
+
+### Copy-paste follow-up (Kash — 40HQ + NJ sample)
+
+WhatsApp **+86 177 0151 5750**
+
+```
+Thanks Kash. 9.5 mm / 1.83 m / FOB Shanghai is what we need.
+
+Please lock this SKU and add packing:
+- 5 lb, 9.5 mm, 1.83 m width, PE film one side
+- Roll length 13.7 m (US 45 ft / 30 SY per roll). Confirm you can make that.
+- USD per m² we already have ($0.88). Also give USD per SY and per roll.
+- kg/roll, CBM/roll, rolls per 40HQ, 40HQ total $ FOB Shanghai
+- MOQ if we do not take a full container
+- Sample DHL to New Jersey, USA: 20×30 cm plus one full 5 lb film roll if possible — sample $ + DHL $
+- Confirm mill address: Nantong Anerte, 166 Qiuhong Road, Hai’an
+- Production 2–3 weeks after deposit — confirmed?
+
+We are not placing a PO yet. Need the 40HQ packing first.
 ```
 
 ---
@@ -230,7 +269,7 @@ All Pro Building Supplies
 ## How to play this
 
 1. Email **Jessica (Kaili)** and **Qianqiao WhatsApp** the same day. Sample both.
-2. Email **Kash (Anerte)** for 3/8" 5 lb rebond the same day.
+2. **Kash (Anerte) FOB is in** — 5 lb 9.5 mm with film **$0.88/m² / $0.74/SY FOB Shanghai**. Send the 40HQ + NJ sample follow-up. Do not PO yet.
 3. Do not order a container off one Memphis unit. Use samples to win the property, then 40HQ.
 4. Landed check before PO: FOB × **~1.43** (China) + ocean, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. If China does not clear that, send the same RFQ to **Tümer**.
 5. Planks stay ours. Naplock / tub strips stay US.

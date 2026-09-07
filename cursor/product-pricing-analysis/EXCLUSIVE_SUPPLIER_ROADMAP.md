@@ -44,7 +44,7 @@ Proof on 2-104. Beat Artisent **material** line by line, one delivery.
 | Line | Artisent | Us |
 |---|---|---|
 | Mortisay 12 ft Ablaze | $5.92–$5.95/SY | **Kaili / Qianqiao** PET 12 ft, comparable beige. Not the brand. |
-| Rebond 3/8" 5 lb | $1.70/SY | **Anerte** `sales@hyunderlays.com` |
+| Rebond 3/8" 5 lb | $1.70/SY | **Anerte** 5 lb film **$0.74/SY FOB** (~$1.05 duty-only). Need 40HQ cube. |
 | Tackstrip | install only | **Halex** +86 527 8427 1555 |
 | Naplock 154H | $0 | US, leave it |
 | Advantage Glue-Down Plank II | $1.20/SF | **Already have** |
@@ -121,7 +121,7 @@ Price the **kit**, not 40 line items. Match floorplan names they already use (`3
 | PEX / PVC / copper | **In house** | Tommur, Zhenpeng, Hailiang, etc. |
 | Glue-down plank | **In house** | Existing |
 | 12 ft PET carpet | RFQ | Kaili Jessica `jessicachan10@foxmail.com`; Qianqiao `info@qianqiaocorp.com` |
-| Rebond pad | RFQ | Anerte Kash `sales@hyunderlays.com` |
+| Rebond pad | **FOB in** — 5 lb 9.5 mm film **$0.88/m² / $0.74/SY** FOB Shanghai. Need 40HQ packing. No PO. | Anerte Kash `sales@hyunderlays.com` · WhatsApp +86 177 0151 5750 |
 | Clear glass 6/10/12 mm | RFQ | Sphinx `sales@sphinxglass.com`; Gold Plus `info@goldplusgroup.com` |
 | 1/4-round / cove | **Next scour** | Vietnam MDF / PVC extrusion |
 | Doors + hardware | After trim | Vietnam |
