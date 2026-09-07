@@ -88,6 +88,8 @@ Dedicated underlay mill since ~2007. Rebond + moisture-barrier, exports to North
 | Phone / WhatsApp | **+86 177 0151 5750** · landline **+86 513 8841 8007** |
 | Skype | kash-smile18 |
 
+**Reply (WhatsApp, 7 Sep 2026):** Kash confirmed they make **PU foam chip** underlay and sent warehouse + red-film roll photos. That is bonded PU chip (same family as US rebond), usually **white foam + colored PE film**, not mottled mixed-color scrap. **No FOB yet.** Next: density / 1.83 m width / 9.5 mm / $/SY.
+
 Alt (if Anerte is slow): Changzhou Anyway / Tony Xu `tony@czanyway.com` · WhatsApp **+86 189 6141 9868** — they sell underlay but are mainly an SPC mill/trader.
 
 ### Copy-paste RFQ (pad — Kash)
