@@ -247,7 +247,7 @@
             <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="loadInboundShipments()">Refresh</button>
           </div>
         </div>
-        <p class="wms-hint" style="margin-bottom:10px;">Containers 3, 4 &amp; 5 — packing-list pieces, ETA 9/18. Every fitting on these three POs is allocated to NJPD APBS-000005 (nothing on them is for anyone else). Foam pipe stays inbound stock, not extra PO lines. Do not receive into on-hand until the boxes land.</p>
+        <p class="wms-hint" style="margin-bottom:10px;">Containers 3, 4 &amp; 5 — ETA 9/18. Fittings qty = packing-list <strong>PCS</strong>. Foam pipe qty = packing-list <strong>PKGS</strong> (20 ft lengths); their PCS column is meters, not sticks. Every fitting on these three POs is allocated to NJPD APBS-000005. Do not receive into on-hand until the boxes land.</p>
         <div id="wms-inbound" class="wms-inbound" aria-live="polite">Loading…</div>
       </div>
 
@@ -1478,7 +1478,9 @@ function renderInboundShipments() {
     const linesHtml = lines.length
       ? '<div class="wms-inbound-lines"><table><thead><tr><th>Code</th><th>Size</th><th>Qty</th></tr></thead><tbody>' +
         lines.map(function (it) {
-          return '<tr><td>' + escapeHtml(it.code) + '</td><td>' + escapeHtml(it.size) + '</td><td>' + escapeHtml(it.qty) + '</td></tr>';
+          var unit = it.unit || (it.code === 'PVC-PIPE-FOAM' || it.code === 'PVC-PIPE-SOLID' ? '20ft' : 'pcs');
+          var extra = it.meters ? ' <span style="color:var(--silver);font-size:11px;">(' + escapeHtml(it.meters) + ' m)</span>' : '';
+          return '<tr><td>' + escapeHtml(it.code) + '</td><td>' + escapeHtml(it.size) + '</td><td>' + escapeHtml(it.qty) + ' ' + escapeHtml(unit) + extra + '</td></tr>';
         }).join('') +
         '</tbody></table></div>'
       : '';

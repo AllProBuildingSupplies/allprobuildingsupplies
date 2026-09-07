@@ -1397,6 +1397,10 @@ async function ensureInboundShipmentsTable(env) {
   } catch (_) {}
 }
 
+function isInboundFoamPipe(code) {
+  return code === 'PVC-PIPE-FOAM' || code === 'PVC-PIPE-SOLID';
+}
+
 function parseInboundItems(raw) {
   let items = raw;
   if (typeof raw === 'string') {
@@ -1411,17 +1415,30 @@ function parseInboundItems(raw) {
     .map((it) => {
       const code = normalizeProductCode(it && (it.code || it.sku));
       const size = canonicalizeSize(it && it.size);
-      const qty = parseInt(it && (it.qty ?? it.quantity ?? it.pcs), 10);
-      const cartons = it && it.cartons != null ? parseInt(it.cartons, 10) : null;
       const tommur = it && (it.tommur_code || it.tommur) ? String(it.tommur_code || it.tommur).trim() : '';
+      const cartons = it && it.cartons != null ? parseInt(it.cartons, 10) : null;
+      const pkgs = it && it.pkgs != null ? parseInt(it.pkgs, 10) : cartons;
+      const meters = it && it.meters != null ? parseInt(it.meters, 10) : null;
+      // Foam pipe packing lists: PCS = meters, PKGS = 20 ft lengths (receive qty).
+      // Fittings: PCS = pieces (receive qty), PKGS/cartons = cartons.
+      let qty = parseInt(it && (it.qty ?? it.quantity ?? it.pcs), 10);
+      if (isInboundFoamPipe(code) && Number.isFinite(pkgs) && pkgs > 0) {
+        qty = pkgs;
+      }
       if (!code || !size || !Number.isFinite(qty) || qty <= 0) return null;
-      return {
+      const row = {
         code,
         size,
         qty,
         cartons: Number.isFinite(cartons) ? cartons : null,
         tommur_code: tommur,
       };
+      if (isInboundFoamPipe(code)) {
+        row.pkgs = Number.isFinite(pkgs) ? pkgs : qty;
+        if (Number.isFinite(meters) && meters > 0) row.meters = meters;
+        row.unit = '20ft';
+      }
+      return row;
     })
     .filter(Boolean);
 }

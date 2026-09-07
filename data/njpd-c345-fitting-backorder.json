@@ -1,6 +1,6 @@
 {
   "order_id": "APBS-000005",
-  "note": "Backorder qty for each fitting = packing-list pcs on C3+C4+C5. Pipe is inbound stock on the containers, not added as extra customer lines beyond fittings.",
+  "note": "Backorder qty for each fitting = packing-list PCS on C3+C4+C5. Foam pipe is inbound stock counted in PKGS (20 ft lengths), not added as extra lines on this fittings PO.",
   "lines": [
     {
       "code": "PVC-1/16HH",

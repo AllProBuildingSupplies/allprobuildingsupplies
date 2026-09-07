@@ -1,5 +1,5 @@
 {
-  "note": "ETA 2026-09-18 from packing lists (not commercial invoices). Container 3 = first block of PL 260509-003-SG; Container 4 = remainder of that PL including 2/3/4\" foam pipe. Container 5 = PL 260430-010-SG (container number not on the packing list). Qtys are packing-list PCS (sticks), not cartons. All fittings on these three containers are allocated to NJPD APBS-000005. Do not add to on-hand until received.",
+  "note": "ETA 2026-09-18 from packing lists (not commercial invoices). Container 3 = first block of PL 260509-003-SG; Container 4 = remainder of that PL including 2/3/4\" foam pipe. Container 5 = PL 260430-010-SG (container number not on the packing list). Fitting qty = packing-list PCS. Foam pipe qty = packing-list PKGS (20 ft lengths); the PCS column on pipe is meters. All fittings on these three containers are allocated to NJPD APBS-000005. Do not add to on-hand until received.",
   "allocated_to": {
     "customer": "NJPD Plumbing & Heating LLC",
     "order_id": "APBS-000005",
@@ -182,7 +182,7 @@
       "invoice_ref": "260509-003-SG",
       "invoice_date": "2026-07-01",
       "status": "in_transit",
-      "notes": "Packing list 260509-003-SG (second block + 2/3/4\" pipe). Allocated to NJPD APBS-000005.",
+      "notes": "Packing list 260509-003-SG (second block + 2/3/4\" pipe). Pipe qty is PKGS (20 ft). Allocated to NJPD APBS-000005.",
       "items": [
         {
           "code": "PVC-1/16HH",
@@ -475,22 +475,31 @@
           "code": "PVC-PIPE-FOAM",
           "size": "2",
           "tommur_code": "A100P01-",
-          "qty": 14274,
-          "cartons": 2340
+          "qty": 2340,
+          "cartons": 2340,
+          "meters": 14274,
+          "pkgs": 2340,
+          "unit": "20ft"
         },
         {
           "code": "PVC-PIPE-FOAM",
           "size": "3",
           "tommur_code": "A100P01-",
-          "qty": 14054,
-          "cartons": 2304
+          "qty": 2304,
+          "cartons": 2304,
+          "meters": 14054,
+          "pkgs": 2304,
+          "unit": "20ft"
         },
         {
           "code": "PVC-PIPE-FOAM",
           "size": "4",
           "tommur_code": "A100P01-",
-          "qty": 4666,
-          "cartons": 765
+          "qty": 765,
+          "cartons": 765,
+          "meters": 4666,
+          "pkgs": 765,
+          "unit": "20ft"
         },
         {
           "code": "PVC-PTRAP",
@@ -678,7 +687,7 @@
       "invoice_ref": "260430-010-SG",
       "invoice_date": "2026-07-30",
       "status": "in_transit",
-      "notes": "Packing list 260430-010-SG. Container number not on PL. Allocated to NJPD APBS-000005.",
+      "notes": "Packing list 260430-010-SG. Container number not on PL. Pipe qty is PKGS (20 ft). Allocated to NJPD APBS-000005.",
       "items": [
         {
           "code": "PVC-1/4HH",
@@ -712,22 +721,31 @@
           "code": "PVC-PIPE-FOAM",
           "size": "1-1/2",
           "tommur_code": "A100P01-",
-          "qty": 15311,
-          "cartons": 2510
+          "qty": 2510,
+          "cartons": 2510,
+          "meters": 15311,
+          "pkgs": 2510,
+          "unit": "20ft"
         },
         {
           "code": "PVC-PIPE-FOAM",
           "size": "2",
           "tommur_code": "A100P01-",
-          "qty": 4514,
-          "cartons": 740
+          "qty": 740,
+          "cartons": 740,
+          "meters": 4514,
+          "pkgs": 740,
+          "unit": "20ft"
         },
         {
           "code": "PVC-PIPE-FOAM",
           "size": "3",
           "tommur_code": "A100P01-",
-          "qty": 4734,
-          "cartons": 776
+          "qty": 776,
+          "cartons": 776,
+          "meters": 4734,
+          "pkgs": 776,
+          "unit": "20ft"
         },
         {
           "code": "PVC-PTRAP",
