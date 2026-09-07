@@ -29,7 +29,7 @@ Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao Linda $8.92/m² 
 
 **PVC DWV:** Zhejiang Green Valve PI YMF26060303X — EXW Taizhou, cheaper than Tommur on paper, not FOB NJ.
 
-**PEX PPSU:** Ningbo Zhenpeng PI 5 Sep 2026 — **FOB Ningbo**, $16,686 / 55,100 pcs, cUPC/NSF 61. Elbows ~½ Tommur FOB. See `PVC_PEX_ORIGIN_SOURCING.md`. Do not add catalog SKUs until FOB is on the ordering sheet.
+**PEX PPSU:** Ningbo Zhenpeng **REV** PI — FOB Ningbo **$16,185.80** / 55,100 pcs / **1 pallet 2.3 CBM 488 kg**. Elbows ~⅓ of Tommur FOB. Ride on next Tommur 45'HQ to NJ. See `PVC_PEX_ORIGIN_SOURCING.md`.
 
 ## Tommur workbook rules
 

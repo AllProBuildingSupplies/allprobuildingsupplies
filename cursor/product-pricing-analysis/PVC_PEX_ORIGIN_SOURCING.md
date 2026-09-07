@@ -230,27 +230,25 @@ EXW factory, ASTM D2665 white DWV, hub×hub (S*S). **$2,659.87** / 10,030 pcs / 
 
 EXW is often ~40–55% of Tommur FOB on the big movers. Do **not** PO this PI: ask **FOB Ningbo/Shanghai**, **NSF-dwv**, samples DHL to **NJ**, and a **45'HQ** price on the full Tommur SKU list. 9 CBM LCL to NJ will eat the savings. Do not store their bank details in git.
 
-### Ningbo Zhenpeng — PEX PPSU F2159, FOB Ningbo (PI 5 Sep 2026)
+### Ningbo Zhenpeng — PEX PPSU F2159, FOB Ningbo (PI 5 Sep 2026, **REV**)
 
-**Not logged until this PI.** All Pro PI, **FOB Ningbo**, USD, HS 3917.40. **PPSU Solvay**, ASTM F2159, **cUPC + NSF/ANSI 61**. 30% / 70%, 30 days, 60-day validity. **$16,686.15** / 55,100 pcs / 163 cartons. CBM not on the PI. Wholesale pack. No 1¼–2" (those stay brass / Tommur).
+**FOB Ningbo**, USD, HS 3917.40. **PPSU Solvay**, ASTM F2159, **cUPC + NSF/ANSI 61**. 30% / 70%, 30 days. **REV total $16,185.80** (was $16,686.15, **~3% off**). 55,100 pcs / 163 cartons / **1 pallet 122×102×183 cm / 2.3 CBM / ~488 kg GW**. No 1¼–2" (those stay brass / Tommur).
 
-| Zhenpeng | Size | Qty | FOB | Tommur FOB | Notes |
+| Zhenpeng | Size | Qty | FOB was | **FOB REV** | Tommur FOB |
 |---|---|---|---|---|---|
-| Elbow B121290 | ½" | 9,000 | **0.172** | 0.466 | ~37% of Tommur |
-| Elbow B343490 | ¾" | 4,500 | **0.353** | 0.790 | ~45% of Tommur |
-| Elbow B050590 | 1" | 2,700 | 0.592 | — | no 1" elbow on Tommur 45HQ |
-| Coupling B1212CP | ½" | 3,000 | 0.107 | (blank — new SKU) | fills factory-order gap |
-| Coupling B3434CP | ¾" | 4,500 | 0.207 | (blank — new SKU) | |
-| Coupling B0505CP | 1" | 1,200 | 0.44 | (blank — new SKU) | |
-| Coupling B3412CP | ¾×½" | 2,000 | 0.18 | — | |
-| Coupling B0534CP | 1×¾" | 1,800 | 0.33 | — | |
-| Tee B12T | ½" | 1,200 | 0.237 | (blank — new SKU) | |
-| Tee B34T | ¾" | 1,800 | 0.489 | (blank — new SKU) | |
-| Tee B05T | 1" | 600 | 0.938 | (blank — new SKU) | |
-| Tee B343412T | ¾×¾×½" | 3,000 | 0.455 | (blank — new SKU) | |
-| Tee B050534T | 1×1×¾" | 600 | 0.733 | (blank — new SKU) | |
-| Plug ½ / ¾ / 1" | | 6k / 3k / 1.5k | 0.094 / 0.156 / 0.268 | — | not on live catalog |
+| Elbow B121290 | ½" | 9,000 | 0.172 | **0.167** | 0.466 |
+| Elbow B343490 | ¾" | 4,500 | 0.353 | **0.342** | 0.790 |
+| Elbow B050590 | 1" | 2,700 | 0.592 | **0.574** | — |
+| Coupling ½" | | 3,000 | 0.107 | **0.104** | (new SKU) |
+| Coupling ¾" | | 4,500 | 0.207 | **0.201** | (new SKU) |
+| Coupling 1" | | 1,200 | 0.44 | **0.427** | (new SKU) |
+| Tee ½" | | 1,200 | 0.237 | **0.230** | (new SKU) |
+| Tee ¾" | | 1,800 | 0.489 | **0.474** | (new SKU) |
+| Tee 1" | | 600 | 0.938 | **0.910** | (new SKU) |
+| Tee ¾×¾×½" | | 3,000 | 0.455 | **0.441** | (new SKU) |
 
-Reducing tees on the PI (½×½×¾, ¾×½×½, ¾×½×¾, ¾×¾×1, 1×¾×¾, 1×¾×1, 1×1×½) are extra SKUs — keep on the mill list, do not invent website prices.
+Plugs and the other reducing tees: same ~3% off. Do not invent website prices for SKUs not already on the site.
 
-**Vs live sell:** ½" elbow is $1.86 on site / Tommur FOB $0.47 already loses to PexUniverse (~$0.46). Zhenpeng FOB $0.172 × ~1.43 duty ≈ **~$0.25 landed** before ocean — that can actually compete. Confirm CBM + kg, samples DHL to NJ, then this can go on the ordering sheet. Do not mix with Green Valve PVC on the same PI.
+**Pack:** 2.3 CBM / 488 kg is one pallet, not a container. LCL to NJ will work but is the expensive way. **Best: ride this pallet on the next Tommur/Lesso 45'HQ to NJ** (plenty of leftover cube).
+
+**Landed sketch (½" elbow):** FOB $0.167 × ~1.43 duty ≈ **$0.24** + pennies of ocean if consolidated. Site sells at $1.86. Tommur FOB was $0.47 and already lost to PexUniverse (~$0.46). This REV number can compete. Samples DHL to NJ, then PO the REV PI **FOB Ningbo**. Do not mix with Green Valve PVC on the same PI.
