@@ -2,7 +2,7 @@
 
 **Open this folder on `main`.** Factory orders, mill contacts, RFQ wording, and specs all live here. Do not scatter them across new `cursor/*` branches.
 
-When mill quotes come back: landed check first, then ordering sheet in this folder, then sell sheets / catalog / site. Do not invent SKU prices.
+When mill quotes come back: landed check first, then ordering sheet in this folder, then sell sheets / catalog / site. Do not invent SKU prices. **Do not place factory POs until all quotes are in** — one combined order window.
 
 **All quotes:** **FOB Ningbo/Shanghai** (or **FCA Ningbo**) with inbound to **NJ USA**. Samples DHL to NJ. Not EXW factory. Not DDP from a new mill. Memphis is a job, not the warehouse.
 
@@ -14,7 +14,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`EXCLUSIVE_SUPPLIER_ROADMAP.md`** | One-vendor play (Ashland Lakes → every category) |
 | **`GLASS_SHEET_SOURCING.md`** | Egypt / India / Turkey contacts + RFQ (China AD/CVD) |
 | **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / Dongsheng + **pad (Anerte) + tackstrip (Halex) RFQs** + Ablaze 451 photo |
-| **`PVC_PEX_ORIGIN_SOURCING.md`** | **Zhenpeng = PEX PPSU primary.** Tommur/Lesso = PVC + PEX pipe. India/Mexico/Vietnam = PVC tariff hedge |
+| **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC pipe + DWV. Zhenpeng = PEX (½–1" only).** No POs until all mill quotes are in |
 | **`HAILIANG_COPPER_RFQ.md`** | Copper/brass RFQ workbook vs live copper SKUs |
 | **`Factory_Order_PVC_PEX_45HQ.csv`** | Current plumbing 45'HQ order (inch sizes, FOB/DDP) |
 | `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
@@ -25,11 +25,13 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 
 ## RFQs already sent (waiting on replies)
 
-Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao Linda $8.92/m² — too high) · pad (Anerte/Kash) · tackstrip (Halex/Fred).
+**No factory POs until these are in and pricing is locked**, then order together so production lines up.
 
-**PVC DWV:** Zhejiang Green Valve PI YMF26060303X — EXW Taizhou, cheaper than Tommur on paper, not FOB NJ.
+Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao, Dongsheng) · pad (Anerte/Kash) · tackstrip (Halex/Fred).
 
-**PEX PPSU (chosen mill):** **Ningbo Zhenpeng** — REV PI FOB Ningbo **$16,185.80** / 1 pallet **2.3 CBM**. Primary for ½–1" F2159. Ride on next Tommur 45'HQ to NJ.
+**PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
+
+**PEX (½–1" only, Zhenpeng):** REV PI held. Do not order yet. Drop 1¼–2" PEX from the working list.
 
 ## Tommur workbook rules
 

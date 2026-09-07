@@ -54,7 +54,9 @@ All mill contacts, RFQ wording, specs, and factory-order sheets live in **`curso
 - If the platform forces a feature branch, reuse the existing open sourcing branch if there is one. Otherwise use a single long-lived branch `cursor/supplier-sourcing-d7cc`, put the files in `cursor/product-pricing-analysis/`, and **merge it to `main` before finishing**. Do not leave a second copy only on the PR.
 - Site/catalog SKU work still merges to `main` as already documented above. Do not invent glass/carpet/pad prices until a mill quote is in.
 
-**PEX PPSU fittings (½–1", ASTM F2159):** mill is **Ningbo Zhenpeng**, FOB Ningbo. Do not put Tommur back on top of that list. PEX-B **pipe** and **1¼–2" PEX fittings** stay Tommur/Lesso.
+**PVC pipe + DWV fittings:** mill is **Tommur / Lesso**.
+
+**PEX:** mill is **Ningbo Zhenpeng**. Sizes **½ / ¾ / 1" only** — do not order 1¼ / 1½ / 2" PEX. No factory POs until every mill quote is in; then place orders together so production lines up.
 
 ### Import destination (all mill quotes)
 
