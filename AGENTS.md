@@ -58,4 +58,6 @@ All mill contacts, RFQ wording, specs, and factory-order sheets live in **`curso
 
 Baruch / All Pro is based in **New Jersey**. Every factory RFQ, sample, and landed-cost check uses **FOB China (or the origin port)** with inbound to **NJ USA** (NY/NJ — Newark / Elizabeth). Sample courier is DHL to NJ. Do **not** quote door-to-door Memphis, Texas, or “Southeast.” Memphis is a customer job only, not the warehouse.
 
+Preferred Incoterms: **FOB Ningbo or Shanghai**. **FCA Ningbo** is acceptable (same as FOB for a container — they deliver to the port/forwarder, we book ocean). Do **not** take **EXW** factory. Do **not** take **DDP NJ** from a new mill unless they give an all-in price that already includes US MFN + Section 301 + overlay, and we still prefer our own forwarder on first orders.
+
 Do **not** commit `.cursor/environment.json`. Cloud Agents for this storefront use the existing personal environment tied to GitHub `AllProBuildingSupplies/allprobuildingsupplies`. A committed environment file made Cursor create a second environment (`allprobuildingsupplies/allprobuildingsupplies`) and broke new chats.
