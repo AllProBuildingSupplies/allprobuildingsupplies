@@ -3930,11 +3930,12 @@ export default {
           );
         }
 
-        // Release prior reservation only after validation succeeds. If the write
-        // fails, re-apply the old reservation so inventory is not left inflated.
-        const oldItems = await restoreOrderItemsStock(env, o.id);
+        // skipStock: backorder-only edits (inbound not yet on hand) must not
+        // deduct warehouse qty. Default path still restores + re-applies.
+        const skipStock = o.skipStock === true;
+        const oldItems = skipStock ? [] : await restoreOrderItemsStock(env, o.id);
         const reapplyOldStock = async () => {
-          if (!oldItems || !oldItems.length) return;
+          if (skipStock || !oldItems || !oldItems.length) return;
           await applyOrderItemsStock(
             env,
             oldItems.map((it) => ({
@@ -3952,7 +3953,7 @@ export default {
           throw err;
         }
 
-        if (o.status !== 'cancelled' && itemsToSave.length > 0) {
+        if (!skipStock && o.status !== 'cancelled' && itemsToSave.length > 0) {
           try {
             await applyOrderItemsStock(env, itemsToSave);
           } catch (err) {
