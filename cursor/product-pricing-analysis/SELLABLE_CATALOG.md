@@ -92,7 +92,7 @@ Achim also sells other décor (pillows, lighting, etc.) that is **not SKU’d ye
 |---|---|---|
 | **PVC** | Sch 40 solid & foam-core pipe + DWV fittings | Stay with Tommur / Lesso as primary. Backup quotes: India ASTM mills, Mexico Wavin (USMCA), Vietnam only if they run IPS + NSF. Memo: `PVC_PEX_ORIGIN_SOURCING.md` |
 | **CPVC** | Sch 80 + SDR-11 / SDR-13.5 | Same China primary |
-| **PEX** | PEX-B pipe + elbows/reducers | Same. Turkey (Fırat / Kalde) is a PEX-only backup, not the PVC container |
+| **PEX** | PEX-B **pipe** — Tommur / Lesso. PEX **PPSU fittings ½–1"** — **Ningbo Zhenpeng primary** (REV FOB Ningbo). 1¼–2" fittings stay Tommur. Turkey is PEX-pipe backup only. |
 | **Copper** | Type K soft / Type L hard tube + wrought fittings | Hailiang RFQ in this folder: `HAILIANG_COPPER_RFQ.md` |
 | **Insulation** | Cold-water pipe insulation | On site |
 | **Brass** | — | Not in `products.csv` yet. Do not invent SKUs. Add when the Hailiang (or other) list is ready. |

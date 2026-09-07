@@ -1,6 +1,8 @@
-# PVC + PEX — should we leave China?
+# PVC + PEX — mills
 
-Short answer: **no as the primary mill.** Keep Tommur / Lesso for the 45'HQ catalog. **Yes, get three backup quotes** (India ASTM mills, Mexico Wavin, Vietnam only if they will run US inch + NSF). That is a tariff hedge, not a cheaper-FOB hunt.
+**PEX PPSU fittings (½–1", ASTM F2159):** **Ningbo Zhenpeng is the primary mill.** REV PI FOB Ningbo, cUPC/NSF 61, Solvay PPSU. Keep them at the top of the list. Do not go back to Tommur pricing on these SKUs.
+
+**PVC pipe + DWV + PEX-B pipe + 1¼–2" PEX:** still **Tommur / Lesso** as primary. India / Mexico / Vietnam are a tariff hedge for PVC, not a cheaper-FOB hunt.
 
 This is different from glass. Glass has China/Malaysia **AD/CVD** that makes those origins unusable. Plastic PVC/PEX pipe (HTS **3917**) has **no AD/CVD order**. China is still legal. The issue is stacked **Section 301** on China-origin articles, plus whether another country can even make the **US inch SKU tree** we already sell.
 
@@ -10,7 +12,9 @@ From `Factory_Order_PVC_PEX_45HQ.csv` and the live plumbing catalog:
 
 - **PVC Sch 40** pipe (solid + foam-core), IPS inch, ASTM D1785
 - **PVC DWV fittings** (¼ / ⅛ / 1/16 bends, street, wyes, couplings, etc.), ASTM D2665
-- **PEX-B** pipe + elbows/reducers, **CTS** (½" / ¾" / 1"), ASTM F876 / F877
+- **PEX-B pipe** (CTS, ASTM F876 / F877) — Tommur / Lesso
+- **PEX PPSU fittings** ½–1" (ASTM F2159) — **Zhenpeng** (primary)
+- **PEX fittings 1¼–2"** — Tommur (Zhenpeng did not quote; usually brass / F1807)
 
 That fittings mix is the money. A mill that only extrudes 4 m metric uPVC sticks is useless for this container.
 
@@ -230,9 +234,11 @@ EXW factory, ASTM D2665 white DWV, hub×hub (S*S). **$2,659.87** / 10,030 pcs / 
 
 EXW is often ~40–55% of Tommur FOB on the big movers. Do **not** PO this PI: ask **FOB Ningbo/Shanghai**, **NSF-dwv**, samples DHL to **NJ**, and a **45'HQ** price on the full Tommur SKU list. 9 CBM LCL to NJ will eat the savings. Do not store their bank details in git.
 
-### Ningbo Zhenpeng — PEX PPSU F2159, FOB Ningbo (PI 5 Sep 2026, **REV**)
+### Ningbo Zhenpeng — **primary PEX PPSU mill** (FOB Ningbo, PI 5 Sep 2026 **REV**)
 
-**FOB Ningbo**, USD, HS 3917.40. **PPSU Solvay**, ASTM F2159, **cUPC + NSF/ANSI 61**. 30% / 70%, 30 days. **REV total $16,185.80** (was $16,686.15, **~3% off**). 55,100 pcs / 163 cartons / **1 pallet 122×102×183 cm / 2.3 CBM / ~488 kg GW**. Carton **30×25×15 cm = 0.01125 CBM** (163 × 0.01125 = **1.83 CBM** loose; use **2.3 CBM palletized** for the 45'HQ). No 1¼–2" (those stay brass / Tommur).
+Keep Zhenpeng at the top of the PEX fittings list. FOB Ningbo, HS 3917.40, **PPSU Solvay**, ASTM F2159, **cUPC + NSF/ANSI 61**. 30% / 70%, 30 days. **REV $16,185.80** / 55,100 pcs / 163 cartons / **1 pallet 122×102×183 cm / 2.3 CBM / ~488 kg GW**. Carton **30×25×15 cm = 0.01125 CBM** (163 × 0.01125 = **1.83 CBM** loose; use **2.3 CBM palletized** on the 45'HQ). No 1¼–2" (those stay Tommur).
+
+Next: PO the REV PI, samples DHL to NJ if needed, **pallet rides the next Tommur/Lesso 45'HQ to Newark**. Do not LCL 2.3 CBM alone. Do not mix with Green Valve PVC on the same PI. Do not change website prices until this is on the ordering sheet.
 
 | Zhenpeng | Size | Qty | FOB was | **FOB REV** | Tommur FOB |
 |---|---|---|---|---|---|

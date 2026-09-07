@@ -54,6 +54,8 @@ All mill contacts, RFQ wording, specs, and factory-order sheets live in **`curso
 - If the platform forces a feature branch, reuse the existing open sourcing branch if there is one. Otherwise use a single long-lived branch `cursor/supplier-sourcing-d7cc`, put the files in `cursor/product-pricing-analysis/`, and **merge it to `main` before finishing**. Do not leave a second copy only on the PR.
 - Site/catalog SKU work still merges to `main` as already documented above. Do not invent glass/carpet/pad prices until a mill quote is in.
 
+**PEX PPSU fittings (½–1", ASTM F2159):** mill is **Ningbo Zhenpeng**, FOB Ningbo. Do not put Tommur back on top of that list. PEX-B **pipe** and **1¼–2" PEX fittings** stay Tommur/Lesso.
+
 ### Import destination (all mill quotes)
 
 Baruch / All Pro is based in **New Jersey**. Every factory RFQ, sample, and landed-cost check uses **FOB China (or the origin port)** with inbound to **NJ USA** (NY/NJ — Newark / Elizabeth). Sample courier is DHL to NJ. Do **not** quote door-to-door Memphis, Texas, or “Southeast.” Memphis is a customer job only, not the warehouse.
