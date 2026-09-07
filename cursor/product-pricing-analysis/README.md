@@ -28,7 +28,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 
 **No factory POs until these are in and pricing is locked**, then order together so production lines up.
 
-Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao, Dongsheng) · pad (Anerte/Kash — **$22/roll, 285/40HQ**, FOB not EXW, need NJ sample) · tackstrip (Halex/Fred) · copper (Hailiang WeChat — ASTM already confirmed, waiting on FOB).
+Glass (Sphinx waiting FOB) · carpet (Dongsheng **EXW in — ask FOB**; Kaili / Qianqiao still open) · pad (Anerte/Kash — **$22/roll, 285/40HQ**, FOB not EXW, need NJ sample) · tackstrip (Halex/Fred) · copper (Hailiang — ASTM confirmed, waiting on FOB).
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 

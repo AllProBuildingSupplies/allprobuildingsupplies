@@ -79,6 +79,16 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 
 **Reply (Sep 2026):** They have 13 tufting machines; **3.66 m and 4 m** both available. They recommend **3.66 m** for a 40HQ (3 rows, more m²). **Take 3.66 m.** That is US **12 ft** (same as Artisent `12.00`). Do not buy 4 m / 13.1 ft for apartment stretch-in.
 
+**Quote in (Julia Yuan, DS-2060903, 3 Sep 2026, valid to 15 Sep):** PDF `dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903.pdf`. **EXW** — do not accept. Spec is right: 3.66 m, solution-dyed PET, textured cut pile, 850 / 1000 / 1200 g/m² (≈25 / 30 / 35 oz). Backing column blank — confirm ActionBac. Pattern TBD.
+
+| Face | g/m² | EXW USD/m² | EXW $/SY | 40HQ qty |
+|---|---:|---:|---:|---:|
+| 25 oz | 850 | **$5.38** | $4.50 | 7,000 m² |
+| 30 oz | 1000 | $5.95 | $4.98 | 7,000 m² |
+| 35 oz | 1200 | $6.73 | $5.63 | 6,200 m² |
+
+They also listed “local charges + ocean + insurance 1×40HQ ≈ **USD 9,800**” (not FOB). Even the cheap line: EXW $4.50/SY × ~1.43 duty ≈ **$6.43/SY** before ocean — already **over Artisent $5.92/SY**. Inland to port makes FOB higher. Send the FOB restatement (`dongsheng/Dongsheng_FOB_ask_SEND.txt`). Keep Kaili in parallel. No PO.
+
 ---
 
 ## Pad (3/8" ≈ 9.5 mm, 5 lb ≈ ~80 kg/m³, US width 6' / 1.83 m)
