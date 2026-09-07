@@ -101,7 +101,7 @@ Subject: RFQ — 3/8" 5 lb rebond carpet pad, 6 ft rolls, FOB
 ```
 Hi Kash,
 
-We are All Pro Building Supplies, a US B2B building-supplies importer (Memphis / Southeast). We need a factory quote for residential rebond carpet pad — not PU chip foam sold as “underlay” unless it is true US-style rebond.
+We are All Pro Building Supplies, a US B2B building-supplies importer. We need a factory quote for residential rebond carpet pad — not PU chip foam sold as “underlay” unless it is true US-style rebond.
 
 Please quote:
 
@@ -117,8 +117,8 @@ Need from you:
 - FOB Shanghai, USD per SY and per m² for each density / with vs without film
 - kg/roll, CBM/roll, rolls per 40HQ, 40HQ price
 - MOQ
-- Sample: one roll or a cut of 3/8" 5 lb with film — cost + days to Memphis
-- Lead time after deposit
+- Sample: one roll or a cut of 3/8" 5 lb with film — sample cost + DHL to US
+- Production lead time after deposit (factory days, FOB Shanghai)
 - Confirm you are the mill (Nantong Anerte, 166 Qiuhong Road, Hai’an)
 
 We will compare landed cost to US builder pad at about $1.70/SY. If 3/8" 5 lb with film cannot land under that, say so and quote the closest spec that can.
@@ -205,8 +205,8 @@ Also confirm:
 - FOB Shanghai or Ningbo, USD per box and per 1,000 LF
 - MOQ (we saw ~100 boxes)
 - 40HQ mix (mostly concrete-nail 1" plus some 7/8" wood)
-- Sample: 1 box of each type, cost + days to Memphis
-- Lead time
+- Sample: 1 box of each type — sample cost + DHL to US
+- Production lead time after deposit (factory days, FOB Shanghai)
 - Confirm mill: Suqian Halex, Fudan Road, Sucheng ETDZ, Suqian, Jiangsu
 
 Private label on the box is fine. We do not need transitions, naplock, or quarter-round from you.
