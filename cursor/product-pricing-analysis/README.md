@@ -1,23 +1,29 @@
-# Product pricing analysis
+# Product pricing + supplier sourcing
 
-Merged from overlapping Cursor PRs #52, #56, #57, and #58 (Tommur workbook + competitive margins + factory orders).
+**Open this folder on `main`.** Factory orders, mill contacts, RFQ wording, and specs all live here. Do not scatter them across new `cursor/*` branches.
 
-Agent: [Product pricing analysis](https://cursor.com/agents/bc-dcaa793d-4f8b-42ca-b880-19afc8aad7cc)
+When mill quotes come back: landed check first, then ordering sheet in this folder, then sell sheets / catalog / site. Do not invent SKU prices.
 
 ## Start here
 
-| File | Use |
+| File | What it is |
 |---|---|
-| **`Factory_Order_PVC_PEX_45HQ.csv`** | Latest factory order: PVC + PEX for a 45'HQ (~3 month supply), with inch sizes, carton dims, FOB and DDP |
-| **`Factory_Order_For_Tommur_FILLED.csv`** | Earlier filled 45'HQ package (core money-makers + top-up) |
-| `Factory_Order_For_Tommur.csv` | Core 3-month reorder only (~60% of a 45'HQ) |
-| `Factory_Order_3Mo_Container.xlsx` | Full projection workbook (summary, fill, assumptions) |
-| `Tommur_Cost_Margin_Tracker.xlsx` | FOB / landed / HTS / freight / margin by SKU |
-| `Competitive_Margin_Sheet.xlsx` | FOB → landed vs cheapest online price |
+| **`SELLABLE_CATALOG.md`** | What is on the site now vs still waiting on quotes |
+| **`EXCLUSIVE_SUPPLIER_ROADMAP.md`** | One-vendor play (Ashland Lakes → every category) |
+| **`GLASS_SHEET_SOURCING.md`** | Egypt / India / Turkey contacts + RFQ (China AD/CVD) |
+| **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / Dongsheng + **pad (Anerte) + tackstrip (Halex) RFQs** + Ablaze 451 photo |
+| **`PVC_PEX_ORIGIN_SOURCING.md`** | Stay with Tommur/Lesso; India / Mexico / Vietnam / Turkey backups |
+| **`HAILIANG_COPPER_RFQ.md`** | Copper/brass RFQ workbook vs live copper SKUs |
+| **`Factory_Order_PVC_PEX_45HQ.csv`** | Current plumbing 45'HQ order (inch sizes, FOB/DDP) |
+| `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
+| `Tommur_Cost_Margin_Tracker.xlsx` | FOB / landed / HTS / freight / margin |
+| `Competitive_Margin_Sheet.xlsx` | FOB → landed vs cheapest online |
 | `COMPETITIVE_MARGINS.md` | How to read the margin sheet |
 | `FACTORY_ORDER_README.md` | How the 3-month container projection was built |
-| **`SELLABLE_CATALOG.md`** | What we can sell now: plumbing + Achim flooring/windows; glass/carpet/bath still in progress |
-| **`PVC_PEX_ORIGIN_SOURCING.md`** | Keep China (Tommur/Lesso) as primary; India / Mexico / Vietnam / Turkey contacts for tariff-hedge quotes |
+
+## RFQs already sent (waiting on replies)
+
+Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao) · pad (Anerte/Kash) · tackstrip (Halex/Fred). Forward replies into this folder as an ordering sheet — do not add catalog SKUs until FOB is real.
 
 ## Tommur workbook rules
 
@@ -27,10 +33,9 @@ Agent: [Product pricing analysis](https://cursor.com/agents/bc-dcaa793d-4f8b-42c
 
 ## Rebuild (optional)
 
-Scripts live in this folder. They still need the original research JSON / live order pulls the agent used.
-
 ```bash
 python3 cursor/product-pricing-analysis/build_tommur_cost_margin.py
 python3 cursor/product-pricing-analysis/build_competitive_margin_sheet.py
 python3 cursor/product-pricing-analysis/build_factory_order_projection.py
+python3 cursor/product-pricing-analysis/build_hailiang_copper_rfq.py
 ```

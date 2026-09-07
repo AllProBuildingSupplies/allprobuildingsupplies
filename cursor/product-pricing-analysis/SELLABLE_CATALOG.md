@@ -93,7 +93,7 @@ Achim also sells other décor (pillows, lighting, etc.) that is **not SKU’d ye
 | **PVC** | Sch 40 solid & foam-core pipe + DWV fittings | Stay with Tommur / Lesso as primary. Backup quotes: India ASTM mills, Mexico Wavin (USMCA), Vietnam only if they run IPS + NSF. Memo: `PVC_PEX_ORIGIN_SOURCING.md` |
 | **CPVC** | Sch 80 + SDR-11 / SDR-13.5 | Same China primary |
 | **PEX** | PEX-B pipe + elbows/reducers | Same. Turkey (Fırat / Kalde) is a PEX-only backup, not the PVC container |
-| **Copper** | Type K soft / Type L hard tube + wrought fittings | Hailiang RFQ exists on a separate thread; catalog is the current copper line |
+| **Copper** | Type K soft / Type L hard tube + wrought fittings | Hailiang RFQ in this folder: `HAILIANG_COPPER_RFQ.md` |
 | **Insulation** | Cold-water pipe insulation | On site |
 | **Brass** | — | Not in `products.csv` yet. Do not invent SKUs. Add when the Hailiang (or other) list is ready. |
 
@@ -103,8 +103,8 @@ Achim also sells other décor (pillows, lighting, etc.) that is **not SKU’d ye
 
 | Line | Status |
 |---|---|
-| **Glass sheets** | 1/4", 3/8", 1/2" (6/10/12 mm). China/Malaysia AD/CVD is a problem. Egypt (Sphinx) + India (Gold Plus) first; Şişecam as a quality check. Memo: `GLASS_SHEET_SOURCING.md` (separate PR if not on this branch). |
-| **Broadloom carpet** | Mill quotes in progress (Kaili, Qianqiao, pad, tackstrip). Not the same as Achim Nexus **carpet tiles**, which are already in Flooring. |
+| **Glass sheets** | 1/4", 3/8", 1/2" (6/10/12 mm). China/Malaysia AD/CVD is a problem. Egypt (Sphinx) + India (Gold Plus) first; Şişecam as a quality check. Memo: `GLASS_SHEET_SOURCING.md`. RFQ sent; waiting on quotes. |
+| **Broadloom carpet + pad + tackstrip** | Mill quotes in progress. Contacts + copy-paste RFQs + Ablaze photo: `CARPET_FACTORY_SOURCING.md`. Not the same as Achim Nexus **carpet tiles**. |
 | **Toilets, vanities, bath fixtures** | Expand later. Baruch has companies to research when we get there. |
 | **Advantage Glue-Down Plank II** | Mentioned as a US fill line — no Achim code, not added. |
 

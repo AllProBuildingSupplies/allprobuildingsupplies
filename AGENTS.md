@@ -44,6 +44,14 @@ After merging to `main`:
 - If `backend/` changed, deploy the production Worker: from `backend/`, `npx wrangler deploy` (not `--env test`).
 - If catalog SKUs, images, or categories changed, upsert into **production D1**. Do not `DELETE` the live `products` table and replace it from CSV — that would wipe on-hand plumbing qty. Insert/update the new or changed rows only (Achim/`ACH-*` upserts are the usual case). Then confirm `GET https://allpro-api.baruch-6d5.workers.dev/api/products` includes the new items.
 
-GitHub should stay on `main` only. Archive finished Cursor cloud agents in the Agents dashboard; do not recreate long-lived `cursor/*` feature branches for work that already landed.
+GitHub should stay on `main` only. Archive finished Cursor cloud agents in the Agents dashboard.
+
+### Supplier contacts, RFQs, specs — one folder, on `main`
+
+All mill contacts, RFQ wording, specs, and factory-order sheets live in **`cursor/product-pricing-analysis/` on `main`**. That is the only place to add glass, carpet, pad, tackstrip, copper, PVC/PEX origin, or exclusive-supplier notes.
+
+- Do **not** open a new `cursor/*` branch each time a mill, country, or RFQ comes up. Edit the files in that folder and merge back to `main` in the same turn.
+- If the platform forces a feature branch, reuse the existing open sourcing branch if there is one. Otherwise use a single long-lived branch `cursor/supplier-sourcing-d7cc`, put the files in `cursor/product-pricing-analysis/`, and **merge it to `main` before finishing**. Do not leave a second copy only on the PR.
+- Site/catalog SKU work still merges to `main` as already documented above. Do not invent glass/carpet/pad prices until a mill quote is in.
 
 Do **not** commit `.cursor/environment.json`. Cloud Agents for this storefront use the existing personal environment tied to GitHub `AllProBuildingSupplies/allprobuildingsupplies`. A committed environment file made Cursor create a second environment (`allprobuildingsupplies/allprobuildingsupplies`) and broke new chats.
