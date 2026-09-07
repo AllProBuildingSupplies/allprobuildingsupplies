@@ -229,3 +229,28 @@ EXW factory, ASTM D2665 white DWV, hub×hub (S*S). **$2,659.87** / 10,030 pcs / 
 | P-trap 2" | | 0.869 | 0.943 | 1.091 |
 
 EXW is often ~40–55% of Tommur FOB on the big movers. Do **not** PO this PI: ask **FOB Ningbo/Shanghai**, **NSF-dwv**, samples DHL to **NJ**, and a **45'HQ** price on the full Tommur SKU list. 9 CBM LCL to NJ will eat the savings. Do not store their bank details in git.
+
+### Ningbo Zhenpeng — PEX PPSU F2159, FOB Ningbo (PI 5 Sep 2026)
+
+**Not logged until this PI.** All Pro PI, **FOB Ningbo**, USD, HS 3917.40. **PPSU Solvay**, ASTM F2159, **cUPC + NSF/ANSI 61**. 30% / 70%, 30 days, 60-day validity. **$16,686.15** / 55,100 pcs / 163 cartons. CBM not on the PI. Wholesale pack. No 1¼–2" (those stay brass / Tommur).
+
+| Zhenpeng | Size | Qty | FOB | Tommur FOB | Notes |
+|---|---|---|---|---|---|
+| Elbow B121290 | ½" | 9,000 | **0.172** | 0.466 | ~37% of Tommur |
+| Elbow B343490 | ¾" | 4,500 | **0.353** | 0.790 | ~45% of Tommur |
+| Elbow B050590 | 1" | 2,700 | 0.592 | — | no 1" elbow on Tommur 45HQ |
+| Coupling B1212CP | ½" | 3,000 | 0.107 | (blank — new SKU) | fills factory-order gap |
+| Coupling B3434CP | ¾" | 4,500 | 0.207 | (blank — new SKU) | |
+| Coupling B0505CP | 1" | 1,200 | 0.44 | (blank — new SKU) | |
+| Coupling B3412CP | ¾×½" | 2,000 | 0.18 | — | |
+| Coupling B0534CP | 1×¾" | 1,800 | 0.33 | — | |
+| Tee B12T | ½" | 1,200 | 0.237 | (blank — new SKU) | |
+| Tee B34T | ¾" | 1,800 | 0.489 | (blank — new SKU) | |
+| Tee B05T | 1" | 600 | 0.938 | (blank — new SKU) | |
+| Tee B343412T | ¾×¾×½" | 3,000 | 0.455 | (blank — new SKU) | |
+| Tee B050534T | 1×1×¾" | 600 | 0.733 | (blank — new SKU) | |
+| Plug ½ / ¾ / 1" | | 6k / 3k / 1.5k | 0.094 / 0.156 / 0.268 | — | not on live catalog |
+
+Reducing tees on the PI (½×½×¾, ¾×½×½, ¾×½×¾, ¾×¾×1, 1×¾×¾, 1×¾×1, 1×1×½) are extra SKUs — keep on the mill list, do not invent website prices.
+
+**Vs live sell:** ½" elbow is $1.86 on site / Tommur FOB $0.47 already loses to PexUniverse (~$0.46). Zhenpeng FOB $0.172 × ~1.43 duty ≈ **~$0.25 landed** before ocean — that can actually compete. Confirm CBM + kg, samples DHL to NJ, then this can go on the ordering sheet. Do not mix with Green Valve PVC on the same PI.
