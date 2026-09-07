@@ -61,6 +61,10 @@ Egypt’s independent float line (Sadat City). Brand **Trulite** clear. Saint-Go
 
 Ask: FOB Alexandria / Damietta, **stock sizes**, 6 / 10 / 12 mm standard clear (not Trulite premium if they have a cheaper grade), 20 ft A-frames.
 
+**Reply (email, Mohamed Nabil, 7 Sep 2026):** Intro + product list (Trulite / Isolite / SolarLite / Vistalite) + prospect registration form. Screenshots: `sphinx-glass/`. **Filled return file:** `sphinx-glass/Sphinx_Prospect_Registration_AllPro.xlsx` (yellow cells). Quote **Trulite commercial clear 6/10/12 mm only**. Do not let them price tint/reflective/jumbo. Incoterm **FOB Egypt**, discharge **Newark/Elizabeth**, 20 ft A-frames. No PO until FOB is in.
+
+Email paste is on sheet **Email_to_Mohamed**. If they insist on their original xlsx, type from sheet **Copy_into_their_form**.
+
 ---
 
 ## Option 2 (price) — Gold Plus, India
