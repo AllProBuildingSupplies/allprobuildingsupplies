@@ -2415,6 +2415,97 @@ async function applyOrderItemsStock(env, items) {
   if (stmts.length) await env.DB.batch(stmts);
 }
 
+/** Set an open order's remaining qty to inbound fittings (C3/C4/C5). Does not touch on-hand. */
+async function syncOrderBackorderFromInbound(env, orderId) {
+  await ensureInboundShipmentsTable(env);
+  const order = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(orderId).first();
+  if (!order) return { error: 'Order not found: ' + orderId, status: 404 };
+
+  const { results: inboundRows } = await env.DB.prepare(
+    `SELECT * FROM inbound_shipments WHERE status != 'received'`
+  ).all();
+  const incoming = new Map();
+  for (const row of inboundRows || []) {
+    for (const it of parseInboundItems(row.items_json)) {
+      if (!it.code || it.code === 'PVC-PIPE-FOAM') continue;
+      const key = it.code + '\t' + canonicalizeSize(it.size);
+      incoming.set(key, (incoming.get(key) || 0) + it.qty);
+    }
+  }
+  if (!incoming.size) return { error: 'No inbound fitting lines to sync', status: 400 };
+
+  const { results: itemRows } = await env.DB.prepare(
+    'SELECT * FROM order_items WHERE order_id = ?'
+  ).bind(orderId).all();
+  const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
+
+  const byKey = new Map();
+  for (const it of itemRows || []) {
+    const key = normalizeProductCode(it.product_sku) + '\t' + canonicalizeSize(it.size);
+    byKey.set(key, it);
+  }
+
+  const draft = [];
+  const seen = new Set();
+  for (const [key, it] of byKey.entries()) {
+    const shipped = parseInt(it.qty_shipped, 10) || 0;
+    const inboundQty = incoming.get(key) || 0;
+    const qty = shipped + inboundQty;
+    if (qty < 1) continue;
+    seen.add(key);
+    draft.push({
+      code: it.product_sku,
+      size: it.size,
+      color: it.color,
+      qty,
+      qtyShipped: shipped,
+      unitPrice: it.price_at_purchase,
+    });
+  }
+  for (const [key, inboundQty] of incoming.entries()) {
+    if (seen.has(key)) continue;
+    const [code, size] = key.split('\t');
+    draft.push({ code, size, qty: inboundQty, qtyShipped: 0 });
+  }
+
+  const priced = validateAdminOrderItems(allProds, draft, { checkStock: false });
+  if (priced.error) return { error: priced.error, status: 400 };
+  const itemsToSave = priced.validated || [];
+
+  const noteLine =
+    'Backorder synced to C3/C4/C5 packing lists 2026-09-18. All fittings on those containers are for this PO.';
+  let notes = String(order.notes || '').replace(/\s*Backorder synced to C3\/C4\/C5 packing lists[^\n]*/g, '').trim();
+  notes = notes ? notes + '\n' + noteLine : noteLine;
+
+  const stmts = [
+    env.DB.prepare(
+      `UPDATE orders SET total_amount = ?, status = 'partially_shipped', notes = ? WHERE id = ?`
+    ).bind(priced.total || 0, notes, orderId),
+    env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(orderId),
+  ];
+  for (const i of itemsToSave) {
+    stmts.push(
+      env.DB.prepare(
+        'INSERT INTO order_items (order_id, product_sku, size, color, quantity, price_at_purchase, qty_shipped) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      ).bind(orderId, i.code, i.size, normalizeColor(i.color), i.qty, i.unitPrice, i.qtyShipped || 0)
+    );
+  }
+  await env.DB.batch(stmts);
+
+  const backorderPcs = itemsToSave.reduce(
+    (s, it) => s + Math.max(0, (it.qty || 0) - (it.qtyShipped || 0)),
+    0
+  );
+  return {
+    success: true,
+    orderId,
+    lines: itemsToSave.length,
+    backorderPcs,
+    inboundFittingPcs: [...incoming.values()].reduce((s, n) => s + n, 0),
+    total: priced.total || 0,
+  };
+}
+
 /**
  * EmailJS {{email_subject}} HTML-escapes characters like "/" → "&#x2F;" which
  * then show literally in the Outlook/Gmail subject line. Keep subjects plain.
@@ -3845,6 +3936,14 @@ export default {
           paymentNote: body.paymentNote || body.note || '',
           paidAt: body.paidAt || null,
         });
+        if (result.error) return jsonResponse({ error: result.error }, result.status || 400);
+        return jsonResponse(result);
+      }
+
+      if (path === '/api/admin/orders/sync-inbound-backorder' && request.method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        const orderId = String(body.orderId || body.id || 'APBS-000005').trim();
+        const result = await syncOrderBackorderFromInbound(env, orderId);
         if (result.error) return jsonResponse({ error: result.error }, result.status || 400);
         return jsonResponse(result);
       }

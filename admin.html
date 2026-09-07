@@ -1546,10 +1546,6 @@ async function inboundFittingTotals(shipments) {
   return totals;
 }
 
-function njpdLineKey(it) {
-  return String(it.code || '').trim() + '\t' + String(it.size || '').trim();
-}
-
 /** Set NJPD APBS-000005 backorder = fittings on C3/C4/C5. Does not touch on-hand. */
 async function syncNjpdBackorderFromInbound(opts) {
   opts = opts || {};
@@ -1557,82 +1553,28 @@ async function syncNjpdBackorderFromInbound(opts) {
     if (!inboundShipmentsCache || !inboundShipmentsCache.length) {
       await loadInboundShipments();
     }
-    const inbound = inboundShipmentsCache || [];
-    if (!inbound.length) throw new Error('No inbound containers loaded');
-    const incoming = await inboundFittingTotals(inbound);
+    const incoming = await inboundFittingTotals(inboundShipmentsCache || []);
     const incomingPcs = Object.keys(incoming).reduce(function (s, k) { return s + incoming[k]; }, 0);
-
-    if (!Array.isArray(masterOrders) || !masterOrders.length) {
-      await loadOrders();
-    }
-    const order = (masterOrders || []).find(function (o) {
-      return String(o.id) === 'APBS-000005';
-    });
-    if (!order) throw new Error('NJPD order APBS-000005 not found');
-
-    const byKey = {};
-    (order.items || []).forEach(function (it) {
-      byKey[njpdLineKey(it)] = it;
-    });
-
-    const nextItems = [];
-    const seen = {};
-    Object.keys(byKey).forEach(function (key) {
-      const it = byKey[key];
-      const shipped = parseInt(it.qtyShipped, 10) || 0;
-      const inboundQty = incoming[key] || 0;
-      const qty = shipped + inboundQty;
-      if (qty < 1) return;
-      seen[key] = true;
-      nextItems.push({
-        code: it.code,
-        size: it.size,
-        color: it.color || '',
-        qty: qty,
-        qtyShipped: shipped,
-        unitPrice: it.unitPrice,
-        description: it.description || '',
-      });
-    });
-    Object.keys(incoming).forEach(function (key) {
-      if (seen[key]) return;
-      const parts = key.split('\t');
-      nextItems.push({
-        code: parts[0],
-        size: parts[1] || '',
-        qty: incoming[key],
-        qtyShipped: 0,
-      });
-    });
-    nextItems.sort(function (a, b) {
-      return String(a.code).localeCompare(String(b.code)) || String(a.size).localeCompare(String(b.size));
-    });
-
-    const boPcs = nextItems.reduce(function (s, it) {
-      return s + Math.max(0, (parseInt(it.qty, 10) || 0) - (parseInt(it.qtyShipped, 10) || 0));
-    }, 0);
+    if (!incomingPcs) throw new Error('No inbound fittings loaded');
     if (!opts.silentConfirm) {
       if (!confirm(
         'Set NJPD APBS-000005 backorder to the C3/C4/C5 packing-list fittings?\n\n' +
-        incomingPcs + ' inbound fitting pcs → ' + boPcs + ' backorder pcs.\n' +
+        incomingPcs + ' inbound fitting pcs.\n' +
         'Shipped C1/C2 qty stays. On-hand is not changed.'
       )) return;
     }
-
-    const payload = Object.assign({}, order, {
-      items: nextItems,
-      skipStock: true,
-      status: 'partially_shipped',
-      notes: String(order.notes || '').replace(/\s*Backorder synced to C3\/C4\/C5 packing lists[^\n]*/g, '').trim()
-        + (order.notes ? '\n' : '')
-        + 'Backorder synced to C3/C4/C5 packing lists 2026-09-18. All fittings on those containers are for this PO.',
+    const r = await adminFetch('/admin/orders/sync-inbound-backorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: 'APBS-000005' }),
     });
-    await persistOrderObject(payload);
+    const d = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error((d && d.error) || 'NJPD backorder sync failed');
     await loadOrders();
     if (typeof renderWmsPickList === 'function') renderWmsPickList();
     showStatus(
-      'NJPD APBS-000005 backorder set to ' + boPcs + ' fitting pcs from C3/C4/C5 (' +
-      nextItems.length + ' lines). On-hand unchanged.',
+      'NJPD APBS-000005 backorder set to ' + (d.backorderPcs || incomingPcs) +
+      ' fitting pcs from C3/C4/C5 (' + (d.lines || '?') + ' lines). On-hand unchanged.',
       false
     );
   } catch (e) {
