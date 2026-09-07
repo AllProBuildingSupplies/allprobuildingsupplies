@@ -1499,7 +1499,7 @@ function renderInboundShipments() {
         '<div class="wms-inbound-meta">' +
           (s.label ? '<div><strong>' + escapeHtml(s.label) + '</strong></div>' : '') +
           '<div>' + escapeHtml(s.carrier || 'Carrier TBD') + ' · ETA <strong>' + eta + '</strong></div>' +
-          '<div>' + escapeHtml(s.lineCount || lines.length) + ' SKUs · <strong>' + escapeHtml(s.totalPcs || 0) + '</strong> pcs expected</div>' +
+          '<div>' + escapeHtml(s.lineCount || lines.length) + ' SKUs · <strong>' + escapeHtml(s.totalPcs || 0) + '</strong> expected</div>' +
           (s.invoiceRef ? '<div>Invoice ' + escapeHtml(s.invoiceRef) + '</div>' : '') +
           (s.notes ? '<div>' + escapeHtml(s.notes) + '</div>' : '') +
         '</div>' +
