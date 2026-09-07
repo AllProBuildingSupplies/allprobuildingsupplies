@@ -195,3 +195,37 @@ Fırat, Egeplast, Kalde, Dizayn are real, highly rated EU/MENA exporters. Their 
 5. **Fırat** + **Kalde** — PEX-B CTS + NSF only.
 
 Compare **landed** (FOB + ocean + MFN + 301 layers + NSF cost) against the current Tommur DDP column in `Factory_Order_PVC_PEX_45HQ.csv`. If India/Mexico cannot match the DWV fittings tree, stay with China and only origin-shift through Lesso.
+
+---
+
+## Quotes in
+
+### Zhejiang Green Valve and Fitting Co., Ltd. (Taizhou) — PI YMF26060303X (dated 2026/6/3, resent Sep 2026)
+
+EXW factory, ASTM D2665 white DWV, hub×hub (S*S). **$2,659.87** / 10,030 pcs / 113 ctns / **9.08 CBM** / 1,128 kg. 30% deposit, 45 days. **Not FOB. Not a 45'HQ.** NSF not stated.
+
+| Item | Size | Green EXW | Tommur FOB (same catalog) | Tommur DDP |
+|---|---|---|---|---|
+| Coupling S*S | 1½" | 0.065 | — | 0.119 |
+| Coupling | 2" | 0.098 | — | 0.169 |
+| Coupling | 3" | 0.265 | — | 0.551 |
+| Coupling | 4" | 0.449 | — | 0.945 |
+| 45° elbow (⅛ bend) | 1½" | 0.111 | — | 0.227 |
+| 45° elbow | 2" | 0.166 | 0.306 | 0.352 |
+| 45° elbow | 3" | 0.356 | 0.909 | 1.046 |
+| 45° elbow | 4" | 0.739 | 1.623 | 1.868 |
+| 90° elbow (¼ bend) | 1½" | 0.133 | 0.231 | 0.266 |
+| 90° elbow | 2" | 0.203 | 0.373 | 0.430 |
+| 90° elbow | 3" | 0.466 | 1.105 | 1.271 |
+| 90° elbow | 4" | 0.953 | 2.106 | 2.216 |
+| Tee S*S*S | 1½" | 0.183 | 0.306 | 0.362 |
+| Tee | 2" | 0.295 | 0.485 | 0.574 |
+| Tee | 3" | 0.745 | 1.505 | 1.733 |
+| Tee | 4" | 1.324 | 2.651 | 3.139 |
+| Wye (Y-tee) | 2" | 0.365 | 0.596 | 0.686 |
+| Wye | 3" | 0.939 | 1.799 | 2.070 |
+| Wye | 4" | 1.665 | 3.275 | 3.769 |
+| Reducing wye 4×4×2 | | 1.026 | 1.896 | 2.183 |
+| P-trap 2" | | 0.869 | 0.943 | 1.091 |
+
+EXW is often ~40–55% of Tommur FOB on the big movers. Do **not** PO this PI: ask **FOB Ningbo/Shanghai**, **NSF-dwv**, samples DHL to **NJ**, and a **45'HQ** price on the full Tommur SKU list. 9 CBM LCL to NJ will eat the savings. Do not store their bank details in git.

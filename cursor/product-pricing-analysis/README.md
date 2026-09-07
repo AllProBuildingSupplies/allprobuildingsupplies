@@ -25,7 +25,9 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 
 ## RFQs already sent (waiting on replies)
 
-Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao) · pad (Anerte/Kash) · tackstrip (Halex/Fred). Forward replies into this folder as an ordering sheet — do not add catalog SKUs until FOB is real.
+Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao Linda $8.92/m² — too high) · pad (Anerte/Kash) · tackstrip (Halex/Fred).
+
+**PVC DWV:** Zhejiang Green Valve PI YMF26060303X — EXW Taizhou, cheaper than Tommur on paper, not FOB NJ. See `PVC_PEX_ORIGIN_SOURCING.md`. Do not add catalog SKUs until FOB is real.
 
 ## Tommur workbook rules
 
