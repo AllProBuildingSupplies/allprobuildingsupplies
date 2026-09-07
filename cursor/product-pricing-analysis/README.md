@@ -16,7 +16,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / Dongsheng + **Anerte pad FOB in** (5 lb film $0.88/m²) + tackstrip (Halex) + Ablaze 451 photo |
 | **`CPVC_NJPD_SPEC.md`** | NJPD stick = **D2846 SDR-11 CTS**, not SCH80. Tommur already has FOB. Photos in `njpd-cpvc/` |
 | **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC pipe + DWV. Zhenpeng = PEX (½–1" only).** No POs until all mill quotes are in |
-| **`HAILIANG_COPPER_RFQ.md`** | Copper/brass RFQ workbook vs live copper SKUs |
+| **`HAILIANG_COPPER_RFQ.md`** | Copper RFQ sent WeChat. She asked B88 vs EN 1057 — **quote B88 only.** No FOB yet |
 | **`Factory_Order_PVC_PEX_45HQ.csv`** | Current plumbing 45'HQ order (inch sizes, FOB/DDP) |
 | `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
 | `Tommur_Cost_Margin_Tracker.xlsx` | FOB / landed / HTS / freight / margin |
@@ -28,7 +28,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 
 **No factory POs until these are in and pricing is locked**, then order together so production lines up.
 
-Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao, Dongsheng) · pad (Anerte/Kash — **FOB in**, need 40HQ packing + NJ sample) · tackstrip (Halex/Fred).
+Glass (Sphinx, Gold Plus, Şişecam) · carpet (Kaili, Qianqiao, Dongsheng) · pad (Anerte/Kash — **FOB in**, need 40HQ packing + NJ sample) · tackstrip (Halex/Fred) · copper (Hailiang WeChat — **ASTM B88 not EN 1057**, waiting on FOB).
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 
