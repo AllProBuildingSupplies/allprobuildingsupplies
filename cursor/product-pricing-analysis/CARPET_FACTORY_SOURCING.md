@@ -77,6 +77,8 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 | Group / other | `mj@dongsheng.com` · **+86 153 7633 5686** · `marketing@dongsheng.com` · `International@dongsheng.com` |
 | Sales hotline | +86-633-8688096 |
 
+**Reply (Sep 2026):** They have 13 tufting machines; **3.66 m and 4 m** both available. They recommend **3.66 m** for a 40HQ (3 rows, more m²). **Take 3.66 m.** That is US **12 ft** (same as Artisent `12.00`). Do not buy 4 m / 13.1 ft for apartment stretch-in.
+
 ---
 
 ## Pad (3/8" ≈ 9.5 mm, 5 lb ≈ ~80 kg/m³, US width 6' / 1.83 m)
