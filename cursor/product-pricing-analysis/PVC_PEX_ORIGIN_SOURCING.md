@@ -232,7 +232,7 @@ EXW is often ~40–55% of Tommur FOB on the big movers. Do **not** PO this PI: a
 
 ### Ningbo Zhenpeng — PEX PPSU F2159, FOB Ningbo (PI 5 Sep 2026, **REV**)
 
-**FOB Ningbo**, USD, HS 3917.40. **PPSU Solvay**, ASTM F2159, **cUPC + NSF/ANSI 61**. 30% / 70%, 30 days. **REV total $16,185.80** (was $16,686.15, **~3% off**). 55,100 pcs / 163 cartons / **1 pallet 122×102×183 cm / 2.3 CBM / ~488 kg GW**. No 1¼–2" (those stay brass / Tommur).
+**FOB Ningbo**, USD, HS 3917.40. **PPSU Solvay**, ASTM F2159, **cUPC + NSF/ANSI 61**. 30% / 70%, 30 days. **REV total $16,185.80** (was $16,686.15, **~3% off**). 55,100 pcs / 163 cartons / **1 pallet 122×102×183 cm / 2.3 CBM / ~488 kg GW**. Carton **30×25×15 cm = 0.01125 CBM** (163 × 0.01125 = **1.83 CBM** loose; use **2.3 CBM palletized** for the 45'HQ). No 1¼–2" (those stay brass / Tommur).
 
 | Zhenpeng | Size | Qty | FOB was | **FOB REV** | Tommur FOB |
 |---|---|---|---|---|---|
