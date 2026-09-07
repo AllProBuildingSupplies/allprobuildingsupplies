@@ -6,9 +6,9 @@ Factory catalog excerpt (pages 19–25) matched to every copper SKU on the All P
 
 ## Status (9 Sep 2026)
 
-She asked: **ASTM B88 还是 EN 1057？** Answer: **ASTM B88 only. Not EN 1057.**
+She asked: **ASTM B88 还是 EN 1057？** **Baruch already replied: ASTM.** Do **not** send another WeChat. Wait for the filled Excel.
 
-That is the right question. EN 1057 is EU metric tube (15 / 22 / 28 mm). NJ / US plumbing is **ASTM B88 CTS** Type K / Type L. A metric quote will not go on NJPD’s jobs.
+EN 1057 is EU metric tube (15 / 22 / 28 mm). NJ / US plumbing is **ASTM B88 CTS** Type K / Type L. A metric quote will not go on NJPD’s jobs.
 
 | | ASTM B88 (quote this) | EN 1057 (do not quote) |
 |---|---|---|
@@ -24,7 +24,9 @@ Yellow/red rows in the Excel are exactly those 3"/4" OD mismatches plus pipe / P
 
 **Still waiting on Unit_Price_FOB_USD.** No copper PO until the filled sheet is in (same combined lock as everyone else).
 
-## Copy-paste WeChat (send this)
+When the quote comes back, check: (1) FOB Ningbo in USD, (2) 3"/4" is B88 OD not φ76/φ108, (3) pipe rows are actually B88 Type K/L, not EN 1057. If those are wrong, send the reference text below — only then.
+
+## WeChat reference (already sent — do not resend unless they quote EN 1057)
 
 ```
 请按 ASTM B88 报价，不要按 EN 1057。

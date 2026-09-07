@@ -16,7 +16,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / Dongsheng + **Anerte pad FOB in** (5 lb film $0.88/m²) + tackstrip (Halex) + Ablaze 451 photo |
 | **`CPVC_NJPD_SPEC.md`** | NJPD stick = **D2846 SDR-11 CTS**, not SCH80. Tommur already has FOB. Photos in `njpd-cpvc/` |
 | **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC pipe + DWV. Zhenpeng = PEX (½–1" only).** No POs until all mill quotes are in |
-| **`HAILIANG_COPPER_RFQ.md`** | Copper RFQ sent WeChat. She asked B88 vs EN 1057 — **quote B88 only.** No FOB yet |
+| **`HAILIANG_COPPER_RFQ.md`** | Copper RFQ on WeChat. **ASTM already confirmed.** Waiting on FOB. Do not nag. |
 | **`Factory_Order_PVC_PEX_45HQ.csv`** | Current plumbing 45'HQ order (inch sizes, FOB/DDP) |
 | `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
 | `Tommur_Cost_Margin_Tracker.xlsx` | FOB / landed / HTS / freight / margin |
