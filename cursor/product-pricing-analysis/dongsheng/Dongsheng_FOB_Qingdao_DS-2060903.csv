@@ -12,10 +12,11 @@ Construction,Textured cut pile
 Backing_on_FOB_sheet,(blank — confirm woven PP)
 SY_per_m2,1.196
 China_duty_stack,1.43
+Packing_source,Selena WhatsApp 2026-09-07 (rectangular CBM)
 
-Face_oz,g_m2,QTY_m2,EXW_USD_m2,FOB_Qingdao_USD_m2,FOB_USD_SY,FOB_x1.43_USD_SY,vs_Artisent_5.92_SY
-25,850,7000,5.38,5.54,4.63,6.62,over
-30,1000,7000,5.95,6.11,5.11,7.31,over
-35,1200,6200,6.73,6.89,5.76,8.24,over
+Face_oz,g_m2,QTY_m2,rolls,GW_kg,CBM,m2_per_roll,kg_per_roll,cbm_per_roll,EXW_USD_m2,FOB_Qingdao_USD_m2,FOB_USD_SY,FOB_x1.43_USD_SY,landed_plus_5k_ocean_USD_SY,FOB_m2_to_match_5.92_at_5k_ocean
+25,850,7000,69,13110,65.87,101.45,190.0,0.955,5.38,5.54,4.63,6.62,7.48,4.24
+30,1000,7000,69,13800,68.47,101.45,200.0,0.992,5.95,6.11,5.11,7.31,8.16,4.24
+35,1200,6200,60,14400,64.21,103.33,240.0,1.070,6.73,6.89,5.76,8.24,9.20,4.14
 
-Note,FOB is +0.16 USD/m2 vs EXW on all three lines (Rizhao inland to Qingdao). Duty-only landed is already above Artisent 5.92/SY before ocean. No PO. $/SY = $/m2 / 1.196.
+Note,Each pile weight is one 40HQ (cubes out ~65-68 CBM; payload only 13-14 t). Ocean sketch $5000 Qingdao-NY is not a booked rate. Duty-only break-even vs Artisent 5.92/SY is FOB $4.95/m2. With $5k ocean need ~$4.24/m2 on 850/1000 g. Current 850 g FOB $5.54 does not work. No PO. $/SY = $/m2 / 1.196. Samples: stock free + DHL; custom chargeable.

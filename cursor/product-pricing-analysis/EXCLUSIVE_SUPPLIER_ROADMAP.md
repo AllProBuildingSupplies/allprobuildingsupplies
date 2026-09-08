@@ -120,7 +120,7 @@ Price the **kit**, not 40 line items. Match floorplan names they already use (`3
 |---|---|---|
 | PEX / PVC / copper | **In house** | Tommur, Zhenpeng, Hailiang, etc. |
 | Glue-down plank | **In house** | Existing |
-| 12 ft PET carpet | **FOB Qingdao in** (Dongsheng DS-2060903) — 25 oz **$5.54/m²** / $4.63/SY; duty-only **$6.62/SY**, over Artisent $5.92. No PO. Confirm woven PP + sample. | **Dongsheng Selena** `julia.yuan@dongsheng.com`; Kaili Jessica `jessicachan10@foxmail.com`; Qianqiao `info@qianqiaocorp.com` |
+| 12 ft PET carpet | **FOB Qingdao in** — 25 oz $5.54/m²; 40HQ 69 rolls / 65.87 CBM / 13.1 t. Duty+$5k ocean **~$7.48/SY**, over $5.92. Need ~**$4.24/m²**. No PO. | **Dongsheng Selena** `julia.yuan@dongsheng.com`; Kaili Jessica `jessicachan10@foxmail.com`; Qianqiao `info@qianqiaocorp.com` |
 | Rebond pad | **Packing in** — $22/roll (30 SY / $0.73/SY), 280–290 rolls/40HQ regular. FOB Shanghai, not EXW. No vacuum. No PO. | Anerte Kash WhatsApp +86 177 0151 5750 |
 | Clear glass 6/10/12 mm | RFQ | Sphinx `sales@sphinxglass.com`; Gold Plus `info@goldplusgroup.com` |
 | 1/4-round / cove | **Next scour** | Vietnam MDF / PVC extrusion |

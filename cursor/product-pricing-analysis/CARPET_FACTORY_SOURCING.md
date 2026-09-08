@@ -89,14 +89,32 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 
 `$ / SY = $ / m² ÷ 1.196`. FOB is **+$0.16/m²** vs EXW on every line (Rizhao inland to Qingdao — small, as expected). The FOB sheet dropped the blank Backing column and dropped the “local + ocean + insurance ≈ $9,800 / 40HQ” note (ocean is now ours).
 
-**Landed vs Artisent $5.92/SY:** 25 oz duty-only is already **$6.62/SY** before ocean. Does **not** beat the job. No PO. Keep Kaili in parallel. Turkey (Tümer) is still the hedge if Kaili is also over.
+**40HQ pack-out (Selena WhatsApp, 7 Sep 2026):** Screenshot `dongsheng/selena-whatsapp-40hq-cbm-weight.jpg`. Each pile weight is **one 40HQ** (cubes out; payload only 13–14 t).
+
+| Face | Rolls | GW | CBM | m²/roll | kg/roll |
+|---|---:|---:|---:|---:|---:|
+| 850 g | 69 | 13,110 kg | 65.87 | 101.4 | 190 |
+| 1000 g | 69 | 13,800 kg | 68.47 | 101.4 | 200 |
+| 1200 g | 60 | 14,400 kg | 64.21 | 103.3 | 240 |
+
+**Landed vs Artisent $5.92/SY** (ocean sketch **$5,000** Qingdao → NY/NJ — not a booked rate):
+
+| Face | FOB $/SY | Duty-only | + $5k ocean | FOB she must hit @ $5k ocean |
+|---|---:|---:|---:|---:|
+| 25 oz | $4.63 | $6.62 | **$7.48** | **~$4.24/m²** ($3.54/SY) |
+| 30 oz | $5.11 | $7.31 | $8.16 | ~$4.24/m² |
+| 35 oz | $5.76 | $8.24 | $9.20 | ~$4.14/m² |
+
+Duty-only break-even is **$4.95/m²** FOB. Current 25 oz **$5.54** is still over before ocean. Negotiate the **850 g** 40HQ first. Walkaway if she cannot get near **$4.20–4.50/m²**. Do not take EXW $5.38 as a “win” — that still loses. **No PO.** Keep Kaili in parallel. Turkey (Tümer) is still the hedge.
+
+**Samples (same WhatsApp):** Stock / similar-quality samples **free**; she will send photos first, then ship after we confirm. **Custom-made samples are chargeable.** DHL freight on us to Livingston. Wait for photos.
 
 **Backing (WhatsApp, Selena, 7 Sep 2026):** Screenshot `dongsheng/selena-whatsapp-backing-options.jpg`. She sent three:
 1. White open-grid **woven PP** (ActionBac type) — **this one**
 2. Tan burlap / **jute** — no (hospitality, not US stretch-in)
 3. White mesh with red/black yarns, “cotton on PP scrim” — no (not US builder ActionBac)
 
-FOB sheet still does not name the backing. Still need 40HQ kg/CBM and a DHL sample to Livingston. Send `dongsheng/Dongsheng_FOB_backing_sample_SEND.txt`.
+FOB sheet still does not name the backing. Send `dongsheng/Dongsheng_FOB_best_price_SEND.txt` (packing thanks + woven PP confirm + best 850 g FOB + sample photos to Livingston).
 
 ---
 
