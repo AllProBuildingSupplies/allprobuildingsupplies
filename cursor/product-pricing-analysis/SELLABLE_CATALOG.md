@@ -92,7 +92,7 @@ Achim also sells other décor (pillows, lighting, etc.) that is **not SKU’d ye
 |---|---|---|
 | **PVC** | Sch 40 pipe + DWV fittings | **Tommur / Lesso.** India / Mexico / Vietnam = tariff hedge only. Memo: `PVC_PEX_ORIGIN_SOURCING.md` |
 | **CPVC** | **NJPD = D2846 SDR-11 CTS** (cream, yellow stripe) — not SCH80 | **Tommur.** Pipe FOB is in. Fittings they call “CPVC 2846 SCH40.” Memo: `CPVC_NJPD_SPEC.md` |
-| **PEX** | **½ / ¾ / 1" only** | Zhenpeng = PPSU F2159 (REV held). **Palconn/Leela** = PEX-B pipe + F1807 brass RFQ. Drop 1¼–2". Memo: `palconn/PALCONN_LEELA_RFQ.md` |
+| **PEX** | **½ / ¾ / 1" only** | Zhenpeng = PPSU F2159 (REV held). **Palconn/Leela** = full plumbing RFQ (`palconn/Palconn_Full_Catalog_RFQ_SEND.xlsx`). Drop 1¼–2". Memo: `palconn/PALCONN_LEELA_RFQ.md` |
 | **Copper** | Type K / Type L tube + wrought fittings | **Hailiang.** RFQ on WeChat. Quote **ASTM B88**, not EN 1057. No FOB yet. Memo: `HAILIANG_COPPER_RFQ.md` |
 | **Insulation** | Cold-water pipe insulation | On site |
 | **Brass** | — | Not in `products.csv` yet. Do not invent SKUs. Add when the Hailiang (or other) list is ready. |

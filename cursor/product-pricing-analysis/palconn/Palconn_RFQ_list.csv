@@ -1,15 +1,12 @@
 priority,system,item,sizes,why,on_live_site
-A,PEX-B pipe,Potable coil + 20ft stick,"1/2, 3/4, 1 red/blue/white",No mill pipe quote yet (Zhenpeng fittings-only REV). Palconn has US CTS coils and 20ft sticks.,pipe yes (incl oversized we will not restock)
-B,F1807 brass,Coupling / 90 elbow / tee / plug,"1/2, 3/4, 1",US plumber crimp system. Not on site.,no
-B,F1807 brass,Reducing coupling,"3/4x1/2, 1x3/4, 1x1/2",Matches factory-order new SKUs.,no
-B,F1807 brass,Reducing tee,"3/4x3/4x1/2, 1x1x3/4, 1x1x1/2",Zhenpeng PPSU has these; brass is the jobsite standard.,no
-B,F1807 brass,PEX x MIPT / FIPT adapters,"1/2, 3/4",Already on 45HQ wish list as new SKUs.,no
-B,F1807 brass,Drop-ear 90 FPT,"1/2, 3/4",Stub-out staple. Not on site.,no
-B,F1807 brass,Copper crimp rings + SS pinch clamps,"1/2, 3/4, 1",Consumable. Must ship with brass fittings.,no
-B,F1807 brass,PEX x PEX ball valve,"1/2, 3/4, 1",Not on site. High turn.,no
-C,F2159 PPSU,Elbow coupling tee plug + reducing tee/coupling,"1/2, 3/4, 1",Price-check vs Zhenpeng REV. Keep Zhenpeng if cheaper landed.,elbow/reducer only
-D,optional,Washer/ice-maker outlet box 1/2 F1807,1/2,Apartment turns. Quote do not lead.,no
-skip,Tommur,PVC Sch40 + DWV,all,Palconn has ASTM D1785/D2665 but Tommur is the mill.,yes
+A,PEX-B pipe,10ft/20ft stick + 100/300/500ft coil,"1/2, 3/4, 1 red/blue/white",No mill pipe quote yet. Palconn has US CTS coils and sticks.,pipe yes (100ft listed; 1-1/4–2 not restocked)
+A,PVC Sch40 pipe,ASTM D1785 solid 20ft,"1/2 through 10",On site. Price-check vs Tommur.,yes
+A,PVC DWV,Full site DWV tree,1½–10 as listed,On site. Palconn catalog is thinner; still quote every SKU.,yes
+B,F1807 brass,Coupling / 90 / tee / plug / reducing / adapters / drop-ear / rings / clamps / PEX valve,"1/2, 3/4, 1",US plumber crimp system. Not on site.,no
+C,F2159 PPSU,Elbow coupling tee plug reducing adapters drop-ear,"1/2, 3/4, 1",Price-check vs Zhenpeng REV. Keep Zhenpeng if cheaper landed.,elbow/reducer 1/2 and 3/4 only
+C,PVC foam-core,ASTM F891 20ft sticks,1½ 2 3 4,On site + inbound. Quote if Palconn extrudes F891.,yes
+D,outlet boxes,Washer ± WHA + ice-maker 1/2 F1807,1/2,Apartment turns.,no
+D,CPVC D2846,SDR-11 CTS pipe + CTS fittings,½–2,NJ potable. Not in Palconn catalog — quote if they make it. No Sch80.,pipe yes (Sch80 and SDR-13.5 not sent)
 skip,rule,PEX over 1 inch,1-1/4 1-1/2 2,Standing rule. Catalog has them — do not RFQ.,site still lists
 skip,hydronic,EVOH / PEX-AL-PEX / radiant manifolds,various,Not the plumbing SKU tree.,no
-skip,other,Push-fit / tools / gas / conduit,various,Not first PO.,no
+skip,other,Push-fit / tools / gas / conduit / PVC Sch80 / CPVC Sch80 / PVC pressure fittings,various,We do not stock these.,no / Sch80 on site but wrong product
