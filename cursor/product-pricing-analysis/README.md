@@ -13,7 +13,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`SELLABLE_CATALOG.md`** | What is on the site now vs still waiting on quotes |
 | **`EXCLUSIVE_SUPPLIER_ROADMAP.md`** | One-vendor play (Ashland Lakes → every category) |
 | **`GLASS_SHEET_SOURCING.md`** | Egypt / India / Turkey. **Sphinx form filled:** `sphinx-glass/Sphinx_Prospect_Registration_AllPro.xlsx` |
-| **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / **Dongsheng FOB Qingdao in** + **Anerte pad $22/roll, 285/40HQ** + tackstrip (Halex) + Ablaze 451 photo |
+| **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / **Dongsheng FOB Qingdao in** + **Anerte pad $22/roll, 285/40HQ** + **Halex/Fred email in** (`halex/`) + Ablaze 451 photo |
 | **`CPVC_NJPD_SPEC.md`** | NJPD stick = **D2846 SDR-11 CTS**, not SCH80. Tommur already has FOB. Photos in `njpd-cpvc/` |
 | **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC. Zhenpeng = PEX PPSU. Palconn/Leela = full plumbing RFQ** (PEX ½–1" + F1807/PPSU + PVC/DWV + F891 + CPVC if they make it). |
 | **`HAILIANG_COPPER_RFQ.md`** | Copper RFQ on WeChat. **ASTM already confirmed.** Waiting on FOB. Do not nag. |
@@ -28,7 +28,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 
 **No factory POs until these are in and pricing is locked**, then order together so production lines up.
 
-Glass (Sphinx waiting FOB) · carpet (Dongsheng **FOB Qingdao in** — 25 oz **$5.54/m²**, 40HQ 65.87 CBM / 13.1 t; need ~**$4.24/m²** to beat Artisent after duty+ocean; Kaili still open) · pad (Anerte/Kash — **$22/roll, 285/40HQ**, FOB not EXW, need NJ sample) · tackstrip (Halex/Fred) · copper (Hailiang — ASTM confirmed, waiting on FOB).
+Glass (Sphinx waiting FOB) · carpet (Dongsheng **FOB Qingdao in** — 25 oz **$5.54/m²**, 40HQ 65.87 CBM / 13.1 t; need ~**$4.24/m²** to beat Artisent after duty+ocean; Kaili still open) · pad (Anerte/Kash — **$22/roll, 285/40HQ**, FOB not EXW, need NJ sample) · tackstrip (**Halex/Fred emailed 7 Sep** — send `halex/Halex_Fred_company_and_RFQ_SEND.txt`) · copper (Hailiang — ASTM confirmed, waiting on FOB).
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 

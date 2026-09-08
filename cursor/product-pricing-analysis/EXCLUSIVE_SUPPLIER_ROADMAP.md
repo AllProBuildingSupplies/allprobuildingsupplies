@@ -45,7 +45,7 @@ Proof on 2-104. Beat Artisent **material** line by line, one delivery.
 |---|---|---|
 | Mortisay 12 ft Ablaze | $5.92–$5.95/SY | **Kaili / Qianqiao** PET 12 ft, comparable beige. Not the brand. |
 | Rebond 3/8" 5 lb | $1.70/SY | **Anerte** $22/roll = **$0.73/SY FOB**, 285 rolls/40HQ. Landed ~$1.55–$1.75. |
-| Tackstrip | install only | **Halex** +86 527 8427 1555 |
+| Tackstrip | install only | **Halex / Fred** `fliang@halexcorpasia.com` · +86 158 9630 5619 |
 | Naplock 154H | $0 | US, leave it |
 | Advantage Glue-Down Plank II | $1.20/SF | **Already have** |
 | 1/4-round white | $0.60/LF | Wave 1 mill or US for this one job |

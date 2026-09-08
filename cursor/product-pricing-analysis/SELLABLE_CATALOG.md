@@ -104,7 +104,7 @@ Achim also sells other décor (pillows, lighting, etc.) that is **not SKU’d ye
 | Line | Status |
 |---|---|
 | **Glass sheets** | 1/4", 3/8", 1/2" (6/10/12 mm). China/Malaysia AD/CVD is a problem. Egypt (Sphinx) + India (Gold Plus) first; Şişecam as a quality check. Memo: `GLASS_SHEET_SOURCING.md`. RFQ sent; waiting on quotes. |
-| **Broadloom carpet + pad + tackstrip** | Dongsheng **FOB Qingdao in** (25 oz $5.54/m², 40HQ 69 rolls / 65.87 CBM). Need ~$4.24/m² to beat Artisent after duty+ocean. No SKU / no PO. **Pad packing in:** $22/roll. Memo: `CARPET_FACTORY_SOURCING.md`. |
+| **Broadloom carpet + pad + tackstrip** | Dongsheng **FOB Qingdao in** (25 oz $5.54/m², 40HQ 69 rolls / 65.87 CBM). Need ~$4.24/m² to beat Artisent after duty+ocean. **Halex/Fred emailed 7 Sep** — send `halex/Halex_Fred_company_and_RFQ_SEND.txt`. No SKU / no PO. **Pad packing in:** $22/roll. Memo: `CARPET_FACTORY_SOURCING.md`. |
 | **Toilets, vanities, bath fixtures** | Expand later. Baruch has companies to research when we get there. |
 | **Advantage Glue-Down Plank II** | Mentioned as a US fill line — no Achim code, not added. |
 

@@ -235,7 +235,7 @@ info@allprobuildingsupplies.com
 
 | Product | Where to buy | Contact |
 |---|---|---|
-| Tackstrip (7/8" or 1", wood + concrete nails) | **Suqian Halex** — US-spec gripper mill, 12 US nailing machines | Fred Liang, sales mgr. Tel **+86 527 8427 1555**. Address: Fudan Rd, Sucheng ETDZ, Suqian, Jiangsu. No public email — Made-in-China inquiry + phone: https://sqhalex.en.made-in-china.com |
+| Tackstrip (7/8" or 1", wood + concrete nails) | **Suqian Halex** — US-spec gripper mill, 12 US nailing machines | **Fred Liang** `fliang@halexcorpasia.com` · mobile **+86 158 9630 5619** · tel +86 527 8427 1690. Address: Fudan Rd, Sucheng ETDZ, Suqian, Jiangsu. Send `halex/Halex_Fred_company_and_RFQ_SEND.txt`. Memo: `halex/HALEX_TACKSTRIP.md` |
 | Naplock / transitions | US (Roberts / Hammered Mill 154H) | Keep domestic — not worth a China MOQ for 24 LF |
 | 1/4 round white | Existing wood mill or US | Same as other trim |
 | Tub strips | US | 2 pcs — not a factory buy |
@@ -281,47 +281,9 @@ That is Engineered Floors Dream Weaver **Ablaze 451** (Durango SKU 4160). “Mor
 
 ### Copy-paste RFQ (tackstrip — Fred Liang / Halex)
 
-No public email. Send the same text via https://sqhalex.en.made-in-china.com (Fred Liang) **and** call/WeChat **+86 527 8427 1555**. Ask him to reply with email.
+**Fred emailed 7 Sep 2026** from `fliang@halexcorpasia.com` (Made-in-China follow-up). He asked for company info and monthly/annual volume. Reply with `halex/Halex_Fred_company_and_RFQ_SEND.txt`. Screenshot: `halex/Fred_Liang_email_2026-09-07.jpg`. Memo: `halex/HALEX_TACKSTRIP.md`.
 
-Subject: RFQ — US-spec carpet tackstrip / gripper, wood + concrete, FOB
-
-```
-Hi Fred,
-
-We are All Pro Building Supplies, a US B2B importer. We need factory-direct carpet tackstrip (gripper) for residential wall-to-wall installs on wood subfloor and concrete slab.
-
-Please quote these Halex (or equivalent) types, 4 ft sticks, 2-row pins, US packing:
-
-1) Wood subfloor — 7/8" wide, ring-shank wood nails
-   (your HL-120 / 4 ft 7/8" 3/4"x13GA RS wood nail)
-
-2) Concrete slab — 1" wide, concrete nails
-   (your HL-340 / 4 ft 1" 11/16"x12GA concrete nail)
-
-3) Dual-purpose if you have one SKU that covers both (wood + concrete nails on the same strip). If not, quote 1 and 2 separately.
-
-Also confirm:
-- Pin angle / two-row, plywood core, no warped boards
-- Pieces per box, boxes per pallet, CBM per pallet
-- FOB Shanghai or Ningbo, USD per box and per 1,000 LF
-- MOQ (we saw ~100 boxes)
-- 40HQ mix (mostly concrete-nail 1" plus some 7/8" wood)
-- Sample: 1 box of each type — sample cost + DHL to 1600 Livingston Ave, North Brunswick, NJ 08902, USA
-- Production lead time after deposit (factory days, FOB Shanghai)
-- Confirm mill: Suqian Halex, Fudan Road, Sucheng ETDZ, Suqian, Jiangsu
-
-Private label on the box is fine. We do not need transitions, naplock, or quarter-round from you.
-
-Please reply with your direct email and WeChat/WhatsApp.
-
-Thank you.
-
-Baruch Grossman
-Founder & Owner
-All Pro Building Supplies LLC
-+1 732-734-1123
-info@allprobuildingsupplies.com
-```
+Subject: Re: About Carpet tackstrip (gripper)
 
 ---
 
