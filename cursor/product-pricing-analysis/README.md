@@ -15,7 +15,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`GLASS_SHEET_SOURCING.md`** | Egypt / India / Turkey. **Sphinx form filled:** `sphinx-glass/Sphinx_Prospect_Registration_AllPro.xlsx` |
 | **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / **Dongsheng FOB Qingdao in** + **Anerte pad $22/roll, 285/40HQ** + tackstrip (Halex) + Ablaze 451 photo |
 | **`CPVC_NJPD_SPEC.md`** | NJPD stick = **D2846 SDR-11 CTS**, not SCH80. Tommur already has FOB. Photos in `njpd-cpvc/` |
-| **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC. Zhenpeng = PEX PPSU. Palconn/Leela = PEX-B pipe + F1807 brass RFQ.** ½–1" only. |
+| **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC. Zhenpeng = PEX PPSU. Palconn/Leela = full plumbing RFQ** (PEX ½–1" + F1807/PPSU + PVC/DWV + F891 + CPVC if they make it). |
 | **`HAILIANG_COPPER_RFQ.md`** | Copper RFQ on WeChat. **ASTM already confirmed.** Waiting on FOB. Do not nag. |
 | **`Factory_Order_PVC_PEX_45HQ.csv`** | Current plumbing 45'HQ order (inch sizes, FOB/DDP) |
 | `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
@@ -32,7 +32,7 @@ Glass (Sphinx waiting FOB) · carpet (Dongsheng **FOB Qingdao in** — 25 oz **$
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 
-**PEX (½–1" only):** Zhenpeng PPSU REV held. **Palconn/Leela catalog in** — RFQ PEX-B pipe + F1807 brass (`palconn/Palconn_RFQ_SEND.txt`). Drop 1¼–2" PEX.
+**PEX (½–1" only):** Zhenpeng PPSU REV held. **Palconn/Leela catalog in** — send `palconn/Palconn_Full_Catalog_RFQ_SEND.xlsx` (PEX-B + F1807/PPSU + PVC/DWV + F891 + CPVC-if). Drop 1¼–2" PEX. Do not forward the COMPARE file.
 
 ## Tommur workbook rules
 
@@ -47,4 +47,5 @@ python3 cursor/product-pricing-analysis/build_tommur_cost_margin.py
 python3 cursor/product-pricing-analysis/build_competitive_margin_sheet.py
 python3 cursor/product-pricing-analysis/build_factory_order_projection.py
 python3 cursor/product-pricing-analysis/build_hailiang_copper_rfq.py
+python3 cursor/product-pricing-analysis/palconn/build_palconn_full_rfq.py
 ```

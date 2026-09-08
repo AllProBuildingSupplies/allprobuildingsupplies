@@ -5,11 +5,11 @@
 | Line | Mill | Sizes |
 |---|---|---|
 | **PVC pipe + DWV fittings** | **Tommur / Lesso** | US inch ASTM (unchanged) |
-| **PEX** | **Ningbo Zhenpeng** (PPSU F2159) · **Palconn / Leela** (PEX-B pipe + F1807 brass RFQ) | **½ / ¾ / 1" only** |
+| **PEX** | **Ningbo Zhenpeng** (PPSU F2159) · **Palconn / Leela** (full plumbing RFQ — pipe, F1807, PPSU, PVC/DWV) | **½ / ¾ / 1" only** |
 
 **Drop PEX larger than 1"** (pipe and fittings 1¼ / 1½ / 2") from factory orders. Do not restock. Live site SKUs can wait until catalog cleanup.
 
-Zhenpeng REV PI is **PPSU fittings** FOB Ningbo. **PEX-B pipe ½–1"** — RFQ Palconn (Leela, North America catalog in `palconn/`) and still ask Zhenpeng for pipe so we can compare. Do not put PEX pipe back on Tommur.
+Zhenpeng REV PI is **PPSU fittings** FOB Ningbo. **PEX-B pipe ½–1"** — Palconn (Leela) now gets the full plumbing RFQ (`palconn/Palconn_Full_Catalog_RFQ_SEND.xlsx`) so we can compare their FOB to Tommur PVC/DWV and Zhenpeng PPSU. Still ask Zhenpeng for pipe. Do not put PEX pipe back on Tommur.
 
 This is different from glass. Glass has China/Malaysia **AD/CVD** that makes those origins unusable. Plastic PVC/PEX pipe (HTS **3917**) has **no AD/CVD order**. China is still legal. The issue is stacked **Section 301** on China-origin articles, plus whether another country can even make the **US inch SKU tree** we already sell.
 
@@ -266,9 +266,9 @@ Plugs and the other reducing tees: same ~3% off. Do not invent website prices fo
 
 **Landed sketch (½" elbow):** FOB $0.167 × ~1.43 duty ≈ **$0.24** + pennies of ocean if consolidated. Site sells at $1.86. Tommur FOB was $0.47 and already lost to PexUniverse (~$0.46). This REV number can compete. Samples DHL to NJ, then PO the REV PI **FOB Ningbo**. Do not mix with Green Valve PVC on the same PI.
 
-### Palconn / Leela Wang — PEX-B pipe + F1807 brass (catalog in, RFQ out)
+### Palconn / Leela Wang — full plumbing RFQ (catalog in, workbook out)
 
-2026 North America catalog: `palconn/2026_PALCONN_North_American_Market_Catalog.pdf`. NSF / cUPC claimed. They make PEX pipe (coils + 20 ft sticks), F1807 brass, F2159 PPSU, F1960, push-fit, PEX-AL-PEX, radiant manifolds, Sch 40 UPVC, and a thin DWV set.
+2026 North America catalog: `palconn/2026_PALCONN_North_American_Market_Catalog.pdf`. NSF / cUPC claimed. They make PEX pipe (coils + 10/20 ft sticks), F1807 brass, F2159 PPSU, F1960, push-fit, PEX-AL-PEX, radiant manifolds, Sch 40 UPVC pipe + pressure fittings, and a thin DWV set.
 
-**RFQ Palconn for pipe + brass + rings/valves (½ / ¾ / 1" only).** PPSU is a price-check against Zhenpeng — do not replace the REV PI until landed is better. **Do not RFQ their PVC/DWV** (Tommur). Send `palconn/Palconn_RFQ_SEND.txt`. Memo: `palconn/PALCONN_LEELA_RFQ.md`.
+**Send `palconn/Palconn_Full_Catalog_RFQ_SEND.xlsx` + `palconn/Palconn_RFQ_SEND.txt`.** Quote everything they produce that we stock or want to stock: PEX-B ½/¾/1", F1807, F2159, outlet boxes, Sch 40 PVC pipe, all site DWV, F891 if they extrude it, D2846 CPVC if they make it. Skip EVOH, PEX-AL-PEX, manifolds, push-fit, tools, PEX over 1", PVC pressure fittings, Sch 80. PPSU is a price-check against Zhenpeng; PVC/DWV is a price-check against Tommur. Do not replace either mill until Palconn lands cheaper. Memo: `palconn/PALCONN_LEELA_RFQ.md`. Internal compare only: `palconn/Palconn_Full_Catalog_RFQ_COMPARE.xlsx`.
 
