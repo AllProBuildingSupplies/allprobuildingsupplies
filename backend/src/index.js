@@ -2463,7 +2463,17 @@ async function maybeSyncNjpdInboundBackorder(env) {
     .first();
   if (!order) return { skipped: 'no-order' };
   if (String(order.notes || '').includes(NJPD_BACKORDER_SYNC_NOTE)) {
-    return { skipped: 'already-synced' };
+    const { results } = await env.DB.prepare(
+      'SELECT quantity, qty_shipped FROM order_items WHERE order_id = ?'
+    )
+      .bind('APBS-000005')
+      .all();
+    const lines = (results || []).length;
+    const backorderPcs = (results || []).reduce(
+      (s, it) => s + Math.max(0, (parseInt(it.quantity, 10) || 0) - (parseInt(it.qty_shipped, 10) || 0)),
+      0
+    );
+    return { skipped: 'already-synced', lines, backorderPcs };
   }
   const result = await syncOrderBackorderFromInbound(env, 'APBS-000005');
   console.log('NJPD APBS-000005 inbound backorder sync', JSON.stringify(result));
