@@ -2852,6 +2852,28 @@ export default {
     try {
       // Fast public routes: skip schema/migration boot (was ~3–4s of D1 round-trips).
       if (path === '/api/health' && request.method === 'GET') {
+        if (url.searchParams.get('njpd') === '1') {
+          await ensureRuntimeSchema(env);
+          let njpd = null;
+          try {
+            njpd = await maybeSyncNjpdInboundBackorder(env);
+          } catch (e) {
+            njpd = { error: String(e && e.message ? e.message : e) };
+          }
+          return jsonResponse({
+            status: 'ok',
+            rev: 'njpd-c345-backorder',
+            njpd: njpd && {
+              success: !!njpd.success,
+              skipped: njpd.skipped || null,
+              error: njpd.error || null,
+              lines: njpd.lines,
+              backorderPcs: njpd.backorderPcs,
+              inboundFittingPcs: njpd.inboundFittingPcs,
+              inboundIds: njpd.inboundIds,
+            },
+          });
+        }
         return jsonResponse({ status: 'ok', rev: 'njpd-c345-backorder' });
       }
 
