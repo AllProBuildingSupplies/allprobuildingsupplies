@@ -34,4 +34,4 @@ Skip on this RFQ: 5 ft Europe, 1-1/4" AU tri-tack, 1-3/4" commercial, peel-and-s
 
 ## Walkaway (internal)
 
-FOB × ~1.43 China duty + ocean to NJ, then vs a US 100-pack box. One Memphis unit is ~200 LF — not a mill order. 40HQ is warehouse stock for the carpet program. Samples DHL to **1600 Livingston Ave**, not Hope Hill.
+FOB × ~1.43 China duty + **$10,000 / 40HQ** ocean to NJ, then vs a US 100-pack box. One Memphis unit is ~200 LF — not a mill order. 40HQ is warehouse stock for the carpet program. Samples DHL to **1600 Livingston Ave**, not Hope Hill.

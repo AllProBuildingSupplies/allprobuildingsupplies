@@ -24,3 +24,5 @@ Requires prior research JSONs used by the script (`/tmp/prices_*.json` + copper 
 
 ## Caveats
 See Summary sheet in the workbook. Copper pipe FOB vs US retail looks unit-suspicious — confirm with factory before setting pipe sell prices.
+
+**Ocean:** landed in the tracker/margins sheet must use **$10,000 per 40ft** (`FREIGHT_PER_CONTAINER` in `build_tommur_cost_margin.py`). Rebuild the tracker after changing that constant. Do not use $5k or $7k sketches.

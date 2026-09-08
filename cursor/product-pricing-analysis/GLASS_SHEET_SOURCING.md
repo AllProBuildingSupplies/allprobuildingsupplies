@@ -132,6 +132,6 @@ We are a US B2B building-supplies importer. We need mill pricing for ordinary an
 ## How to play this
 
 1. Email **Sphinx `sales@sphinxglass.com`** and **Gold Plus `info@goldplusgroup.com`** the same day. Şişecam `archglass@sisecam.com` is the quality check — walk if they only quote Ultra Clear / jumbo.
-2. Compare **landed East Coast** (FOB + ocean on 20 ft + MFN + ~12.5% overlay), not FOB. Glass freight is weight, not CBM. Pick the cheapest **6 mm** that is clear and flat.
+2. Compare **landed East Coast** (FOB + ocean + MFN + ~12.5% overlay), not FOB. Planning ocean is **$10,000 per 40ft**; use the same **$10,000** on a 20 ft A-frame until we have a 20ft quote (do not assume half). Glass is weight-limited. Pick the cheapest **6 mm** that is clear and flat. On ~1,500 m² of 6 mm, $10k is ~**$6.67/m²** of freight alone.
 3. Do not mix origins in one entry — CBP origin is the float line.
 4. First PO is **one 20 ft of 6 mm stock**. Add 10/12 mm only after that sells.

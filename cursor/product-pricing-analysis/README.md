@@ -6,6 +6,8 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 
 **All quotes:** **FOB origin port** with inbound to **NJ USA** (Newark / Elizabeth), then **1600 Livingston Ave, North Brunswick, NJ 08902**. Samples DHL to that address. **Never use 35 Hope Hill Lane** (home). Not EXW factory. Not DDP from a new mill. Memphis / Florida are customer jobs — still price FOB to NJ first.
 
+**Ocean (planning, until rates come down):** **$10,000 per 40ft / 40HQ** to NJ on every landed check. Same **$10,000** on a 45'HQ (more cube, not a cheaper box). Do **not** assume a 20ft is half — glass A-frames stay at **$10,000** until we have a 20ft quote. Landed ≈ FOB × duty stack + $10,000 / sellable units in the box.
+
 ## Start here
 
 | File | What it is |
@@ -28,7 +30,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 
 **No factory POs until these are in and pricing is locked**, then order together so production lines up.
 
-Glass (Sphinx waiting FOB) · carpet (Dongsheng **FOB Qingdao in** — 25 oz **$5.54/m²**, 40HQ 65.87 CBM / 13.1 t; need ~**$4.24/m²** to beat Artisent after duty+ocean; Kaili still open) · pad (Anerte/Kash — **$22/roll, 285/40HQ**, FOB not EXW, need NJ sample) · tackstrip (**Halex/Fred emailed 7 Sep** — send `halex/Halex_Fred_company_and_RFQ_SEND.txt`) · copper (Hailiang — ASTM confirmed, waiting on FOB).
+Glass (Sphinx waiting FOB) · carpet (Dongsheng **FOB Qingdao in** — 25 oz **$5.54/m²**; at **$10k/40HQ** lands **~$7.82/SY** vs Artisent $5.92; need ~**$3.95/m²**. Kaili still open) · pad (Anerte/Kash — **$22/roll**, 285/40HQ; at **$10k** lands **~$2.21/SY** vs Artisent $1.70 — no longer beats) · tackstrip (**Halex/Fred emailed 7 Sep** — send `halex/Halex_Fred_company_and_RFQ_SEND.txt`) · copper (Hailiang — ASTM confirmed, waiting on FOB).
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 
@@ -39,6 +41,7 @@ Glass (Sphinx waiting FOB) · carpet (Dongsheng **FOB Qingdao in** — 25 oz **$
 - **FOB_USD** = yellow column from All 3 Projects only (else blank)
 - **CBM** = always `L×W×H/1,000,000` (prefer Lesso carton dims)
 - **Duty_Tariff_Freight_Pct** = `(duty$ + freight$) / FOB` → Landed ≈ FOB × (1 + pct)
+- **Freight** = **$10,000 / container CBM** × CBM per pc (`build_tommur_cost_margin.py`)
 
 ## Rebuild (optional)
 
