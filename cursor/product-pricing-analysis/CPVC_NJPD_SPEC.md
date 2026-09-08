@@ -37,7 +37,7 @@ People (and Tommur’s own book) often call the D2846 CTS **fittings** line “S
 | 1½" × 3.76" | $2.07 | $3.04 | $8.26 |
 | 2" × 4.9" | $3.53 | $5.20 | $14.11 |
 
-½ / ¾ / 1" landed is **tight vs Home Depot** (~4–12%). 1¼" and up look fine. Quote NJPD off **landed**, not the site card.
+½ / ¾ / 1" landed is **tight vs Home Depot** (~4–12%). 1¼" and up look fine. Quote NJPD off **landed**, not the site card. Those landed figures are from the Tommur tracker; rebuild with **$10,000/container** in `build_tommur_cost_margin.py` (was $7k).
 
 SCH80 FOB is a different wall/OD. Do not substitute.
 

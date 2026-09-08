@@ -44,7 +44,7 @@ Proof on 2-104. Beat Artisent **material** line by line, one delivery.
 | Line | Artisent | Us |
 |---|---|---|
 | Mortisay 12 ft Ablaze | $5.92–$5.95/SY | **Kaili / Qianqiao** PET 12 ft, comparable beige. Not the brand. |
-| Rebond 3/8" 5 lb | $1.70/SY | **Anerte** $22/roll = **$0.73/SY FOB**, 285 rolls/40HQ. Landed ~$1.55–$1.75. |
+| Rebond 3/8" 5 lb | $1.70/SY | **Anerte** $22/roll = **$0.73/SY FOB**, 285 rolls/40HQ. At **$10k/40HQ** lands **~$2.21** — does not beat. |
 | Tackstrip | install only | **Halex / Fred** `fliang@halexcorpasia.com` · +86 158 9630 5619 |
 | Naplock 154H | $0 | US, leave it |
 | Advantage Glue-Down Plank II | $1.20/SF | **Already have** |
@@ -120,8 +120,8 @@ Price the **kit**, not 40 line items. Match floorplan names they already use (`3
 |---|---|---|
 | PEX / PVC / copper | **In house** | Tommur, Zhenpeng, Hailiang, etc. |
 | Glue-down plank | **In house** | Existing |
-| 12 ft PET carpet | **FOB Qingdao in** — 25 oz $5.54/m²; 40HQ 69 rolls / 65.87 CBM / 13.1 t. Duty+$5k ocean **~$7.48/SY**, over $5.92. Need ~**$4.24/m²**. No PO. | **Dongsheng Selena** `julia.yuan@dongsheng.com`; Kaili Jessica `jessicachan10@foxmail.com`; Qianqiao `info@qianqiaocorp.com` |
-| Rebond pad | **Packing in** — $22/roll (30 SY / $0.73/SY), 280–290 rolls/40HQ regular. FOB Shanghai, not EXW. No vacuum. No PO. | Anerte Kash WhatsApp +86 177 0151 5750 |
+| 12 ft PET carpet | **FOB Qingdao in** — 25 oz $5.54/m²; 40HQ 69 rolls / 65.87 CBM / 13.1 t. Duty+$10k ocean **~$7.82/SY**, over $5.92. Need ~**$3.95/m²**. No PO. | **Dongsheng Selena** `julia.yuan@dongsheng.com`; Kaili Jessica `jessicachan10@foxmail.com`; Qianqiao `info@qianqiaocorp.com` |
+| Rebond pad | **Packing in** — $22/roll (30 SY / $0.73/SY), 280–290 rolls/40HQ regular. At **$10k/40HQ** lands **~$2.21/SY** vs Artisent $1.70. FOB Shanghai, not EXW. No vacuum. No PO. | Anerte Kash WhatsApp +86 177 0151 5750 |
 | Clear glass 6/10/12 mm | RFQ | Sphinx `sales@sphinxglass.com`; Gold Plus `info@goldplusgroup.com` |
 | 1/4-round / cove | **Next scour** | Vietnam MDF / PVC extrusion |
 | Doors + hardware | After trim | Vietnam |

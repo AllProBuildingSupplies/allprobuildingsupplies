@@ -19,7 +19,7 @@ SO142607704 is all-carpet ($1,449 with install). SO142607700 is mixed carpet + p
 
 **What Mortisay actually is:** Engineered Floors / Dream Weaver, **12 ft** residential broadloom, color **Ablaze 451**. Typical EF builder carpet = **100% solution-dyed BCF polyester**, textured cut pile, ActionBac. Do **not** put “Mortisay” or “Ablaze” on a China RFQ (trademark). Ask for 12 ft PET cut pile, beige/gold, ~25–35 oz/yd² (~850–1200 g/m²).
 
-**Beat this:** $5.92/SY carpet = **~$7.08/m²**. Target FOB **under ~$3.50/m²** so China duty (~6% MFN + 25% Sec 301 + ~12.5% FLIP ≈ **43%**) + ocean still lands under Artisent. Pad target FOB well under $1.70/SY.
+**Beat this:** $5.92/SY carpet = **~$7.08/m²**. Planning ocean is **$10,000 / 40HQ** (until rates come down). China duty stack ~**1.43**. A 7,000 m² box is **~8,372 SY** (1 m² = 1.196 SY). Target FOB **~$3.95/m²** on 25 oz so duty + $10k still lands under Artisent. Pad at $10k/40HQ needs FOB **~$0.37/SY** to beat **$1.70** — current Anerte $0.73/SY does not.
 
 Mill MOQ is typically **300–1,500 m²** per color. 58 SY ≈ 49 m². Do not PO one unit — RFQ samples + a color, then a 40HQ once the property pipeline is real.
 
@@ -61,7 +61,7 @@ English site explicitly lists **3.66 m / 12 ft** nylon **and** solution-dyed PET
 
 **Reply (WhatsApp, 7 Sep 2026):** Linda quoted **USD 8.92/sqm** on a 4-swatch board (DY01 grey, DY02 navy, **DY04 cream**, DY05 rust; DY06 on the edge). Second board = higher density, higher cost. Volume discount “if more quantity.” Spec (PET vs nylon, oz, 12 ft, FOB vs CIF) **not stated**.
 
-**Math:** $8.92/m² = **~$7.46/SY FOB**. Artisent is **$5.92/SY** already on the job. After China duty (~43%) this lands ~**$10.60/SY** — does **not** beat Artisent. Ask for the cheap 12 ft **solution-dyed PET** apartment line (25–35 oz), FOB Shanghai, 40HQ price. DY04 is the closest color to Ablaze. Keep Kaili in parallel.
+**Math:** $8.92/m² = **~$7.46/SY FOB**. Artisent is **$5.92/SY** already on the job. After China duty (~43%) this is ~**$10.67/SY** before ocean; + **$10k/40HQ** (~$1.19/SY on an 8,372 SY box) ≈ **$11.86/SY**. Does **not** beat Artisent. Ask for the cheap 12 ft **solution-dyed PET** apartment line (25–35 oz), FOB Shanghai, 40HQ price. DY04 is the closest color to Ablaze. Keep Kaili in parallel.
 
 If they will not show a mill address / video, use **Dongsheng** instead (below). Still worth a sample RFQ because 12 ft PET is what we need.
 
@@ -97,15 +97,15 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 | 1000 g | 69 | 13,800 kg | 68.47 | 101.4 | 200 |
 | 1200 g | 60 | 14,400 kg | 64.21 | 103.3 | 240 |
 
-**Landed vs Artisent $5.92/SY** (ocean sketch **$5,000** Qingdao → NY/NJ — not a booked rate):
+**Landed vs Artisent $5.92/SY** (planning ocean **$10,000 / 40HQ** to NJ until rates come down). Area: 1 m² = 1.196 SY, so 7,000 m² = **8,372 SY** ($1.19/SY ocean) and 6,200 m² = **7,415 SY** ($1.35/SY ocean).
 
-| Face | FOB $/SY | Duty-only | + $5k ocean | FOB she must hit @ $5k ocean |
+| Face | FOB $/SY | Duty-only | + $10k ocean | FOB she must hit @ $10k |
 |---|---:|---:|---:|---:|
-| 25 oz | $4.63 | $6.62 | **$7.48** | **~$4.24/m²** ($3.54/SY) |
-| 30 oz | $5.11 | $7.31 | $8.16 | ~$4.24/m² |
-| 35 oz | $5.76 | $8.24 | $9.20 | ~$4.14/m² |
+| 25 oz | $4.63 | $6.62 | **$7.82** | **~$3.95/m²** ($3.30/SY) |
+| 30 oz | $5.11 | $7.31 | **$8.50** | **~$3.95/m²** |
+| 35 oz | $5.76 | $8.24 | **$9.59** | **~$3.82/m²** |
 
-Duty-only break-even is **$4.95/m²** FOB. Current 25 oz **$5.54** is still over before ocean. Negotiate the **850 g** 40HQ first. Walkaway if she cannot get near **$4.20–4.50/m²**. Do not take EXW $5.38 as a “win” — that still loses. **No PO.** Keep Kaili in parallel. Turkey (Tümer) is still the hedge.
+Duty-only break-even is still **$4.95/m²** FOB. Current 25 oz **$5.54** is over before ocean and worse at $10k. Negotiate the **850 g** 40HQ first. Walkaway if she cannot get near **$3.95/m²**. Do not take EXW $5.38 as a “win” — that still loses. **No PO.** Keep Kaili in parallel. Turkey (Tümer) is still the hedge — no Sec 301, so the same $10k ocean hurts less.
 
 **Samples (same WhatsApp):** Stock / similar-quality samples **free**; she will send photos first, then ship after we confirm. **Custom-made samples are chargeable.** DHL freight on us to Livingston. Wait for photos.
 
@@ -155,13 +155,13 @@ Dedicated underlay mill since ~2007. Rebond + moisture-barrier, exports to North
 | 40HQ regular | **280–290 rolls** (~8,400–8,700 SY, ~5.7 t, FOB **~$6,270**) |
 | 40HQ vacuum | 340–350 rolls — **do not use.** Kash: “vacuum packing may have recovery problem.” |
 
-40HQ **cubes out** (light). Ocean is on us, FOB Shanghai → Newark/Elizabeth. At ~$4.5–6k ocean, freight is ~$0.50–0.70/SY. Landed sketch: **$0.73 FOB + ~$0.31 duty + ocean ≈ $1.55–$1.75/SY** vs Artisent **$1.70**. Beats if our forwarder is in the lower half of that band. Get a 40HQ rate; do not take Kash DDP.
+40HQ **cubes out** (light). Ocean is on us, FOB Shanghai → Newark/Elizabeth. Planning ocean **$10,000 / 40HQ**: 285 rolls × 30 SY = **8,550 SY** → **~$1.17/SY** freight. Landed sketch: **$0.73 FOB + ~$0.31 duty + $1.17 ocean ≈ $2.21/SY** vs Artisent **$1.70**. **Does not beat** at this ocean rate. Walkaway FOB to match $1.70 is **~$0.37/SY** ($0.44/m²) vs Kash **$0.73/SY**. Hold the quote; do not PO; do not take Kash DDP. Revisit if ocean comes down or FOB drops hard.
 
 He asked to **pick up at the factory** (EXW) and for a US door address to price freight. **No.** Terms stay **FOB Shanghai** (FCA Shanghai OK). We book ocean. Memphis is not the warehouse. Sample only: DHL to NJ.
 
 He also sells **carpet gripper** (red-stripe wood tackstrip in the photo) and LVT/SPC. Gripper = backup to Halex; ask FOB later, do not switch mills yet. **Do not RFQ his SPC** — we already have glue-down plank.
 
-**Buy:** 3/8" **5 lb, 1.83×13.7 m, PE film, regular pack.** No vacuum. No PO until the combined lock. Still need: DHL sample to NJ + our forwarder’s 40HQ ocean.
+**Buy:** 3/8" **5 lb, 1.83×13.7 m, PE film, regular pack.** No vacuum. No PO until the combined lock. At **$10k/40HQ** this pad does not beat Artisent $1.70. Still need: DHL sample to NJ. Re-run landed if ocean drops.
 
 Alt (only if Anerte falls over): Changzhou Anyway / Tony Xu `tony@czanyway.com` · WhatsApp **+86 189 6141 9868** — they sell underlay but are mainly an SPC mill/trader.
 
@@ -292,5 +292,5 @@ Subject: Re: About Carpet tackstrip (gripper)
 1. Email **Jessica (Kaili)** and **Qianqiao WhatsApp** the same day. Sample both.
 2. **Kash (Anerte) packing is in** — $22/roll (30 SY), 280–290 rolls/40HQ regular. **FOB Shanghai, not EXW.** No vacuum. Send the Incoterms + DHL follow-up. Do not PO yet.
 3. Do not order a container off one Memphis unit. Use samples to win the property, then 40HQ.
-4. Landed check before PO: FOB × **~1.43** (China) + ocean, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. **Dongsheng FOB is in and does not clear that.** If Kaili is also over, send the same RFQ to **Tümer**.
+4. Landed check before PO: FOB × **~1.43** (China) + **$10,000 / 40HQ**, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. **Dongsheng and Anerte FOB are in and neither clears that at $10k ocean.** If Kaili is also over, send the same RFQ to **Tümer**.
 5. Planks stay ours. Naplock / tub strips stay US.

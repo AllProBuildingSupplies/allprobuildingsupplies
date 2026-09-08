@@ -264,7 +264,7 @@ Plugs and the other reducing tees: same ~3% off. Do not invent website prices fo
 
 **Pack:** 2.3 CBM / 488 kg is one pallet, not a container. LCL to NJ will work but is the expensive way. **Best: ride this pallet on the next Tommur/Lesso 45'HQ to NJ** (plenty of leftover cube).
 
-**Landed sketch (½" elbow):** FOB $0.167 × ~1.43 duty ≈ **$0.24** + pennies of ocean if consolidated. Site sells at $1.86. Tommur FOB was $0.47 and already lost to PexUniverse (~$0.46). This REV number can compete. Samples DHL to NJ, then PO the REV PI **FOB Ningbo**. Do not mix with Green Valve PVC on the same PI.
+**Landed sketch (½" elbow):** FOB $0.167 × ~1.43 duty ≈ **$0.24**. Pallet is 2.3 CBM on a Tommur 45'HQ: at **$10,000/container** that is ~$268 on the pallet / 55,100 pcs ≈ **$0.005/pc**. Still pennies. Site sells at $1.86. Tommur FOB was $0.47 and already lost to PexUniverse (~$0.46). This REV number can compete. Samples DHL to NJ, then PO the REV PI **FOB Ningbo**. Do not mix with Green Valve PVC on the same PI.
 
 ### Palconn / Leela Wang — full plumbing RFQ (catalog in, workbook out)
 

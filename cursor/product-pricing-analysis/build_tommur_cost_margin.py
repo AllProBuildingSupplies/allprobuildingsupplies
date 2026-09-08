@@ -33,7 +33,9 @@ OUT_PATH = HERE / "Tommur_Cost_Margin_Tracker.xlsx"
 # Container internal volumes (CBM) — industry standard averages
 CBM_40FT = 67.7  # standard 40'
 CBM_45HQ = 86.0  # 45' high cube
-FREIGHT_PER_CONTAINER = 7000.0  # USD
+# Planning ocean until rates come down: $10,000 per 40ft to NJ.
+# Same dollar on a 45'HQ (more cube → slightly less $/CBM). Do not assume 20ft is half.
+FREIGHT_PER_CONTAINER = 10000.0  # USD
 
 # Tariff stack as of ~Aug 2026 research (verify with broker before entry):
 # MFN base + Section 301 China (+25% typical for these headings)
@@ -1106,7 +1108,7 @@ def write_workbook(rows):
         ["45'HQ container CBM (internal)", CBM_45HQ],
         ["Freight $/CBM 40'", round(FREIGHT_PER_CONTAINER / CBM_40FT, 4)],
         ["Freight $/CBM 45'HQ", round(FREIGHT_PER_CONTAINER / CBM_45HQ, 4)],
-        ["Freight per pc formula", "(7000 / container_CBM) * CBM_per_pc"],
+        ["Freight per pc formula", "(10000 / container_CBM) * CBM_per_pc  — $10k/40ft planning rate"],
         ["CBM_per_pc formula", "(L_cm * W_cm * H_cm / 1,000,000) / pcs_per_carton"],
         ["", ""],
         ["FOB / DDP RULES", ""],
