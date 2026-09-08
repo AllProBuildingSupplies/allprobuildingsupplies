@@ -1455,6 +1455,16 @@ async function loadInboundShipments() {
     if (!r.ok) throw new Error((d && d.error) || 'Failed to load inbound');
     inboundShipmentsCache = Array.isArray(d.shipments) ? d.shipments : [];
     renderInboundShipments();
+    const sync = d.njpdBackorder;
+    if (sync && sync.success) {
+      if (typeof loadOrders === 'function') await loadOrders();
+      if (typeof renderWmsPickList === 'function') renderWmsPickList();
+      showStatus(
+        'NJPD APBS-000005 backorder set to ' + (sync.backorderPcs || '?') +
+        ' fitting pcs from C3/C4/C5 (' + (sync.lines || '?') + ' lines). On-hand unchanged.',
+        false
+      );
+    }
   } catch (e) {
     box.innerHTML = '<div class="wms-inbound-empty">' + escapeHtml(e.message || 'Could not load inbound') + '</div>';
   }
@@ -1589,7 +1599,13 @@ async function syncNjpdBackorderFromInbound(opts) {
       body: JSON.stringify({ orderId: 'APBS-000005' }),
     });
     const d = await r.json().catch(function () { return {}; });
-    if (!r.ok) throw new Error((d && d.error) || 'NJPD backorder sync failed');
+    if (!r.ok) {
+      const err = (d && d.error) || 'NJPD backorder sync failed';
+      if (r.status === 404 || /route not found/i.test(err)) {
+        throw new Error('Match API was not on the live server. Refresh and try Match NJPD backorder again.');
+      }
+      throw new Error(err);
+    }
     await loadOrders();
     if (typeof renderWmsPickList === 'function') renderWmsPickList();
     showStatus(

@@ -1621,6 +1621,9 @@ async function ensureRuntimeSchema(env) {
       try {
         await ensureAchimCatalogSeed(env);
       } catch (_) {}
+      try {
+        await maybeSyncNjpdInboundBackorder(env);
+      } catch (_) {}
     })().catch((err) => {
       schemaReadyPromise = null;
       throw err;
@@ -2447,6 +2450,26 @@ function isNjpdC345Inbound(row) {
   return NJPD_C345_INBOUND_IDS.includes(id) || NJPD_C345_INVOICE_REFS.includes(inv);
 }
 
+const NJPD_BACKORDER_SYNC_NOTE = 'Backorder synced to C3/C4/C5 packing lists';
+
+/**
+ * One-shot: Match NJPD APBS-000005 to C3–C5 packing lists if admin already
+ * imported inbound but the live Worker 404'd the dedicated sync route.
+ * Does not touch on-hand. Idempotent via the order notes marker.
+ */
+async function maybeSyncNjpdInboundBackorder(env) {
+  const order = await env.DB.prepare('SELECT id, notes FROM orders WHERE id = ?')
+    .bind('APBS-000005')
+    .first();
+  if (!order) return { skipped: 'no-order' };
+  if (String(order.notes || '').includes(NJPD_BACKORDER_SYNC_NOTE)) {
+    return { skipped: 'already-synced' };
+  }
+  const result = await syncOrderBackorderFromInbound(env, 'APBS-000005');
+  console.log('NJPD APBS-000005 inbound backorder sync', JSON.stringify(result));
+  return result;
+}
+
 /** Set an open order's remaining qty to inbound fittings (C3/C4/C5). Does not touch on-hand. */
 async function syncOrderBackorderFromInbound(env, orderId) {
   await ensureInboundShipmentsTable(env);
@@ -2508,7 +2531,7 @@ async function syncOrderBackorderFromInbound(env, orderId) {
   const itemsToSave = priced.validated || [];
 
   const noteLine =
-    'Backorder synced to C3/C4/C5 packing lists 2026-09-18. All fittings on those containers are for this PO.';
+    NJPD_BACKORDER_SYNC_NOTE + ' 2026-09-18. All fittings on those containers are for this PO.';
   let notes = String(order.notes || '').replace(/\s*Backorder synced to C3\/C4\/C5 packing lists[^\n]*/g, '').trim();
   notes = notes ? notes + '\n' + noteLine : noteLine;
 
@@ -2829,7 +2852,7 @@ export default {
     try {
       // Fast public routes: skip schema/migration boot (was ~3–4s of D1 round-trips).
       if (path === '/api/health' && request.method === 'GET') {
-        return jsonResponse({ status: 'ok' });
+        return jsonResponse({ status: 'ok', rev: 'njpd-c345-backorder' });
       }
 
       // Public printable invoice HTML / PDF (linked + attached from invoice emails).
@@ -3806,7 +3829,14 @@ export default {
         q += ` ORDER BY CASE status WHEN 'in_transit' THEN 0 WHEN 'arrived' THEN 1 WHEN 'received' THEN 2 ELSE 3 END, eta ASC, container_number ASC`;
         const stmt = env.DB.prepare(q);
         const { results } = binds.length ? await stmt.bind(...binds).all() : await stmt.all();
-        return jsonResponse({ shipments: (results || []).map(formatInboundRow) });
+        let njpdBackorder = null;
+        try {
+          njpdBackorder = await maybeSyncNjpdInboundBackorder(env);
+        } catch (_) {}
+        return jsonResponse({
+          shipments: (results || []).map(formatInboundRow),
+          njpdBackorder,
+        });
       }
 
       if (path === '/api/admin/inbound' && request.method === 'POST') {
