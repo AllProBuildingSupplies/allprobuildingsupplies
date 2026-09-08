@@ -1,0 +1,21 @@
+Quote,DS-2060903
+Date,2026-09-03
+Received,2026-09-07
+Incoterms,FOB Qingdao
+Valid_until,2026-09-15
+Lead_time,30 working days after deposit
+Payment,50% TT deposit; 50% TT before shipment
+USD_RMB,6.71
+Width_m,3.66
+Fiber,100% solution-dyed BCF polyester (PET)
+Construction,Textured cut pile
+Backing_on_FOB_sheet,(blank — confirm woven PP)
+SY_per_m2,1.196
+China_duty_stack,1.43
+
+Face_oz,g_m2,QTY_m2,EXW_USD_m2,FOB_Qingdao_USD_m2,FOB_USD_SY,FOB_x1.43_USD_SY,vs_Artisent_5.92_SY
+25,850,7000,5.38,5.54,4.63,6.62,over
+30,1000,7000,5.95,6.11,5.11,7.31,over
+35,1200,6200,6.73,6.89,5.76,8.24,over
+
+Note,FOB is +0.16 USD/m2 vs EXW on all three lines (Rizhao inland to Qingdao). Duty-only landed is already above Artisent 5.92/SY before ocean. No PO. $/SY = $/m2 / 1.196.

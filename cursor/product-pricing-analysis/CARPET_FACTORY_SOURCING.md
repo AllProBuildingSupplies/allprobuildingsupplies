@@ -79,22 +79,24 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 
 **Reply (Sep 2026):** They have 13 tufting machines; **3.66 m and 4 m** both available. They recommend **3.66 m** for a 40HQ (3 rows, more m²). **Take 3.66 m.** That is US **12 ft** (same as Artisent `12.00`). Do not buy 4 m / 13.1 ft for apartment stretch-in.
 
-**Quote in (Selena / desk `julia.yuan@dongsheng.com`, DS-2060903, 3 Sep 2026, valid to 15 Sep):** PDF `dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903.pdf`. **EXW** — do not accept. Spec is right: 3.66 m, solution-dyed PET, textured cut pile, 850 / 1000 / 1200 g/m² (≈25 / 30 / 35 oz). Backing column blank — confirm ActionBac. Pattern TBD. **Write Selena, not Julia.** FOB ask already sent (`dongsheng/Dongsheng_FOB_ask_SEND.txt` — next notes use Selena).
+**Quote in (Selena / desk `julia.yuan@dongsheng.com`, DS-2060903, 3 Sep 2026, valid to 15 Sep):** First sheet was **EXW** (`dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903.pdf`). **FOB Qingdao is in** (same PI number, received 7 Sep): `dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903_FOB_Qingdao.pdf`. Spec is right: 3.66 m, solution-dyed PET, textured cut pile, 850 / 1000 / 1200 g/m² (≈25 / 30 / 35 oz). Pattern TBD. Payment **50% TT deposit / 50% before shipment**. Lead time **30 working days** after deposit. **Write Selena, not Julia.** Numbers: `dongsheng/Dongsheng_FOB_Qingdao_DS-2060903.csv`.
 
-| Face | g/m² | EXW USD/m² | EXW $/SY | 40HQ qty |
-|---|---:|---:|---:|---:|
-| 25 oz | 850 | **$5.38** | $4.50 | 7,000 m² |
-| 30 oz | 1000 | $5.95 | $4.98 | 7,000 m² |
-| 35 oz | 1200 | $6.73 | $5.63 | 6,200 m² |
+| Face | g/m² | 40HQ | EXW $/m² | **FOB Qingdao $/m²** | FOB $/SY | FOB × 1.43 $/SY |
+|---|---:|---:|---:|---:|---:|---:|
+| 25 oz | 850 | 7,000 m² | $5.38 | **$5.54** | $4.63 | **$6.62** |
+| 30 oz | 1000 | 7,000 m² | $5.95 | **$6.11** | $5.11 | $7.31 |
+| 35 oz | 1200 | 6,200 m² | $6.73 | **$6.89** | $5.76 | $8.24 |
 
-They also listed “local charges + ocean + insurance 1×40HQ ≈ **USD 9,800**” (not FOB). Even the cheap line: EXW $4.50/SY × ~1.43 duty ≈ **$6.43/SY** before ocean — already **over Artisent $5.92/SY**. Inland to port makes FOB higher. FOB ask sent. Keep Kaili in parallel. No PO.
+`$ / SY = $ / m² ÷ 1.196`. FOB is **+$0.16/m²** vs EXW on every line (Rizhao inland to Qingdao — small, as expected). The FOB sheet dropped the blank Backing column and dropped the “local + ocean + insurance ≈ $9,800 / 40HQ” note (ocean is now ours).
+
+**Landed vs Artisent $5.92/SY:** 25 oz duty-only is already **$6.62/SY** before ocean. Does **not** beat the job. No PO. Keep Kaili in parallel. Turkey (Tümer) is still the hedge if Kaili is also over.
 
 **Backing (WhatsApp, Selena, 7 Sep 2026):** Screenshot `dongsheng/selena-whatsapp-backing-options.jpg`. She sent three:
 1. White open-grid **woven PP** (ActionBac type) — **this one**
 2. Tan burlap / **jute** — no (hospitality, not US stretch-in)
 3. White mesh with red/black yarns, “cotton on PP scrim” — no (not US builder ActionBac)
 
-Send `dongsheng/Dongsheng_backing_FOB_SEND.txt`.
+FOB sheet still does not name the backing. Still need 40HQ kg/CBM and a DHL sample to Livingston. Send `dongsheng/Dongsheng_FOB_backing_sample_SEND.txt`.
 
 ---
 
@@ -310,5 +312,5 @@ info@allprobuildingsupplies.com
 1. Email **Jessica (Kaili)** and **Qianqiao WhatsApp** the same day. Sample both.
 2. **Kash (Anerte) packing is in** — $22/roll (30 SY), 280–290 rolls/40HQ regular. **FOB Shanghai, not EXW.** No vacuum. Send the Incoterms + DHL follow-up. Do not PO yet.
 3. Do not order a container off one Memphis unit. Use samples to win the property, then 40HQ.
-4. Landed check before PO: FOB × **~1.43** (China) + ocean, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. If China does not clear that, send the same RFQ to **Tümer**.
+4. Landed check before PO: FOB × **~1.43** (China) + ocean, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. **Dongsheng FOB is in and does not clear that.** If Kaili is also over, send the same RFQ to **Tümer**.
 5. Planks stay ours. Naplock / tub strips stay US.
