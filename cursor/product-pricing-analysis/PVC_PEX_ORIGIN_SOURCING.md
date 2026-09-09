@@ -245,7 +245,7 @@ EXW is often ~40–55% of Tommur FOB on the big movers. Do **not** PO this PI: a
 
 Keep Zhenpeng as the **PEX mill**. FOB Ningbo, HS 3917.40, **PPSU Solvay**, ASTM F2159, **cUPC + NSF/ANSI 61**. 30% / 70%, 30 days. **REV $16,185.80** / 55,100 pcs / 163 cartons / **1 pallet 122×102×183 cm / 2.3 CBM / ~488 kg GW**. Carton **30×25×15 cm = 0.01125 CBM**. **½–1" only** — no 1¼–2".
 
-**No PO yet.** Hold this REV PI until glass / carpet / pad / tackstrip / PVC quotes are in, then place orders together. Pallet rides a Tommur 45'HQ to NJ when we ship. Do not mix with Green Valve on the same PI. Do not change website prices until the combined order is locked.
+**No PO yet.** Hold this REV PI until glass / carpet / pad / copper quotes are in (tackstrip FOB is in — Halex), then place orders together. Pallet rides a Tommur 45'HQ to NJ when we ship. Do not mix with Green Valve on the same PI. Do not change website prices until the combined order is locked.
 
 | Zhenpeng | Size | Qty | FOB was | **FOB REV** | Tommur FOB |
 |---|---|---|---|---|---|

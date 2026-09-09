@@ -45,7 +45,7 @@ Proof on 2-104. Beat Artisent **material** line by line, one delivery.
 |---|---|---|
 | Mortisay 12 ft Ablaze | $5.92–$5.95/SY | **Kaili / Qianqiao** PET 12 ft, comparable beige. Not the brand. |
 | Rebond 3/8" 5 lb | $1.70/SY | **Anerte** $22/roll = **$0.73/SY FOB**, 285 rolls/40HQ. At **$10k/40HQ** lands **~$2.21** — does not beat. |
-| Tackstrip | install only | **Halex / Fred** `fliang@halexcorpasia.com` · +86 158 9630 5619 |
+| Tackstrip | install only | **Halex FOB in** — SGR-120 **$10.74**/box lands **~$21.11** vs HD **$28.65**. Stock SGR-120 + SGR-360. Samples, then 40HQ. |
 | Naplock 154H | $0 | US, leave it |
 | Advantage Glue-Down Plank II | $1.20/SF | **Already have** |
 | 1/4-round white | $0.60/LF | Wave 1 mill or US for this one job |
@@ -62,7 +62,7 @@ Pitch after 2-104: “Same unit, one invoice, we stock the next 20 turns.”
 
 These are on the Artisent ticket or the glass ask. Same customer, same truck.
 
-1. **Carpet + pad + tackstrip** — RFQs already written. Samples, then 40HQ once the property pipeline is real.
+1. **Carpet + pad + tackstrip** — carpet/pad FOB in but **do not beat** at $10k ocean. **Halex tackstrip FOB in and does beat** the US box. Samples, then 40HQ when the combined lock opens.
 2. **Clear float 6 / 10 / 12 mm** — Sphinx Egypt + Gold Plus India. Stock sizes, commercial grade. 20 ft A-frames. First 20 ft = **6 mm**.
 3. **Mirrors** — same glass mill, silvered. Vanity and closet. Do not open a second mill.
 4. **1/4-round + cove base** — Vietnam / Indonesia MDF or PVC. Cheap, every unit, 208 LF on this ticket.

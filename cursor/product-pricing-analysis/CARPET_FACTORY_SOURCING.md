@@ -159,7 +159,7 @@ Dedicated underlay mill since ~2007. Rebond + moisture-barrier, exports to North
 
 He asked to **pick up at the factory** (EXW) and for a US door address to price freight. **No.** Terms stay **FOB Shanghai** (FCA Shanghai OK). We book ocean. Memphis is not the warehouse. Sample only: DHL to NJ.
 
-He also sells **carpet gripper** (red-stripe wood tackstrip in the photo) and LVT/SPC. Gripper = backup to Halex; ask FOB later, do not switch mills yet. **Do not RFQ his SPC** — we already have glue-down plank.
+He also sells **carpet gripper** (red-stripe wood tackstrip in the photo) and LVT/SPC. Gripper = **backup only** — Halex FOB is in and beats the US box. Do not switch mills. **Do not RFQ his SPC** — we already have glue-down plank.
 
 **Buy:** 3/8" **5 lb, 1.83×13.7 m, PE film, regular pack.** No vacuum. No PO until the combined lock. At **$10k/40HQ** this pad does not beat Artisent $1.70. Still need: DHL sample to NJ. Re-run landed if ocean drops.
 
@@ -235,7 +235,7 @@ info@allprobuildingsupplies.com
 
 | Product | Where to buy | Contact |
 |---|---|---|
-| Tackstrip (7/8" or 1", wood + concrete nails) | **Suqian Halex** — US-spec gripper mill, 12 US nailing machines | **Fred Liang** `fliang@halexcorpasia.com` · mobile **+86 158 9630 5619** · tel +86 527 8427 1690. Address: Fudan Rd, Sucheng ETDZ, Suqian, Jiangsu. Send `halex/Halex_Fred_company_and_RFQ_SEND.txt`. Memo: `halex/HALEX_TACKSTRIP.md` |
+| Tackstrip (7/8" or 1", wood + concrete nails) | **Suqian Halex — FOB Shanghai in (9 Sep 2026)** | **SGR-120 $10.74**/box lands **~$21.11** vs HD **$28.65**; **SGR-360 dual $12.07** lands **~$23.75** vs HD **$37.47**. Beats at $10k ocean. MOQ 40HQ mixed. Send `halex/Halex_Fred_quote_ack_SEND.txt` (samples + mix). Compare: `halex/Halex_Fred_quote_COMPARE.xlsx`. Memo: `halex/HALEX_TACKSTRIP.md` |
 | Naplock / transitions | US (Roberts / Hammered Mill 154H) | Keep domestic — not worth a China MOQ for 24 LF |
 | 1/4 round white | Existing wood mill or US | Same as other trim |
 | Tub strips | US | 2 pcs — not a factory buy |
@@ -281,9 +281,9 @@ That is Engineered Floors Dream Weaver **Ablaze 451** (Durango SKU 4160). “Mor
 
 ### Copy-paste RFQ (tackstrip — Fred Liang / Halex)
 
-**Fred emailed 7 Sep 2026** from `fliang@halexcorpasia.com` (Made-in-China follow-up). He asked for company info and monthly/annual volume. Reply with `halex/Halex_Fred_company_and_RFQ_SEND.txt`. Screenshot: `halex/Fred_Liang_email_2026-09-07.jpg`. Memo: `halex/HALEX_TACKSTRIP.md`.
+**Quote in 9 Sep 2026** — `halex/Carpet tackstrip Prices to All Pro Building Supplies LLC 20260909.xlsx`. FOB Shanghai: SGR-120 **$10.74**, SGR-340 **$11.97**, SGR-360 **$12.07** / box. MOQ 40HQ mixed. Landed vs HD 100-pack **beats** at $10k ocean. Internal: `halex/Halex_Fred_quote_COMPARE.xlsx`. **Send next:** `halex/Halex_Fred_quote_ack_SEND.txt` (samples DHL Livingston + mixed 40HQ of 400 SGR-120 / 1140 SGR-360). First RFQ was `halex/Halex_Fred_company_and_RFQ_SEND.txt`. Memo: `halex/HALEX_TACKSTRIP.md`.
 
-Subject: Re: About Carpet tackstrip (gripper)
+Subject: Re: Carpet tackstrip Prices to All Pro Building Supplies LLC
 
 ---
 
@@ -293,4 +293,5 @@ Subject: Re: About Carpet tackstrip (gripper)
 2. **Kash (Anerte) packing is in** — $22/roll (30 SY), 280–290 rolls/40HQ regular. **FOB Shanghai, not EXW.** No vacuum. Send the Incoterms + DHL follow-up. Do not PO yet.
 3. Do not order a container off one Memphis unit. Use samples to win the property, then 40HQ.
 4. Landed check before PO: FOB × **~1.43** (China) + **$10,000 / 40HQ**, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. **Dongsheng and Anerte FOB are in and neither clears that at $10k ocean.** If Kaili is also over, send the same RFQ to **Tümer**.
-5. Planks stay ours. Naplock / tub strips stay US.
+5. **Halex tackstrip FOB is in and does beat** the US 100-pack at $10k ocean. Send `halex/Halex_Fred_quote_ack_SEND.txt` (samples + mixed 40HQ). No PO until the combined lock.
+6. Planks stay ours. Naplock / tub strips stay US.

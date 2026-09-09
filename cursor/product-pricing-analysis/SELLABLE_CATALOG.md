@@ -104,7 +104,7 @@ Achim also sells other décor (pillows, lighting, etc.) that is **not SKU’d ye
 | Line | Status |
 |---|---|
 | **Glass sheets** | 1/4", 3/8", 1/2" (6/10/12 mm). China/Malaysia AD/CVD is a problem. Egypt (Sphinx) + India (Gold Plus) first; Şişecam as a quality check. Memo: `GLASS_SHEET_SOURCING.md`. RFQ sent; waiting on quotes. |
-| **Broadloom carpet + pad + tackstrip** | Dongsheng **FOB Qingdao in** (25 oz $5.54/m²). At **$10k/40HQ** lands **~$7.82/SY** vs Artisent $5.92; need ~**$3.95/m²**. **Pad** $22/roll lands **~$2.21/SY** vs $1.70 — does not beat at this ocean. **Halex/Fred emailed 7 Sep** — send `halex/Halex_Fred_company_and_RFQ_SEND.txt`. No SKU / no PO. Memo: `CARPET_FACTORY_SOURCING.md`. |
+| **Broadloom carpet + pad + tackstrip** | Dongsheng **FOB Qingdao in** (25 oz $5.54/m²). At **$10k/40HQ** lands **~$7.82/SY** vs Artisent $5.92; need ~**$3.95/m²**. **Pad** $22/roll lands **~$2.21/SY** vs $1.70 — does not beat at this ocean. **Halex FOB Shanghai in** — SGR-120 **$10.74**/box lands **~$21.11** vs HD **$28.65**; SGR-360 dual **$12.07** lands **~$23.75** vs HD **$37.47**. Beats at $10k ocean. MOQ 40HQ. Samples next. No SKU / no PO. Memo: `halex/HALEX_TACKSTRIP.md`. |
 | **Toilets, vanities, bath fixtures** | Expand later. Baruch has companies to research when we get there. |
 | **Advantage Glue-Down Plank II** | Mentioned as a US fill line — no Achim code, not added. |
 
