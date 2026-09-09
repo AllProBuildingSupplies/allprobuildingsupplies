@@ -17,7 +17,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`GLASS_SHEET_SOURCING.md`** | Egypt / India / Turkey. **Sphinx form filled:** `sphinx-glass/Sphinx_Prospect_Registration_AllPro.xlsx` |
 | **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / **Dongsheng FOB Qingdao in** + **Anerte pad $22/roll, 285/40HQ** + **Halex/Fred email in** (`halex/`) + Ablaze 451 photo |
 | **`CPVC_NJPD_SPEC.md`** | NJPD stick = **D2846 SDR-11 CTS**, not SCH80. Tommur already has FOB. Photos in `njpd-cpvc/` |
-| **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC. Zhenpeng = PEX PPSU. Palconn/Leela = full plumbing RFQ** (PEX ½–1" + F1807/PPSU + PVC/DWV + F891 + CPVC if they make it). |
+| **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC/DWV. Zhenpeng = PEX PPSU. Palconn quote in** — PEX-B pipe + F1807. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`. |
 | **`HAILIANG_COPPER_RFQ.md`** | Copper RFQ on WeChat. **ASTM already confirmed.** Waiting on FOB. Do not nag. |
 | **`Factory_Order_PVC_PEX_45HQ.csv`** | Current plumbing 45'HQ order (inch sizes, FOB/DDP) |
 | `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
@@ -34,7 +34,7 @@ Glass (Sphinx waiting FOB) · carpet (Dongsheng **FOB Qingdao in** — 25 oz **$
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 
-**PEX (½–1" only):** Zhenpeng PPSU REV held. **Palconn/Leela catalog in** — send `palconn/Palconn_Full_Catalog_RFQ_SEND.xlsx` (PEX-B + F1807/PPSU + PVC/DWV + F891 + CPVC-if). Drop 1¼–2" PEX. Do not forward the COMPARE file.
+**PEX (½–1" only):** Zhenpeng PPSU REV **held**. **Palconn/Leela quote in** (`20260908 Palconn_Full_Catalog_RFQ_SEND.xlsx`): take Palconn for **PEX-B pipe + F1807 brass**; keep Zhenpeng for PPSU; keep Tommur for PVC/DWV. No PO until combined lock. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`.
 
 ## Tommur workbook rules
 

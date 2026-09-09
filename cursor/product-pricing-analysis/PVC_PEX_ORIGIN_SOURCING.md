@@ -266,9 +266,9 @@ Plugs and the other reducing tees: same ~3% off. Do not invent website prices fo
 
 **Landed sketch (½" elbow):** FOB $0.167 × ~1.43 duty ≈ **$0.24**. Pallet is 2.3 CBM on a Tommur 45'HQ: at **$10,000/container** that is ~$268 on the pallet / 55,100 pcs ≈ **$0.005/pc**. Still pennies. Site sells at $1.86. Tommur FOB was $0.47 and already lost to PexUniverse (~$0.46). This REV number can compete. Samples DHL to NJ, then PO the REV PI **FOB Ningbo**. Do not mix with Green Valve PVC on the same PI.
 
-### Palconn / Leela Wang — full plumbing RFQ (catalog in, workbook out)
+### Palconn / Leela Wang — quote in (8 Sep 2026)
 
-2026 North America catalog: `palconn/2026_PALCONN_North_American_Market_Catalog.pdf`. NSF / cUPC claimed. They make PEX pipe (coils + 10/20 ft sticks), F1807 brass, F2159 PPSU, F1960, push-fit, PEX-AL-PEX, radiant manifolds, Sch 40 UPVC pipe + pressure fittings, and a thin DWV set.
+Workbook: `palconn/20260908 Palconn_Full_Catalog_RFQ_SEND.xlsx`. NSF / UPC / CSA. Plastic 25 days, brass 50 days. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`.
 
-**Send `palconn/Palconn_Full_Catalog_RFQ_SEND.xlsx` + `palconn/Palconn_RFQ_SEND.txt`.** Quote everything they produce that we stock or want to stock: PEX-B ½/¾/1", F1807, F2159, outlet boxes, Sch 40 PVC pipe, all site DWV, F891 if they extrude it, D2846 CPVC if they make it. Skip EVOH, PEX-AL-PEX, manifolds, push-fit, tools, PEX over 1", PVC pressure fittings, Sch 80. PPSU is a price-check against Zhenpeng; PVC/DWV is a price-check against Tommur. Do not replace either mill until Palconn lands cheaper. Memo: `palconn/PALCONN_LEELA_RFQ.md`. Internal compare only: `palconn/Palconn_Full_Catalog_RFQ_COMPARE.xlsx`.
+**Take Palconn for PEX-B pipe ½/¾/1" and F1807 brass.** Pipe FOB $0.082 / $0.159 / $0.259 per ft (~10% under Tommur). **Keep Zhenpeng** for PPSU (REV PI). **Keep Tommur** for PVC/DWV (Palconn higher and missing 1½/2" 90s, street, traps). No Palconn PO until the combined lock. Memo: `palconn/PALCONN_LEELA_RFQ.md`.
 
