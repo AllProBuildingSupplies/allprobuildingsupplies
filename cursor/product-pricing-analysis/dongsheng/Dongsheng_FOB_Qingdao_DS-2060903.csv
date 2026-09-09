@@ -1,6 +1,8 @@
 Quote,DS-2060903
-Date,2026-09-03
-Received,2026-09-07
+Date_on_sheet,2026-09-03
+First_FOB_received,2026-09-07
+Revised_FOB_received,2026-09-09
+Revised_pdf,Dongsheng_Quote_Tufted_Carpet_DS-2060903_FOB_Qingdao_20260909.pdf
 Incoterms,FOB Qingdao
 Valid_until,2026-09-15
 Lead_time,30 working days after deposit
@@ -13,11 +15,12 @@ Backing_on_FOB_sheet,(blank — confirm woven PP)
 SY_per_m2,1.196
 China_duty_stack,1.43
 Ocean_USD_per_40HQ,10000
-Packing_source,Selena WhatsApp 2026-09-07 (rectangular CBM)
+Packing_source,Selena WhatsApp 2026-09-07 (rectangular CBM). 800 g packing not yet sent — ocean uses 7000 m2 same as 850/1000.
 
-Face_oz,g_m2,QTY_m2,rolls,GW_kg,CBM,m2_per_roll,kg_per_roll,cbm_per_roll,EXW_USD_m2,FOB_Qingdao_USD_m2,FOB_USD_SY,FOB_x1.43_USD_SY,SY_in_40HQ,ocean_per_SY_at_10k,landed_plus_10k_ocean_USD_SY,FOB_m2_to_match_5.92_at_10k_ocean
-25,850,7000,69,13110,65.87,101.45,190.0,0.955,5.38,5.54,4.63,6.62,8372,1.19,7.82,3.95
-30,1000,7000,69,13800,68.47,101.45,200.0,0.992,5.95,6.11,5.11,7.31,8372,1.19,8.50,3.95
-35,1200,6200,60,14400,64.21,103.33,240.0,1.07,6.73,6.89,5.76,8.24,7415,1.35,9.59,3.82
+face_oz,g_m2,QTY_m2,rolls,GW_kg,CBM,m2_per_roll,kg_per_roll,cbm_per_roll,EXW_USD_m2,FOB_Qingdao_20260907,FOB_Qingdao_20260909,FOB_USD_SY,FOB_x1.43_USD_SY,SY_in_40HQ,ocean_per_SY_at_10k,landed_plus_10k_ocean_USD_SY,FOB_m2_to_match_5.92_at_10k_ocean
+24,800,7000,,,,,,,,,5.16,4.31,6.17,8372,1.19,7.36,3.95
+25,850,7000,69,13110,65.87,101.45,190.0,0.955,5.38,5.54,5.44,4.55,6.51,8372,1.19,7.70,3.95
+30,1000,7000,69,13800,68.47,101.45,200.0,0.992,5.95,6.11,6.00,5.02,7.17,8372,1.19,8.37,3.95
+35,1200,6200,60,14400,64.21,103.33,240.0,1.07,6.73,6.89,6.77,5.66,8.09,7415,1.35,9.44,3.82
 
-Note,Each pile weight is one 40HQ (cubes out ~65-68 CBM; payload only 13-14 t). Planning ocean $10000/40HQ to NJ. 1 m2 = 1.196 SY so 7000 m2 = 8372 SY. Duty-only break-even vs Artisent 5.92/SY is FOB $4.95/m2. With $10k ocean need ~$3.95/m2 on 850/1000 g. Current 850 g FOB $5.54 lands ~$7.82/SY. No PO. $/SY = $/m2 / 1.196. Samples: stock free + DHL; custom chargeable.
+Note,9 Sep revision adds 800 g/m2 (~24 oz) at FOB $5.16 and drops 850/1000/1200 by $0.10-$0.12. 800 g lands ~$7.36/SY vs Artisent $5.92 — still over; also lighter than 25 oz builder. Duty-only on 800 g is already $6.17/SY. Walkaway still ~$3.95/m2 on a 7000 m2 box. No PO. $/SY = $/m2 / 1.196. Samples: stock free + DHL; custom chargeable.

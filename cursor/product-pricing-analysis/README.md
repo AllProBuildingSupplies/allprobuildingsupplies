@@ -15,7 +15,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`SELLABLE_CATALOG.md`** | What is on the site now vs still waiting on quotes |
 | **`EXCLUSIVE_SUPPLIER_ROADMAP.md`** | One-vendor play (Ashland Lakes → every category) |
 | **`GLASS_SHEET_SOURCING.md`** | Egypt / India / Turkey. **Sphinx form filled:** `sphinx-glass/Sphinx_Prospect_Registration_AllPro.xlsx` |
-| **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / **Dongsheng FOB Qingdao in** + **Anerte pad $22/roll, 285/40HQ** + **Halex FOB Shanghai in** (`halex/`) + Ablaze 451 photo |
+| **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / **Dongsheng 9 Sep FOB** (800 g **$5.16** / 850 g **$5.44**) + **Anerte pad $22/roll** + **Halex FOB Shanghai in** (`halex/`) |
 | **`CPVC_NJPD_SPEC.md`** | NJPD stick = **D2846 SDR-11 CTS**, not SCH80. Tommur already has FOB. Photos in `njpd-cpvc/` |
 | **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC/DWV. Zhenpeng = PEX PPSU. Palconn quote in** — PEX-B pipe + F1807. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`. |
 | **`HAILIANG_COPPER_RFQ.md`** | Copper RFQ on WeChat. **ASTM already confirmed.** Waiting on FOB. Do not nag. |
@@ -30,7 +30,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 
 **No factory POs until these are in and pricing is locked**, then order together so production lines up.
 
-Glass (Sphinx waiting FOB) · carpet (Dongsheng **FOB Qingdao in** — 25 oz **$5.54/m²**; at **$10k/40HQ** lands **~$7.82/SY** vs Artisent $5.92; need ~**$3.95/m²**. Kaili still open) · pad (Anerte/Kash — **$22/roll**, 285/40HQ; at **$10k** lands **~$2.21/SY** vs Artisent $1.70 — no longer beats) · tackstrip (**Halex FOB Shanghai in** — SGR-120 **$10.74**/box lands **~$21.11** vs HD **$28.65**; first accessory that still beats at $10k ocean. Samples next. Compare: `halex/Halex_Fred_quote_COMPARE.xlsx`) · copper (Hailiang — ASTM confirmed, waiting on FOB).
+Glass (Sphinx waiting FOB) · carpet (Dongsheng **9 Sep FOB** — 800 g **$5.16/m²** lands **~$7.36/SY**; 850 g **$5.44** lands **~$7.70**; both over Artisent $5.92; need ~**$3.95/m²**. Kaili still open) · pad (Anerte/Kash — **$22/roll**, 285/40HQ; at **$10k** lands **~$2.21/SY** vs Artisent $1.70 — no longer beats) · tackstrip (**Halex FOB Shanghai in** — SGR-120 **$10.74**/box lands **~$21.11** vs HD **$28.65**; first accessory that still beats at $10k ocean. Samples next. Compare: `halex/Halex_Fred_quote_COMPARE.xlsx`) · copper (Hailiang — ASTM confirmed, waiting on FOB).
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 

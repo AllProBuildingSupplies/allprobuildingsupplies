@@ -79,33 +79,36 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 
 **Reply (Sep 2026):** They have 13 tufting machines; **3.66 m and 4 m** both available. They recommend **3.66 m** for a 40HQ (3 rows, more m²). **Take 3.66 m.** That is US **12 ft** (same as Artisent `12.00`). Do not buy 4 m / 13.1 ft for apartment stretch-in.
 
-**Quote in (Selena / desk `julia.yuan@dongsheng.com`, DS-2060903, 3 Sep 2026, valid to 15 Sep):** First sheet was **EXW** (`dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903.pdf`). **FOB Qingdao is in** (same PI number, received 7 Sep): `dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903_FOB_Qingdao.pdf`. Spec is right: 3.66 m, solution-dyed PET, textured cut pile, 850 / 1000 / 1200 g/m² (≈25 / 30 / 35 oz). Pattern TBD. Payment **50% TT deposit / 50% before shipment**. Lead time **30 working days** after deposit. **Write Selena, not Julia.** Numbers: `dongsheng/Dongsheng_FOB_Qingdao_DS-2060903.csv`.
+**Quote in (Selena / desk `julia.yuan@dongsheng.com`, DS-2060903, 3 Sep 2026, valid to 15 Sep):** First sheet was **EXW** (`dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903.pdf`). **FOB Qingdao 7 Sep:** `dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903_FOB_Qingdao.pdf`. **Revised 9 Sep** (adds **800 g/m²**, trims 850/1000/1200 by $0.10–$0.12): `dongsheng/Dongsheng_Quote_Tufted_Carpet_DS-2060903_FOB_Qingdao_20260909.pdf`. Spec: 3.66 m, solution-dyed PET, textured cut pile. Pattern TBD. Payment **50% TT deposit / 50% before shipment**. Lead time **30 working days** after deposit. **Write Selena, not Julia.** Numbers: `dongsheng/Dongsheng_FOB_Qingdao_DS-2060903.csv`. Send next: `dongsheng/Dongsheng_FOB_800g_ack_SEND.txt`.
 
-| Face | g/m² | 40HQ | EXW $/m² | **FOB Qingdao $/m²** | FOB $/SY | FOB × 1.43 $/SY |
-|---|---:|---:|---:|---:|---:|---:|
-| 25 oz | 850 | 7,000 m² | $5.38 | **$5.54** | $4.63 | **$6.62** |
-| 30 oz | 1000 | 7,000 m² | $5.95 | **$6.11** | $5.11 | $7.31 |
-| 35 oz | 1200 | 6,200 m² | $6.73 | **$6.89** | $5.76 | $8.24 |
+| Face | g/m² | 40HQ | EXW $/m² | FOB 7 Sep | **FOB 9 Sep $/m²** | FOB $/SY | FOB × 1.43 $/SY |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ~24 oz | 800 | 7,000 m² | — | — | **$5.16** | $4.31 | **$6.17** |
+| 25 oz | 850 | 7,000 m² | $5.38 | $5.54 | **$5.44** | $4.55 | **$6.51** |
+| 30 oz | 1000 | 7,000 m² | $5.95 | $6.11 | **$6.00** | $5.02 | $7.17 |
+| 35 oz | 1200 | 6,200 m² | $6.73 | $6.89 | **$6.77** | $5.66 | $8.09 |
 
-`$ / SY = $ / m² ÷ 1.196`. FOB is **+$0.16/m²** vs EXW on every line (Rizhao inland to Qingdao — small, as expected). The FOB sheet dropped the blank Backing column and dropped the “local + ocean + insurance ≈ $9,800 / 40HQ” note (ocean is now ours).
+`$ / SY = $ / m² ÷ 1.196`. 850–1200 g FOB is still **+$0.16/m²** vs the original EXW (Rizhao inland to Qingdao). 800 g was FOB-only. The FOB sheet still has no backing column.
 
 **40HQ pack-out (Selena WhatsApp, 7 Sep 2026):** Screenshot `dongsheng/selena-whatsapp-40hq-cbm-weight.jpg`. Each pile weight is **one 40HQ** (cubes out; payload only 13–14 t).
 
 | Face | Rolls | GW | CBM | m²/roll | kg/roll |
 |---|---:|---:|---:|---:|---:|
+| 800 g | not sent | — | — | — | — |
 | 850 g | 69 | 13,110 kg | 65.87 | 101.4 | 190 |
 | 1000 g | 69 | 13,800 kg | 68.47 | 101.4 | 200 |
 | 1200 g | 60 | 14,400 kg | 64.21 | 103.3 | 240 |
 
 **Landed vs Artisent $5.92/SY** (planning ocean **$10,000 / 40HQ** to NJ until rates come down). Area: 1 m² = 1.196 SY, so 7,000 m² = **8,372 SY** ($1.19/SY ocean) and 6,200 m² = **7,415 SY** ($1.35/SY ocean).
 
-| Face | FOB $/SY | Duty-only | + $10k ocean | FOB she must hit @ $10k |
+| Face | FOB 9 Sep $/SY | Duty-only | + $10k ocean | FOB she must hit @ $10k |
 |---|---:|---:|---:|---:|
-| 25 oz | $4.63 | $6.62 | **$7.82** | **~$3.95/m²** ($3.30/SY) |
-| 30 oz | $5.11 | $7.31 | **$8.50** | **~$3.95/m²** |
-| 35 oz | $5.76 | $8.24 | **$9.59** | **~$3.82/m²** |
+| ~24 oz (800 g) | $4.31 | **$6.17** | **$7.36** | **~$3.95/m²** |
+| 25 oz (850 g) | $4.55 | $6.51 | **$7.70** | **~$3.95/m²** ($3.30/SY) |
+| 30 oz | $5.02 | $7.17 | **$8.37** | **~$3.95/m²** |
+| 35 oz | $5.66 | $8.09 | **$9.44** | **~$3.82/m²** |
 
-Duty-only break-even is still **$4.95/m²** FOB. Current 25 oz **$5.54** is over before ocean and worse at $10k. Negotiate the **850 g** 40HQ first. Walkaway if she cannot get near **$3.95/m²**. Do not take EXW $5.38 as a “win” — that still loses. **No PO.** Keep Kaili in parallel. Turkey (Tümer) is still the hedge — no Sec 301, so the same $10k ocean hurts less.
+Duty-only break-even is still **$4.95/m²** FOB. **800 g $5.16 is already over duty-only** ($6.17/SY vs Artisent $5.92) and lands **~$7.36/SY** at $10k ocean. It is also **lighter than 25 oz** builder (~23.6 oz). Do not switch the target to 800 g to “save” $0.28/m². 850 g dropped **$0.10** to **$5.44** and still lands **~$7.70**. Walkaway if she cannot get near **$3.95/m²**. **No PO.** Keep Kaili in parallel. Turkey (Tümer) is still the hedge — no Sec 301, so the same $10k ocean hurts less.
 
 **Samples (same WhatsApp):** Stock / similar-quality samples **free**; she will send photos first, then ship after we confirm. **Custom-made samples are chargeable.** DHL freight on us to Livingston. Wait for photos.
 
@@ -114,7 +117,7 @@ Duty-only break-even is still **$4.95/m²** FOB. Current 25 oz **$5.54** is over
 2. Tan burlap / **jute** — no (hospitality, not US stretch-in)
 3. White mesh with red/black yarns, “cotton on PP scrim” — no (not US builder ActionBac)
 
-FOB sheet still does not name the backing. Send `dongsheng/Dongsheng_FOB_best_price_SEND.txt` (packing thanks + woven PP confirm + best 850 g FOB + sample photos to Livingston).
+FOB sheet still does not name the backing. 800 g packing (rolls / GW / CBM) is not on the 9 Sep sheet. Send `dongsheng/Dongsheng_FOB_800g_ack_SEND.txt` (thanks for 800 g + packing ask + woven PP + best FOB on 800 and 850 + sample photos to Livingston).
 
 ---
 
@@ -292,6 +295,6 @@ Subject: Re: Carpet tackstrip Prices to All Pro Building Supplies LLC
 1. Email **Jessica (Kaili)** and **Qianqiao WhatsApp** the same day. Sample both.
 2. **Kash (Anerte) packing is in** — $22/roll (30 SY), 280–290 rolls/40HQ regular. **FOB Shanghai, not EXW.** No vacuum. Send the Incoterms + DHL follow-up. Do not PO yet.
 3. Do not order a container off one Memphis unit. Use samples to win the property, then 40HQ.
-4. Landed check before PO: FOB × **~1.43** (China) + **$10,000 / 40HQ**, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. **Dongsheng and Anerte FOB are in and neither clears that at $10k ocean.** If Kaili is also over, send the same RFQ to **Tümer**.
+4. Landed check before PO: FOB × **~1.43** (China) + **$10,000 / 40HQ**, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. **Dongsheng 9 Sep revision (800 g $5.16 / 850 g $5.44) and Anerte pad still do not clear that at $10k ocean.** If Kaili is also over, send the same RFQ to **Tümer**.
 5. **Halex tackstrip FOB is in and does beat** the US 100-pack at $10k ocean. Send `halex/Halex_Fred_quote_ack_SEND.txt` (samples + mixed 40HQ). No PO until the combined lock.
 6. Planks stay ours. Naplock / tub strips stay US.
