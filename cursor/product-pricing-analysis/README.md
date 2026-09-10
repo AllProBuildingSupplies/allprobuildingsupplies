@@ -23,7 +23,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
 | `Tommur_Cost_Margin_Tracker.xlsx` | FOB / landed / HTS / freight / margin |
 | `Competitive_Margin_Sheet.xlsx` | FOB → landed vs cheapest online |
-| **`Three_Mill_FOB_Landed.xlsx`** | Palconn / Tommur / Zhenpeng FOB + DDP or est landed + APBS sell (9 columns) |
+| **`Three_Mill_FOB_Landed.xlsx`** | Palconn + Tommur + Zhenpeng on one list (FOB, DDP/est landed, APBS sell). PEX **½ / ¾ / 1" only**. Every mill number we have is filled — blank means that mill did not quote. |
 | `COMPETITIVE_MARGINS.md` | How to read the margin sheet |
 | `FACTORY_ORDER_README.md` | How the 3-month container projection was built |
 
