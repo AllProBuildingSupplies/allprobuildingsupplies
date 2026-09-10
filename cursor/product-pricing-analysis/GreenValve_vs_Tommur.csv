@@ -1,0 +1,27 @@
+Item,Size,Green_EXW_USD,Green_FOB_est_USD,Green_landed_USD,PI_qty,Tommur_FOB_USD,Tommur_DDP_USD,EXW_vs_Tommur_FOB_pct,Landed_vs_Tommur_DDP_pct,Better_buy,Sell_USD,Margin_on_Tommur_DDP_pct,Margin_on_Green_landed_pct,Notes
+DWV coupling SxS,"1-1/2""",0.065,0.067,0.1052,560,0.1129,0.12,-42.4,-12.3,Green Valve landed cheaper,0.25,52.0,57.9,Tommur COUPLING HxH
+DWV coupling SxS,"2""",0.098,0.1009,0.1623,630,0.1697,0.17,-42.3,-4.5,Green Valve landed cheaper,0.34,50.0,52.3,Tommur COUPLING HxH
+DWV coupling SxS,"3""",0.265,0.273,0.435,360,0.5217,0.55,-49.2,-20.9,Green Valve landed cheaper,1.15,52.2,62.2,Tommur COUPLING HxH
+DWV coupling SxS,"4""",0.449,0.4625,0.7691,150,0.8943,0.95,-49.8,-19.0,Green Valve landed cheaper,2.13,55.4,63.9,Tommur COUPLING HxH
+DWV 90 elbow SxS,"1-1/2""",0.133,0.137,0.2227,1150,0.2307,0.27,-42.3,-17.5,Green Valve landed cheaper,0.53,49.1,58.0,Tommur 1/4 BEND HxH
+DWV 90 elbow SxS,"2""",0.203,0.2091,0.3529,1080,0.3734,0.43,-45.6,-17.9,Green Valve landed cheaper,0.86,50.0,59.0,Tommur 1/4 BEND HxH
+DWV 90 elbow SxS,"3""",0.466,0.48,0.8367,816,1.1046,1.27,-57.8,-34.1,Green Valve landed cheaper,2.65,52.1,68.4,Tommur 1/4 BEND HxH
+DWV 90 elbow SxS,"4""",0.953,0.9816,1.6731,105,2.1055,2.22,-54.7,-24.6,Green Valve landed cheaper,4.99,55.5,66.5,Tommur 1/4 BEND HxH
+DWV 45 elbow SxS,"1-1/2""",0.111,0.1143,0.1814,1000,0.2131,0.23,-47.9,-21.1,Green Valve landed cheaper,0.52,55.8,65.1,Tommur 1/8 BEND HxH
+DWV 45 elbow SxS,"2""",0.166,0.171,0.2807,1120,0.306,0.35,-45.8,-19.8,Green Valve landed cheaper,0.79,55.7,64.5,Tommur 1/8 BEND HxH
+DWV 45 elbow SxS,"3""",0.356,0.3667,0.6322,800,0.9091,1.05,-60.8,-39.8,Green Valve landed cheaper,2.16,51.4,70.7,Tommur 1/8 BEND HxH
+DWV 45 elbow SxS,"4""",0.739,0.7612,1.3392,132,1.6227,1.87,-54.5,-28.4,Green Valve landed cheaper,4.11,54.5,67.4,Tommur 1/8 BEND HxH
+DWV tee SxSxS,"1-1/2""",0.183,0.1885,0.3065,387,0.3459,0.36,-47.1,-14.9,Green Valve landed cheaper,0.91,60.4,66.3,Tommur SANITARY TEE
+DWV tee SxSxS,"2""",0.295,0.3039,0.5115,280,0.4845,0.52,-39.1,-1.6,Green Valve landed cheaper,1.32,60.6,61.3,Tommur SANITARY TEE
+DWV tee SxSxS,"3""",0.745,0.7673,1.2766,84,1.5034,1.7,-50.4,-24.9,Green Valve landed cheaper,6.99,75.7,81.7,Tommur SANITARY TEE
+DWV tee SxSxS,"4""",1.324,1.3637,2.3951,20,2.8505,3.16,-53.6,-24.2,Green Valve landed cheaper,14.75,78.6,83.8,Tommur SANITARY TEE
+DWV wye SxSxS,"1-1/2""",0.231,0.2379,0.3845,110,0.4301,0.45,-46.3,-14.6,Green Valve landed cheaper,1.72,73.8,77.6,Tommur WYE ALL HUB
+DWV wye SxSxS,"2""",0.365,0.376,0.6099,336,0.5963,0.63,-38.8,-3.2,Green Valve landed cheaper,3.6,82.5,83.1,Tommur WYE ALL HUB
+DWV wye SxSxS,"3""",0.939,0.9672,1.6334,162,1.7967,2.07,-47.7,-21.1,Green Valve landed cheaper,7.19,71.2,77.3,Tommur WYE ALL HUB
+DWV wye SxSxS,"4""",1.665,1.7149,2.9218,48,3.2748,3.77,-49.2,-22.5,Green Valve landed cheaper,13.1,71.2,77.7,Tommur WYE ALL HUB
+DWV reducing wye 4x4x2,"4x4x2""",1.026,1.0568,1.7804,26,1.8964,2.18,-45.9,-18.3,Green Valve landed cheaper,5.3,58.9,66.4,Tommur REDUCING WYE 4x4x2
+DWV P-trap SxS,"2""",0.869,0.8951,1.3997,30,0.9434,0.99,-7.9,41.4,Tommur DDP cheaper,2.35,57.9,40.4,Tommur P-TRAP HxH
+DWV plug (socket),"1-1/2""",0.159,0.1638,0.2415,280,0.0837,0.09,90.0,168.3,Tommur DDP cheaper,0.65,86.2,62.8,NOT same as Tommur CAP SOC — plug vs cap
+DWV plug (socket),"2""",0.225,0.2318,0.3411,216,0.1224,0.13,83.8,162.4,Tommur DDP cheaper,1.48,91.2,77.0,NOT same as Tommur CAP SOC — plug vs cap
+DWV plug (socket),"3""",0.589,0.6067,0.8968,92,0.4057,0.43,45.2,108.6,Tommur DDP cheaper,5.42,92.1,83.5,NOT same as Tommur CAP SOC — plug vs cap
+DWV plug (socket),"4""",0.796,0.8199,1.262,56,0.7133,0.76,11.6,66.1,Tommur DDP cheaper,10.5,92.8,88.0,NOT same as Tommur CAP SOC — plug vs cap

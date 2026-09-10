@@ -26,6 +26,13 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`Three_Mill_FOB_Landed.xlsx`** | Palconn + Tommur + Zhenpeng on one list (FOB, DDP/est landed, APBS sell). PEX **½ / ¾ / 1" only**. Every mill number we have is filled — blank means that mill did not quote. |
 | `COMPETITIVE_MARGINS.md` | How to read the margin sheet |
 | `FACTORY_ORDER_README.md` | How the 3-month container projection was built |
+| `WHO_TO_CONTACT.md` | Factories to email: Zhenpeng fittings first, Tommur pipe DDP, Palconn backup |
+| `KING_SMART_ALIBABA_REVIEW.md` | Alibaba store `kingsmartplumbing` vs NJPD Everflow — USA stock vs 50–75% target |
+| `KingSmart_vs_NJPD.xlsx` | SKU-level King Smart list vs Gator sell vs Tommur vs Zhenpeng |
+| `GREEN_VALVE_VS_TOMMUR.md` | Misnamed “Zhenpeng” PDF = Green Valve PVC PI vs Tommur FOB/DDP |
+| `GreenValve_vs_Tommur.xlsx` | SKU-level Green EXW → landed vs Tommur PVC fittings + pipe |
+| `ZHENPENG_FOB_QUOTE.md` | Real Zhenpeng FOB 2026-09-05 vs NJPD / Tommur DDP (23 F2159 SKUs) |
+| `Zhenpeng_FOB_vs_NJPD.xlsx` | Line-level FOB → landed → Gator sell, Tommur, King Smart |
 
 ## RFQs already sent (waiting on replies)
 
