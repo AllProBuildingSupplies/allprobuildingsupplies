@@ -23,6 +23,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
 | `Tommur_Cost_Margin_Tracker.xlsx` | FOB / landed / HTS / freight / margin |
 | `Competitive_Margin_Sheet.xlsx` | FOB → landed vs cheapest online |
+| **`Three_Mill_FOB_Landed.xlsx`** | Palconn / Tommur / Zhenpeng FOB + DDP or est landed + APBS sell (9 columns) |
 | `COMPETITIVE_MARGINS.md` | How to read the margin sheet |
 | `FACTORY_ORDER_README.md` | How the 3-month container projection was built |
 
@@ -52,5 +53,6 @@ python3 cursor/product-pricing-analysis/build_factory_order_projection.py
 python3 cursor/product-pricing-analysis/build_hailiang_copper_rfq.py
 python3 cursor/product-pricing-analysis/palconn/build_palconn_full_rfq.py
 python3 cursor/product-pricing-analysis/palconn/build_palconn_quote_compare.py
+python3 cursor/product-pricing-analysis/build_three_mill_fob_landed.py
 python3 cursor/product-pricing-analysis/halex/build_halex_compare.py
 ```

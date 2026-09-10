@@ -3,7 +3,7 @@
 Catalog: `palconn/2026_PALCONN_North_American_Market_Catalog.pdf` (44 pp, received 8 Sep 2026 from Leela Wang). NSF / cUPC / CSA logos on the approvals page. Founded 2007; Weifang Palconn Plastics Technology Co., Ltd, Yinma Industrial Zone, Weifang, Shandong 261317.
 
 **Quote 8 Sep:** `palconn/20260908 Palconn_Full_Catalog_RFQ_SEND.xlsx` — 118 of 167 lines priced.  
-**Quote 10 Sep:** `palconn/20260910 Palconn_Full_Catalog_RFQ_SEND.xlsx` — **84 lines** (PEX + PVC pipe only). PPSU **−5%**, PEX-B **−1.2%**, F1807 unchanged, PVC pipe **MOQ / CBM / GW filled**, six extra F2159 reducing tees. DWV and CPVC **omitted**. 1" F2159 female adapter still **blank**. Internal: `palconn/Palconn_Leela_quote_COMPARE.xlsx` (do not forward). Ocean **$10k / 67.7 CBM**. Rebuild: `python3 cursor/product-pricing-analysis/palconn/build_palconn_quote_compare.py`.
+**Quote 10 Sep:** `palconn/20260910 Palconn_Full_Catalog_RFQ_SEND.xlsx` — **84 lines** (PEX + PVC pipe only). PPSU **−5%**, PEX-B **−1.2%**, F1807 unchanged, PVC pipe **MOQ / CBM / GW filled**, six extra F2159 reducing tees. DWV and CPVC **omitted**. 1" F2159 female adapter still **blank**. Internal: `palconn/Palconn_Leela_quote_COMPARE.xlsx` (do not forward). Side-by-side mill sheet: `Three_Mill_FOB_Landed.xlsx`. Ocean **$10k / 67.7 CBM**. Rebuild: `python3 cursor/product-pricing-analysis/palconn/build_palconn_quote_compare.py`.
 
 Send next: `palconn/Palconn_10Sep_quote_ack_SEND.txt`.
 
