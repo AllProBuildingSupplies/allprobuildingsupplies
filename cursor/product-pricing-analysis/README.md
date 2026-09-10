@@ -17,7 +17,7 @@ When mill quotes come back: landed check first, then ordering sheet in this fold
 | **`GLASS_SHEET_SOURCING.md`** | Egypt / India / Turkey. **Sphinx form filled:** `sphinx-glass/Sphinx_Prospect_Registration_AllPro.xlsx` |
 | **`CARPET_FACTORY_SOURCING.md`** | Kaili / Qianqiao / **Dongsheng 9 Sep FOB** (800 g **$5.16** / 850 g **$5.44**) + **Anerte pad $22/roll** + **Halex FOB Shanghai in** (`halex/`) |
 | **`CPVC_NJPD_SPEC.md`** | NJPD stick = **D2846 SDR-11 CTS**, not SCH80. Tommur already has FOB. Photos in `njpd-cpvc/` |
-| **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC/DWV. Zhenpeng = PEX PPSU. Palconn quote in** — PEX-B pipe + F1807. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`. |
+| **`PVC_PEX_ORIGIN_SOURCING.md`** | **Tommur = PVC/DWV. Zhenpeng = PEX PPSU. Palconn 10 Sep** — PEX-B + F1807; PPSU −5% still keep Zhenpeng; PVC pipe CBM in, do not buy. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`. |
 | **`HAILIANG_COPPER_RFQ.md`** | Copper RFQ on WeChat. **ASTM already confirmed.** Waiting on FOB. Do not nag. |
 | **`Factory_Order_PVC_PEX_45HQ.csv`** | Current plumbing 45'HQ order (inch sizes, FOB/DDP) |
 | `Factory_Order_For_Tommur_FILLED.csv` | Earlier filled 45'HQ package |
@@ -34,7 +34,7 @@ Glass (Sphinx waiting FOB) · carpet (Dongsheng **9 Sep FOB** — 800 g **$5.16/
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 
-**PEX (½–1" only):** Zhenpeng PPSU REV **held**. **Palconn/Leela quote in** (`20260908 Palconn_Full_Catalog_RFQ_SEND.xlsx`): take Palconn for **PEX-B pipe + F1807 brass**; keep Zhenpeng for PPSU; keep Tommur for PVC/DWV. No PO until combined lock. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`.
+**PEX (½–1" only):** Zhenpeng PPSU REV **held**. **Palconn 10 Sep** (`20260910 Palconn_Full_Catalog_RFQ_SEND.xlsx`): take Palconn for **PEX-B pipe + F1807**; keep Zhenpeng for PPSU (Palconn −5% but 1" elbow still Zhenpeng); **do not buy Palconn PVC pipe** (CBM in — 2" solid lands **~$16.04** vs site **$14.75**). Tommur = PVC/DWV. No PO until combined lock. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`.
 
 ## Tommur workbook rules
 
@@ -51,5 +51,6 @@ python3 cursor/product-pricing-analysis/build_competitive_margin_sheet.py
 python3 cursor/product-pricing-analysis/build_factory_order_projection.py
 python3 cursor/product-pricing-analysis/build_hailiang_copper_rfq.py
 python3 cursor/product-pricing-analysis/palconn/build_palconn_full_rfq.py
+python3 cursor/product-pricing-analysis/palconn/build_palconn_quote_compare.py
 python3 cursor/product-pricing-analysis/halex/build_halex_compare.py
 ```

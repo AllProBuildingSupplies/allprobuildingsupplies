@@ -266,9 +266,9 @@ Plugs and the other reducing tees: same ~3% off. Do not invent website prices fo
 
 **Landed sketch (½" elbow):** FOB $0.167 × ~1.43 duty ≈ **$0.24**. Pallet is 2.3 CBM on a Tommur 45'HQ: at **$10,000/container** that is ~$268 on the pallet / 55,100 pcs ≈ **$0.005/pc**. Still pennies. Site sells at $1.86. Tommur FOB was $0.47 and already lost to PexUniverse (~$0.46). This REV number can compete. Samples DHL to NJ, then PO the REV PI **FOB Ningbo**. Do not mix with Green Valve PVC on the same PI.
 
-### Palconn / Leela Wang — quote in (8 Sep 2026)
+### Palconn / Leela Wang — quote revised 10 Sep 2026
 
-Workbook: `palconn/20260908 Palconn_Full_Catalog_RFQ_SEND.xlsx`. NSF / UPC / CSA. Plastic 25 days, brass 50 days. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`.
+Workbook: `palconn/20260910 Palconn_Full_Catalog_RFQ_SEND.xlsx` (PEX + PVC pipe; DWV omitted). NSF / UPC / CSA. Plastic 25 days, brass 50 days. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`.
 
-**Take Palconn for PEX-B pipe ½/¾/1" and F1807 brass.** Pipe FOB $0.082 / $0.159 / $0.259 per ft (~10% under Tommur). **Keep Zhenpeng** for PPSU (REV PI). **Keep Tommur** for PVC/DWV (Palconn higher and missing 1½/2" 90s, street, traps). No Palconn PO until the combined lock. Memo: `palconn/PALCONN_LEELA_RFQ.md`.
+**Take Palconn for PEX-B pipe ½/¾/1" and F1807 brass.** Pipe FOB **$0.081 / $0.157 / $0.256** per ft (~11% under Tommur). **Keep Zhenpeng** for PPSU (REV PI) — Palconn PPSU is −5% and wins 8/9 FOB overlaps, but 1" elbow is still Zhenpeng and the REV pallet is packed. **Keep Tommur** for PVC/DWV. Palconn PVC pipe now has CBM; 2" solid lands **~$16.04** vs site **$14.75** — do not buy. No Palconn PO until the combined lock. Memo: `palconn/PALCONN_LEELA_RFQ.md`.
 
