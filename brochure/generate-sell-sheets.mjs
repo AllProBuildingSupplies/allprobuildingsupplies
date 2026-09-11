@@ -1,12 +1,13 @@
 /**
- * Generates light, Alveron-style category sell-sheet PDFs (1 page each)
- * from assets/products.csv. Run: npm run sell-sheets  (from brochure/)
+ * Customer-facing category sell sheets from assets/products.csv.
+ * Cover → department covers → one sheet per sub_sub_category.
+ * Run from brochure/: npm run sell-sheets
  */
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
 import { createRequire } from 'module';
-import { CATEGORY_META, COMPANY, standardsForSku } from './category-standards.js';
+import { CATEGORY_META, COMPANY, DEPARTMENT_META, standardsForSku } from './category-standards.js';
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,7 +17,15 @@ const outDir = path.join(__dirname, 'sell-sheets');
 const htmlDir = path.join(outDir, 'html');
 const pdfDir = path.join(outDir, 'pdf');
 const imagesDir = path.join(root, 'images');
-const heroDir = path.join(outDir, 'images');
+
+const PAGE_H = 11;
+const HDR_H = 0.46;
+const FTR_H = 0.36;
+const INTRO_H = 1.72;
+const BODY_PAD = 0.16;
+const BODY_FIRST = PAGE_H - HDR_H - FTR_H - INTRO_H - BODY_PAD;
+const BODY_CONT = PAGE_H - HDR_H - FTR_H - BODY_PAD - 0.04;
+const SIZE_COLS = 4;
 
 function parseCsv(text) {
   const rows = [];
@@ -94,64 +103,52 @@ function slugify(s) {
     .replace(/^-|-$/g, '');
 }
 
-function productImgUrl(rel) {
-  if (!rel) return null;
-  const clean = rel.replace(/^\.\//, '').replace(/^images\//, '');
+function isLogoPath(rel) {
+  return /logo(-email)?\.(png|jpe?g|webp|gif)$/i.test(String(rel || ''));
+}
+
+function realImagePath(rel) {
+  if (!rel || isLogoPath(rel)) return null;
+  const clean = String(rel).replace(/^\.\//, '').replace(/^images\//, '');
   const abs = path.join(imagesDir, clean);
-  return fs.existsSync(abs) ? `file://${abs}` : null;
+  return fs.existsSync(abs) ? abs : null;
 }
 
-function heroImgUrl(filename) {
-  if (!filename) return null;
-  const abs = path.join(heroDir, filename);
-  if (fs.existsSync(abs)) return `file://${abs}`;
-  const alt = path.join(imagesDir, 'sell-sheets', filename);
-  return fs.existsSync(alt) ? `file://${alt}` : null;
+function imgUrl(rel) {
+  const abs = realImagePath(rel);
+  return abs ? `file://${abs}` : null;
 }
 
-function logoUrl() {
-  const dark = path.join(imagesDir, 'logo.png');
-  const light = path.join(imagesDir, 'logo-email.png');
-  if (fs.existsSync(dark)) return `file://${dark}`;
-  if (fs.existsSync(light)) return `file://${light}`;
+function firstRealImage(rows) {
+  for (const r of rows || []) {
+    if (realImagePath(r.Image)) return r.Image;
+  }
   return null;
 }
 
-function groupByCategory(products) {
-  const map = new Map();
-  for (const p of products) {
-    const key = (p.sub_sub_category || p.Material || 'Other').trim() || 'Other';
-    if (!map.has(key)) map.set(key, []);
-    map.get(key).push(p);
-  }
-  return map;
+function logoUrl() {
+  const light = path.join(imagesDir, 'logo-email.png');
+  const dark = path.join(imagesDir, 'logo.png');
+  if (fs.existsSync(light)) return `file://${light}`;
+  if (fs.existsSync(dark)) return `file://${dark}`;
+  return null;
 }
 
-function productFamilies(rows) {
-  const byCode = new Map();
-  for (const r of rows) {
-    const code = r.Code || 'UNKNOWN';
-    if (!byCode.has(code)) {
-      byCode.set(code, {
-        code,
-        description: r.Description,
-        material: r.Material,
-        image: r.Image,
-        family: r.sub_sub_sub_category || r.Description,
-        pack: r.Pack,
-        sizes: [],
-        standards: standardsForSku(r),
-      });
-    }
-    const fam = byCode.get(code);
-    if (r.Size && !fam.sizes.includes(r.Size)) fam.sizes.push(r.Size);
-    if (r.Pack) fam.pack = r.Pack;
-    if (r.Image && !fam.image) fam.image = r.Image;
-  }
-  for (const fam of byCode.values()) fam.sizes.sort(sizeSort);
-  return [...byCode.values()].sort(
-    (a, b) => a.family.localeCompare(b.family) || a.code.localeCompare(b.code)
-  );
+function displayPrice(raw) {
+  const s = String(raw ?? '')
+    .replace(/\$/g, '')
+    .replace(/,/g, '')
+    .trim();
+  if (s === '') return null;
+  const n = parseFloat(s);
+  if (!Number.isFinite(n) || n === 0) return null;
+  return n;
+}
+
+function fmtPrice(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v) || v === 0) return '';
+  return `$${v.toFixed(2)}`;
 }
 
 function sizeValue(s) {
@@ -176,555 +173,479 @@ function sizeSort(a, b) {
   return String(a).localeCompare(String(b));
 }
 
-function sizeRange(families) {
-  const all = [...new Set(families.flatMap((f) => f.sizes))];
-  all.sort(sizeSort);
-  if (!all.length) return '—';
-  if (all.length === 1) return all[0];
-  return `${all[0]} – ${all[all.length - 1]}`;
+function priceUnitFor(row) {
+  const desc = (row.Description || '').toLowerCase();
+  if (/\b\d+\s*ft\s+(stick|coil)\b/.test(desc) || /\b(100 ft coil|20 ft stick)\b/.test(desc)) {
+    return '/ea';
+  }
+  const sub = (row.sub_category || '').toLowerCase();
+  const ssc = (row.sub_sub_category || '').toLowerCase();
+  if (sub === 'pipes' && !ssc.includes('pex')) return '/ft';
+  return '/ea';
+}
+
+function plumbingTitle(row) {
+  const style = (row.sub_sub_sub_category || row.Description || '').trim();
+  const code = row.Code || '';
+  if (/COPPER-K/i.test(code)) return `${style} · Type K`;
+  if (/COPPER-L/i.test(code)) return `${style} · Type L`;
+  return style;
+}
+
+function stripColorSuffix(code, color) {
+  if (!code || !color) return code;
+  const escColor = color.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return code.replace(new RegExp(`[- ]${escColor}$`, 'i'), '');
+}
+
+function plumbingGroupKey(row) {
+  const code = (row.Code || 'UNKNOWN').trim();
+  const color = (row.Color || '').trim();
+  const stripped = stripColorSuffix(code, color);
+  if (color && stripped !== code) return `c:${stripped}`;
+  return `k:${code}`;
+}
+
+function unique(list) {
+  return [...new Set(list.filter(Boolean))];
+}
+
+function buildPlumbingBlocks(rows) {
+  const byKey = new Map();
+  for (const r of rows) {
+    const key = plumbingGroupKey(r);
+    const color = (r.Color || '').trim();
+    const code = stripColorSuffix((r.Code || 'UNKNOWN').trim(), color);
+    if (!byKey.has(key)) {
+      byKey.set(key, {
+        kind: 'fitting',
+        title: plumbingTitle(r),
+        code,
+        description: r.Description,
+        pack: r.Pack,
+        unit: priceUnitFor(r),
+        image: firstRealImage([r]),
+        standards: standardsForSku(r),
+        sizes: [],
+      });
+    }
+    const b = byKey.get(key);
+    const size = (r.Size || '').trim();
+    if (!b.image) b.image = firstRealImage([r]);
+    if (r.Pack) b.pack = r.Pack;
+    const dup = b.sizes.some((s) => s.size === size && s.color === color);
+    if ((size || color) && !dup) {
+      b.sizes.push({ size, color, price: displayPrice(r.Price), unit: b.unit });
+    }
+  }
+  const blocks = [];
+  for (const b of byKey.values()) {
+    b.sizes.sort((a, c) => sizeSort(a.size, c.size) || String(a.color).localeCompare(c.color));
+    const colors = unique(b.sizes.map((s) => s.color));
+    const sizes = unique(b.sizes.map((s) => s.size));
+    let sizeOnly = sizes.length > 0;
+    const priceBySize = new Map();
+    for (const sz of sizes) {
+      const prices = unique(b.sizes.filter((s) => s.size === sz).map((s) => String(s.price ?? '')));
+      if (prices.length !== 1) sizeOnly = false;
+      priceBySize.set(sz, b.sizes.find((s) => s.size === sz)?.price ?? null);
+    }
+    if (colors.length > 1 && sizeOnly) {
+      blocks.push({
+        kind: 'size-table',
+        title: b.title,
+        code: b.code,
+        description: b.description,
+        pack: b.pack,
+        unit: b.unit,
+        image: b.image,
+        continuation: false,
+        colors,
+        sizes: sizes.map((size) => ({ size, price: priceBySize.get(size), unit: b.unit })),
+      });
+      continue;
+    }
+    b.showColor = colors.length > 1;
+    if (!b.showColor) b.sizes = b.sizes.map((s) => ({ ...s, color: '' }));
+    blocks.push(b);
+  }
+  blocks.sort((a, b) => a.title.localeCompare(b.title) || a.code.localeCompare(b.code));
+  return blocks;
+}
+
+function buildStyleBlocks(rows) {
+  const byStyle = new Map();
+  for (const r of rows) {
+    const key = (r.sub_sub_sub_category || r.Code || r.Description || 'Item').trim();
+    if (!byStyle.has(key)) byStyle.set(key, []);
+    byStyle.get(key).push(r);
+  }
+  const blocks = [];
+  for (const [title, group] of [...byStyle.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const unit = priceUnitFor(group[0]);
+    const variants = [];
+    for (const r of group) {
+      const size = (r.Size || '').trim();
+      const color = (r.Color || '').trim();
+      if (!size && !color) continue;
+      if (variants.some((v) => v.size === size && v.color === color)) continue;
+      variants.push({
+        size,
+        color,
+        price: displayPrice(r.Price),
+        unit,
+        image: r.Image,
+      });
+    }
+    variants.sort((a, b) => sizeSort(a.size, b.size) || String(a.color).localeCompare(b.color));
+    const sizes = unique(variants.map((v) => v.size));
+    const colors = unique(variants.map((v) => v.color));
+    const priceBySize = new Map();
+    let sizeOnly = sizes.length > 0;
+    for (const sz of sizes) {
+      const prices = unique(variants.filter((v) => v.size === sz).map((v) => String(v.price ?? '')));
+      if (prices.length !== 1) sizeOnly = false;
+      priceBySize.set(sz, variants.find((v) => v.size === sz)?.price ?? null);
+    }
+    const pricesAll = unique(variants.map((v) => String(v.price ?? '')));
+    const onePrice = pricesAll.length === 1;
+    const pack = group.find((r) => r.Pack)?.Pack || '';
+    const code = group[0].Code || '';
+    const description = group[0].Description || '';
+    const image = firstRealImage(group);
+    const base = { title, code, description, pack, unit, image, continuation: false };
+
+    if (variants.length && sizes.length <= 1 && colors.length <= 1) {
+      blocks.push({
+        ...base,
+        kind: 'size-table',
+        colors: [],
+        sizes: [{ size: sizes[0] || colors[0] || variants[0].size, price: variants[0].price, unit }],
+      });
+      continue;
+    }
+
+    if (colors.length >= 2 && sizes.length <= 1) {
+      const swatches = colors.map((color) => {
+        const v = variants.find((x) => x.color === color);
+        return {
+          color,
+          image: firstRealImage(group.filter((r) => (r.Color || '').trim() === color)),
+          price: onePrice ? null : v?.price ?? null,
+          unit,
+        };
+      });
+      blocks.push({
+        ...base,
+        kind: 'color-grid',
+        size: sizes[0] || '',
+        price: onePrice ? variants[0]?.price ?? null : null,
+        swatches,
+      });
+      continue;
+    }
+
+    if (sizeOnly && sizes.length >= 1 && colors.length >= 1) {
+      blocks.push({
+        ...base,
+        kind: 'size-table',
+        colors,
+        sizes: sizes.map((size) => ({ size, price: priceBySize.get(size), unit })),
+      });
+      continue;
+    }
+
+    blocks.push({
+      ...base,
+      kind: 'matrix',
+      rows: variants,
+    });
+  }
+  return blocks;
+}
+
+function fittingCols(sizes, showColor) {
+  if (showColor) return 3;
+  const long = (sizes || []).some((s) => String(s.size || s).length > 8 || /x/i.test(String(s.size || s)));
+  return long ? 3 : 5;
+}
+
+function fittingHeight(b) {
+  const n = b.sizes.length;
+  const perRow = fittingCols(b.sizes, b.showColor);
+  const rows = Math.max(1, Math.ceil(n / perRow));
+  return 0.1 + Math.max(0.88, 0.38 + 0.22 * rows);
+}
+
+function sizeTableHeight(nSizes, continuation) {
+  const head = continuation ? 0.38 : 1.28;
+  return head + 0.22 * Math.ceil(Math.max(1, nSizes) / SIZE_COLS);
+}
+
+function colorGridHeight(n, continuation) {
+  const head = continuation ? 0.38 : 0.52;
+  return head + 1.18 * Math.ceil(Math.max(1, n) / 6);
+}
+
+function matrixHeight(n, continuation) {
+  const head = continuation ? 0.38 : 1.18;
+  return head + 0.24 * Math.max(1, n);
+}
+
+function blockHeight(b) {
+  if (b.kind === 'fitting') return fittingHeight(b);
+  if (b.kind === 'size-table') return sizeTableHeight(b.sizes.length, b.continuation);
+  if (b.kind === 'color-grid') return colorGridHeight(b.swatches.length, b.continuation);
+  if (b.kind === 'matrix') return matrixHeight(b.rows.length, b.continuation);
+  return 1.2;
+}
+
+function splitBlock(b, remaining) {
+  if (blockHeight(b) <= remaining) return { take: b, rest: null };
+  const minKeep = 1.35;
+  if (remaining < minKeep) return { take: null, rest: b };
+
+  if (b.kind === 'fitting') {
+    const perRow = fittingCols(b.sizes, b.showColor);
+    const rowH = 0.22;
+    const head = 0.48;
+    const availRows = Math.max(1, Math.floor((remaining - head) / rowH));
+    const avail = Math.min(b.sizes.length - 1, availRows * perRow);
+    if (avail < 1) return { take: null, rest: b };
+    const take = { ...b, sizes: b.sizes.slice(0, avail) };
+    if (blockHeight(take) > remaining) return { take: null, rest: b };
+    return {
+      take,
+      rest: { ...b, sizes: b.sizes.slice(avail), continuation: true },
+    };
+  }
+
+  if (b.kind === 'size-table') {
+    const head = b.continuation ? 0.38 : 1.28;
+    const rowsAvail = Math.max(1, Math.floor((remaining - head) / 0.22));
+    const avail = Math.min(b.sizes.length - 1, rowsAvail * SIZE_COLS);
+    if (avail < 1) return { take: null, rest: b };
+    const take = { ...b, sizes: b.sizes.slice(0, avail) };
+    if (blockHeight(take) > remaining) return { take: null, rest: b };
+    return {
+      take,
+      rest: { ...b, sizes: b.sizes.slice(avail), continuation: true, image: null },
+    };
+  }
+
+  if (b.kind === 'color-grid') {
+    const head = b.continuation ? 0.38 : 0.52;
+    const rowsAvail = Math.max(1, Math.floor((remaining - head) / 1.18));
+    const avail = Math.min(b.swatches.length - 1, rowsAvail * 6);
+    if (avail < 1) return { take: null, rest: b };
+    const take = { ...b, swatches: b.swatches.slice(0, avail) };
+    if (blockHeight(take) > remaining) return { take: null, rest: b };
+    return {
+      take,
+      rest: { ...b, swatches: b.swatches.slice(avail), continuation: true, image: null },
+    };
+  }
+
+  if (b.kind === 'matrix') {
+    const head = b.continuation ? 0.38 : 1.18;
+    const avail = Math.min(b.rows.length - 1, Math.max(1, Math.floor((remaining - head) / 0.24)));
+    if (avail < 1) return { take: null, rest: b };
+    const take = { ...b, rows: b.rows.slice(0, avail) };
+    if (blockHeight(take) > remaining) return { take: null, rest: b };
+    return {
+      take,
+      rest: { ...b, rows: b.rows.slice(avail), continuation: true, image: null },
+    };
+  }
+
+  return { take: null, rest: b };
+}
+
+function packBlocks(blocks) {
+  const pages = [];
+  let bucket = [];
+  let used = 0;
+  let limit = BODY_FIRST;
+  const queue = [...blocks];
+
+  const flush = () => {
+    if (bucket.length) pages.push(bucket);
+    bucket = [];
+    used = 0;
+    limit = BODY_CONT;
+  };
+
+  while (queue.length) {
+    const b = queue.shift();
+    const h = blockHeight(b);
+    if (!bucket.length && h <= limit) {
+      bucket.push(b);
+      used += h;
+      continue;
+    }
+    if (bucket.length && used + h <= limit - 0.06) {
+      bucket.push(b);
+      used += h;
+      continue;
+    }
+    const room = bucket.length ? limit - used : limit;
+    const { take, rest } = splitBlock(b, room);
+    if (take) {
+      bucket.push(take);
+      flush();
+      if (rest) queue.unshift(rest);
+    } else if (bucket.length) {
+      flush();
+      queue.unshift(b);
+    } else {
+      bucket.push(b);
+      flush();
+    }
+  }
+  if (bucket.length) pages.push(bucket);
+  return pages.length ? pages : [[]];
 }
 
 const SHARED_CSS = `
   :root {
     --ink: #0C1117;
     --navy: #1A3350;
-    --navy2: #243F5C;
     --gold: #C8981F;
     --gold2: #B8871A;
     --gold-soft: #E8C56A;
-    --cream: #FFFFFF;
-    --paper: #FFFFFF;
     --muted: #5C6B7A;
     --line: #D8DEE6;
-    --line2: #E8ECF0;
-    --soft: #EEF2F6;
+    --soft: #F4F6F8;
+    --paper: #FFFFFF;
   }
   @page { size: letter; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'DM Sans', sans-serif;
-    background: #ccc;
+    background: #cfcfcf;
+    color: var(--ink);
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    color: var(--ink);
   }
-  .page {
+  .sheet, .cover {
     width: 8.5in;
     height: 11in;
-    position: relative;
-    overflow: hidden;
+    background: var(--paper);
     page-break-after: always;
-    background: var(--cream);
-    display: grid;
-    grid-template-columns: 2.2in 1fr;
-    grid-template-rows: 1fr 0.42in;
-  }
-  .page:last-child { page-break-after: auto; }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    grid-row: 1 / 2;
-    background: var(--navy);
-    color: #fff;
-    padding: 0.28in 0.2in 0.22in;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-  .sidebar::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(200,152,31,.08) 0%, transparent 28%);
-    pointer-events: none;
-  }
-  .sidebar > * { position: relative; z-index: 1; }
-  .brand-block { margin-bottom: 0.16in; }
-  .brand-logo {
-    height: 0.48in;
-    width: auto;
-    display: block;
-    margin-bottom: 8px;
-  }
-  .brand-name {
-    font-family: 'Oswald', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    color: var(--gold-soft);
-    line-height: 1.1;
-  }
-  .brand-script {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-style: italic;
-    font-size: 12px;
-    color: var(--gold-soft);
-    margin-top: 2px;
-  }
-  .collection {
-    font-family: 'DM Mono', monospace;
-    font-size: 7px;
-    letter-spacing: 1.8px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.55);
-    margin: 0.12in 0 0.1in;
-  }
-  .hero-wrap {
-    flex: 1;
-    min-height: 0;
-    border: 1px solid rgba(200,152,31,.35);
-    background: #0f2438;
     overflow: hidden;
     position: relative;
-    margin-bottom: 0.12in;
   }
-  .hero-wrap img {
+  .sheet:last-child, .cover:last-child { page-break-after: auto; }
+
+  .hdr {
+    height: 0.46in;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.28in;
+    border-bottom: 3px solid var(--navy);
+    flex-shrink: 0;
+  }
+  .hdr-brand { display: flex; align-items: center; gap: 8px; }
+  .hdr-brand img { height: 0.32in; width: auto; }
+  .hdr-brand span {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+  .hdr h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    line-height: 1;
+  }
+  .hdr h1 em { color: var(--gold2); font-style: normal; font-size: 14px; margin-left: 6px; }
+  .hdr-meta {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 7.5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .hdr-meta strong { color: var(--gold2); display: block; font-size: 8px; margin-top: 2px; }
+
+  .hero-band {
+    height: 1.38in;
+    margin: 0.12in 0.28in 0;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .hero-band img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
     display: block;
   }
-  .hero-cap {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    background: linear-gradient(transparent, rgba(12,17,23,.85));
-    padding: 18px 8px 7px;
-    font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
-    letter-spacing: 1.4px;
-    color: var(--gold-soft);
-    text-align: center;
-  }
-  .feat {
-    border: 1px solid rgba(200,152,31,.45);
-    padding: 7px 8px;
-    margin-bottom: 6px;
-  }
-  .feat:last-child { margin-bottom: 0; }
-  .feat-t {
-    font-family: 'Oswald', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--gold-soft);
-    line-height: 1.15;
-  }
-  .feat-s {
-    font-size: 7.5px;
-    color: rgba(255,255,255,.65);
-    margin-top: 2px;
-    line-height: 1.3;
-  }
-
-  /* ── MAIN ── */
-  .main {
-    grid-row: 1 / 2;
-    padding: 0.28in 0.32in 0.16in 0.3in;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    background: var(--cream);
-  }
-  .main-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 2px solid var(--ink);
-    padding-bottom: 8px;
-    margin-bottom: 10px;
-  }
-  .main-title {
-    font-family: 'Oswald', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--ink);
-    line-height: 1;
-    letter-spacing: 0.3px;
-  }
-  .main-meta {
-    font-family: 'DM Mono', monospace;
-    font-size: 7.5px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-align: right;
-    line-height: 1.5;
-  }
-  .main-meta strong { color: var(--gold2); }
-
-  .stats {
+  .hero-band.contain img { object-fit: contain; }
+  .intro {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
-    margin-bottom: 10px;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 8px;
-  }
-  .stat {
-    padding: 0 10px;
-    border-right: 1px solid var(--line);
-  }
-  .stat:first-child { padding-left: 0; }
-  .stat:last-child { border-right: none; padding-right: 0; }
-  .stat-v {
-    font-family: 'Oswald', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--ink);
-    line-height: 1.1;
-  }
-  .stat-v .gold { color: var(--gold2); }
-  .stat-l {
-    font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-top: 3px;
-  }
-
-  .mid {
-    display: grid;
-    grid-template-columns: 1.05fr 1fr;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-  .sec-lbl {
-    font-family: 'DM Mono', monospace;
-    font-size: 7px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold2);
-    margin-bottom: 5px;
-  }
-  .construction {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .construction td {
-    font-size: 8px;
-    padding: 4px 0;
-    border-bottom: 1px solid var(--line2);
-    vertical-align: top;
-    line-height: 1.3;
-  }
-  .construction td:first-child {
-    width: 1.05in;
-    font-family: 'Oswald', sans-serif;
-    font-size: 8px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    color: var(--navy);
-    padding-right: 6px;
-  }
-  .construction td:last-child { color: var(--muted); }
-  .apps {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 7px;
-  }
-  .chip {
-    font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--navy);
-    background: var(--soft);
-    border: 1px solid var(--line);
-    padding: 3px 6px;
-  }
-
-  .std-box {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    padding: 8px 9px;
-  }
-  .std-box h4 {
-    font-family: 'Oswald', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--ink);
-    margin-bottom: 6px;
-  }
-  .std-row {
-    display: flex;
-    gap: 7px;
-    margin-bottom: 5px;
-    font-size: 7.5px;
-    line-height: 1.3;
-    color: var(--muted);
-  }
-  .std-row code {
-    font-family: 'DM Mono', monospace;
-    font-size: 7px;
-    color: var(--gold2);
-    white-space: nowrap;
-    min-width: 1.15in;
-  }
-  .note {
-    margin-top: 6px;
-    padding-top: 5px;
-    border-top: 1px solid var(--line2);
-    font-size: 7px;
-    color: var(--muted);
-    line-height: 1.35;
-  }
-
-  .prod-lbl {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin: 2px 0 5px;
-  }
-  .prod-lbl .sec-lbl { margin-bottom: 0; }
-  .prod-lbl span {
-    font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
-    letter-spacing: 1px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  table.prod {
-    width: 100%;
-    border-collapse: collapse;
-    flex: 1;
-  }
-  table.prod th {
-    font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--gold2);
-    text-align: left;
-    padding: 3px 4px 4px;
-    border-bottom: 1.5px solid var(--ink);
-    background: transparent;
-  }
-  table.prod td {
-    padding: 3.5px 4px;
-    border-bottom: 1px solid var(--line2);
-    font-size: 7.5px;
-    color: var(--ink);
-    vertical-align: middle;
-    line-height: 1.25;
-  }
-  table.prod tr:nth-child(even) td { background: rgba(26,51,80,.03); }
-  .thumb {
-    width: 0.28in;
-    height: 0.28in;
-    object-fit: contain;
-  }
-  .sku {
-    font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
-    color: var(--gold2);
-  }
-  .pname {
-    font-family: 'Oswald', sans-serif;
-    font-size: 8px;
-    letter-spacing: 0.2px;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-  .sizes { color: var(--muted); font-size: 7px; }
-  .pack {
-    font-family: 'DM Mono', monospace;
-    font-size: 7px;
-    text-align: center;
-    color: var(--navy);
-  }
-  .stds { color: var(--muted); font-size: 6.5px; }
-
-  /* dense grid for many SKUs */
-  .prod-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px 8px;
-    flex: 1 1 0;
-    align-content: start;
-    min-height: 0;
-  }
-  .prod-grid.cols-3 {
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 2px 6px;
-  }
-  .prod-grid.ultra .pg-item {
-    padding: 2px 3px;
-    gap: 3px;
-    grid-template-columns: 0.22in 1fr;
-    align-items: start;
-  }
-  .prod-grid.ultra .thumb {
-    width: 0.22in;
-    height: 0.22in;
-  }
-  .prod-grid.ultra .pname { font-size: 7px; line-height: 1.1; }
-  .prod-grid.ultra .sku { font-size: 5.5px; }
-  .pg-item {
-    display: grid;
-    grid-template-columns: 0.28in 1fr;
-    gap: 5px;
-    align-items: start;
-    padding: 3px 4px;
-    border-bottom: 1px solid var(--line2);
-  }
-  .pg-item .pname { font-size: 7.5px; }
-  .pg-item .sku { font-size: 6px; }
-  .pg-item .sizes { font-size: 6.5px; }
-  .main.compact-mid .mid { margin-bottom: 4px; }
-  .main.compact-mid .construction td { padding: 2px 0; font-size: 7px; }
-  .main.compact-mid .std-box { padding: 6px 7px; }
-  .main.compact-mid .std-row { margin-bottom: 3px; font-size: 7px; }
-  .main.compact-mid .apps { margin-top: 4px; gap: 3px; }
-  .main.compact-mid .chip { font-size: 5.5px; padding: 2px 4px; }
-  .main.compact-mid .stats { margin-bottom: 6px; padding-bottom: 5px; }
-  .main.compact-mid .stat-v { font-size: 14px; }
-  .main.compact-mid .order-bar { padding: 6px 8px; margin-top: 4px; }
-  .main.compact-mid .order-bar .ob-t { font-size: 11px; }
-  .main.compact-mid .prod-lbl { margin: 0 0 3px; }
-
-  /* Large fill cards for sparse categories */
-  .fill-grid {
-    display: grid;
-    gap: 8px;
-    flex: 1 1 0;
-    align-content: stretch;
-    min-height: 0;
-    grid-auto-rows: 1fr;
-  }
-  .fill-grid.cols-1 { grid-template-columns: 1fr; }
-  .fill-grid.cols-2 { grid-template-columns: 1fr 1fr; }
-  .fill-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-  .fill-card {
-    background: var(--soft);
-    border: 1px solid var(--line);
-    padding: 10px 11px;
-    display: grid;
-    grid-template-columns: 0.85in 1fr;
+    grid-template-columns: 2.35in 1fr;
+    height: 1.52in;
+    margin: 0.1in 0.28in 0.06in;
     gap: 10px;
-    align-items: center;
-    min-height: 0;
-    height: 100%;
+    flex-shrink: 0;
   }
-  .fill-card img {
-    width: 0.85in;
-    height: 0.85in;
-    object-fit: contain;
+  .intro.no-pic { grid-template-columns: 1fr; height: auto; min-height: 0.7in; }
+  .intro-pic {
     background: #fff;
     border: 1px solid var(--line);
+    overflow: hidden;
   }
-  .fill-grid.cols-1 .fill-card {
-    grid-template-columns: 1.35in 1fr;
-    padding: 14px 16px;
+  .intro-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
   }
-  .fill-grid.cols-1 .fill-card img {
-    width: 1.35in;
-    height: 1.35in;
+  .intro-pic.contain img { object-fit: contain; }
+  .intro .spec-band { margin: 0; height: 100%; }
+  .spec-band {
+    margin: 0.1in 0.28in 0.08in;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    background: var(--soft);
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 10px;
+    flex-shrink: 0;
   }
-  .fill-card .pname { font-size: 12px; margin-bottom: 3px; }
-  .fill-card .sku { font-size: 8px; margin-bottom: 5px; }
-  .fill-card .sizes-label {
+  .spec-band p { font-size: 9px; line-height: 1.35; color: var(--navy); }
+  .spec-band .note { font-size: 8px; color: var(--muted); margin-top: 4px; }
+  .spec-stds { display: flex; flex-wrap: wrap; gap: 4px; align-content: start; }
+  .badge {
     font-family: 'DM Mono', monospace;
     font-size: 7px;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
+    border: 1px solid rgba(200,152,31,.55);
     color: var(--gold2);
-    margin: 4px 0 6px;
-  }
-  .fill-card .stds { margin-top: 8px; font-size: 7.5px; }
-  .fill-body { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-  .size-chips {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(0.72in, 1fr));
-    gap: 8px;
-    margin-top: 2px;
-    flex: 1;
-    align-content: start;
-  }
-  .size-chips.compact {
-    grid-template-columns: repeat(auto-fill, minmax(0.40in, 1fr));
-    gap: 3px;
-    margin-top: 2px;
-  }
-  .size-chip {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0.42in;
-    padding: 6px 4px;
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0;
-    line-height: 1.15;
-    text-align: center;
-    color: var(--navy);
+    padding: 3px 6px;
     background: #fff;
-    border: 1.5px solid var(--navy);
-    box-sizing: border-box;
-  }
-  .size-chips.compact .size-chip {
-    min-height: 0.22in;
-    font-size: 6px;
-    padding: 2px 1px;
-    border-width: 1px;
-  }
-  .prod-grid.ultra .size-chips.compact {
-    grid-template-columns: repeat(auto-fill, minmax(0.34in, 1fr));
-    gap: 2px;
-  }
-  .prod-grid.ultra .size-chips.compact .size-chip {
-    min-height: 0.18in;
-    font-size: 5.5px;
-    padding: 1px;
-  }
-  .pg-item .size-chips {
-    margin-top: 2px;
-  }
-  .order-bar {
-    margin-top: 8px;
-    flex-shrink: 0;
-    background: var(--navy);
-    color: #fff;
-    padding: 8px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .order-bar .ob-t {
-    font-family: 'Oswald', sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .order-bar .ob-s {
-    font-size: 8px;
-    color: rgba(255,255,255,.7);
-    margin-top: 2px;
-  }
-  .order-bar .ob-c {
-    text-align: right;
-    font-family: 'Oswald', sans-serif;
-    font-size: 12px;
-    color: var(--gold-soft);
-    line-height: 1.35;
-  }
-  .order-bar .ob-c span {
-    display: block;
-    font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,.55);
-    text-transform: uppercase;
   }
 
-  /* ── FOOTER ── */
-  .footer {
-    grid-column: 1 / -1;
+  .body {
+    flex: 1;
+    min-height: 0;
+    padding: 0.08in 0.28in 0.08in;
+    overflow: hidden;
+  }
+  .sheet { display: flex; flex-direction: column; }
+
+  .ftr {
+    height: 0.36in;
     background: var(--navy);
     color: #fff;
     display: flex;
@@ -733,88 +654,304 @@ const SHARED_CSS = `
     padding: 0 0.28in;
     font-family: 'DM Mono', monospace;
     font-size: 7px;
-    letter-spacing: 1.2px;
+    letter-spacing: 1.1px;
     text-transform: uppercase;
+    flex-shrink: 0;
   }
-  .footer .mid-badges {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  .badge {
-    border: 1px solid rgba(200,152,31,.5);
-    color: var(--gold-soft);
-    padding: 3px 7px;
-    font-size: 6.5px;
-    letter-spacing: 1px;
-  }
-  .footer .right { color: rgba(255,255,255,.7); }
-  .footer .right strong { color: var(--gold-soft); font-weight: 500; }
+  .ftr strong { color: var(--gold-soft); font-weight: 500; }
 
-  /* ── INDEX PAGE ── */
-  .index-page {
-    width: 8.5in;
-    height: 11in;
-    background: var(--cream);
-    page-break-after: always;
+  .fit {
     display: grid;
-    grid-template-columns: 2.2in 1fr;
-    grid-template-rows: 1fr 0.42in;
+    grid-template-columns: 0.88in 1fr;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .fit .ph, .ph {
+    width: 0.88in;
+    height: 0.88in;
+    background: #fff;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
   }
-  .index-main {
-    padding: 0.28in 0.32in 0.18in 0.3in;
+  .ph img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+  .fit-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+  .fit-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 7.5px;
+    color: var(--muted);
+    margin: 2px 0 6px;
+    letter-spacing: 0.4px;
+  }
+  .size-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 16px;
+  }
+  .size-item {
+    font-size: 10.5px;
+    line-height: 1.25;
+    min-width: 1.2in;
+  }
+  .size-item .sz { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--navy); }
+  .size-item .pr { font-weight: 600; color: var(--gold2); margin-left: 6px; white-space: nowrap; }
+  .size-item .u { font-size: 8px; color: var(--muted); font-weight: 400; margin-left: 2px; }
+
+  .style {
+    padding: 8px 0 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .style-top {
+    display: grid;
+    grid-template-columns: 1.55in 1fr;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .style-top.no-photo { grid-template-columns: 1fr; }
+  .style-photo {
+    width: 1.55in;
+    height: 1.05in;
+    background: #fff;
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .style-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+  .style-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+  .style-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 7.5px;
+    color: var(--muted);
+    margin: 3px 0 6px;
+  }
+  .colors-line { font-size: 10px; line-height: 1.35; color: var(--navy); }
+  .colors-line strong { font-family: 'Oswald', sans-serif; font-size: 9px; letter-spacing: 0.6px; color: var(--gold2); margin-right: 6px; }
+  .meta-line { font-size: 9px; color: var(--muted); margin-top: 4px; }
+
+  .sz-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+  }
+  .sz-table td {
+    width: 25%;
+    padding: 3px 6px 3px 0;
+    font-size: 10px;
+    line-height: 1.2;
+    vertical-align: top;
+  }
+  .sz-table .s { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--navy); }
+  .sz-table .p { color: var(--gold2); font-weight: 600; margin-left: 8px; white-space: nowrap; }
+  .sz-table .p .u { font-size: 8px; color: var(--muted); font-weight: 400; margin-left: 3px; }
+
+  .mx { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .mx th {
+    text-align: left;
+    font-family: 'Oswald', sans-serif;
+    font-size: 8px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    padding: 3px 8px 3px 0;
+  }
+  .mx td {
+    font-size: 10px;
+    padding: 3px 8px 3px 0;
+    border-bottom: 1px solid var(--soft);
+  }
+  .mx .p { color: var(--gold2); font-weight: 600; white-space: nowrap; }
+
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px 8px;
+    margin-top: 6px;
+  }
+  .swatch { min-width: 0; }
+  .swatch .ph {
+    width: 100%;
+    height: 0.85in;
+    margin-bottom: 3px;
+  }
+  .swatch .ph img { object-fit: cover; }
+  .swatch .nm {
+    font-size: 8px;
+    line-height: 1.2;
+    color: var(--navy);
+    text-align: center;
+  }
+  .swatch .sp { font-size: 8px; color: var(--gold2); font-weight: 600; text-align: center; margin-top: 1px; }
+
+  /* covers */
+  .cover { display: grid; grid-template-columns: 2.3in 1fr; grid-template-rows: 1fr 0.36in; }
+  .cover-side {
+    grid-row: 1;
+    background: var(--navy);
+    padding: 0.18in 0.14in;
     display: flex;
     flex-direction: column;
-  }
-  .cat-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 8px;
+  }
+  .cover .ftr { grid-column: 1 / -1; }
+  .cover-photos { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+  .cover-photos img, .cover-photos .slot {
     flex: 1;
-    align-content: start;
-  }
-  .cat-card {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--gold);
-    padding: 8px 9px;
-    display: grid;
-    grid-template-columns: 0.72in 1fr;
-    gap: 8px;
-    align-items: center;
-  }
-  .cat-card img {
-    width: 0.72in;
-    height: 0.72in;
+    min-height: 0;
+    width: 100%;
     object-fit: cover;
-    border: 1px solid var(--line);
+    object-position: center;
+    border: 1px solid rgba(200,152,31,.35);
+    background: #0f2438;
   }
-  .cat-card h3 {
+  .cover-feat {
+    border: 1px solid rgba(200,152,31,.45);
+    padding: 7px 8px;
+  }
+  .cover-feat .t { font-family: 'Oswald', sans-serif; font-size: 10px; color: var(--gold-soft); letter-spacing: 0.6px; text-transform: uppercase; }
+  .cover-feat .s { font-size: 7.5px; color: rgba(255,255,255,.65); margin-top: 2px; }
+  .cover-main { padding: 0.26in 0.26in 0.12in; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .cover-brand { text-align: center; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 8px; }
+  .cover-brand .nm {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+  }
+  .cover-brand .nm span { color: var(--gold2); }
+  .cover-brand img { height: 0.62in; width: auto; margin: 6px 0 4px; }
+  .cover-brand .sub {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--navy);
+  }
+  .cover-brand .meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 7.5px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .banner {
+    font-size: 8.5px;
+    line-height: 1.35;
+    color: var(--navy);
+    border: 1px solid rgba(200,152,31,.35);
+    border-left: 3px solid var(--gold);
+    background: linear-gradient(90deg, rgba(200,152,31,.12), rgba(26,51,80,.05));
+    padding: 6px 9px;
+    margin-bottom: 8px;
+  }
+  .banner strong {
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--gold2);
+    font-size: 9px;
+    margin-right: 5px;
+  }
+  .tiles {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    gap: 7px;
+    align-content: stretch;
+  }
+  .tiles.cols-1 { grid-template-columns: 1fr; }
+  .tiles.cols-2 { grid-template-columns: 1fr 1fr; }
+  .tiles.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .tile {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--gold);
+    background: var(--soft);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    text-decoration: none;
+    color: inherit;
+  }
+  .tile .pic {
+    flex: 1;
+    min-height: 0.62in;
+    height: auto;
+    background: #fff;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+  .tiles.cols-3 .tile .pic { min-height: 0.62in; }
+  .tiles.cols-1 .tile {
+    flex-direction: row;
+    gap: 12px;
+    padding: 8px;
+    align-items: stretch;
+  }
+  .tiles.cols-1 .tile .pic {
+    width: 2.15in;
+    height: auto;
+    min-height: 1.35in;
+    margin-bottom: 0;
+    flex: 0 0 2.15in;
+  }
+  .tile .pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+  .tiles.cols-1 .tile .copy { display: flex; flex-direction: column; justify-content: center; }
+  .tile h3 {
     font-family: 'Oswald', sans-serif;
     font-size: 12px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: var(--ink);
-    line-height: 1.1;
-    margin-bottom: 3px;
+    line-height: 1.15;
   }
-  .cat-card p {
-    font-size: 7.5px;
-    color: var(--muted);
-    line-height: 1.35;
-  }
-  .cat-card .meta {
+  .tiles.cols-1 .tile h3 { font-size: 18px; }
+  .tile .tg { font-size: 8px; color: var(--muted); margin-top: 2px; line-height: 1.25; }
+  .tile .ct {
     font-family: 'DM Mono', monospace;
-    font-size: 6.5px;
-    letter-spacing: 0.8px;
+    font-size: 7.5px;
     color: var(--gold2);
-    margin-top: 4px;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
+    margin-top: auto;
+    padding-top: 4px;
   }
 `;
 
-function wrapHtml(title, body, extraClass = '') {
+function wrapHtml(title, body) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -822,324 +959,403 @@ function wrapHtml(title, body, extraClass = '') {
 <title>${esc(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet"/>
 <style>${SHARED_CSS}</style>
 </head>
-<body class="${extraClass}">
+<body>
 ${body}
 </body>
 </html>`;
 }
 
-function renderSidebar(meta) {
+function renderHeader(meta, pageLabel, continued) {
   const logo = logoUrl();
-  const hero = heroImgUrl(meta.hero);
-  const feats = (meta.highlights || [])
-    .slice(0, 3)
-    .map(
-      (h) => `<div class="feat"><div class="feat-t">${esc(h.title)}</div><div class="feat-s">${esc(h.sub)}</div></div>`
-    )
-    .join('');
-  return `
-  <aside class="sidebar">
-    <div class="brand-block">
-      ${logo ? `<img class="brand-logo" src="${logo}" alt="All Pro"/>` : ''}
-      <div class="brand-name">${esc(COMPANY.short)}</div>
-      <div class="brand-script">Building Supplies</div>
-    </div>
-    <div class="collection">${esc(meta.collection || meta.title)}</div>
-    <div class="hero-wrap">
-      ${hero ? `<img src="${hero}" alt="${esc(meta.title)}"/>` : ''}
-      <div class="hero-cap">${esc(meta.heroCaption || meta.material)}</div>
-    </div>
-    ${feats}
-  </aside>`;
+  return `<div class="hdr">
+    <div class="hdr-brand">${logo ? `<img src="${logo}" alt="All Pro"/>` : ''}<span>${esc(COMPANY.short)}</span></div>
+    <h1>${esc(meta.title)}${continued ? ' <em>Cont.</em>' : ''}</h1>
+    <div class="hdr-meta">Spec Sheet · ${esc(COMPANY.updated)}${pageLabel ? ` · ${esc(pageLabel)}` : ''}<strong>Suggested Wholesale</strong></div>
+  </div>`;
 }
 
-function renderSizeChips(sizes, { compact = false } = {}) {
-  if (!sizes?.length) return '<div class="size-chips"><div class="size-chip">—</div></div>';
-  const chips = sizes
-    .map((s) => `<div class="size-chip">${esc(s)}</div>`)
-    .join('');
-  return `<div class="size-chips${compact ? ' compact' : ''}">${chips}</div>`;
+function renderFooter(meta, pageLabel) {
+  return `<div class="ftr">
+    <div>${esc(meta.title)}${pageLabel ? ` · ${esc(pageLabel)}` : ''}</div>
+    <div>${esc(COMPANY.phone)} · ${esc(COMPANY.email)}</div>
+    <div><strong>${esc(COMPANY.short)}</strong> · ${esc(COMPANY.web)}</div>
+  </div>`;
 }
 
-function renderProductTable(families, mode) {
-  if (mode === 'dense' || mode === 'ultra') {
-    const colsClass = mode === 'ultra' || families.length >= 18 ? ' cols-3 ultra' : '';
-    const items = families
-      .map((f) => {
-        const url = productImgUrl(f.image);
-        return `<div class="pg-item">
-          ${url ? `<img class="thumb" src="${url}" alt=""/>` : '<div></div>'}
-          <div>
-            <div class="pname">${esc(f.family)}</div>
-            <div class="sku">${esc(f.code)}${f.pack ? ` · Pk ${esc(f.pack)}` : ''}</div>
-            ${renderSizeChips(f.sizes, { compact: true })}
-          </div>
-        </div>`;
-      })
-      .join('');
-    return `<div class="prod-grid${colsClass}">${items}</div>`;
-  }
+function renderSizeList(sizes) {
+  return `<div class="size-list">${sizes
+    .map((s) => {
+      const label = [s.size, s.color].filter(Boolean).join(' · ');
+      const pr = fmtPrice(s.price);
+      return `<div class="size-item"><span class="sz">${esc(label)}</span>${pr ? `<span class="pr">${esc(pr)}<span class="u">${esc(s.unit || '')}</span></span>` : ''}</div>`;
+    })
+    .join('')}</div>`;
+}
 
-  if (mode === 'fill') {
-    const cols = families.length <= 2 ? 1 : families.length <= 6 ? 2 : 3;
-    const cards = families
-      .map((f) => {
-        const url = productImgUrl(f.image);
-        return `<div class="fill-card">
-          ${url ? `<img src="${url}" alt=""/>` : '<div></div>'}
-          <div class="fill-body">
-            <div class="pname">${esc(f.family)}</div>
-            <div class="sku">${esc(f.code)} · ${esc(f.description)}</div>
-            <div class="sizes-label">Available sizes · ${f.sizes.length}</div>
-            ${renderSizeChips(f.sizes)}
-            <div class="stds">Pack ${esc(f.pack || '—')} · ${esc((f.standards || []).join(' · ') || '—')}</div>
-          </div>
-        </div>`;
-      })
-      .join('');
-    return `<div class="fill-grid cols-${cols}">${cards}</div>`;
-  }
+function renderFitting(b) {
+  const url = imgUrl(b.image);
+  return `<div class="fit">
+    ${url ? `<div class="ph"><img src="${url}" alt=""/></div>` : '<div></div>'}
+    <div>
+      <div class="fit-name">${esc(b.title)}${b.continuation ? ' · Cont.' : ''}</div>
+      <div class="fit-code">${esc(b.code)}${b.pack ? ` · Pack ${esc(b.pack)}` : ''} · ${esc(b.unit || '/ea')}${b.standards?.length ? ` · ${esc(b.standards.join(' · '))}` : ''}</div>
+      ${renderSizeList(b.sizes)}
+    </div>
+  </div>`;
+}
 
-  const rows = families
-    .map((f) => {
-      const url = productImgUrl(f.image);
-      return `<tr>
-        <td style="width:0.32in">${url ? `<img class="thumb" src="${url}" alt=""/>` : ''}</td>
-        <td style="width:1.15in"><div class="sku">${esc(f.code)}</div><div class="pname">${esc(f.family)}</div></td>
-        <td>${esc(f.description)}</td>
-        <td style="width:2.1in">${renderSizeChips(f.sizes, { compact: true })}</td>
-        <td class="pack" style="width:0.35in">${esc(f.pack || '—')}</td>
-        <td class="stds" style="width:1in">${esc((f.standards || []).join(' · ') || '—')}</td>
-      </tr>`;
+function sizePriceCells(sizes) {
+  const rows = [];
+  for (let i = 0; i < sizes.length; i += SIZE_COLS) rows.push(sizes.slice(i, i + SIZE_COLS));
+  return rows
+    .map((row) => {
+      const cells = row
+        .map((s) => {
+          const pr = fmtPrice(s.price);
+          return `<td><span class="s">${esc(s.size)}</span>${pr ? `<span class="p">${esc(pr)} <span class="u">${esc(s.unit || '')}</span></span>` : ''}</td>`;
+        })
+        .join('');
+      return `<tr>${cells}${'<td></td>'.repeat(Math.max(0, SIZE_COLS - row.length))}</tr>`;
     })
     .join('');
-
-  return `<table class="prod">
-    <thead>
-      <tr>
-        <th></th><th>Code / Type</th><th>Description</th><th>Sizes</th><th>Pack</th><th>Standard</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>`;
 }
 
-function renderCategoryPage(meta, families, rowCount) {
-  const allSizes = [...new Set(families.flatMap((f) => f.sizes))];
-  const construction = (meta.construction || [])
-    .map((c) => `<tr><td>${esc(c.label)}</td><td>${esc(c.value)}</td></tr>`)
-    .join('');
-  const standards = (meta.standards || [])
-    .map((s) => `<div class="std-row"><code>${esc(s.code)}</code><span>${esc(s.name)}</span></div>`)
-    .join('');
-  const apps = (meta.applications || [])
-    .map((a) => `<span class="chip">${esc(a)}</span>`)
-    .join('');
-  const badges = (meta.standards || [])
-    .slice(0, 4)
-    .map((s) => `<span class="badge">${esc(s.code)}</span>`)
-    .join('');
-
-  const mode = families.length >= 18 ? 'ultra' : families.length >= 9 ? 'dense' : 'fill';
-  const productBlock = renderProductTable(families, mode);
-  const sectionLabel = mode === 'fill' ? 'Products & Specs' : 'Product Line';
-  const mainClass = mode === 'ultra' ? 'main compact-mid' : 'main';
-
-  return `
-<section class="page">
-  ${renderSidebar(meta)}
-  <div class="${mainClass}">
-    <div class="main-head">
-      <h1 class="main-title">${esc(meta.title)}</h1>
-      <div class="main-meta">Spec Sheet / Updated ${esc(COMPANY.updated)}<br/><strong>Call for Pricing</strong></div>
-    </div>
-
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-v">${families.length}</div>
-        <div class="stat-l">Product Types</div>
-      </div>
-      <div class="stat">
-        <div class="stat-v">${rowCount}</div>
-        <div class="stat-l">SKU / Size Rows</div>
-      </div>
-      <div class="stat">
-        <div class="stat-v">${esc(sizeRange(families))}</div>
-        <div class="stat-l">Size Range · ${allSizes.length} sizes</div>
-      </div>
-      <div class="stat">
-        <div class="stat-v"><span class="gold">Trade</span></div>
-        <div class="stat-l">Volume Pricing</div>
-      </div>
-    </div>
-
-    <div class="mid">
+function renderSizeTable(b) {
+  const url = !b.continuation && imgUrl(b.image);
+  const colors = (b.colors || []).filter(Boolean);
+  const photo = url
+    ? `<div class="style-photo"><img src="${url}" alt=""/></div>`
+    : '';
+  return `<div class="style">
+    <div class="style-top${url ? '' : ' no-photo'}">
+      ${photo}
       <div>
-        <div class="sec-lbl">Construction / Specs</div>
-        <table class="construction">${construction}</table>
-        <div class="apps">${apps}</div>
-      </div>
-      <div class="std-box">
-        <h4>Applicable Standards</h4>
-        ${standards}
-        ${meta.notes ? `<div class="note">${esc(meta.notes)}</div>` : ''}
+        <div class="style-name">${esc(b.title)}${b.continuation ? ' · Cont.' : ''}</div>
+        <div class="style-code">${esc(b.code)}${b.pack ? ` · Pack ${esc(b.pack)}` : ''} · ${esc(b.unit || '/ea')}</div>
+        ${colors.length ? `<div class="colors-line"><strong>Colors</strong>${esc(colors.join(' · '))}</div>` : ''}
       </div>
     </div>
-
-    <div class="prod-lbl">
-      <div class="sec-lbl">${sectionLabel} — ${families.length} Available</div>
-      <span>${esc(COMPANY.phone)} · ${esc(COMPANY.email)}</span>
-    </div>
-    ${productBlock}
-    <div class="order-bar">
-      <div>
-        <div class="ob-t">Ready to Order?</div>
-        <div class="ob-s">Send item codes, sizes &amp; quantities — fast trade pricing.</div>
-      </div>
-      <div class="ob-c">
-        <span>Direct Line</span>${esc(COMPANY.phone)}
-        <span style="margin-top:2px">Email</span>${esc(COMPANY.email)}
-      </div>
-    </div>
-  </div>
-  <div class="footer">
-    <div>Spec Sheet · Rev. ${esc(COMPANY.updated)}</div>
-    <div class="mid-badges">${badges}</div>
-    <div class="right"><strong>${esc(COMPANY.short)}</strong> · ${esc(meta.title)}</div>
-  </div>
-</section>`;
+    <table class="sz-table"><tbody>${sizePriceCells(b.sizes)}</tbody></table>
+  </div>`;
 }
 
-function renderIndex(categories) {
-  const cards = categories
-    .map((c) => {
-      const hero = heroImgUrl(c.hero);
-      return `<div class="cat-card">
-        ${hero ? `<img src="${hero}" alt="${esc(c.title)}"/>` : '<div></div>'}
-        <div>
-          <h3>${esc(c.title)}</h3>
-          <p>${esc(c.tagline)}</p>
-          <div class="meta">${c.familyCount} types · ${c.rowCount} SKUs · ${esc(c.pdfName)}</div>
-        </div>
+function renderColorGrid(b) {
+  const swatches = (b.swatches || [])
+    .map((s) => {
+      const url = imgUrl(s.image);
+      const pr = fmtPrice(s.price);
+      return `<div class="swatch">
+        <div class="ph">${url ? `<img src="${url}" alt=""/>` : ''}</div>
+        <div class="nm">${esc(s.color)}</div>
+        ${pr ? `<div class="sp">${esc(pr)}</div>` : ''}
       </div>`;
     })
     .join('');
+  const headPrice = fmtPrice(b.price);
+  return `<div class="style">
+    <div class="style-name">${esc(b.title)}${b.continuation ? ' · Cont.' : ''}</div>
+    <div class="style-code">${esc(b.code)}${b.pack ? ` · Pack ${esc(b.pack)}` : ''}${b.size ? ` · ${esc(b.size)}` : ''}${headPrice ? ` · ${esc(headPrice)}${b.unit ? ` ${esc(b.unit)}` : ''}` : ''}</div>
+    <div class="swatches">${swatches}</div>
+  </div>`;
+}
 
-  const meta = {
-    collection: 'COMPLETE LINE CARD',
-    hero: categories[0]?.hero || 'hero-achim.png',
-    heroCaption: 'FLOORING · PLUMBING · WINDOWS',
-    highlights: [
-      { title: '3 Departments', sub: 'Flooring · Plumbing · Windows' },
-      { title: 'Call for Pricing', sub: 'Trade & Volume' },
-      { title: 'New Jersey', sub: 'Fast Response' },
-    ],
-    title: 'Catalog Index',
-    material: 'ALL PRO',
-  };
+function renderMatrix(b) {
+  const url = !b.continuation && imgUrl(b.image);
+  const rows = (b.rows || [])
+    .map((r) => {
+      const pr = fmtPrice(r.price);
+      return `<tr>
+        <td>${esc(r.size || '—')}</td>
+        <td>${esc(r.color || '—')}</td>
+        <td class="p">${pr ? `${esc(pr)} ${esc(r.unit || '')}` : ''}</td>
+      </tr>`;
+    })
+    .join('');
+  return `<div class="style">
+    <div class="style-top${url ? '' : ' no-photo'}">
+      ${url ? `<div class="style-photo"><img src="${url}" alt=""/></div>` : ''}
+      <div>
+        <div class="style-name">${esc(b.title)}${b.continuation ? ' · Cont.' : ''}</div>
+        <div class="style-code">${esc(b.code)}${b.pack ? ` · Pack ${esc(b.pack)}` : ''}</div>
+      </div>
+    </div>
+    <table class="mx">
+      <thead><tr><th>Size</th><th>Color</th><th>Price</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
 
-  return `
-<section class="index-page">
-  ${renderSidebar(meta)}
-  <div class="index-main">
-    <div class="main-head">
-      <h1 class="main-title">Category Sell Sheets</h1>
-      <div class="main-meta">Line Card / Updated ${esc(COMPANY.updated)}<br/><strong>${esc(COMPANY.web)}</strong></div>
+function renderBlock(b) {
+  if (b.kind === 'fitting') return renderFitting(b);
+  if (b.kind === 'size-table') return renderSizeTable(b);
+  if (b.kind === 'color-grid') return renderColorGrid(b);
+  return renderMatrix(b);
+}
+
+function renderCategoryPages(meta, blocks, rows) {
+  const pages = packBlocks(blocks);
+  const total = pages.length;
+  const hero = imgUrl(firstRealImage(rows));
+  const stds = (meta.standards || []).slice(0, 4);
+  return pages
+    .map((pageBlocks, idx) => {
+      const label = total > 1 ? `${idx + 1} / ${total}` : '';
+      const continued = idx > 0;
+      const intro =
+        idx === 0
+          ? `<div class="intro${hero ? '' : ' no-pic'}">
+          ${hero ? `<div class="intro-pic${['Windows', 'Flooring'].includes(meta.material) ? '' : ' contain'}"><img src="${hero}" alt=""/></div>` : ''}
+        <div class="spec-band">
+          <div>
+            <p>${esc(meta.tagline || meta.overview || meta.title)}</p>
+            ${meta.notes ? `<div class="note">${esc(meta.notes)}</div>` : ''}
+          </div>
+          <div class="spec-stds">${stds.map((s) => `<span class="badge">${esc(s.code)}</span>`).join('')}</div>
+        </div>
+        </div>`
+          : '';
+      return `<section class="sheet">
+        ${renderHeader(meta, label, continued)}
+        ${intro}
+        <div class="body">${pageBlocks.map(renderBlock).join('')}</div>
+        ${renderFooter(meta, label)}
+      </section>`;
+    })
+    .join('\n');
+}
+
+function renderCover({ id, photos, feats, subtitle, footerLabel, cards, linked, priceNote }) {
+  const logo = logoUrl();
+  const photoHtml = (photos || [])
+    .slice(0, 3)
+    .map((p) => {
+      const u = imgUrl(p) || (p && String(p).startsWith('file:') ? p : null);
+      return u ? `<img src="${u}" alt=""/>` : `<div class="slot"></div>`;
+    })
+    .join('');
+  const featHtml = (feats || [])
+    .map((f) => `<div class="cover-feat"><div class="t">${esc(f.title)}</div><div class="s">${esc(f.sub)}</div></div>`)
+    .join('');
+  const cols = cards.length <= 3 ? 1 : cards.length <= 6 ? 2 : 3;
+  const tiles = cards
+    .map((c) => {
+      const u = imgUrl(c.image);
+      const inner = `
+        ${u ? `<div class="pic"><img src="${u}" alt=""/></div>` : ''}
+        <div class="copy">
+        <h3>${esc(c.title)}</h3>
+        ${c.tagline && cols === 1 ? `<div class="tg">${esc(c.tagline)}</div>` : ''}
+        <div class="ct">${c.familyCount} types · ${c.rowCount} SKUs</div>
+        </div>`;
+      if (linked) return `<a class="tile" href="#${esc(c.slug)}">${inner}</a>`;
+      return `<div class="tile">${inner}</div>`;
+    })
+    .join('');
+  return `<section class="cover" id="${esc(id)}">
+    <aside class="cover-side">
+      <div class="cover-photos">${photoHtml}</div>
+      ${featHtml}
+    </aside>
+    <div class="cover-main">
+      <div class="cover-brand">
+        <div class="nm">All Pro <span>Building Supplies</span></div>
+        ${logo ? `<img src="${logo}" alt="All Pro"/>` : ''}
+        <div class="sub">${esc(subtitle)}</div>
+        <div class="meta">Updated ${esc(COMPANY.updated)} · ${esc(COMPANY.web)} · ${esc(COMPANY.phone)}</div>
+      </div>
+      <div class="banner"><strong>Suggested Wholesale</strong>${esc(priceNote)}</div>
+      <div class="tiles cols-${cols}">${tiles}</div>
     </div>
-    <p style="font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:10px;max-width:5.8in">
-      One dense spec sheet per category — product codes, sizes, packs,
-      and governing ASTM / ASME / NSF standards. Pricing on request.
-    </p>
-    <div class="cat-cards">${cards}</div>
-  </div>
-  <div class="footer">
-    <div>Spec Sheet Index · Rev. ${esc(COMPANY.updated)}</div>
-    <div class="mid-badges">
-      <span class="badge">${esc(COMPANY.phone)}</span>
-      <span class="badge">${esc(COMPANY.email)}</span>
+    <div class="ftr">
+      <div>${esc(footerLabel)} · ${esc(COMPANY.updated)}</div>
+      <div>${esc(COMPANY.phone)} · ${esc(COMPANY.email)}</div>
+      <div><strong>${esc(COMPANY.short)}</strong> · Building Supplies</div>
     </div>
-    <div class="right"><strong>${esc(COMPANY.short)}</strong> · Building Supplies</div>
-  </div>
-</section>`;
+  </section>`;
+}
+
+function metaFor(catKey, rows) {
+  return (
+    CATEGORY_META[catKey] || {
+      slug: slugify(catKey),
+      title: catKey,
+      material: rows[0]?.Material || '',
+      collection: String(catKey).toUpperCase(),
+      tagline: `${catKey} from the All Pro catalog.`,
+      overview: `${catKey} from the All Pro catalog.`,
+      standards: [],
+      construction: [],
+      notes: '',
+    }
+  );
+}
+
+function isPlumbing(dept) {
+  return dept === 'Plumbing';
 }
 
 async function main() {
   fs.mkdirSync(htmlDir, { recursive: true });
   fs.mkdirSync(pdfDir, { recursive: true });
-
   if (!fs.existsSync(csvPath)) {
     console.error('Missing products.csv at', csvPath);
     process.exit(1);
   }
 
   const products = parseCsv(fs.readFileSync(csvPath, 'utf8'));
-  const byCat = groupByCategory(products);
-  const indexMeta = [];
-  const generated = [];
-
-  for (const [catKey, rows] of [...byCat.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
-    const meta = CATEGORY_META[catKey] || {
-      slug: slugify(catKey),
-      title: catKey,
-      material: rows[0]?.Material || '',
-      collection: String(catKey).toUpperCase(),
-      hero: 'hero-achim.png',
-      heroCaption: catKey,
-      tagline: `${catKey} from the All Pro catalog.`,
-      overview: `Factory-sourced ${catKey}.`,
-      standards: [],
-      highlights: [
-        { title: 'Factory Sourced', sub: 'Trade Ready' },
-        { title: 'Call for Pricing', sub: COMPANY.phone },
-        { title: 'New Jersey', sub: 'Fast Response' },
-      ],
-      construction: [{ label: 'Category', value: catKey }],
-      applications: [],
-      notes: '',
-    };
-    const families = productFamilies(rows);
-    const html = wrapHtml(
-      `${COMPANY.name} — ${meta.title} Spec Sheet`,
-      renderCategoryPage(meta, families, rows.length)
-    );
-    const htmlName = `${meta.slug}-sell-sheet.html`;
-    const pdfName = `${meta.slug}-sell-sheet.pdf`;
-    const htmlPath = path.join(htmlDir, htmlName);
-    fs.writeFileSync(htmlPath, html);
-    generated.push({ meta, htmlPath, pdfName, families, rows });
-    indexMeta.push({
-      title: meta.title,
-      tagline: meta.tagline,
-      familyCount: families.length,
-      rowCount: rows.length,
-      pdfName,
-      hero: meta.hero,
-      standards: meta.standards || [],
-    });
-    console.log(`HTML: ${htmlName} (${families.length} types, ${rows.length} rows, 1 page)`);
+  const deptOrder = ['Plumbing', 'Windows', 'Flooring'];
+  const byDept = new Map();
+  for (const p of products) {
+    const dept = (p.main_category || 'Other').trim() || 'Other';
+    const cat = (p.sub_sub_category || p.Material || 'Other').trim() || 'Other';
+    if (!byDept.has(dept)) byDept.set(dept, new Map());
+    const cats = byDept.get(dept);
+    if (!cats.has(cat)) cats.set(cat, []);
+    cats.get(cat).push(p);
   }
 
-  const indexHtmlPath = path.join(htmlDir, '00-sell-sheet-index.html');
-  fs.writeFileSync(indexHtmlPath, wrapHtml(`${COMPANY.name} — Sell Sheet Index`, renderIndex(indexMeta)));
+  const generated = [];
+  const deptCovers = [];
+  const allCategoryMeta = [];
 
-  const mdLines = [
+  for (const dept of [...deptOrder, ...[...byDept.keys()].filter((d) => !deptOrder.includes(d))]) {
+    const cats = byDept.get(dept);
+    if (!cats) continue;
+    const dmeta = DEPARTMENT_META[dept] || {
+      slug: `dept-${slugify(dept)}`,
+      title: dept,
+      subtitle: dept,
+      feats: [
+        { title: dept, sub: 'Catalog Section' },
+        { title: 'Suggested Wholesale', sub: 'Call for Bulk Quotes' },
+        { title: 'Trade Ready', sub: 'Spec Sheets' },
+      ],
+    };
+    const catCards = [];
+    const deptPhotos = [];
+    for (const [catKey, rows] of [...cats.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+      const meta = metaFor(catKey, rows);
+      const blocks = isPlumbing(dept) ? buildPlumbingBlocks(rows) : buildStyleBlocks(rows);
+      const pageHtml = renderCategoryPages(meta, blocks, rows);
+      const htmlName = `${meta.slug}-sell-sheet.html`;
+      const pdfName = `${meta.slug}-sell-sheet.pdf`;
+      const htmlPath = path.join(htmlDir, htmlName);
+      fs.writeFileSync(htmlPath, wrapHtml(`${COMPANY.name} — ${meta.title}`, pageHtml));
+      const image = firstRealImage(rows);
+      if (image && deptPhotos.length < 3) deptPhotos.push(image);
+      const card = {
+        title: meta.title,
+        tagline: meta.tagline,
+        familyCount: blocks.length,
+        rowCount: rows.length,
+        pdfName,
+        image,
+        slug: meta.slug,
+        pageHtml,
+      };
+      catCards.push(card);
+      generated.push({ meta, htmlPath, pdfName, dept, blocks, rows });
+      allCategoryMeta.push({ ...card, dept });
+      console.log(`HTML: ${htmlName} (${dept} / ${blocks.length} types, ${rows.length} rows, ${packBlocks(blocks).length} page(s))`);
+    }
+
+    const priceNote = isPlumbing(dept)
+      ? 'Prices shown are suggested wholesale. Items without a list price show size only. Pipe is per foot except packaged coils / sticks, which are per each.'
+      : 'Prices shown are suggested wholesale. Items without a list price show size and color only.';
+    const coverOpts = {
+      id: dmeta.slug,
+      photos: deptPhotos.slice(0, 1),
+      feats: dmeta.feats,
+      subtitle: `${dmeta.title} · ${dmeta.subtitle}`,
+      footerLabel: `${dmeta.title} Cover`,
+      cards: catCards,
+      priceNote,
+    };
+    const deptHtml = renderCover({ ...coverOpts, linked: false });
+    const deptHtmlLinked = renderCover({ ...coverOpts, linked: true });
+    const deptHtmlPath = path.join(htmlDir, `${dmeta.slug}-cover.html`);
+    fs.writeFileSync(deptHtmlPath, wrapHtml(`${COMPANY.name} — ${dmeta.title}`, deptHtml));
+    deptCovers.push({
+      dmeta,
+      htmlPath: deptHtmlPath,
+      pdfName: `${dmeta.slug}-cover.pdf`,
+      linkedHtml: deptHtmlLinked,
+      catCards,
+      photos: deptPhotos,
+    });
+  }
+
+  const deptCards = deptCovers.map((d) => ({
+    title: d.dmeta.title,
+    tagline: d.dmeta.subtitle,
+    familyCount: d.catCards.length,
+    rowCount: d.catCards.reduce((n, c) => n + c.rowCount, 0),
+    image: d.photos[0] || d.catCards[0]?.image,
+    slug: d.dmeta.slug,
+  }));
+  const mainPhotos = deptCovers.map((d) => d.photos[0]).filter(Boolean);
+  const indexOpts = {
+    id: 'catalog-cover',
+    photos: mainPhotos,
+    feats: [
+      { title: '3 Departments', sub: 'Plumbing · Windows · Flooring' },
+      { title: 'Suggested Wholesale', sub: 'Call for Bulk Quotes' },
+      { title: 'Trade Catalog', sub: 'Every Size & Color Listed' },
+    ],
+    subtitle: 'Product Catalog · Spec Sheets & Wholesale Pricing',
+    footerLabel: 'Catalog Cover',
+    cards: deptCards,
+    priceNote:
+      'Prices shown are suggested wholesale. Items without a list price show size and color only. Pipe is per foot except packaged coils / sticks, which are per each.',
+  };
+  const indexHtml = renderCover({ ...indexOpts, linked: false });
+  const indexHtmlLinked = renderCover({ ...indexOpts, linked: true });
+  const indexHtmlPath = path.join(htmlDir, '00-sell-sheet-index.html');
+  fs.writeFileSync(indexHtmlPath, wrapHtml(`${COMPANY.name} — Catalog Cover`, indexHtml));
+
+  const catalogBody =
+    indexHtmlLinked + deptCovers.map((d) => d.linkedHtml + d.catCards.map((c) => c.pageHtml).join('\n')).join('\n');
+  const catalogHtmlPath = path.join(htmlDir, 'allpro-product-catalog.html');
+  fs.writeFileSync(catalogHtmlPath, wrapHtml(`${COMPANY.name} — Product Catalog`, catalogBody));
+
+  const forbidden = /tommur|lesso|tomex|bluefin|alibaba|factory sku|factory code|4B200B/i;
+  const htmlFiles = [indexHtmlPath, catalogHtmlPath, ...generated.map((g) => g.htmlPath), ...deptCovers.map((d) => d.htmlPath)];
+  for (const hp of htmlFiles) {
+    const text = fs.readFileSync(hp, 'utf8');
+    if (forbidden.test(text)) throw new Error(`Factory / internal term leaked into ${path.basename(hp)}`);
+  }
+
+  const md = [
     '# All Pro Building Supplies — Category Sell Sheets',
     '',
-    'Light, single-page Alveron-style spec sheets. Rebuild: `npm run sell-sheets` from `brochure/`.',
+    'Suggested wholesale from `assets/products.csv`. Rebuild: `npm run sell-sheets` from `brochure/`.',
     '',
-    '## PDFs',
+    'Customer-facing PDFs never include factory, supplier, or internal sourcing names.',
     '',
-    '| Category | PDF | Types | SKUs |',
-    '|---|---|---:|---:|',
-    ...indexMeta.map(
-      (c) => `| ${c.title} | \`brochure/sell-sheets/pdf/${c.pdfName}\` | ${c.familyCount} | ${c.rowCount} |`
+    'Layout: plumbing is one photo + wrapping size/price row per fitting. Blinds and shades are a size/price table plus a color list (price is by size). Tiles, mats, and planks are a color photo grid with size and price once. Mixed size×color prices use a Size | Color | Price table. SKUs without photos are text only — the logo is never used as product art. Blank or $0 prices are omitted.',
+    '',
+    '## Full catalog',
+    '',
+    '- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf`',
+    '',
+    '## Department covers',
+    '',
+    ...deptCovers.map((d) => `- \`brochure/sell-sheets/pdf/${d.pdfName}\``),
+    '',
+    '## Individual PDFs',
+    '',
+    '| Department | Category | PDF | Types | SKUs |',
+    '|---|---|---|---:|---:|',
+    ...allCategoryMeta.map(
+      (c) => `| ${c.dept} | ${c.title} | \`brochure/sell-sheets/pdf/${c.pdfName}\` | ${c.familyCount} | ${c.rowCount} |`
     ),
     '',
   ];
-  fs.writeFileSync(path.join(outDir, 'README.md'), mdLines.join('\n'));
+  fs.writeFileSync(path.join(outDir, 'README.md'), md.join('\n'));
 
   let puppeteer;
   try {
@@ -1156,7 +1372,7 @@ async function main() {
 
   async function htmlToPdf(htmlPath, pdfPath) {
     const page = await browser.newPage();
-    await page.goto(`file://${htmlPath}`, { waitUntil: 'networkidle0', timeout: 120000 });
+    await page.goto(`file://${htmlPath}`, { waitUntil: 'networkidle0', timeout: 300000 });
     await page.pdf({
       path: pdfPath,
       format: 'Letter',
@@ -1168,11 +1384,11 @@ async function main() {
   }
 
   await htmlToPdf(indexHtmlPath, path.join(pdfDir, '00-sell-sheet-index.pdf'));
-  for (const g of generated) {
-    await htmlToPdf(g.htmlPath, path.join(pdfDir, g.pdfName));
-  }
+  for (const d of deptCovers) await htmlToPdf(d.htmlPath, path.join(pdfDir, d.pdfName));
+  for (const g of generated) await htmlToPdf(g.htmlPath, path.join(pdfDir, g.pdfName));
+  await htmlToPdf(catalogHtmlPath, path.join(pdfDir, 'allpro-product-catalog.pdf'));
   await browser.close();
-  console.log(`\nDone. ${generated.length} one-page sell sheets + index → ${pdfDir}`);
+  console.log(`\nDone. ${generated.length} category sheets + ${deptCovers.length} department covers + catalog → ${pdfDir}`);
 }
 
 main().catch((err) => {
