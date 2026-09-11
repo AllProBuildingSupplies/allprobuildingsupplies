@@ -2,30 +2,44 @@
 
 Suggested wholesale prices from `assets/products.csv`. Rebuild: `npm run sell-sheets` from `brochure/`.
 
+Customer-facing PDFs never include factory, supplier, or internal sourcing names.
+
 ## Full catalog
 
-- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf` — cover + all category sheets (tiles link to sections)
+- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf` — cover, department covers, then every category
+
+## Department covers
+
+- `brochure/sell-sheets/pdf/dept-plumbing-cover.pdf`
+- `brochure/sell-sheets/pdf/dept-windows-cover.pdf`
+- `brochure/sell-sheets/pdf/dept-flooring-cover.pdf`
 
 ## Individual PDFs
 
-| Category | PDF | Types | SKUs |
-|---|---|---:|---:|
-| Window Blinds | `brochure/sell-sheets/pdf/blinds-sell-sheet.pdf` | 6 | 6 |
-| Carpet Tiles | `brochure/sell-sheets/pdf/carpet-tiles-sell-sheet.pdf` | 1 | 6 |
-| Copper Fittings | `brochure/sell-sheets/pdf/copper-fittings-sell-sheet.pdf` | 10 | 88 |
-| Copper Tube / Pipe | `brochure/sell-sheets/pdf/copper-pipes-sell-sheet.pdf` | 2 | 8 |
-| CPVC Pipe | `brochure/sell-sheets/pdf/cpvc-pipes-sell-sheet.pdf` | 3 | 21 |
-| Curtain Panels | `brochure/sell-sheets/pdf/curtain-panels-sell-sheet.pdf` | 28 | 34 |
-| Pipe Insulation | `brochure/sell-sheets/pdf/insulation-sell-sheet.pdf` | 1 | 9 |
-| Kitchen Curtains | `brochure/sell-sheets/pdf/kitchen-curtains-sell-sheet.pdf` | 36 | 36 |
-| Entrance & Kitchen Mats | `brochure/sell-sheets/pdf/mats-sell-sheet.pdf` | 12 | 90 |
-| PEX Fittings | `brochure/sell-sheets/pdf/pex-fittings-sell-sheet.pdf` | 2 | 9 |
-| PEX-B Pipe | `brochure/sell-sheets/pdf/pex-pipes-sell-sheet.pdf` | 1 | 6 |
-| PVC DWV Fittings | `brochure/sell-sheets/pdf/pvc-fittings-sell-sheet.pdf` | 24 | 91 |
-| PVC Pipe | `brochure/sell-sheets/pdf/pvc-pipes-sell-sheet.pdf` | 2 | 16 |
-| Curtain Rods & Finials | `brochure/sell-sheets/pdf/rods-sell-sheet.pdf` | 3 | 20 |
-| Area Rug Sets | `brochure/sell-sheets/pdf/rugs-sell-sheet.pdf` | 1 | 7 |
-| Window Shades | `brochure/sell-sheets/pdf/shades-sell-sheet.pdf` | 10 | 10 |
-| Valances & Tiers | `brochure/sell-sheets/pdf/valances-tiers-sell-sheet.pdf` | 20 | 20 |
-| Vinyl Floor Planks | `brochure/sell-sheets/pdf/vinyl-planks-sell-sheet.pdf` | 5 | 29 |
-| Vinyl Floor Tiles | `brochure/sell-sheets/pdf/vinyl-tiles-sell-sheet.pdf` | 12 | 129 |
+| Department | Category | PDF | Types | SKUs |
+|---|---|---|---:|---:|
+| Plumbing | Copper Fittings | `brochure/sell-sheets/pdf/copper-fittings-sell-sheet.pdf` | 10 | 88 |
+| Plumbing | Copper Tube / Pipe | `brochure/sell-sheets/pdf/copper-pipes-sell-sheet.pdf` | 2 | 8 |
+| Plumbing | CPVC Pipe | `brochure/sell-sheets/pdf/cpvc-pipes-sell-sheet.pdf` | 3 | 21 |
+| Plumbing | Pipe Insulation | `brochure/sell-sheets/pdf/insulation-sell-sheet.pdf` | 1 | 9 |
+| Plumbing | PEX Fittings | `brochure/sell-sheets/pdf/pex-fittings-sell-sheet.pdf` | 7 | 26 |
+| Plumbing | PEX-B Pipe | `brochure/sell-sheets/pdf/pex-pipes-sell-sheet.pdf` | 2 | 12 |
+| Plumbing | PVC DWV Fittings | `brochure/sell-sheets/pdf/pvc-dwv-fittings-sell-sheet.pdf` | 23 | 90 |
+| Plumbing | PVC SCH 40 Foam-Core Pipe | `brochure/sell-sheets/pdf/sch40-foam-sell-sheet.pdf` | 1 | 4 |
+| Plumbing | PVC SCH 40 Solid Pipe | `brochure/sell-sheets/pdf/sch40-solid-sell-sheet.pdf` | 1 | 3 |
+| Windows | Window Accessories | `brochure/sell-sheets/pdf/window-accessories-sell-sheet.pdf` | 3 | 3 |
+| Windows | Cellular Shades | `brochure/sell-sheets/pdf/cellular-shades-sell-sheet.pdf` | 2 | 58 |
+| Windows | Mini Blinds | `brochure/sell-sheets/pdf/mini-blinds-sell-sheet.pdf` | 2 | 365 |
+| Windows | Plantation Blinds | `brochure/sell-sheets/pdf/plantation-blinds-sell-sheet.pdf` | 2 | 93 |
+| Windows | Roll-Up Blinds | `brochure/sell-sheets/pdf/roll-up-blinds-sell-sheet.pdf` | 2 | 30 |
+| Windows | Roller Shades | `brochure/sell-sheets/pdf/roller-shades-sell-sheet.pdf` | 7 | 122 |
+| Windows | Roman Shades | `brochure/sell-sheets/pdf/roman-shades-sell-sheet.pdf` | 1 | 21 |
+| Windows | Vertical Blinds | `brochure/sell-sheets/pdf/vertical-blinds-sell-sheet.pdf` | 4 | 8 |
+| Flooring | Carpet Tiles | `brochure/sell-sheets/pdf/carpet-tiles-sell-sheet.pdf` | 2 | 7 |
+| Flooring | Click-Lock Flooring | `brochure/sell-sheets/pdf/click-lock-sell-sheet.pdf` | 1 | 6 |
+| Flooring | Deck Tiles | `brochure/sell-sheets/pdf/deck-tiles-sell-sheet.pdf` | 1 | 2 |
+| Flooring | Foam Floor Tiles | `brochure/sell-sheets/pdf/foam-tiles-sell-sheet.pdf` | 1 | 3 |
+| Flooring | Entrance & Kitchen Mats | `brochure/sell-sheets/pdf/mats-sell-sheet.pdf` | 12 | 90 |
+| Flooring | Area Rug Sets | `brochure/sell-sheets/pdf/rugs-sell-sheet.pdf` | 1 | 7 |
+| Flooring | Vinyl Floor Planks | `brochure/sell-sheets/pdf/vinyl-planks-sell-sheet.pdf` | 10 | 29 |
+| Flooring | Vinyl Floor Tiles | `brochure/sell-sheets/pdf/vinyl-tiles-sell-sheet.pdf` | 8 | 121 |

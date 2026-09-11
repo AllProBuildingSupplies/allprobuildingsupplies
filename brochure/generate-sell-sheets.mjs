@@ -188,7 +188,13 @@ function productFamilies(rows) {
       });
     }
     if (r.Pack) fam.pack = r.Pack;
-    if (r.Image && !fam.image) fam.image = r.Image;
+    const img = r.Image || '';
+    const imgIsLogo = /logo(-email)?\.(png|jpe?g)$/i.test(img);
+    if (img && (!fam.image || /logo(-email)?\.(png|jpe?g)$/i.test(fam.image)) && !imgIsLogo) {
+      fam.image = img;
+    } else if (img && !fam.image) {
+      fam.image = img;
+    }
   }
   for (const fam of byKey.values()) {
     fam.sizePrices.sort(
@@ -1296,7 +1302,7 @@ function renderCategoryPageSingle(meta, families, rowCount, opts) {
   ${renderSidebar(meta)}
   <div class="${mainClass}">
     <div class="main-head">
-      <h1 class="main-title">${esc(meta.title)}${hideMid ? ' <em style="color:var(--gold2);font-style:normal;font-size:18px">Cont.</em>' : ''}</h1>
+      <h1 class="main-title">${esc(meta.title)}${pageLabel && !pageLabel.startsWith('1 ') ? ' <em style="color:var(--gold2);font-style:normal;font-size:18px">Cont.</em>' : ''}</h1>
       <div class="main-meta">Spec Sheet / Updated ${esc(COMPANY.updated)}${pageLabel ? ` · ${esc(pageLabel)}` : ''}<br/><strong>Suggested Wholesale</strong></div>
     </div>
 
@@ -1359,6 +1365,7 @@ function renderCover({
   footerLabel,
   cards,
   linked = false,
+  priceNote = 'Items without a list price show size and color only.',
 }) {
   const logo = logoUrl();
   const collage = heroImgUrl(collageFile);
@@ -1401,7 +1408,7 @@ function renderCover({
     <div class="wholesale-banner">
       <strong>Suggested Wholesale</strong>
       Prices shown are suggested wholesale list pricing. Call or email for bulk / volume quotes.
-      Blank or $0 items show size and color only. Pipe is priced per foot except packaged coils / sticks, which are per each.
+      ${esc(priceNote)}
     </div>
     <div class="cat-cards${cards.length > 6 ? ' many' : ''}">${cardHtml}</div>
   </div>
@@ -1505,6 +1512,10 @@ async function main() {
         `HTML: ${htmlName} (${dept} / ${families.length} types, ${rows.length} rows, ~${paginateFamilies(families).length} page(s))`
       );
     }
+    const deptPriceNote =
+      dept === 'Plumbing'
+        ? 'Items without a list price show size and color only. Pipe is priced per foot except packaged coils / sticks, which are per each.'
+        : 'Items without a list price show size and color only.';
     const deptHtml = renderCover({
       id: dmeta.slug,
       collageFile: dmeta.hero,
@@ -1513,6 +1524,7 @@ async function main() {
       footerLabel: `${dmeta.title} Cover`,
       cards: catCards,
       linked: false,
+      priceNote: deptPriceNote,
     });
     const deptHtmlLinked = renderCover({
       id: dmeta.slug,
@@ -1522,6 +1534,7 @@ async function main() {
       footerLabel: `${dmeta.title} Cover`,
       cards: catCards,
       linked: true,
+      priceNote: deptPriceNote,
     });
     const deptHtmlPath = path.join(htmlDir, `${dmeta.slug}-cover.html`);
     fs.writeFileSync(deptHtmlPath, wrapHtml(`${COMPANY.name} — ${dmeta.title}`, deptHtml));
@@ -1555,6 +1568,8 @@ async function main() {
     footerLabel: 'Catalog Cover',
     cards: deptCards,
     linked: false,
+    priceNote:
+      'Items without a list price show size and color only. Pipe is priced per foot except packaged coils / sticks, which are per each.',
   });
   const indexHtmlLinked = renderCover({
     id: 'catalog-cover',
@@ -1568,6 +1583,8 @@ async function main() {
     footerLabel: 'Catalog Cover',
     cards: deptCards,
     linked: true,
+    priceNote:
+      'Items without a list price show size and color only. Pipe is priced per foot except packaged coils / sticks, which are per each.',
   });
 
   const indexHtmlPath = path.join(htmlDir, '00-sell-sheet-index.html');
@@ -1636,7 +1653,7 @@ async function main() {
 
   async function htmlToPdf(htmlPath, pdfPath) {
     const page = await browser.newPage();
-    await page.goto(`file://${htmlPath}`, { waitUntil: 'networkidle0', timeout: 180000 });
+    await page.goto(`file://${htmlPath}`, { waitUntil: 'networkidle0', timeout: 300000 });
     await page.pdf({
       path: pdfPath,
       format: 'Letter',
