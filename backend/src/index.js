@@ -14,6 +14,204 @@ const corsHeaders = {
 
 /** Isolate-scoped: schema/migration boot is expensive (~dozens of D1 round-trips). Run once per isolate. */
 let schemaReadyPromise = null;
+let achimSeedPromise = null;
+
+function parseCsvRows(text) {
+  const rows = [];
+  let field = '';
+  let row = [];
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += c;
+      }
+      continue;
+    }
+    if (c === '"') {
+      inQuotes = true;
+      continue;
+    }
+    if (c === ',') {
+      row.push(field);
+      field = '';
+      continue;
+    }
+    if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(field);
+      if (row.some((x) => x !== '')) rows.push(row);
+      row = [];
+      field = '';
+      continue;
+    }
+    field += c;
+  }
+  if (field.length || row.length) {
+    row.push(field);
+    if (row.some((x) => x !== '')) rows.push(row);
+  }
+  return rows;
+}
+
+async function fetchMainProductsCsv() {
+  const urls = [
+    'https://raw.githubusercontent.com/AllProBuildingSupplies/allprobuildingsupplies/main/assets/products.csv',
+    'https://raw.githubusercontent.com/allprobuildingsupplies/allprobuildingsupplies/main/assets/products.csv',
+  ];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { headers: { 'User-Agent': 'allpro-api-catalog-seed' } });
+      if (r.ok) return await r.text();
+    } catch (_) {}
+  }
+  return '';
+}
+
+const CATALOG_SEED_VERSION = 'baruch-list-v1-20260911';
+
+/**
+ * Upsert every row from the public main-branch CSV (Baruch's sell list).
+ * ON CONFLICT keeps existing qty so warehouse on-hand is not wiped.
+ * Then drops SKUs that are no longer on the list (curtains, old PEX-B PIPE codes, etc.).
+ */
+async function ensureAchimCatalogSeed(env) {
+  if (!env || !env.DB) return;
+  if (achimSeedPromise) return achimSeedPromise;
+  achimSeedPromise = (async () => {
+    await env.DB.prepare(
+      `CREATE TABLE IF NOT EXISTS app_meta (key TEXT PRIMARY KEY, value TEXT)`
+    ).run();
+    let current = null;
+    try {
+      current = await env.DB.prepare(
+        `SELECT value FROM app_meta WHERE key = 'catalog_list'`
+      ).first();
+    } catch (_) {}
+    if (current && String(current.value) === CATALOG_SEED_VERSION) return;
+
+    const csvText = await fetchMainProductsCsv();
+    if (!csvText) return;
+    const table = parseCsvRows(csvText);
+    if (table.length < 2) return;
+    const headers = table[0].map((h) => String(h || '').trim());
+    const idx = (name) => headers.indexOf(name);
+    const iCode = idx('Code');
+    const iDesc = idx('Description');
+    const iSize = idx('Size');
+    const iColor = idx('Color');
+    const iPack = idx('Pack');
+    const iPrice = idx('Price');
+    const iImage = idx('Image');
+    const iMat = idx('Material');
+    const iMain = idx('main_category');
+    const iSub = idx('sub_category');
+    const iSssub = idx('sub_sub_category');
+    const iSss = idx('sub_sub_sub_category');
+    const iTom = idx('Tommur-Code');
+    const iLesso = idx('Lesso-Code');
+    if (iCode < 0 || iSize < 0 || iColor < 0) return;
+
+    const keepKeys = [];
+    const stmts = [];
+    const seen = new Set();
+    for (let r = 1; r < table.length; r++) {
+      const cols = table[r];
+      const code = normalizeProductCode(cols[iCode]);
+      if (!code) continue;
+      const size = canonicalizeSize(cols[iSize]);
+      if (!size) continue;
+      const color = normalizeColor(iColor >= 0 ? cols[iColor] : '');
+      const key = code + '\0' + size + '\0' + color;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      keepKeys.push({ code, size, color });
+      const priceRaw = iPrice >= 0 ? cols[iPrice] : '';
+      stmts.push(
+        env.DB.prepare(
+          `INSERT INTO products (${PRODUCT_INSERT_COLS}) VALUES (${PRODUCT_INSERT_PLACEHOLDERS})
+           ON CONFLICT(code, size, color) DO UPDATE SET
+             description = excluded.description,
+             pack = excluded.pack,
+             price = excluded.price,
+             image = excluded.image,
+             material = excluded.material,
+             main_category = excluded.main_category,
+             sub_category = excluded.sub_category,
+             sub_sub_category = excluded.sub_sub_category,
+             sub_sub_sub_category = excluded.sub_sub_sub_category,
+             tommur_code = excluded.tommur_code,
+             lesso_code = excluded.lesso_code`
+        ).bind(
+          ...productInsertBinds(
+            {
+              code,
+              description: iDesc >= 0 ? cols[iDesc] : '',
+              color,
+              pack: iPack >= 0 ? cols[iPack] : 1,
+              qty: 0,
+              price: priceRaw,
+              image: iImage >= 0 ? cols[iImage] : 'images/logo.png',
+              material: iMat >= 0 ? cols[iMat] : '',
+              main_category: iMain >= 0 ? cols[iMain] : '',
+              sub_category: iSub >= 0 ? cols[iSub] : '',
+              sub_sub_category: iSssub >= 0 ? cols[iSssub] : '',
+              sub_sub_sub_category: iSss >= 0 ? cols[iSss] : '',
+              tommur_code: iTom >= 0 ? cols[iTom] : '',
+              lesso_code: iLesso >= 0 ? cols[iLesso] : '',
+            },
+            size
+          )
+        )
+      );
+    }
+    if (seen.size < 1) return;
+
+    const existing = await env.DB.prepare(
+      `SELECT code, size, color FROM products`
+    ).all();
+    const keepSet = new Set(keepKeys.map((k) => k.code + '\0' + k.size + '\0' + k.color));
+    for (const row of existing.results || []) {
+      const key =
+        normalizeProductCode(row.code) +
+        '\0' +
+        canonicalizeSize(row.size) +
+        '\0' +
+        normalizeColor(row.color);
+      if (!keepSet.has(key)) {
+        stmts.push(
+          env.DB.prepare(`DELETE FROM products WHERE code = ? AND size = ? AND color = ?`).bind(
+            row.code,
+            row.size,
+            row.color
+          )
+        );
+      }
+    }
+
+    stmts.push(
+      env.DB.prepare(
+        `INSERT INTO app_meta (key, value) VALUES ('catalog_list', ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+      ).bind(CATALOG_SEED_VERSION)
+    );
+    for (let i = 0; i < stmts.length; i += 40) {
+      await env.DB.batch(stmts.slice(i, i + 40));
+    }
+  })().catch((err) => {
+    achimSeedPromise = null;
+    throw err;
+  });
+  return achimSeedPromise;
+}
 
 function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -48,14 +246,25 @@ function normalizeProductCode(code) {
   return PRODUCT_CODE_ALIASES[c] || PRODUCT_CODE_ALIASES[c.toUpperCase()] || c;
 }
 
-/** Display size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2" */
+function isDimensionalSizePart(p) {
+  const s = String(p || '').replace(/["″]$/, '').trim();
+  return /^(\d+(\.\d+)?|\d+-\d+\/\d+|\d+\/\d+)$/.test(s);
+}
+
+/** Display size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2".
+ *  Color / pattern names are left unmarked. */
 function formatSizeDisplay(size) {
   const raw = normalizeSize(size);
   if (!raw) return '';
   const sep = /\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/;
   const parts = raw.split(sep).filter(Boolean);
   if (!parts.length) return raw;
+  if (!parts.every(isDimensionalSizePart)) return raw;
   return parts.map((p) => (/["″]$/.test(p) ? p : `${p}"`)).join(' x ');
+}
+
+function isQuoteOnlyProduct(p) {
+  return !(parseFloat(p && p.price) > 0);
 }
 
 function roundMoney(n) {
@@ -76,8 +285,12 @@ function productCategoryFields(p) {
 }
 
 const PRODUCT_INSERT_COLS =
-  'code, description, size, pack, qty, price, image, material, main_category, sub_category, sub_sub_category, sub_sub_sub_category, tommur_code, lesso_code';
-const PRODUCT_INSERT_PLACEHOLDERS = '?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?';
+  'code, description, size, color, pack, qty, price, image, material, main_category, sub_category, sub_sub_category, sub_sub_sub_category, tommur_code, lesso_code';
+const PRODUCT_INSERT_PLACEHOLDERS = '?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?';
+
+function normalizeColor(color) {
+  return String(color == null ? '' : color).trim();
+}
 
 function productInsertBinds(p, sizeOverride) {
   const cats = productCategoryFields(p);
@@ -85,6 +298,7 @@ function productInsertBinds(p, sizeOverride) {
     normalizeProductCode(p.code),
     p.description,
     sizeOverride != null ? sizeOverride : canonicalizeSize(p.size),
+    normalizeColor(p.color),
     p.pack,
     p.qty == null || p.qty === '' ? 0 : p.qty,
     roundMoney(p.price),
@@ -194,16 +408,23 @@ function sizeMatchCandidates(size) {
   return out;
 }
 
-function findProduct(prods, code, size) {
+function findProduct(prods, code, size, color) {
   if (!Array.isArray(prods) || !prods.length) return null;
   const c = normalizeProductCode(code);
   const want = canonicalizeSize(size);
   if (!c || !want) return null;
-  return (
-    prods.find(
-      (p) => normalizeProductCode(p.code) === c && canonicalizeSize(p.size) === want
-    ) || null
+  const col = normalizeColor(color);
+  const matches = prods.filter(
+    (p) => normalizeProductCode(p.code) === c && canonicalizeSize(p.size) === want
   );
+  if (!matches.length) return null;
+  if (col) {
+    const exact = matches.find((p) => normalizeColor(p.color) === col);
+    if (exact) return exact;
+  }
+  if (matches.length === 1) return matches[0];
+  const blank = matches.find((p) => !normalizeColor(p.color));
+  return blank || matches[0];
 }
 
 /**
@@ -355,7 +576,7 @@ async function loadOwnedOrder(env, orderId, userEmail) {
 }
 
 function mapOrderItem(it, prods) {
-  const match = findProduct(prods, it.product_sku, it.size);
+  const match = findProduct(prods, it.product_sku, it.size, it.color);
   const canonSize = match ? match.size : normalizeSize(it.size);
   const qty = parseInt(it.quantity, 10) || 0;
   let qtyShipped = parseInt(it.qty_shipped, 10);
@@ -364,6 +585,7 @@ function mapOrderItem(it, prods) {
   return {
     code: it.product_sku,
     size: canonSize,
+    color: match ? normalizeColor(match.color) : normalizeColor(it.color),
     qty,
     qtyShipped,
     qtyBackordered: Math.max(0, qty - qtyShipped),
@@ -474,6 +696,7 @@ function toPublicProduct(p) {
     code: p.code,
     description: p.description,
     size: p.size,
+    color: p.color || '',
     size_display: formatSizeDisplay(p.size),
     pack: p.pack,
     image: p.image,
@@ -701,6 +924,7 @@ async function ensureCoreSchema(env) {
       code                   TEXT NOT NULL,
       description            TEXT,
       size                   TEXT NOT NULL DEFAULT '',
+      color                  TEXT NOT NULL DEFAULT '',
       pack                   INTEGER,
       qty                    INTEGER,
       price                  REAL,
@@ -712,7 +936,7 @@ async function ensureCoreSchema(env) {
       sub_sub_sub_category   TEXT DEFAULT '',
       tommur_code            TEXT DEFAULT '',
       lesso_code             TEXT DEFAULT '',
-      PRIMARY KEY (code, size)
+      PRIMARY KEY (code, size, color)
     )
   `).run();
   await env.DB.prepare(`
@@ -751,6 +975,7 @@ async function ensureCoreSchema(env) {
       order_id          TEXT NOT NULL,
       product_sku       TEXT,
       size              TEXT,
+      color             TEXT DEFAULT '',
       quantity          INTEGER,
       price_at_purchase REAL,
       qty_shipped       INTEGER DEFAULT 0
@@ -787,6 +1012,69 @@ async function ensureProductCategoryColumns(env) {
       `ALTER TABLE products ADD COLUMN sub_sub_sub_category TEXT DEFAULT ''`
     ).run();
   } catch (_) {}
+}
+
+/** Color column + unique key (code, size, color). Plumbing keeps color ''. */
+async function ensureProductColorSchema(env) {
+  try {
+    await env.DB.prepare(`ALTER TABLE products ADD COLUMN color TEXT DEFAULT ''`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`UPDATE products SET color = '' WHERE color IS NULL`).run();
+  } catch (_) {}
+  try {
+    await env.DB.prepare(`ALTER TABLE order_items ADD COLUMN color TEXT DEFAULT ''`).run();
+  } catch (_) {}
+
+  let pkCols = [];
+  try {
+    const info = await env.DB.prepare(`PRAGMA table_info(products)`).all();
+    pkCols = (info.results || [])
+      .filter((c) => Number(c.pk) > 0)
+      .sort((a, b) => Number(a.pk) - Number(b.pk))
+      .map((c) => String(c.name));
+  } catch (_) {
+    return;
+  }
+  if (pkCols.length === 3 && pkCols[0] === 'code' && pkCols[1] === 'size' && pkCols[2] === 'color') {
+    return;
+  }
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS products_color_pk (
+      code                   TEXT NOT NULL,
+      description            TEXT,
+      size                   TEXT NOT NULL DEFAULT '',
+      color                  TEXT NOT NULL DEFAULT '',
+      pack                   INTEGER,
+      qty                    INTEGER,
+      price                  REAL,
+      image                  TEXT,
+      material               TEXT DEFAULT '',
+      main_category          TEXT DEFAULT '',
+      sub_category           TEXT DEFAULT '',
+      sub_sub_category       TEXT DEFAULT '',
+      sub_sub_sub_category   TEXT DEFAULT '',
+      tommur_code            TEXT DEFAULT '',
+      lesso_code             TEXT DEFAULT '',
+      PRIMARY KEY (code, size, color)
+    )
+  `).run();
+  await env.DB.prepare(`
+    INSERT OR IGNORE INTO products_color_pk (
+      code, description, size, color, pack, qty, price, image, material,
+      main_category, sub_category, sub_sub_category, sub_sub_sub_category,
+      tommur_code, lesso_code
+    )
+    SELECT
+      code, description, size, COALESCE(color, ''), pack, qty, price, image,
+      COALESCE(material, ''), COALESCE(main_category, ''), COALESCE(sub_category, ''),
+      COALESCE(sub_sub_category, ''), COALESCE(sub_sub_sub_category, ''),
+      COALESCE(tommur_code, ''), COALESCE(lesso_code, '')
+    FROM products
+  `).run();
+  await env.DB.prepare(`DROP TABLE products`).run();
+  await env.DB.prepare(`ALTER TABLE products_color_pk RENAME TO products`).run();
 }
 
 /**
@@ -1148,6 +1436,10 @@ async function ensureInboundShipmentsTable(env) {
   } catch (_) {}
 }
 
+function isInboundFoamPipe(code) {
+  return code === 'PVC-PIPE-FOAM' || code === 'PVC-PIPE-SOLID';
+}
+
 function parseInboundItems(raw) {
   let items = raw;
   if (typeof raw === 'string') {
@@ -1162,17 +1454,30 @@ function parseInboundItems(raw) {
     .map((it) => {
       const code = normalizeProductCode(it && (it.code || it.sku));
       const size = canonicalizeSize(it && it.size);
-      const qty = parseInt(it && (it.qty ?? it.quantity ?? it.pcs), 10);
-      const cartons = it && it.cartons != null ? parseInt(it.cartons, 10) : null;
       const tommur = it && (it.tommur_code || it.tommur) ? String(it.tommur_code || it.tommur).trim() : '';
+      const cartons = it && it.cartons != null ? parseInt(it.cartons, 10) : null;
+      const pkgs = it && it.pkgs != null ? parseInt(it.pkgs, 10) : cartons;
+      const meters = it && it.meters != null ? parseInt(it.meters, 10) : null;
+      // Foam pipe packing lists: PCS = meters, PKGS = 20 ft lengths (receive qty).
+      // Fittings: PCS = pieces (receive qty), PKGS/cartons = cartons.
+      let qty = parseInt(it && (it.qty ?? it.quantity ?? it.pcs), 10);
+      if (isInboundFoamPipe(code) && Number.isFinite(pkgs) && pkgs > 0) {
+        qty = pkgs;
+      }
       if (!code || !size || !Number.isFinite(qty) || qty <= 0) return null;
-      return {
+      const row = {
         code,
         size,
         qty,
         cartons: Number.isFinite(cartons) ? cartons : null,
         tommur_code: tommur,
       };
+      if (isInboundFoamPipe(code)) {
+        row.pkgs = Number.isFinite(pkgs) ? pkgs : qty;
+        if (Number.isFinite(meters) && meters > 0) row.meters = meters;
+        row.unit = '20ft';
+      }
+      return row;
     })
     .filter(Boolean);
 }
@@ -1339,6 +1644,7 @@ async function ensureRuntimeSchema(env) {
       await ensureAddressesTable(env);
       await ensureProductFactoryColumns(env);
       await ensureProductCategoryColumns(env);
+      await ensureProductColorSchema(env);
       await ensureUsersCompatColumns(env);
       await ensureOrderShipmentColumns(env);
       await ensureOrderPaymentColumns(env);
@@ -1351,6 +1657,12 @@ async function ensureRuntimeSchema(env) {
       try {
         await seedFactoryCodes(env, canonicalizeSize);
       } catch (_) {}
+      try {
+        await ensureAchimCatalogSeed(env);
+      } catch (_) {}
+      try {
+        await maybeSyncNjpdInboundBackorder(env);
+      } catch (_) {}
     })().catch((err) => {
       schemaReadyPromise = null;
       throw err;
@@ -1360,16 +1672,19 @@ async function ensureRuntimeSchema(env) {
 }
 
 const PRODUCTS_SELECT =
-  `SELECT code, description, size, pack, qty, price, image, material,
+  `SELECT code, description, size, color, pack, qty, price, image, material,
           main_category, sub_category, sub_sub_category, sub_sub_sub_category
    FROM products`;
 const PRODUCTS_SELECT_ADMIN =
-  `SELECT code, description, size, pack, qty, price, image, material,
+  `SELECT code, description, size, color, pack, qty, price, image, material,
           main_category, sub_category, sub_sub_category, sub_sub_sub_category,
           tommur_code, lesso_code
    FROM products`;
 
 async function productsCatalogResponse(env, auth) {
+  try {
+    await ensureAchimCatalogSeed(env);
+  } catch (_) {}
   if (auth.admin) {
     const { results } = await env.DB.prepare(PRODUCTS_SELECT_ADMIN).all();
     return jsonResponse(results, 200, { 'Cache-Control': 'private, no-store' });
@@ -1828,6 +2143,7 @@ function toTradeProduct(p) {
     code: p.code,
     description: p.description,
     size: p.size,
+    color: p.color || '',
     size_display: formatSizeDisplay(p.size),
     pack: p.pack,
     qty: p.qty,
@@ -2062,8 +2378,11 @@ function validateAndPriceItems(allProds, items) {
   for (const i of items) {
     const qty = parseInt(i.qty, 10);
     if (!qty || qty < 1) return { error: `Invalid quantity for ${i.code || 'item'}` };
-    const match = findProduct(allProds, i.code, i.size);
+    const match = findProduct(allProds, i.code, i.size, i.color);
     if (!match) return { error: `Product not found: ${i.code} ${i.size}` };
+    if (isQuoteOnlyProduct(match)) {
+      return { error: `Call for pricing: ${match.code} ${match.size}` };
+    }
     // Customer orders may backorder when qty exceeds on-hand (stock floored at 0 on deduct).
     const stock = parseInt(match.qty, 10) || 0;
     const unitPrice = parseFloat(match.price) || 0;
@@ -2072,6 +2391,7 @@ function validateAndPriceItems(allProds, items) {
     validated.push({
       code: match.code,
       size: match.size,
+      color: normalizeColor(match.color),
       description: match.description,
       qty,
       unitPrice,
@@ -2093,7 +2413,7 @@ function validateAdminOrderItems(allProds, items, options = {}) {
   for (const i of items) {
     const qty = parseInt(i.qty, 10);
     if (!qty || qty < 1) return { error: `Invalid quantity for ${i.code || 'item'}` };
-    const match = findProduct(allProds, i.code, i.size);
+    const match = findProduct(allProds, i.code, i.size, i.color);
     if (!match) return { error: `Product not found: ${i.code} ${i.size}` };
     if (checkStock) {
       const stock = parseInt(match.qty, 10) || 0;
@@ -2116,6 +2436,7 @@ function validateAdminOrderItems(allProds, items, options = {}) {
     validated.push({
       code: match.code,
       size: match.size,
+      color: normalizeColor(match.color),
       description: match.description,
       qty,
       qtyShipped,
@@ -2130,7 +2451,12 @@ function validateAdminOrderItems(allProds, items, options = {}) {
 async function restoreOrderItemsStock(env, orderId) {
   const { results: oldItems } = await env.DB.prepare('SELECT * FROM order_items WHERE order_id = ?').bind(orderId).all();
   const stmts = oldItems.map((it) =>
-    env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(it.quantity, it.product_sku, it.size)
+    env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ? AND color = ?').bind(
+      it.quantity,
+      it.product_sku,
+      it.size,
+      normalizeColor(it.color)
+    )
   );
   if (stmts.length) await env.DB.batch(stmts);
   return oldItems;
@@ -2138,9 +2464,154 @@ async function restoreOrderItemsStock(env, orderId) {
 
 async function applyOrderItemsStock(env, items) {
   const stmts = items.map((it) =>
-    env.DB.prepare('UPDATE products SET qty = MAX(0, qty - ?) WHERE code = ? AND size = ?').bind(it.qty, it.code, it.size)
+    env.DB.prepare('UPDATE products SET qty = MAX(0, qty - ?) WHERE code = ? AND size = ? AND color = ?').bind(
+      it.qty,
+      it.code,
+      it.size,
+      normalizeColor(it.color)
+    )
   );
   if (stmts.length) await env.DB.batch(stmts);
+}
+
+/** Packing-list POs for Containers 3–5 (ETA 2026-09-18). All fittings on these are NJPD APBS-000005. */
+const NJPD_C345_INBOUND_IDS = [
+  'inbound-whsu9010053',
+  'inbound-whsu9004718',
+  'inbound-container-5',
+];
+const NJPD_C345_INVOICE_REFS = ['260509-003-SG', '260430-010-SG'];
+
+function isNjpdC345Inbound(row) {
+  if (!row) return false;
+  const id = String(row.id || '').trim().toLowerCase();
+  const inv = String(row.invoice_ref || row.invoiceRef || '').trim();
+  return NJPD_C345_INBOUND_IDS.includes(id) || NJPD_C345_INVOICE_REFS.includes(inv);
+}
+
+const NJPD_BACKORDER_SYNC_NOTE = 'Backorder synced to C3/C4/C5 packing lists';
+
+/**
+ * One-shot: Match NJPD APBS-000005 to C3–C5 packing lists if admin already
+ * imported inbound but the live Worker 404'd the dedicated sync route.
+ * Does not touch on-hand. Idempotent via the order notes marker.
+ */
+async function maybeSyncNjpdInboundBackorder(env) {
+  const order = await env.DB.prepare('SELECT id, notes FROM orders WHERE id = ?')
+    .bind('APBS-000005')
+    .first();
+  if (!order) return { skipped: 'no-order' };
+  if (String(order.notes || '').includes(NJPD_BACKORDER_SYNC_NOTE)) {
+    const { results } = await env.DB.prepare(
+      'SELECT quantity, qty_shipped FROM order_items WHERE order_id = ?'
+    )
+      .bind('APBS-000005')
+      .all();
+    const lines = (results || []).length;
+    const backorderPcs = (results || []).reduce(
+      (s, it) => s + Math.max(0, (parseInt(it.quantity, 10) || 0) - (parseInt(it.qty_shipped, 10) || 0)),
+      0
+    );
+    return { skipped: 'already-synced', lines, backorderPcs };
+  }
+  const result = await syncOrderBackorderFromInbound(env, 'APBS-000005');
+  console.log('NJPD APBS-000005 inbound backorder sync', JSON.stringify(result));
+  return result;
+}
+
+/** Set an open order's remaining qty to inbound fittings (C3/C4/C5). Does not touch on-hand. */
+async function syncOrderBackorderFromInbound(env, orderId) {
+  await ensureInboundShipmentsTable(env);
+  const order = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(orderId).first();
+  if (!order) return { error: 'Order not found: ' + orderId, status: 404 };
+
+  const { results: inboundRows } = await env.DB.prepare(
+    `SELECT * FROM inbound_shipments WHERE status != 'received'`
+  ).all();
+  const incoming = new Map();
+  const usedIds = [];
+  for (const row of inboundRows || []) {
+    if (!isNjpdC345Inbound(row)) continue;
+    usedIds.push(row.id);
+    for (const it of parseInboundItems(row.items_json)) {
+      if (!it.code || it.code === 'PVC-PIPE-FOAM') continue;
+      const key = it.code + '\t' + canonicalizeSize(it.size);
+      incoming.set(key, (incoming.get(key) || 0) + it.qty);
+    }
+  }
+  if (!incoming.size) return { error: 'No inbound fitting lines to sync', status: 400 };
+
+  const { results: itemRows } = await env.DB.prepare(
+    'SELECT * FROM order_items WHERE order_id = ?'
+  ).bind(orderId).all();
+  const { results: allProds } = await env.DB.prepare('SELECT * FROM products').all();
+
+  const byKey = new Map();
+  for (const it of itemRows || []) {
+    const key = normalizeProductCode(it.product_sku) + '\t' + canonicalizeSize(it.size);
+    byKey.set(key, it);
+  }
+
+  const draft = [];
+  const seen = new Set();
+  for (const [key, it] of byKey.entries()) {
+    const shipped = parseInt(it.qty_shipped, 10) || 0;
+    const inboundQty = incoming.get(key) || 0;
+    const qty = shipped + inboundQty;
+    if (qty < 1) continue;
+    seen.add(key);
+    draft.push({
+      code: it.product_sku,
+      size: it.size,
+      color: it.color,
+      qty,
+      qtyShipped: shipped,
+      unitPrice: it.price_at_purchase,
+    });
+  }
+  for (const [key, inboundQty] of incoming.entries()) {
+    if (seen.has(key)) continue;
+    const [code, size] = key.split('\t');
+    draft.push({ code, size, qty: inboundQty, qtyShipped: 0 });
+  }
+
+  const priced = validateAdminOrderItems(allProds, draft, { checkStock: false });
+  if (priced.error) return { error: priced.error, status: 400 };
+  const itemsToSave = priced.validated || [];
+
+  const noteLine =
+    NJPD_BACKORDER_SYNC_NOTE + ' 2026-09-18. All fittings on those containers are for this PO.';
+  let notes = String(order.notes || '').replace(/\s*Backorder synced to C3\/C4\/C5 packing lists[^\n]*/g, '').trim();
+  notes = notes ? notes + '\n' + noteLine : noteLine;
+
+  const stmts = [
+    env.DB.prepare(
+      `UPDATE orders SET total_amount = ?, status = 'partially_shipped', notes = ? WHERE id = ?`
+    ).bind(priced.total || 0, notes, orderId),
+    env.DB.prepare('DELETE FROM order_items WHERE order_id = ?').bind(orderId),
+  ];
+  for (const i of itemsToSave) {
+    stmts.push(
+      env.DB.prepare(
+        'INSERT INTO order_items (order_id, product_sku, size, color, quantity, price_at_purchase, qty_shipped) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      ).bind(orderId, i.code, i.size, normalizeColor(i.color), i.qty, i.unitPrice, i.qtyShipped || 0)
+    );
+  }
+  await env.DB.batch(stmts);
+
+  const backorderPcs = itemsToSave.reduce(
+    (s, it) => s + Math.max(0, (it.qty || 0) - (it.qtyShipped || 0)),
+    0
+  );
+  return {
+    success: true,
+    orderId,
+    lines: itemsToSave.length,
+    backorderPcs,
+    inboundFittingPcs: [...incoming.values()].reduce((s, n) => s + n, 0),
+    inboundIds: usedIds,
+    total: priced.total || 0,
+  };
 }
 
 /**
@@ -2430,7 +2901,29 @@ export default {
     try {
       // Fast public routes: skip schema/migration boot (was ~3–4s of D1 round-trips).
       if (path === '/api/health' && request.method === 'GET') {
-        return jsonResponse({ status: 'ok' });
+        if (url.searchParams.get('njpd') === '1') {
+          await ensureRuntimeSchema(env);
+          let njpd = null;
+          try {
+            njpd = await maybeSyncNjpdInboundBackorder(env);
+          } catch (e) {
+            njpd = { error: String(e && e.message ? e.message : e) };
+          }
+          return jsonResponse({
+            status: 'ok',
+            rev: 'njpd-c345-backorder',
+            njpd: njpd && {
+              success: !!njpd.success,
+              skipped: njpd.skipped || null,
+              error: njpd.error || null,
+              lines: njpd.lines,
+              backorderPcs: njpd.backorderPcs,
+              inboundFittingPcs: njpd.inboundFittingPcs,
+              inboundIds: njpd.inboundIds,
+            },
+          });
+        }
+        return jsonResponse({ status: 'ok', rev: 'njpd-c345-backorder' });
       }
 
       // Public printable invoice HTML / PDF (linked + attached from invoice emails).
@@ -2761,8 +3254,8 @@ export default {
             for (const i of priced.validated) {
               stmts.push(
                 env.DB.prepare(
-                  'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?)'
-                ).bind(orderId, i.code, i.size, i.qty, i.unitPrice)
+                  'INSERT INTO order_items (order_id, product_sku, size, color, quantity, price_at_purchase) VALUES (?, ?, ?, ?, ?, ?)'
+                ).bind(orderId, i.code, i.size, normalizeColor(i.color), i.qty, i.unitPrice)
               );
             }
             await env.DB.batch(stmts);
@@ -3158,7 +3651,7 @@ export default {
           const code = normalizeProductCode(p.code);
           const size = canonicalizeSize(p.size);
           if (!code || !size) continue;
-          const key = code + '\0' + size;
+          const key = code + '\0' + size + '\0' + normalizeColor(p.color);
           if (seen.has(key)) continue;
           seen.add(key);
           stmts.push(
@@ -3184,10 +3677,11 @@ export default {
           const size = canonicalizeSize(p.size);
           if (!code || !size) continue;
           const cats = productCategoryFields(p);
-          incoming.set(code + '\0' + size, {
+          incoming.set(code + '\0' + size + '\0' + normalizeColor(p.color), {
             code,
             description: p.description,
             size,
+            color: normalizeColor(p.color),
             pack: p.pack,
             qty: p.qty == null || p.qty === '' ? 0 : p.qty,
             price: roundMoney(p.price),
@@ -3226,14 +3720,18 @@ export default {
             if (canonicalizeSize(row.size) !== p.size) continue;
             if (normalizeSize(row.size) === p.size) continue;
             stmts.push(
-              env.DB.prepare('DELETE FROM products WHERE code = ? AND size = ?').bind(row.code, row.size)
+              env.DB.prepare('DELETE FROM products WHERE code = ? AND size = ? AND color = ?').bind(
+                row.code,
+                row.size,
+                normalizeColor(row.color)
+              )
             );
           }
           stmts.push(
             env.DB.prepare(`
             INSERT INTO products (${PRODUCT_INSERT_COLS})
             VALUES (${PRODUCT_INSERT_PLACEHOLDERS})
-            ON CONFLICT(code, size) DO UPDATE SET
+            ON CONFLICT(code, size, color) DO UPDATE SET
               description=excluded.description, pack=excluded.pack,
               qty=excluded.qty, price=excluded.price, image=excluded.image,
               material=excluded.material,
@@ -3266,7 +3764,7 @@ export default {
           return jsonResponse({ error: 'No items to receive' }, 400);
         }
 
-        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, color, qty FROM products').all();
         const stmts = [];
         const missing = [];
         const applied = [];
@@ -3284,7 +3782,7 @@ export default {
             missing.push({ code, size, qty: addQty, error: 'Invalid qty (must be positive)' });
             continue;
           }
-          const match = findProduct(allProds, code, size);
+          const match = findProduct(allProds, code, size, raw.color);
           if (!match) {
             missing.push({ code, size, qty: addQty, error: 'Product not found' });
             continue;
@@ -3292,10 +3790,11 @@ export default {
           const before = parseInt(match.qty, 10) || 0;
           const after = before + addQty;
           stmts.push(
-            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(
+            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ? AND color = ?').bind(
               addQty,
               match.code,
-              match.size
+              match.size,
+              normalizeColor(match.color)
             )
           );
           applied.push({ code: match.code, size: match.size, before, delta: addQty, after });
@@ -3326,7 +3825,7 @@ export default {
           return jsonResponse({ error: 'No items to adjust' }, 400);
         }
 
-        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, color, qty FROM products').all();
         const stmts = [];
         const missing = [];
         const applied = [];
@@ -3344,7 +3843,7 @@ export default {
             missing.push({ code, size, delta, error: 'Invalid delta (must be non-zero integer)' });
             continue;
           }
-          const match = findProduct(allProds, code, size);
+          const match = findProduct(allProds, code, size, raw.color);
           if (!match) {
             missing.push({ code, size, delta, error: 'Product not found' });
             continue;
@@ -3352,10 +3851,11 @@ export default {
           const before = parseInt(match.qty, 10) || 0;
           const after = Math.max(0, before + delta);
           stmts.push(
-            env.DB.prepare('UPDATE products SET qty = ? WHERE code = ? AND size = ?').bind(
+            env.DB.prepare('UPDATE products SET qty = ? WHERE code = ? AND size = ? AND color = ?').bind(
               after,
               match.code,
-              match.size
+              match.size,
+              normalizeColor(match.color)
             )
           );
           applied.push({ code: match.code, size: match.size, before, delta, after });
@@ -3400,7 +3900,14 @@ export default {
         q += ` ORDER BY CASE status WHEN 'in_transit' THEN 0 WHEN 'arrived' THEN 1 WHEN 'received' THEN 2 ELSE 3 END, eta ASC, container_number ASC`;
         const stmt = env.DB.prepare(q);
         const { results } = binds.length ? await stmt.bind(...binds).all() : await stmt.all();
-        return jsonResponse({ shipments: (results || []).map(formatInboundRow) });
+        let njpdBackorder = null;
+        try {
+          njpdBackorder = await maybeSyncNjpdInboundBackorder(env);
+        } catch (_) {}
+        return jsonResponse({
+          shipments: (results || []).map(formatInboundRow),
+          njpdBackorder,
+        });
       }
 
       if (path === '/api/admin/inbound' && request.method === 'POST') {
@@ -3442,13 +3949,13 @@ export default {
         const items = parseInboundItems(row.items_json);
         if (!items.length) return jsonResponse({ error: 'No line items to receive' }, 400);
 
-        const { results: allProds } = await env.DB.prepare('SELECT code, size, qty FROM products').all();
+        const { results: allProds } = await env.DB.prepare('SELECT code, size, color, qty FROM products').all();
         const stmts = [];
         const missing = [];
         const applied = [];
         let updated = 0;
         for (const raw of items) {
-          const match = findProduct(allProds, raw.code, raw.size);
+          const match = findProduct(allProds, raw.code, raw.size, raw.color);
           if (!match) {
             missing.push({ code: raw.code, size: raw.size, qty: raw.qty, error: 'Product not found' });
             continue;
@@ -3456,10 +3963,11 @@ export default {
           const before = parseInt(match.qty, 10) || 0;
           const after = before + raw.qty;
           stmts.push(
-            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ?').bind(
+            env.DB.prepare('UPDATE products SET qty = qty + ? WHERE code = ? AND size = ? AND color = ?').bind(
               raw.qty,
               match.code,
-              match.size
+              match.size,
+              normalizeColor(match.color)
             )
           );
           applied.push({ code: match.code, size: match.size, before, delta: raw.qty, after });
@@ -3569,6 +4077,14 @@ export default {
         return jsonResponse(result);
       }
 
+      if (path === '/api/admin/orders/sync-inbound-backorder' && request.method === 'POST') {
+        const body = await request.json().catch(() => ({}));
+        const orderId = String(body.orderId || body.id || 'APBS-000005').trim();
+        const result = await syncOrderBackorderFromInbound(env, orderId);
+        if (result.error) return jsonResponse({ error: result.error }, result.status || 400);
+        return jsonResponse(result);
+      }
+
       if (path === '/api/admin/orders' && request.method === 'POST') {
         const o = await request.json();
 
@@ -3645,22 +4161,24 @@ export default {
         for (const i of itemsToSave) {
           stmts.push(
             env.DB.prepare(
-              'INSERT INTO order_items (order_id, product_sku, size, quantity, price_at_purchase, qty_shipped) VALUES (?, ?, ?, ?, ?, ?)'
-            ).bind(o.id, i.code, i.size, i.qty, i.unitPrice, i.qtyShipped || 0)
+              'INSERT INTO order_items (order_id, product_sku, size, color, quantity, price_at_purchase, qty_shipped) VALUES (?, ?, ?, ?, ?, ?, ?)'
+            ).bind(o.id, i.code, i.size, normalizeColor(i.color), i.qty, i.unitPrice, i.qtyShipped || 0)
           );
         }
 
-        // Release prior reservation only after validation succeeds. If the write
-        // fails, re-apply the old reservation so inventory is not left inflated.
-        const oldItems = await restoreOrderItemsStock(env, o.id);
+        // skipStock: backorder-only edits (inbound not yet on hand) must not
+        // deduct warehouse qty. Default path still restores + re-applies.
+        const skipStock = o.skipStock === true;
+        const oldItems = skipStock ? [] : await restoreOrderItemsStock(env, o.id);
         const reapplyOldStock = async () => {
-          if (!oldItems || !oldItems.length) return;
+          if (skipStock || !oldItems || !oldItems.length) return;
           await applyOrderItemsStock(
             env,
             oldItems.map((it) => ({
               qty: parseInt(it.quantity, 10) || 0,
               code: it.product_sku,
               size: it.size,
+              color: it.color,
             }))
           );
         };
@@ -3671,7 +4189,7 @@ export default {
           throw err;
         }
 
-        if (o.status !== 'cancelled' && itemsToSave.length > 0) {
+        if (!skipStock && o.status !== 'cancelled' && itemsToSave.length > 0) {
           try {
             await applyOrderItemsStock(env, itemsToSave);
           } catch (err) {

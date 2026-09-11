@@ -1,0 +1,174 @@
+family,code,desc,size,unit,fob8,fob10,fob_delta_pct,moq,pack,cbm,gw,lead,nsf,units_carton,ocean_unit,landed,our_fob,our_src,tommur_ddp,zhenpeng,site,verdict
+PEX-B pipe,PEX-B PIPE,"PEX-B potable pipe, 20 ft stick","1/2""",ft,0.082,0.081,-1.2,30000,20ft/stick 50sticks/bag,0.09,,25,NSF UPC CSA,1000.0,0.0133,0.1291,0.0915,Tommur FOB,0.0963,,0.37,Palconn cheaper FOB than Tommur
+PEX-B pipe,PEX-B PIPE,"PEX-B potable pipe, 100 ft coil","1/2""",ft,0.082,0.081,-1.2,30000,100,0.025,,25,NSF UPC CSA,100.0,0.0369,0.1527,0.0915,Tommur FOB,0.0963,,0.37,Palconn cheaper FOB than Tommur
+PEX-B pipe,PEX-B PIPE,"PEX-B potable pipe, 20 ft stick","3/4""",ft,0.159,0.157,-1.3,30000,20ft/stick 25sticks/bag,0.09,,25,NSF UPC CSA,500.0,0.0266,0.2511,0.1717,Tommur FOB,0.1807,,0.69,Palconn cheaper FOB than Tommur
+PEX-B pipe,PEX-B PIPE,"PEX-B potable pipe, 100 ft coil","3/4""",ft,0.159,0.157,-1.3,30000,100,0.043,,25,NSF UPC CSA,100.0,0.0635,0.288,0.1717,Tommur FOB,0.1807,,0.69,Palconn cheaper FOB than Tommur
+PEX-B pipe,PEX-B PIPE,"PEX-B potable pipe, 20 ft stick","1""",ft,0.259,0.256,-1.2,20000,20ft/stick 20sticks/bag,0.09,,25,NSF UPC CSA,400.0,0.0332,0.3993,0.2941,Tommur FOB,0.3096,,1.18,Palconn cheaper FOB than Tommur
+PEX-B pipe,PEX-B PIPE,"PEX-B potable pipe, 100 ft coil","1""",ft,0.259,0.256,-1.2,20000,100,0.064,,25,NSF UPC CSA,100.0,0.0945,0.4606,0.2941,Tommur FOB,0.3096,,1.18,Palconn cheaper FOB than Tommur
+PEX F2159 PPSU,PEX-ELBOW,90 elbow F2159 PPSU crimp,"1/2""",pc,0.156037151702786,0.148235294117647,-5.0,3000,600,0.012,,25,NSF UPC CSA,600.0,0.003,0.215,0.4659,Zhenpeng REV FOB,0.4904,0.167,1.86,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-ELBOW,90 elbow F2159 PPSU crimp,"3/4""",pc,0.330650154798762,0.314117647058824,-5.0,3000,300,0.012,,25,NSF UPC CSA,300.0,0.0059,0.4551,0.7896,Zhenpeng REV FOB,0.8311,0.342,3.16,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-ELBOW,90 elbow F2159 PPSU crimp,"1""",pc,0.624148606811145,0.592941176470588,-5.0,3000,150,0.012,,25,NSF UPC CSA,150.0,0.0118,0.8597,0.574,Zhenpeng REV FOB,,0.574,,Zhenpeng cheaper FOB
+PEX F2159 PPSU,PEX-CPLNG,Coupling F2159 PPSU crimp,"1/2""",pc,0.107739938080495,0.10235294117647,-5.0,3000,1000,0.012,,25,NSF UPC CSA,1000.0,0.0018,0.1482,0.104,Zhenpeng REV FOB,,0.104,,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-CPLNG,Coupling F2159 PPSU crimp,"3/4""",pc,0.204334365325077,0.194117647058823,-5.0,3000,500,0.012,,25,NSF UPC CSA,500.0,0.0035,0.2811,0.201,Zhenpeng REV FOB,,0.201,,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-CPLNG,Coupling F2159 PPSU crimp,"1""",pc,0.378947368421053,0.36,-5.0,3000,200,0.012,,25,NSF UPC CSA,200.0,0.0089,0.5237,0.427,Zhenpeng REV FOB,,0.427,,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-TEE,Tee F2159 PPSU crimp,"1/2""",pc,0.222910216718266,0.211764705882353,-5.0,3200,400,0.012,,25,NSF UPC CSA,400.0,0.0044,0.3072,0.23,Zhenpeng REV FOB,,0.23,,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-TEE,Tee F2159 PPSU crimp,"3/4""",pc,0.445820433436533,0.423529411764706,-5.0,3000,200,0.012,,25,NSF UPC CSA,200.0,0.0089,0.6145,0.474,Zhenpeng REV FOB,,0.474,,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-TEE,Tee F2159 PPSU crimp,"1""",pc,0.928792569659443,0.882352941176471,-5.0,3000,100,0.012,,25,NSF UPC CSA,100.0,0.0177,1.2795,0.91,Zhenpeng REV FOB,,0.91,,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-REDUCER,Reducing coupling F2159 PPSU,"3/4"" x 1/2""",pc,0.1671826625387,0.158823529411765,-5.0,3000,500,0.012,,25,NSF UPC CSA,500.0,0.0035,0.2306,0.501,Tommur FOB,0.5274,,2.0,Palconn cheaper FOB than Tommur
+PEX F2159 PPSU,PEX-REDUCER,Reducing coupling F2159 PPSU,"1"" x 1/2""",pc,0.271207430340557,0.257647058823529,-5.0,3000,300,0.012,,25,NSF UPC CSA,300.0,0.0059,0.3743,0.7825,Tommur FOB,0.8237,,3.13,Palconn cheaper FOB than Tommur
+PEX F2159 PPSU,PEX-REDUCER,Reducing coupling F2159 PPSU,"1"" x 3/4""",pc,0.304643962848297,0.289411764705882,-5.0,3000,200,0.012,,25,NSF UPC CSA,200.0,0.0089,0.4228,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"3/4"" x 3/4"" x 1/2""",pc,0.371517027863777,0.352941176470588,-5.0,3000,250,0.012,,25,NSF UPC CSA,250.0,0.0071,0.5118,0.441,Zhenpeng REV FOB,,0.441,,Palconn cheaper FOB than Zhenpeng
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"1"" x 1"" x 3/4""",pc,0.668730650154799,0.635294117647059,-5.0,3000,100,0.012,,25,NSF UPC CSA,100.0,0.0177,0.9262,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"1"" x 1"" x 1/2""",pc,0.579566563467492,0.550588235294117,-5.0,3000,150,0.012,,25,NSF UPC CSA,150.0,0.0118,0.7991,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"1/2"" x 1/2"" x 3/4""",pc,,0.275294117647059,,3000,200,0.012,,,,200.0,0.0089,0.4026,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"1"" x 3/4"" x 1""",pc,,0.705882352941177,,3000,150,0.012,,,,150.0,0.0118,1.0212,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"1"" x 3/4"" x 3/4""",pc,,0.564705882352941,,3000,150,0.012,,,,150.0,0.0118,0.8193,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"3/4"" x 1/2"" x 1/2""",pc,,0.3,,3000,300,0.012,,,,300.0,0.0059,0.4349,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"3/4"" x 1/2"" x 3/4""",pc,,0.370588235294118,,3000,250,0.012,,,,250.0,0.0071,0.537,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,"3/4"" x 3/4"" x 1""",pc,,0.547058823529412,,3000,100,0.012,,,,100.0,0.0177,0.8,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-PLUG,Plug F2159 PPSU,"1/2""",pc,0.0705882352941176,0.0670588235294117,-5.0,4000,2000,0.012,,25,NSF UPC CSA,2000.0,0.0009,0.0968,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-PLUG,Plug F2159 PPSU,"3/4""",pc,0.130030959752322,0.123529411764706,-5.0,3000,1000,0.012,,25,NSF UPC CSA,1000.0,0.0018,0.1784,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-PLUG,Plug F2159 PPSU,"1""",pc,0.241486068111455,0.229411764705882,-5.0,3000,600,0.012,,25,NSF UPC CSA,600.0,0.003,0.3311,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-MADPTR,Male adapter PEX x MIPT F2159 PPSU,"1/2""",pc,0.204334365325077,0.194117647058823,-5.0,3600,600,0.012,,25,NSF UPC CSA,600.0,0.003,0.2806,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-MADPTR,Male adapter PEX x MIPT F2159 PPSU,"3/4""",pc,0.326934984520124,0.310588235294118,-5.0,3000,300,0.012,,25,NSF UPC CSA,300.0,0.0059,0.45,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-MADPTR,Male adapter PEX x MIPT F2159 PPSU,"1""",pc,0.631578947368421,0.6,-5.0,3000,100,0.012,,25,NSF UPC CSA,100.0,0.0177,0.8757,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-FADPTR,Female swivel adapter PEX x FIPT F2159 PPSU,"1/2""",pc,0.330827067669173,0.314285714285714,-5.0,3200,400,0.012,,25,NSF UPC CSA,400.0,0.0044,0.4538,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-FADPTR,Female swivel adapter PEX x FIPT F2159 PPSU,"3/4""",pc,0.511278195488722,0.485714285714286,-5.0,3000,200,0.012,,25,NSF UPC CSA,200.0,0.0089,0.7035,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-FADPTR,Female swivel adapter PEX x FIPT F2159 PPSU,"1""",pc,,,,//,,,,25,NSF UPC CSA,,,,,,,,,Not quoted
+PEX F2159 PPSU,PEX-DE90,Drop-ear / male elbow PEX x MPT F2159 PPSU,"1/2""",pc,0.378947368421053,0.36,-5.0,3200,400,0.012,,25,NSF UPC CSA,400.0,0.0044,0.5192,,,,,,No mill compare (new line)
+PEX F2159 PPSU,PEX-DE90,Drop-ear / male elbow PEX x MPT F2159 PPSU,"3/4""",pc,0.661654135338346,0.628571428571429,-5.0,3000,300,0.012,,25,NSF UPC CSA,300.0,0.0059,0.9048,,,,,,No mill compare (new line)
+PEX F1807 brass,PEX-F1807-CPLNG,Coupling F1807 brass crimp,"1/2""",pc,0.359299516908212,0.359299516908212,0.0,3000,700,0.012,,50,NSF UPC CSA,700.0,0.0025,0.5163,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-CPLNG,Coupling F1807 brass crimp,"3/4""",pc,0.504898013955985,0.504898013955985,0.0,3000,400,0.012,,50,NSF UPC CSA,400.0,0.0044,0.7264,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-CPLNG,Coupling F1807 brass crimp,"1""",pc,0.965177133655394,0.965177133655394,0.0,3000,240,0.012,,50,NSF UPC CSA,240.0,0.0074,1.3876,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-ELBOW,90 elbow F1807 brass crimp,"1/2""",pc,0.493156199677939,0.493156199677939,0.0,3000,700,0.012,,50,NSF UPC CSA,700.0,0.0025,0.7077,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-ELBOW,90 elbow F1807 brass crimp,"3/4""",pc,0.774959742351046,0.774959742351046,0.0,3000,300,0.012,,50,NSF UPC CSA,300.0,0.0059,1.1141,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-ELBOW,90 elbow F1807 brass crimp,"1""",pc,1.50295222758991,1.50295222758991,0.0,3000,120,0.012,,50,NSF UPC CSA,120.0,0.0148,2.164,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-TEE,Tee F1807 brass crimp,"1/2""",pc,0.658979372747489,0.658979372747489,0.0,3000,500,0.012,,50,NSF UPC CSA,500.0,0.0035,0.9458,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-TEE,Tee F1807 brass crimp,"3/4""",pc,1.05436699639598,1.05436699639598,0.0,3000,250,0.012,,50,NSF UPC CSA,250.0,0.0071,1.5148,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-TEE,Tee F1807 brass crimp,"1""",pc,1.899,1.899,0.0,3000,150,0.012,,50,NSF UPC CSA,150.0,0.0118,2.7274,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-PLUG,Plug F1807 brass crimp,"1/2""",pc,0.270061728395062,0.270061728395062,0.0,3000,1200,0.012,,50,NSF UPC CSA,1200.0,0.0015,0.3877,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-PLUG,Plug F1807 brass crimp,"3/4""",pc,0.387479871175523,0.387479871175523,0.0,3000,700,0.012,,50,NSF UPC CSA,700.0,0.0025,0.5566,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-PLUG,Plug F1807 brass crimp,"1""",pc,0.681025228126677,0.681025228126677,0.0,3000,500,0.012,,50,NSF UPC CSA,500.0,0.0035,0.9774,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-REDCPL,Reducing coupling F1807 brass,"3/4"" x 1/2""",pc,0.479066022544283,0.479066022544283,0.0,3000,500,0.012,,50,NSF UPC CSA,500.0,0.0035,0.6886,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-REDCPL,Reducing coupling F1807 brass,"1"" x 3/4""",pc,0.810185185185185,0.810185185185185,0.0,3000,300,0.012,,50,NSF UPC CSA,300.0,0.0059,1.1645,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-REDCPL,Reducing coupling F1807 brass,"1"" x 1/2""",pc,0.732,0.732,0.0,3000,300,0.012,,50,NSF UPC CSA,300.0,0.0059,1.0527,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-REDTEE,Reducing tee F1807 brass,"3/4"" x 3/4"" x 1/2""",pc,0.970496894409938,0.970496894409938,0.0,3000,300,0.012,,50,NSF UPC CSA,300.0,0.0059,1.3937,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-REDTEE,Reducing tee F1807 brass,"1"" x 1"" x 3/4""",pc,1.55575065847234,1.55575065847234,0.0,3000,150,0.012,,50,NSF UPC CSA,150.0,0.0118,2.2365,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-REDTEE,Reducing tee F1807 brass,"1"" x 1"" x 1/2""",pc,1.36084284460053,1.36084284460053,0.0,3000,200,0.012,,50,NSF UPC CSA,200.0,0.0089,1.9549,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-MADPTR,PEX x MIPT adapter F1807 brass,"1/2""",pc,0.739734299516908,0.739734299516908,0.0,3000,300,0.012,,50,NSF UPC CSA,300.0,0.0059,1.0637,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-MADPTR,PEX x MIPT adapter F1807 brass,"3/4""",pc,1.13895598497048,1.13895598497048,0.0,3000,200,0.012,,50,NSF UPC CSA,200.0,0.0089,1.6376,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-MADPTR,PEX x MIPT adapter F1807 brass,"1""",pc,1.69082125603865,1.69082125603865,0.0,3000,120,0.012,,50,NSF UPC CSA,120.0,0.0148,2.4327,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-FADPTR,PEX x FIPT adapter F1807 brass,"1/2""",pc,0.739734299516908,0.739734299516908,0.0,3000,300,0.012,,50,NSF UPC CSA,300.0,0.0059,1.0637,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-FADPTR,PEX x FIPT adapter F1807 brass,"3/4""",pc,1.13895598497048,1.13895598497048,0.0,3000,200,0.012,,50,NSF UPC CSA,200.0,0.0089,1.6376,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-FADPTR,PEX x FIPT adapter F1807 brass,"1""",pc,1.69082125603865,1.69082125603865,0.0,3000,120,0.012,,50,NSF UPC CSA,120.0,0.0148,2.4327,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-DE90,Drop-ear 90 FPT F1807 brass,"1/2""",pc,1.79649758454106,1.79649758454106,0.0,3000,200,0.012,,50,NSF UPC CSA,200.0,0.0089,2.5779,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-DE90,Drop-ear 90 FPT F1807 brass,"3/4""",pc,1.999,1.999,0.0,3000,100,0.012,,50,NSF UPC CSA,100.0,0.0177,2.8763,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-RING,Copper crimp ring,"1/2""",pc,0.138504155124654,0.138504155124654,0.0,30000,2000,0.012,,50,NSF UPC CSA,2000.0,0.0009,0.199,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-RING,Copper crimp ring,"3/4""",pc,0.198522622345337,0.198522622345337,0.0,20000,1000,0.012,,50,NSF UPC CSA,1000.0,0.0018,0.2857,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-RING,Copper crimp ring,"1""",pc,0.244690674053555,0.244690674053555,0.0,10000,500,0.012,,50,NSF UPC CSA,500.0,0.0035,0.3534,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-CLAMP,Stainless steel pinch clamp,"1/2""",pc,0.0654577620521893,0.0654577620521893,0.0,30000,2000,0.012,,50,NSF UPC CSA,2000.0,0.0009,0.0945,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-CLAMP,Stainless steel pinch clamp,"3/4""",pc,0.0937638213180009,0.0937638213180009,0.0,20000,1000,0.012,,50,NSF UPC CSA,1000.0,0.0018,0.1359,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-CLAMP,Stainless steel pinch clamp,"1""",pc,0.132684652808492,0.132684652808492,0.0,10000,500,0.012,,50,NSF UPC CSA,500.0,0.0035,0.1932,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-VALVE,PEX x PEX ball valve F1807,"1/2""",pc,2.38430718503182,2.38430718503182,0.0,1000,100,0.012,,50,NSF UPC CSA,100.0,0.0177,3.4273,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-VALVE,PEX x PEX ball valve F1807,"3/4""",pc,3.10319377348363,3.10319377348363,0.0,1000,100,0.012,,50,NSF UPC CSA,100.0,0.0177,4.4553,,,,,,Palconn only mill
+PEX F1807 brass,PEX-F1807-VALVE,PEX x PEX ball valve F1807,"1""",pc,4.37322674641515,4.37322674641515,0.0,1000,80,0.012,,50,NSF UPC CSA,80.0,0.0222,6.2759,,,,,,Palconn only mill
+PEX outlet boxes,PEX-WMBOX,"Washing machine outlet box 1/2 F1807, no WHA","1/2""",pc,12.99,12.99,0.0,300,10,0.03,,50,NSF UPC CSA,10.0,0.4431,19.0188,,,,,,Palconn only mill
+PEX outlet boxes,PEX-WMBOX-WHA,Washing machine outlet box 1/2 F1807 with water-hammer arrestors,"1/2""",pc,20.99,20.99,0.0,300,10,0.03,,50,NSF UPC CSA,10.0,0.4431,30.4588,,,,,,Palconn only mill
+PEX outlet boxes,PEX-ICEBOX,Ice maker outlet box 1/2 F1807,"1/2""",pc,7.09,7.09,0.0,300,10,0.03,,50,NSF UPC CSA,10.0,0.4431,10.5818,,,,,,Palconn only mill
+PVC Sch40 pipe,PVC-PIPE-SOLID,ASTM D1785 Sch 40 PVC solid pipe,"1-1/2""",20 ft stick,6.96063422583059,6.96063422583059,0.0,1100,20,0.012,4.92271520526797,25,NSF UPC CSA,1.0,1.7725,11.7262,,,,,1.03,CBM in; keep Tommur for PVC pipe
+PVC Sch40 pipe,PVC-PIPE-SOLID,ASTM D1785 Sch 40 PVC solid pipe,"2""",20 ft stick,9.35823155499209,9.35823155499209,0.0,1200,20,0.018,6.61834931639163,25,NSF UPC CSA,1.0,2.6588,16.0411,,,,,14.75,Landed above site sell — keep Tommur
+PVC Sch40 pipe,PVC-PIPE-SOLID,ASTM D1785 Sch 40 PVC solid pipe,"3""",20 ft stick,19.4290423741341,19.4290423741341,0.0,1200,20,0.038,13.7406505234849,25,NSF UPC CSA,1.0,5.613,33.3965,,,,,27.5,Landed above site sell — keep Tommur
+PVC Sch40 pipe,PVC-PIPE-SOLID,ASTM D1785 Sch 40 PVC solid pipe,"4""",20 ft stick,27.6570381124619,27.6570381124619,0.0,1100,20,0.065,19.55967195398,25,NSF UPC CSA,1.0,9.6012,49.1508,,,,,50.0,Landed under site (tight) — still Tommur unless FOB pipe exists
+PVC foam-core pipe,PVC-PIPE-FOAM,ASTM F891 PVC foam-core DWV pipe,"1-1/2""",20 ft stick,5.03730108448266,5.03730108448266,0.0,1600,20,0.012,3.56249126697024,25,NSF UPC CSA,1.0,1.7725,8.9758,,,,,9.25,Landed under site (tight) — still Tommur unless FOB pipe exists
+PVC foam-core pipe,PVC-PIPE-FOAM,ASTM F891 PVC foam-core DWV pipe,"2""",20 ft stick,6.77240441479691,6.77240441479691,0.0,1600,20,0.018,4.78959490002026,25,NSF UPC CSA,1.0,2.6588,12.3433,,,,,11.0,Landed above site sell — keep Tommur
+PVC foam-core pipe,PVC-PIPE-FOAM,ASTM F891 PVC foam-core DWV pipe,"3""",20 ft stick,14.0604911918076,14.0604911918076,0.0,1600,20,0.038,9.94389182620614,25,NSF UPC CSA,1.0,5.613,25.7195,,,,,19.0,Landed above site sell — keep Tommur
+PVC foam-core pipe,PVC-PIPE-FOAM,ASTM F891 PVC foam-core DWV pipe,"4""",20 ft stick,20.0149617919133,20.0149617919133,0.0,1600,20,0.065,14.1550257561698,25,NSF UPC CSA,1.0,9.6012,38.2226,,,,,27.6,Landed above site sell — keep Tommur
+PVC DWV fittings,PVC-1/16HH,1/16 BEND (H x H),"1-1/2""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.162,,1.36,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/16HH,1/16 BEND (H x H),"2""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.2441,,0.91,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/16HH,1/16 BEND (H x H),"3""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.81,,2.65,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/16HS,"1/16 BEND, STREET (H x S)","1-1/2""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.1519,,2.05,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/16HS,"1/16 BEND, STREET (H x S)","2""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.2509,,2.26,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/16HS,"1/16 BEND, STREET (H x S)","3""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.7538,,7.46,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HH,1/4 BEND (H x H),"1-1/2""",pc,,,,,,,,25,NSF UPC CSA,,,,0.2307,Tommur FOB,0.2655,,0.53,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HH,1/4 BEND (H x H),"2""",pc,,,,,,,,25,NSF UPC CSA,,,,0.3734,Tommur FOB,0.4298,,0.86,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HH,1/4 BEND (H x H),"3""",pc,1.1945566286216,,,200,20,0.1,,25,NSF UPC CSA,20.0,0.7386,,1.1046,Tommur FOB,1.2712,,2.65,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HH,1/4 BEND (H x H),"4""",pc,2.35715539947322,,,100,10,0.1,,25,NSF UPC CSA,10.0,1.4771,,2.1055,Tommur FOB,2.2163,,4.99,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HH,1/4 BEND (H × H),"6""",pc,,,,,,,,25,NSF UPC CSA,,,,5.7095,Tommur FOB,6.01,,22.84,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"2""",pc,0.464442493415277,,,1440,144,0.1,,25,NSF UPC CSA,144.0,0.1026,,,,0.5153,,1.34,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"3""",pc,1.24635645302897,,,600,60,0.1,,25,NSF UPC CSA,60.0,0.2462,,,,1.485,,3.17,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HHLNG,LONG SWEEP 1/4 BEND (H x H),"4""",pc,2.4451273046532,,,280,28,0.1,,25,NSF UPC CSA,28.0,0.5275,,,,2.5875,,6.47,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HS,"1/4 BEND, STREET (H x S)","1-1/2""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.2295,,0.7,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HS,"1/4 BEND, STREET (H x S)","2""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.3848,,0.99,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HS,"1/4 BEND, STREET (H x S)","3""",pc,,,,,,,,25,NSF UPC CSA,,,,,,1.215,,2.95,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4HS,"1/4 BEND, STREET (H x S)","4""",pc,,,,,,,,25,NSF UPC CSA,,,,,,2.16,,4.86,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/4LOWHEEL,1/4 BEND W/ LOW HEEL INLET (H x H x H),"3"" x 3"" x 2""",pc,1.64934152765584,,,200,20,0.1,,25,NSF UPC CSA,20.0,0.7386,,,,1.3163,,4.11,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HH,1/8 BEND (H x H),"1-1/2""",pc,0.314661984196664,,,2500,250,0.1,,25,NSF UPC CSA,250.0,0.0591,,,,0.2273,,0.52,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HH,1/8 BEND (H x H),"2""",pc,0.464442493415277,,,1440,144,0.1,,25,NSF UPC CSA,144.0,0.1026,,0.306,Tommur FOB,0.3521,,0.79,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HH,1/8 BEND (H x H),"3""",pc,1.24635645302897,,,600,60,0.1,,25,NSF UPC CSA,60.0,0.2462,,0.9091,Tommur FOB,1.0462,,2.16,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HH,1/8 BEND (H x H),"4""",pc,2.4451273046532,,,280,28,0.1,,25,NSF UPC CSA,28.0,0.5275,,1.6227,Tommur FOB,1.8675,,4.11,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HH,1/8 BEND (H × H),"6""",pc,,,,,,,,25,NSF UPC CSA,,,,3.5094,Tommur FOB,3.6941,,14.04,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HH,1/8 BEND (H × H),"8""",pc,,,,,,,,25,NSF UPC CSA,,,,6.7353,Tommur FOB,7.0898,,26.94,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HS,1/8 BEND STREET (H x S),"1-1/2""",pc,,,,,,,,25,NSF UPC CSA,,,,,,0.2273,,0.49,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HS,1/8 BEND STREET (H x S),"2""",pc,,,,,,,,,NSF UPC CSA,,,,,,0.35,,0.82,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HS,1/8 BEND STREET (H x S),"3""",pc,,,,,,,,,NSF UPC CSA,,,,,,1.0013,,2.22,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-1/8HS,1/8 BEND STREET (H x S),"4""",pc,,,,,,,,,NSF UPC CSA,,,,,,1.6,,3.87,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-45ELLSOC,45° ELL (SOC × SOC),"10""",pc,,,,,,,,,NSF UPC CSA,,,,,,,,68.59,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"2"" x 1-1/2""",pc,0.144161545215101,,,3000,300,0.1,,,NSF UPC CSA,300.0,0.0492,,,,0.1215,,0.85,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"3"" x 2""",pc,0.534328358208955,,,1300,130,0.1,,,NSF UPC CSA,130.0,0.1136,,,,0.459,,1.15,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-BUSHINGHS,FLUSH BUSHING (H x S),"4"" x 3""",pc,1.00438981562774,,,980,98,0.1,,,NSF UPC CSA,98.0,0.1507,,,,0.6188,,2.01,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CAPSOC,CAP (SOC),"1-1/2""",pc,0.177699736611062,,,1680,168,0.1,,,NSF UPC CSA,168.0,0.0879,,,,0.0906,,0.65,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CAPSOC,CAP (SOC),"2""",pc,0.274100087796313,,,1250,125,0.1,,,NSF UPC CSA,125.0,0.1182,,,,0.1294,,1.48,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CAPSOC,CAP (SOC),"3""",pc,0.8071992976295,,,720,72,0.1,,,NSF UPC CSA,72.0,0.2052,,,,0.4286,,5.42,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CAPSOC,CAP (SOC),"4""",pc,1.27164179104478,,,600,60,0.1,,,NSF UPC CSA,60.0,0.2462,,,,0.7538,,10.5,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"2""",pc,0.653204565408253,,,560,56,0.1,,,NSF UPC CSA,56.0,0.2638,,,,0.5625,,2.87,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"3""",pc,1.83107989464443,,,360,36,0.1,,,NSF UPC CSA,36.0,0.4103,,,,1.5638,,5.25,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CLEANTEE,CLEANOUT TEE W/ C.O. PLUG (H x H),"4""",pc,3.86777875329236,,,200,20,0.1,,,NSF UPC CSA,20.0,0.7386,,,,2.7788,,9.05,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CLSTFLNGH,CLOSET FLANGE W/TEST PLATE (H),"4"" x 3""",pc,1.13099209833187,,,400,40,0.1,,,NSF UPC CSA,40.0,0.3693,,,,1.314,,2.59,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CPLNG,COUPLING (H x H),"1-1/2""",pc,0.141352063213345,,,3000,300,0.1,,,NSF UPC CSA,300.0,0.0492,,,,0.1193,,0.25,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CPLNG,COUPLING (H x H),"2""",pc,0.187532923617208,,,1500,150,0.1,,,NSF UPC CSA,150.0,0.0985,,,,0.1688,,0.34,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CPLNG,COUPLING (H x H),"3""",pc,0.658823529411765,,,1000,100,0.1,,,NSF UPC CSA,100.0,0.1477,,,,0.5513,,1.15,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-CPLNG,COUPLING (H x H),"4""",pc,1.11483757682177,,,1000,100,0.1,,,NSF UPC CSA,100.0,0.1477,,,,0.945,,2.13,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"2"" x 1-1/2""",pc,,,,,,,,,NSF UPC CSA,,,,0.1486,Tommur FOB,0.171,,1.6,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"3"" x 2""",pc,,,,,,,,,NSF UPC CSA,,,,0.4272,Tommur FOB,0.4916,,1.84,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"4"" x 2""",pc,,,,,,,,,NSF UPC CSA,,,,0.7527,Tommur FOB,0.7923,,3.01,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-INCREDHH,PIPE INCREASER-REDUCER (H x H),"4"" x 3""",pc,,,,,,,,,NSF UPC CSA,,,,0.8407,Tommur FOB,0.9675,,3.85,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"6"" x 3""",pc,,,,,,,,,NSF UPC CSA,,,,3.021,Tommur FOB,3.18,,12.08,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"6"" x 4""",pc,,,,,,,,,NSF UPC CSA,,,,1.9453,Tommur FOB,2.0477,,7.78,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-INCREDHH,PIPE INCREASER-REDUCER (H × H),"8"" x 6""",pc,,,,,,,,,NSF UPC CSA,,,,4.1155,Tommur FOB,4.3321,,16.46,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-MADPTR,MALE ADAPTER (MPT x H),"1-1/2""",pc,0.156628621597893,,,7200,720,0.1,,,NSF UPC CSA,720.0,0.0205,,,,0.1001,,0.55,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-MADPTR,MALE ADAPTER (MPT x H),"2""",pc,0.251799824407375,,,3000,300,0.1,,,NSF UPC CSA,300.0,0.0492,,,,0.1328,,0.65,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-PTRAP,P-TRAP (H x H),"1-1/2""",pc,,,,,,,,,NSF UPC CSA,,,,,,0.6188,,3.89,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-PTRAP,P-TRAP (H x H),"2""",pc,1.2270412642669,,,300,30,0.1,,,NSF UPC CSA,30.0,0.4924,,0.9434,Tommur FOB,1.0913,,2.35,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-PTRAP,P-TRAP (H x H),"3""",pc,,,,,,,,,NSF UPC CSA,,,,,,2.9138,,15.05,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-PTRAP,P-TRAP (H x H),"4""",pc,,,,,,,,,NSF UPC CSA,,,,,,5.1863,,26.75,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","1-1/2""",pc,,,,,,,,,NSF UPC CSA,,,,,,0.6075,,1.22,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","2""",pc,,,,,,,,,NSF UPC CSA,,,,,,1.0238,,5.25,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","3""",pc,,,,,,,,,NSF UPC CSA,,,,,,2.9813,,16.25,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-PTRAPLOW,"P-TRAP, LOW PROFILE(HxH)","4""",pc,,,,,,,,,NSF UPC CSA,,,,,,5.2763,,38.0,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEE,SANITARY TEE (ALL HUB),"1-1/2""",pc,0.415452151009658,,,1350,135,0.1,,,NSF UPC CSA,135.0,0.1094,,0.3059,Tommur FOB,0.3623,,0.91,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEE,SANITARY TEE (ALL HUB),"2""",pc,0.671466198419666,,,560,56,0.1,,,NSF UPC CSA,56.0,0.2638,,0.4845,Tommur FOB,0.5737,,1.32,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEE,SANITARY TEE (ALL HUB),"3""",pc,2.03810359964881,,,320,32,0.1,,,NSF UPC CSA,32.0,0.4616,,1.5054,Tommur FOB,1.7325,,6.99,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEE,SANITARY TEE (ALL HUB),"4""",pc,3.5153643546971,,,200,20,0.1,,,NSF UPC CSA,20.0,0.7386,,2.6505,Tommur FOB,3.1387,,14.75,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEEDBL,"DOUBLE SANITARY TEE, REDUCING (ALL HUB)","2"" x 2"" x 1-1/2"" x 1-1/2""",pc,,,,,,,,,NSF UPC CSA,,,,,,0.5625,,4.25,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2"" x 1-1/2""",pc,0.690956979806848,,,480,48,0.1,,,NSF UPC CSA,48.0,0.3077,,0.419,Tommur FOB,,,1.68,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2"" x 1-1/2"" x 1-1/2""",pc,,,,,,,,,NSF UPC CSA,,,,,,0.4511,,1.15,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2"" x 1-1/2"" x 2""",pc,,,,,,,,,NSF UPC CSA,,,,,,0.5153,,1.53,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"2"" x 2"" x 1-1/2""",pc,,,,,,,,,NSF UPC CSA,,,,,,0.4714,,1.16,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"3"" x 2""",pc,,,,,,,,,NSF UPC CSA,,,,1.05,Tommur FOB,,,4.2,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"3"" x 3"" x 2""",pc,,,,,,,,,NSF UPC CSA,,,,1.0264,Tommur FOB,1.1812,,5.75,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"4"" x 4"" x 2""",pc,2.60474100087796,,,240,24,0.1,,,NSF UPC CSA,24.0,0.6155,,1.3979,Tommur FOB,1.4715,,5.59,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-SANTEERED,REDUCING SANITARY TEE (ALL HUB),"4"" x 4"" x 3""",pc,3.48323090430202,,,180,18,0.1,,,NSF UPC CSA,18.0,0.8206,,2.0529,Tommur FOB,2.3625,,9.65,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYEDBL,REDUCING DOUBLE WYE (ALL HUB),"3"" x 3"" x 2"" x 2""",pc,,,,,,,,,NSF UPC CSA,,,,,,1.665,,6.55,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYEHUB,WYE (ALL HUB),"1-1/2""",pc,0.549780509218613,,,880,88,0.1,,,NSF UPC CSA,88.0,0.1679,,,,0.4545,,1.72,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYEHUB,WYE (ALL HUB),"2""",pc,0.832309043020193,,,500,50,0.1,,,NSF UPC CSA,50.0,0.2954,,0.5963,Tommur FOB,0.6863,,3.6,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYEHUB,WYE (ALL HUB),"3""",pc,2.46338893766462,,,240,24,0.1,,,NSF UPC CSA,24.0,0.6155,,1.7987,Tommur FOB,2.07,,7.19,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYEHUB,WYE (ALL HUB),"4""",pc,4.42598770851624,,,200,20,0.1,,,NSF UPC CSA,20.0,0.7386,,3.2748,Tommur FOB,3.7687,,13.1,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYEHUB,WYE (ALL HUB),"6""",pc,,,,,,,,,NSF UPC CSA,,,,7.5662,Tommur FOB,7.9645,,30.26,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYERED,REDUCING WYE (ALL HUB),"3"" x 3"" x 2""",pc,,,,,,0.1,,,NSF UPC CSA,,,,1.2904,Tommur FOB,1.485,,7.05,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYERED,REDUCING WYE (ALL HUB),"4"" x 4"" x 2""",pc,2.60474100087796,,,240,24,0.1,,,NSF UPC CSA,24.0,0.6155,,1.8964,Tommur FOB,2.1825,,5.3,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYERED,REDUCING WYE (ALL HUB),"4"" x 4"" x 3""",pc,3.48323090430202,,,180,18,0.1,,,NSF UPC CSA,18.0,0.8206,,2.5905,Tommur FOB,2.9813,,6.71,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYERED,REDUCING WYE (ALL HUB),"6"" x 6"" x 2""",pc,,,,,,,,,NSF UPC CSA,,,,4.5554,Tommur FOB,4.7951,,18.22,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYERED,REDUCING WYE (ALL HUB),"6"" x 6"" x 3""",pc,,,,,,,,,NSF UPC CSA,,,,4.8095,Tommur FOB,5.0627,,19.24,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYERED,REDUCING WYE (ALL HUB),"6"" x 6"" x 4""",pc,,,,,,,,,NSF UPC CSA,,,,5.3472,Tommur FOB,5.6286,,21.39,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYERED,REDUCING WYE (ALL HUB),"8"" x 8"" x 4""",pc,,,,,,,,,NSF UPC CSA,,,,8.9935,Tommur FOB,9.4668,,35.97,Omitted from 10 Sep sheet — still not quoted
+PVC DWV fittings,PVC-WYERED,REDUCING WYE (ALL HUB),"8"" x 8"" x 6""",pc,,,,,,,,,NSF UPC CSA,,,,11.6915,Tommur FOB,12.3068,,46.77,Omitted from 10 Sep sheet — still not quoted

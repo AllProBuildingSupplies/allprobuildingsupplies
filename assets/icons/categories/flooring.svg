@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- vinyl plank / tile floor -->
+  <rect x="16" y="28" width="40" height="16" rx="2" stroke="#C8981F" stroke-width="2.5"/>
+  <rect x="60" y="28" width="44" height="16" rx="2" stroke="#E2AF34" stroke-width="2.5"/>
+  <rect x="16" y="48" width="52" height="16" rx="2" stroke="#E2AF34" stroke-width="2.5"/>
+  <rect x="72" y="48" width="32" height="16" rx="2" stroke="#C8981F" stroke-width="2.5"/>
+  <rect x="16" y="68" width="36" height="16" rx="2" stroke="#C8981F" stroke-width="2.5"/>
+  <rect x="56" y="68" width="48" height="16" rx="2" stroke="#E2AF34" stroke-width="2.5"/>
+  <path d="M22 36h20M22 56h28M22 76h16" stroke="#C8981F" stroke-width="1.6" stroke-linecap="round" opacity=".4"/>
+</svg>

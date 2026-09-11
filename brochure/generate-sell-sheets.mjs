@@ -1,12 +1,13 @@
 /**
- * Generates light, Alveron-style category sell-sheet PDFs (1 page each)
- * from assets/products.csv. Run: npm run sell-sheets  (from brochure/)
+ * Generates Alveron-style category sell-sheet PDFs from assets/products.csv.
+ * Full catalog: cover → department covers → one sheet per sub_sub_category.
+ * Run: npm run sell-sheets  (from brochure/)
  */
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
 import { createRequire } from 'module';
-import { CATEGORY_META, COMPANY, standardsForSku } from './category-standards.js';
+import { CATEGORY_META, COMPANY, DEPARTMENT_META, standardsForSku } from './category-standards.js';
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -127,14 +128,44 @@ function groupByCategory(products) {
   return map;
 }
 
+function displayPrice(raw) {
+  const s = String(raw ?? '')
+    .replace(/\$/g, '')
+    .replace(/,/g, '')
+    .trim();
+  if (s === '') return null;
+  const n = parseFloat(s);
+  if (!Number.isFinite(n) || n === 0) return null;
+  return n;
+}
+
+function stripColorSuffix(code, color) {
+  if (!code || !color) return code;
+  const escColor = color.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return code.replace(new RegExp(`[- ]${escColor}$`, 'i'), '');
+}
+
+/** Group by style so every size and color prints together. Color-suffixed codes (PEX red/blue) merge. */
+function familyGroupKey(row) {
+  const style = (row.sub_sub_sub_category || '').trim();
+  const code = (row.Code || 'UNKNOWN').trim();
+  const color = (row.Color || '').trim();
+  if (style && color && stripColorSuffix(code, color) !== code) {
+    return `style:${style}`;
+  }
+  return `code:${code}`;
+}
+
 function productFamilies(rows) {
-  const byCode = new Map();
+  const byKey = new Map();
   for (const r of rows) {
-    const code = r.Code || 'UNKNOWN';
+    const key = familyGroupKey(r);
+    const color = (r.Color || '').trim();
+    const displayCode = stripColorSuffix(r.Code || 'UNKNOWN', color);
     const unit = priceUnitFor(r);
-    if (!byCode.has(code)) {
-      byCode.set(code, {
-        code,
+    if (!byKey.has(key)) {
+      byKey.set(key, {
+        code: displayCode,
         description: r.Description,
         material: r.Material,
         image: r.Image,
@@ -145,36 +176,46 @@ function productFamilies(rows) {
         standards: standardsForSku(r),
       });
     }
-    const fam = byCode.get(code);
+    const fam = byKey.get(key);
     const size = (r.Size || '').trim();
-    if (size && !fam.sizePrices.some((sp) => sp.size === size)) {
+    const dup = fam.sizePrices.some((sp) => sp.size === size && (sp.color || '') === color);
+    if ((size || color) && !dup) {
       fam.sizePrices.push({
         size,
-        price: parseFloat(r.Price),
+        color,
+        price: displayPrice(r.Price),
         unit,
       });
     }
     if (r.Pack) fam.pack = r.Pack;
     if (r.Image && !fam.image) fam.image = r.Image;
   }
-  for (const fam of byCode.values()) {
-    fam.sizePrices.sort((a, b) => sizeSort(a.size, b.size));
-    fam.sizes = fam.sizePrices.map((sp) => sp.size);
+  for (const fam of byKey.values()) {
+    fam.sizePrices.sort(
+      (a, b) => sizeSort(a.size, b.size) || String(a.color || '').localeCompare(b.color || '')
+    );
+    fam.sizes = [...new Set(fam.sizePrices.map((sp) => sp.size).filter(Boolean))];
+    fam.colors = [...new Set(fam.sizePrices.map((sp) => sp.color).filter(Boolean))];
   }
-  return [...byCode.values()].sort(
+  return [...byKey.values()].sort(
     (a, b) => a.family.localeCompare(b.family) || a.code.localeCompare(b.code)
   );
 }
 
 function priceUnitFor(row) {
+  const desc = (row.Description || '').toLowerCase();
+  if (/\b\d+\s*ft\s+(stick|coil)\b/.test(desc) || /\b(100 ft coil|20 ft stick)\b/.test(desc)) {
+    return '/ea';
+  }
   const sub = (row.sub_category || '').toLowerCase();
-  if (sub === 'pipes') return '/ft';
+  const ssc = (row.sub_sub_category || '').toLowerCase();
+  if (sub === 'pipes' && !ssc.includes('pex')) return '/ft';
   return '/ea';
 }
 
 function fmtPrice(n) {
   const v = Number(n);
-  if (!Number.isFinite(v)) return '—';
+  if (!Number.isFinite(v) || v === 0) return '';
   return `$${v.toFixed(2)}`;
 }
 
@@ -706,6 +747,9 @@ const SHARED_CSS = `
     font-weight: 400;
     color: var(--muted);
   }
+  .size-chip .sz {
+    white-space: nowrap;
+  }
   .size-chips.compact .size-chip {
     min-height: 0.34in;
     padding: 2px 1px;
@@ -960,6 +1004,21 @@ const SHARED_CSS = `
     color: var(--navy);
     margin-top: 3px;
   }
+  .cat-cards.many {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+  .cat-cards.many .cat-card {
+    grid-template-columns: 1fr;
+    padding: 6px;
+    align-items: start;
+  }
+  .cat-cards.many .cat-card img {
+    width: 100%;
+    height: 0.72in;
+  }
+  .cat-cards.many .cat-card h3 { font-size: 11px; }
+  .cat-cards.many .cat-card p { font-size: 7px; display: none; }
 `;
 
 function wrapHtml(title, body, extraClass = '') {
@@ -1010,13 +1069,15 @@ function renderSizeChips(sizePrices, { compact = false } = {}) {
   const chips = list
     .map((sp) => {
       const size = typeof sp === 'string' ? sp : sp.size;
+      const color = typeof sp === 'string' ? '' : sp.color || '';
       const price = typeof sp === 'string' ? null : sp.price;
       const unit = typeof sp === 'string' ? '' : sp.unit || '';
-      const priceHtml =
-        price == null || !Number.isFinite(Number(price))
-          ? ''
-          : `<span class="pr">${esc(fmtPrice(price))}<span class="u">${esc(unit)}</span></span>`;
-      return `<div class="size-chip"><span class="sz">${esc(size)}</span>${priceHtml}</div>`;
+      const shown = fmtPrice(price);
+      const priceHtml = shown
+        ? `<span class="pr">${esc(shown)}<span class="u">${esc(unit)}</span></span>`
+        : '';
+      const label = [size, color].filter(Boolean).join(' · ') || '—';
+      return `<div class="size-chip"><span class="sz">${esc(label)}</span>${priceHtml}</div>`;
     })
     .join('');
   return `<div class="size-chips${compact ? ' compact' : ''}">${chips}</div>`;
@@ -1085,16 +1146,29 @@ function renderProductTable(families, mode) {
   </table>`;
 }
 
+function chunkFamilies(families, maxVariants = 24) {
+  const out = [];
+  for (const f of families) {
+    const list = f.sizePrices || [];
+    if (list.length <= maxVariants) {
+      out.push(f);
+      continue;
+    }
+    for (let i = 0; i < list.length; i += maxVariants) {
+      out.push({
+        ...f,
+        sizePrices: list.slice(i, i + maxVariants),
+        sizes: [...new Set(list.slice(i, i + maxVariants).map((sp) => sp.size).filter(Boolean))],
+        continuation: i > 0,
+      });
+    }
+  }
+  return out;
+}
+
 /** Pack families onto pages by size-chip budget so dense grids never clip. */
 function paginateFamilies(families) {
-  // Small SKUs first so page 1 keeps construction/standards; large grids
-  // (e.g. reducing tee) land on continuation pages without the mid block.
-  const ordered = [...families].sort(
-    (a, b) =>
-      (a.sizePrices?.length || 0) - (b.sizePrices?.length || 0) ||
-      a.family.localeCompare(b.family) ||
-      a.code.localeCompare(b.code)
-  );
+  const ordered = chunkFamilies(families);
   const pages = [];
   let bucket = [];
   let cost = 0;
@@ -1162,18 +1236,19 @@ function renderCategoryPage(meta, families, rowCount) {
           : `${meta.title} · Continued`;
       const mainClass = mode === 'ultra' || mode === 'dense' ? 'main compact-mid' : 'main';
       const remaining = pages.slice(idx + 1).reduce((n, p) => n + p.length, 0);
+      const denseFirst = idx === 0 && mode === 'ultra';
       return renderCategoryPageSingle(meta, pageFamilies, rowCount, {
         mainClass,
         mode,
         sectionLabel,
         unitNote,
         allSizes,
-        construction: idx === 0 ? construction : '',
-        standards: idx === 0 ? standards : '',
-        apps: idx === 0 ? apps : '',
+        construction: idx === 0 && !denseFirst ? construction : '',
+        standards: idx === 0 && !denseFirst ? standards : '',
+        apps: idx === 0 && !denseFirst ? apps : '',
         badges,
         pageLabel: pageCount > 1 ? `${idx + 1} / ${pageCount}` : '',
-        hideMid: idx > 0,
+        hideMid: idx > 0 || denseFirst,
         contNote:
           idx === 0 && remaining
             ? `Continued · ${remaining} more product type${remaining === 1 ? '' : 's'}`
@@ -1276,17 +1351,25 @@ function renderCategoryPageSingle(meta, families, rowCount, opts) {
 </section>`;
 }
 
-function renderIndex(categories, { linked = false } = {}) {
+function renderCover({
+  id,
+  collageFile,
+  feats,
+  subtitle,
+  footerLabel,
+  cards,
+  linked = false,
+}) {
   const logo = logoUrl();
-  const collage = heroImgUrl('cover-collage.jpg');
-  const cards = categories
+  const collage = heroImgUrl(collageFile);
+  const cardHtml = cards
     .map((c) => {
       const hero = heroImgUrl(c.hero);
       const inner = `
         ${hero ? `<img src="${hero}" alt="${esc(c.title)}"/>` : '<div></div>'}
         <div>
           <h3>${esc(c.title)}</h3>
-          <p>${esc(c.tagline)}</p>
+          <p>${esc(c.tagline || '')}</p>
           <div class="meta">${c.familyCount} types · ${c.rowCount} SKUs</div>
           ${linked ? `<div class="jump">Open section →</div>` : ''}
         </div>`;
@@ -1296,35 +1379,34 @@ function renderIndex(categories, { linked = false } = {}) {
       return `<div class="cat-card">${inner}</div>`;
     })
     .join('');
+  const featHtml = (feats || [])
+    .map((f) => `<div class="feat"><div class="feat-t">${esc(f.title)}</div><div class="feat-s">${esc(f.sub)}</div></div>`)
+    .join('');
 
   return `
-<section class="index-page" id="catalog-cover">
+<section class="index-page" id="${esc(id)}">
   <aside class="cover-sidebar">
     <div class="cover-collage">
       ${collage ? `<img src="${collage}" alt="All Pro product lines"/>` : ''}
     </div>
-    <div class="cover-side-feats">
-      <div class="feat"><div class="feat-t">8 Categories</div><div class="feat-s">Full Plumbing Line</div></div>
-      <div class="feat"><div class="feat-t">Suggested Wholesale</div><div class="feat-s">Call for Bulk Quotes</div></div>
-      <div class="feat"><div class="feat-t">ASTM / NSF</div><div class="feat-s">Code-Ready Specs</div></div>
-    </div>
+    <div class="cover-side-feats">${featHtml}</div>
   </aside>
   <div class="index-main">
     <div class="cover-brand-bar">
       <div class="brand-top">All Pro <span>Building Supplies</span></div>
       <div class="cover-logo-wrap">${logo ? `<img src="${logo}" alt="All Pro"/>` : ''}</div>
-      <div class="cover-sub">Product Catalog · Spec Sheets &amp; Wholesale Pricing</div>
+      <div class="cover-sub">${esc(subtitle)}</div>
       <div class="cover-meta">Updated ${esc(COMPANY.updated)} · ${esc(COMPANY.web)} · ${esc(COMPANY.phone)}</div>
     </div>
     <div class="wholesale-banner">
       <strong>Suggested Wholesale</strong>
       Prices shown are suggested wholesale list pricing. Call or email for bulk / volume quotes.
-      Pipe is priced per foot; fittings &amp; accessories per each.
+      Blank or $0 items show size and color only. Pipe is priced per foot except packaged coils / sticks, which are per each.
     </div>
-    <div class="cat-cards">${cards}</div>
+    <div class="cat-cards${cards.length > 6 ? ' many' : ''}">${cardHtml}</div>
   </div>
   <div class="footer">
-    <div>Catalog Cover · Rev. ${esc(COMPANY.updated)}</div>
+    <div>${esc(footerLabel)} · Rev. ${esc(COMPANY.updated)}</div>
     <div class="mid-badges">
       <span class="badge">${esc(COMPANY.phone)}</span>
       <span class="badge">${esc(COMPANY.email)}</span>
@@ -1344,86 +1426,196 @@ async function main() {
   }
 
   const products = parseCsv(fs.readFileSync(csvPath, 'utf8'));
-  const byCat = groupByCategory(products);
-  const indexMeta = [];
-  const generated = [];
+  const deptOrder = ['Plumbing', 'Windows', 'Flooring'];
+  const byDept = new Map();
+  for (const p of products) {
+    const dept = (p.main_category || 'Other').trim() || 'Other';
+    const cat = (p.sub_sub_category || p.Material || 'Other').trim() || 'Other';
+    if (!byDept.has(dept)) byDept.set(dept, new Map());
+    const cats = byDept.get(dept);
+    if (!cats.has(cat)) cats.set(cat, []);
+    cats.get(cat).push(p);
+  }
 
-  for (const [catKey, rows] of [...byCat.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
-    const meta = CATEGORY_META[catKey] || {
-      slug: slugify(catKey),
-      title: catKey,
-      material: rows[0]?.Material || '',
-      collection: String(catKey).toUpperCase(),
-      hero: 'hero-pvc-pipes.jpg',
-      heroCaption: catKey,
-      tagline: `${catKey} from the All Pro catalog.`,
-      overview: `${catKey} from the All Pro catalog.`,
-      standards: [],
-      highlights: [
-        { title: 'Trade Ready', sub: 'Spec Sheet' },
-        { title: 'Call for Pricing', sub: COMPANY.phone },
-        { title: 'New Jersey', sub: 'Fast Response' },
-      ],
-      construction: [{ label: 'Category', value: catKey }],
-      applications: [],
-      notes: '',
-    };
-    const families = productFamilies(rows);
-    const html = wrapHtml(
-      `${COMPANY.name} — ${meta.title} Spec Sheet`,
-      renderCategoryPage(meta, families, rows.length)
-    );
-    const htmlName = `${meta.slug}-sell-sheet.html`;
-    const pdfName = `${meta.slug}-sell-sheet.pdf`;
-    const htmlPath = path.join(htmlDir, htmlName);
-    fs.writeFileSync(htmlPath, html);
-    generated.push({ meta, htmlPath, pdfName, families, rows });
-    indexMeta.push({
-      title: meta.title,
-      tagline: meta.tagline,
-      familyCount: families.length,
-      rowCount: rows.length,
-      pdfName,
-      hero: meta.hero,
-      slug: meta.slug,
-      standards: meta.standards || [],
-      pageHtml: renderCategoryPage(meta, families, rows.length),
-    });
-    console.log(
-      `HTML: ${htmlName} (${families.length} types, ${rows.length} rows, ~${paginateFamilies(families).length} page(s))`
+  const generated = [];
+  const deptCovers = [];
+  const allCategoryMeta = [];
+
+  function metaFor(catKey, rows) {
+    return (
+      CATEGORY_META[catKey] || {
+        slug: slugify(catKey),
+        title: catKey,
+        material: rows[0]?.Material || '',
+        collection: String(catKey).toUpperCase(),
+        hero: `hero-${slugify(catKey)}.jpg`,
+        heroCaption: catKey,
+        tagline: `${catKey} from the All Pro catalog.`,
+        overview: `${catKey} from the All Pro catalog.`,
+        standards: [],
+        highlights: [
+          { title: 'Trade Ready', sub: 'Spec Sheet' },
+          { title: 'Call for Pricing', sub: COMPANY.phone },
+          { title: 'New Jersey', sub: 'Fast Response' },
+        ],
+        construction: [{ label: 'Category', value: catKey }],
+        applications: [],
+        notes: '',
+      }
     );
   }
 
-  const indexHtmlPath = path.join(htmlDir, '00-sell-sheet-index.html');
-  fs.writeFileSync(
-    indexHtmlPath,
-    wrapHtml(`${COMPANY.name} — Catalog Cover`, renderIndex(indexMeta, { linked: false }))
-  );
+  for (const dept of [...deptOrder, ...[...byDept.keys()].filter((d) => !deptOrder.includes(d))]) {
+    const cats = byDept.get(dept);
+    if (!cats) continue;
+    const dmeta = DEPARTMENT_META[dept] || {
+      slug: `dept-${slugify(dept)}`,
+      title: dept,
+      subtitle: dept,
+      hero: `hero-dept-${slugify(dept)}.jpg`,
+      feats: [
+        { title: dept, sub: 'Catalog Section' },
+        { title: 'Suggested Wholesale', sub: 'Call for Bulk Quotes' },
+        { title: 'Trade Ready', sub: 'Spec Sheets' },
+      ],
+    };
+    const catCards = [];
+    for (const [catKey, rows] of [...cats.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+      const meta = metaFor(catKey, rows);
+      const families = productFamilies(rows);
+      const pageHtml = renderCategoryPage(meta, families, rows.length);
+      const htmlName = `${meta.slug}-sell-sheet.html`;
+      const pdfName = `${meta.slug}-sell-sheet.pdf`;
+      const htmlPath = path.join(htmlDir, htmlName);
+      fs.writeFileSync(htmlPath, wrapHtml(`${COMPANY.name} — ${meta.title} Spec Sheet`, pageHtml));
+      generated.push({ meta, htmlPath, pdfName, families, rows, dept });
+      const card = {
+        title: meta.title,
+        tagline: meta.tagline,
+        familyCount: families.length,
+        rowCount: rows.length,
+        pdfName,
+        hero: meta.hero,
+        slug: meta.slug,
+        pageHtml,
+      };
+      catCards.push(card);
+      allCategoryMeta.push({ ...card, dept });
+      console.log(
+        `HTML: ${htmlName} (${dept} / ${families.length} types, ${rows.length} rows, ~${paginateFamilies(families).length} page(s))`
+      );
+    }
+    const deptHtml = renderCover({
+      id: dmeta.slug,
+      collageFile: dmeta.hero,
+      feats: dmeta.feats,
+      subtitle: `${dmeta.title} · ${dmeta.subtitle}`,
+      footerLabel: `${dmeta.title} Cover`,
+      cards: catCards,
+      linked: false,
+    });
+    const deptHtmlLinked = renderCover({
+      id: dmeta.slug,
+      collageFile: dmeta.hero,
+      feats: dmeta.feats,
+      subtitle: `${dmeta.title} · ${dmeta.subtitle}`,
+      footerLabel: `${dmeta.title} Cover`,
+      cards: catCards,
+      linked: true,
+    });
+    const deptHtmlPath = path.join(htmlDir, `${dmeta.slug}-cover.html`);
+    fs.writeFileSync(deptHtmlPath, wrapHtml(`${COMPANY.name} — ${dmeta.title}`, deptHtml));
+    deptCovers.push({
+      dmeta,
+      htmlPath: deptHtmlPath,
+      pdfName: `${dmeta.slug}-cover.pdf`,
+      linkedHtml: deptHtmlLinked,
+      catCards,
+    });
+  }
 
-  // Full catalog: cover (with internal links) + every category page
+  const deptCards = deptCovers.map((d) => ({
+    title: d.dmeta.title,
+    tagline: d.dmeta.subtitle,
+    familyCount: d.catCards.length,
+    rowCount: d.catCards.reduce((n, c) => n + c.rowCount, 0),
+    hero: d.dmeta.hero,
+    slug: d.dmeta.slug,
+  }));
+
+  const indexHtml = renderCover({
+    id: 'catalog-cover',
+    collageFile: 'cover-collage.jpg',
+    feats: [
+      { title: '3 Departments', sub: 'Plumbing · Windows · Flooring' },
+      { title: 'Suggested Wholesale', sub: 'Call for Bulk Quotes' },
+      { title: 'Trade Catalog', sub: 'Spec Sheets & Pricing' },
+    ],
+    subtitle: 'Product Catalog · Spec Sheets & Wholesale Pricing',
+    footerLabel: 'Catalog Cover',
+    cards: deptCards,
+    linked: false,
+  });
+  const indexHtmlLinked = renderCover({
+    id: 'catalog-cover',
+    collageFile: 'cover-collage.jpg',
+    feats: [
+      { title: '3 Departments', sub: 'Plumbing · Windows · Flooring' },
+      { title: 'Suggested Wholesale', sub: 'Call for Bulk Quotes' },
+      { title: 'Trade Catalog', sub: 'Spec Sheets & Pricing' },
+    ],
+    subtitle: 'Product Catalog · Spec Sheets & Wholesale Pricing',
+    footerLabel: 'Catalog Cover',
+    cards: deptCards,
+    linked: true,
+  });
+
+  const indexHtmlPath = path.join(htmlDir, '00-sell-sheet-index.html');
+  fs.writeFileSync(indexHtmlPath, wrapHtml(`${COMPANY.name} — Catalog Cover`, indexHtml));
+
   const catalogBody =
-    renderIndex(indexMeta, { linked: true }) + indexMeta.map((c) => c.pageHtml).join('\n');
+    indexHtmlLinked +
+    deptCovers
+      .map((d) => d.linkedHtml + d.catCards.map((c) => c.pageHtml).join('\n'))
+      .join('\n');
   const catalogHtmlPath = path.join(htmlDir, 'allpro-product-catalog.html');
-  fs.writeFileSync(
+  fs.writeFileSync(catalogHtmlPath, wrapHtml(`${COMPANY.name} — Product Catalog`, catalogBody));
+
+  const forbidden = /tommur|lesso|tomex|bluefin|alibaba|factory sku|factory code|4B200B/i;
+  const htmlFiles = [
+    indexHtmlPath,
     catalogHtmlPath,
-    wrapHtml(`${COMPANY.name} — Product Catalog`, catalogBody)
-  );
+    ...generated.map((g) => g.htmlPath),
+    ...deptCovers.map((d) => d.htmlPath),
+  ];
+  for (const hp of htmlFiles) {
+    const text = fs.readFileSync(hp, 'utf8');
+    if (forbidden.test(text)) {
+      throw new Error(`Factory / internal term leaked into ${path.basename(hp)}`);
+    }
+  }
 
   const mdLines = [
     '# All Pro Building Supplies — Category Sell Sheets',
     '',
     'Suggested wholesale prices from `assets/products.csv`. Rebuild: `npm run sell-sheets` from `brochure/`.',
     '',
+    'Customer-facing PDFs never include factory, supplier, or internal sourcing names.',
+    '',
     '## Full catalog',
     '',
-    '- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf` — cover + all category sheets (tiles link to sections)',
+    '- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf` — cover, department covers, then every category',
+    '',
+    '## Department covers',
+    '',
+    ...deptCovers.map((d) => `- \`brochure/sell-sheets/pdf/${d.pdfName}\``),
     '',
     '## Individual PDFs',
     '',
-    '| Category | PDF | Types | SKUs |',
-    '|---|---|---:|---:|',
-    ...indexMeta.map(
-      (c) => `| ${c.title} | \`brochure/sell-sheets/pdf/${c.pdfName}\` | ${c.familyCount} | ${c.rowCount} |`
+    '| Department | Category | PDF | Types | SKUs |',
+    '|---|---|---|---:|---:|',
+    ...allCategoryMeta.map(
+      (c) => `| ${c.dept} | ${c.title} | \`brochure/sell-sheets/pdf/${c.pdfName}\` | ${c.familyCount} | ${c.rowCount} |`
     ),
     '',
   ];
@@ -1456,12 +1648,17 @@ async function main() {
   }
 
   await htmlToPdf(indexHtmlPath, path.join(pdfDir, '00-sell-sheet-index.pdf'));
+  for (const d of deptCovers) {
+    await htmlToPdf(d.htmlPath, path.join(pdfDir, d.pdfName));
+  }
   for (const g of generated) {
     await htmlToPdf(g.htmlPath, path.join(pdfDir, g.pdfName));
   }
   await htmlToPdf(catalogHtmlPath, path.join(pdfDir, 'allpro-product-catalog.pdf'));
   await browser.close();
-  console.log(`\nDone. ${generated.length} category sheets + cover + full catalog → ${pdfDir}`);
+  console.log(
+    `\nDone. ${generated.length} category sheets + ${deptCovers.length} department covers + catalog → ${pdfDir}`
+  );
 }
 
 main().catch((err) => {

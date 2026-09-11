@@ -1,0 +1,12 @@
+priority,system,item,sizes,why,on_live_site
+A,PEX-B pipe,10ft/20ft stick + 100/300/500ft coil,"1/2, 3/4, 1 red/blue/white",No mill pipe quote yet. Palconn has US CTS coils and sticks.,pipe yes (100ft listed; 1-1/4–2 not restocked)
+A,PVC Sch40 pipe,ASTM D1785 solid 20ft,"1/2 through 10",On site. Price-check vs Tommur.,yes
+A,PVC DWV,Full site DWV tree,1½–10 as listed,On site. Palconn catalog is thinner; still quote every SKU.,yes
+B,F1807 brass,Coupling / 90 / tee / plug / reducing / adapters / drop-ear / rings / clamps / PEX valve,"1/2, 3/4, 1",US plumber crimp system. Not on site.,no
+C,F2159 PPSU,Elbow coupling tee plug reducing adapters drop-ear,"1/2, 3/4, 1",Price-check vs Zhenpeng REV. Keep Zhenpeng if cheaper landed.,elbow/reducer 1/2 and 3/4 only
+C,PVC foam-core,ASTM F891 20ft sticks,1½ 2 3 4,On site + inbound. Quote if Palconn extrudes F891.,yes
+D,outlet boxes,Washer ± WHA + ice-maker 1/2 F1807,1/2,Apartment turns.,no
+D,CPVC D2846,SDR-11 CTS pipe + CTS fittings,½–2,NJ potable. Not in Palconn catalog — quote if they make it. No Sch80.,pipe yes (Sch80 and SDR-13.5 not sent)
+skip,rule,PEX over 1 inch,1-1/4 1-1/2 2,Standing rule. Catalog has them — do not RFQ.,site still lists
+skip,hydronic,EVOH / PEX-AL-PEX / radiant manifolds,various,Not the plumbing SKU tree.,no
+skip,other,Push-fit / tools / gas / conduit / PVC Sch80 / CPVC Sch80 / PVC pressure fittings,various,We do not stock these.,no / Sch80 on site but wrong product

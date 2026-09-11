@@ -1,0 +1,52 @@
+Hi Leela,
+
+Thank you for the 2026 North American catalog.
+
+We are All Pro Building Supplies, a US B2B importer. Please quote the attached workbook **Palconn_Full_Catalog_RFQ_SEND.xlsx** as **FOB Ningbo or Shanghai** (Qingdao is also acceptable), USD, with NSF / cUPC listings in Palconn’s name.
+
+Yellow cells are for Palconn. Quote every line you manufacture. If you do not make that pattern or size, leave FOB blank. Every quoted line needs **MOQ**, pcs or feet per carton, cartons per pallet, CBM, gross weight, and lead time after deposit.
+
+The sheet is everything we stock or want to stock that is in your catalog (or that you may extrude even if it is not printed):
+
+1) PEX-B potable pipe — ½", ¾", and 1" only
+   10 ft and 20 ft sticks; 100 / 300 / 500 ft coils (no 500 ft on 1")
+   White, red, and blue separately
+   ASTM F876 / F877, CTS (not metric OD)
+
+2) ASTM F2159 PPSU crimp — ½" / ¾" / 1"
+   Coupling, 90 elbow, tee, plug, reducing coupling, reducing tee, M/F adapters, drop-ear
+
+3) ASTM F1807 brass crimp — ½" / ¾" / 1"
+   Coupling, 90 elbow, tee, plug, reducing coupling, reducing tee, M/F adapters, drop-ear 90 FPT
+   Copper crimp rings and stainless pinch clamps
+   PEX × PEX ball valve
+   Lead-free, NSF/ANSI 61 and 372
+
+4) Outlet boxes (catalog p.30) — washer box ± hammer arrestor, ice-maker box, ½" F1807
+
+5) ASTM D1785 Sch 40 PVC solid pipe — every size on the Quote sheet (plain end, USD per foot, 20 ft)
+
+6) ASTM F891 foam-core DWV pipe — 20 ft sticks, 1½" / 2" / 3" / 4" — only if you extrude F891
+
+7) ASTM D2665 PVC DWV fittings — white, NSF-dwv — every pattern/size on the Quote sheet. Leave blank if you do not mold it.
+
+8) ASTM D2846 CPVC SDR-11 CTS pipe and CTS fittings — only if you manufacture them. Do not quote CPVC Sch 80.
+
+Please do not quote 1¼" / 1½" / 2" PEX, EVOH / oxygen-barrier PEX, PEX-AL-PEX, radiant manifolds, push-fit, tools, gas pipe, conduit, PVC Sch 80, or CPVC Sch 80.
+
+Please also confirm:
+• Production lead time after deposit
+• Sample cost (or free) and DHL to 1600 Livingston Ave, North Brunswick, NJ 08902, USA
+
+We will arrange ocean freight from the FOB port to Newark / Elizabeth, NJ. Please do not quote EXW or DDP.
+
+Thank you.
+
+Baruch Grossman
+Founder & Owner
+All Pro Building Supplies LLC
+1600 Livingston Ave
+North Brunswick, NJ 08902
+USA
++1 732-734-1123
+info@allprobuildingsupplies.com

@@ -31,6 +31,95 @@
   } catch (_) {}
 })();
 
+window.apbsParseCsv = function apbsParseCsv(text) {
+  var rows = [];
+  var i = 0;
+  var field = '';
+  var row = [];
+  var inQuotes = false;
+  while (i < text.length) {
+    var c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    }
+    if (c === '"') { inQuotes = true; i++; continue; }
+    if (c === ',') { row.push(field); field = ''; i++; continue; }
+    if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(field);
+      if (row.some(function (x) { return x !== ''; })) rows.push(row);
+      row = []; field = ''; i++; continue;
+    }
+    field += c; i++;
+  }
+  if (field.length || row.length) {
+    row.push(field);
+    if (row.some(function (x) { return x !== ''; })) rows.push(row);
+  }
+  if (!rows.length) return [];
+  var headers = rows[0];
+  return rows.slice(1).map(function (cols) {
+    var obj = {};
+    headers.forEach(function (h, idx) { obj[h] = cols[idx] ?? ''; });
+    return obj;
+  });
+};
+
+window.apbsCsvToCatalogRows = function apbsCsvToCatalogRows(csvRows) {
+  return (csvRows || []).map(function (r) {
+    var qty = parseInt(r.Qty != null ? r.Qty : r.qty, 10) || 0;
+    var priceRaw = r.Price != null ? r.Price : r.price;
+    return {
+      code: r.Code || r.code || '',
+      description: r.Description || r.description || '',
+      size: r.Size || r.size || '',
+      color: r.Color || r.color || '',
+      pack: r.Pack != null ? r.Pack : r.pack,
+      qty: qty,
+      price: priceRaw,
+      image: r.Image || r.image || 'images/logo.png',
+      material: r.Material || r.material || '',
+      main_category: r.main_category || '',
+      sub_category: r.sub_category || '',
+      sub_sub_category: r.sub_sub_category || '',
+      sub_sub_sub_category: r.sub_sub_sub_category || '',
+      inStock: qty > 0
+    };
+  }).filter(function (r) { return !!r.code; });
+};
+
+/** Local static preview (no Worker): load assets/products.csv when on localhost
+ *  without ?apbs_api=, or when ?apbs_csv=1. Live/test hosts keep using the API. */
+window.apbsShouldUseCsvCatalog = function apbsShouldUseCsvCatalog() {
+  try {
+    var q = new URLSearchParams(window.location.search || '');
+    if (q.get('apbs_csv') === '1') return true;
+    if (q.get('apbs_api')) return false;
+    var host = String(window.location.hostname || '').toLowerCase();
+    return host === '127.0.0.1' || host === 'localhost';
+  } catch (_) { return false; }
+};
+
+window.apbsFetchCatalogRows = async function apbsFetchCatalogRows() {
+  if (window.apbsShouldUseCsvCatalog()) {
+    var csvRes = await fetch('assets/products.csv', { cache: 'no-store' });
+    if (!csvRes.ok) throw new Error('CSV HTTP ' + csvRes.status);
+    return window.apbsCsvToCatalogRows(window.apbsParseCsv(await csvRes.text()));
+  }
+  var apiURL = window.APBS_API_BASE
+    ? window.APBS_API_BASE + '/products'
+    : 'https://allpro-api.baruch-6d5.workers.dev/api/products';
+  var r = await fetch(apiURL, { headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {} });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  var rows = await r.json();
+  if (!Array.isArray(rows)) throw new Error(rows.error || 'Invalid catalog response');
+  return rows;
+};
+
 window.APBS_THEME_KEY = 'apbs_theme';
 window.apbsGetTheme = function apbsGetTheme() {
   try { return localStorage.getItem(window.APBS_THEME_KEY) === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; }
@@ -146,12 +235,51 @@ window.normalizeProductCode = function normalizeProductCode(code) {
   return map[c] || map[c.toUpperCase()] || c;
 };
 
-/** Front-facing size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2" */
+/** True when a size segment is a pipe/tile dimension, not a color or pattern name. */
+window.apbsIsDimensionalSizePart = function apbsIsDimensionalSizePart(p) {
+  var s = String(p || '').replace(/["″]$/, '').trim();
+  return /^(\d+(\.\d+)?|\d+-\d+\/\d+|\d+\/\d+)$/.test(s);
+};
+
+window.APBS_QUOTE_ONLY_MAINS = {};
+window.apbsIsQuoteOnlyMain = function apbsIsQuoteOnlyMain(main) {
+  return !!window.APBS_QUOTE_ONLY_MAINS[String(main || '').trim().toLowerCase()];
+};
+/** Quote-only when a selling price is present and is not > 0 (blank CSV / $0).
+ *  Public API omits `price` entirely — that is Login for price, not Call for pricing. */
+window.apbsIsQuoteOnlyItem = function apbsIsQuoteOnlyItem(item) {
+  if (!item) return false;
+  var hasPrice = Object.prototype.hasOwnProperty.call(item, 'price') ||
+    Object.prototype.hasOwnProperty.call(item, 'Price');
+  if (!hasPrice) return false;
+  var price = item.price != null ? item.price : item.Price;
+  if (price == null) return false;
+  if (price === '') return true;
+  return !(parseFloat(price) > 0);
+};
+window.apbsCatalogItemMatchesMain = function apbsCatalogItemMatchesMain(it, main) {
+  main = main == null ? window.catActiveMain : main;
+  if (!main || main === 'all') return true;
+  var label = (it && (it.mainLabel || it.main_category || it.main || '')) || '';
+  return String(label).toLowerCase() === String(main).toLowerCase();
+};
+window.apbsQuotePriceHtml = function apbsQuotePriceHtml() {
+  return '<span class="price-locked price-quote">Call for pricing</span>';
+};
+window.apbsQuoteCtaHtml = function apbsQuoteCtaHtml() {
+  return '<div class="shop-buy shop-buy-quote">' +
+    '<a class="add-to-cart-btn shop-quote-btn" href="contact.html">Request quote</a></div>';
+};
+
+/** Front-facing size with inch marks: 1-1/2 → 1-1/2", 2x1-1/2 → 2" x 1-1/2".
+ *  Color / pattern names (Walnut, #337, Stock widths) stay unmarked. */
 window.apbsSizeToDisplay = function apbsSizeToDisplay(size) {
   var raw = window.normalizeProductSize(size);
   if (!raw) return '';
   var parts = raw.split(/\s*[xX\u00D7\u2715\u2716\u2A2F\u22C5\u2217\uFFFD\u2022]\s*/).filter(Boolean);
   if (!parts.length) return raw;
+  var dimensional = parts.every(window.apbsIsDimensionalSizePart);
+  if (!dimensional) return raw;
   return parts.map(function (p) {
     return /["″]$/.test(p) ? p : (p + '"');
   }).join(' x ');
@@ -265,7 +393,210 @@ window.apbsProductKey = function apbsProductKey(code, size) {
   return c + '|' + sz;
 };
 
-window.apbsFindProduct = function apbsFindProduct(products, code, size) {
+/** Keep local/test query flags when jumping between catalog pages. */
+window.apbsWithEnvQuery = function apbsWithEnvQuery(url) {
+  try {
+    var cur = new URLSearchParams(window.location.search || '');
+    var u = new URL(url, window.location.href);
+    ['apbs_csv', 'apbs_api', 'apbs_env'].forEach(function (k) {
+      var v = cur.get(k);
+      if (v && !u.searchParams.get(k)) u.searchParams.set(k, v);
+    });
+    var path = u.pathname.split('/').pop() || 'index.html';
+    return path + u.search + (u.hash || '');
+  } catch (_) {
+    return url;
+  }
+};
+
+window.apbsProductUrl = function apbsProductUrl(code, opts) {
+  opts = opts || {};
+  var q = 'code=' + encodeURIComponent(code || '');
+  if (opts.color) q += '&color=' + encodeURIComponent(opts.color);
+  if (opts.size) q += '&size=' + encodeURIComponent(opts.size);
+  return window.apbsWithEnvQuery('product.html?' + q);
+};
+
+window.apbsCanonSize = function apbsCanonSize(size) {
+  if (window.apbsSizeToCatalog) return window.apbsSizeToCatalog(size);
+  if (window.normalizeProductSize) return window.normalizeProductSize(size);
+  return String(size == null ? '' : size).trim().replace(/"/g, '');
+};
+
+window.apbsIsApprovedSession = function apbsIsApprovedSession() {
+  try {
+    var user = JSON.parse(sessionStorage.getItem('apbs_user') || 'null');
+    if (user && window.apbsNormalizeUser) window.apbsNormalizeUser(user);
+    return !!(user && user.status === 'approved');
+  } catch (_) {
+    return false;
+  }
+};
+
+window.apbsRowsToGroups = function apbsRowsToGroups(rows) {
+  var groups = {};
+  var sizeDisp = window.apbsSizeToDisplay || function (s) { return String(s || ''); };
+  for (var i = 0; i < (rows || []).length; i++) {
+    var row = rows[i];
+    if (!row || !row.code) continue;
+    var code = window.normalizeProductCode ? window.normalizeProductCode(row.code) : String(row.code).trim();
+    if (!groups[code]) {
+      groups[code] = {
+        desc: row.description,
+        image: row.image || 'images/logo.png',
+        rows: [],
+        material: row.material != null ? String(row.material).trim() : '',
+        mainCat: row.main_category != null ? String(row.main_category).trim() : '',
+        subCat: row.sub_category != null ? String(row.sub_category).trim() : '',
+        subSubCat: row.sub_sub_category != null ? String(row.sub_sub_category).trim() : '',
+        typeCat: row.sub_sub_sub_category != null ? String(row.sub_sub_sub_category).trim() : ''
+      };
+    }
+    var hasPrice = Object.prototype.hasOwnProperty.call(row, 'price') ||
+      Object.prototype.hasOwnProperty.call(row, 'Price');
+    var priceRaw = row.price != null ? row.price : row.Price;
+    groups[code].rows.push({
+      size: row.size,
+      color: row.color || '',
+      sizeDisplay: row.size_display || sizeDisp(row.size),
+      pack: row.pack,
+      qty: parseInt(row.qty, 10) || 0,
+      inStock: row.inStock !== undefined ? !!row.inStock : (parseInt(row.qty, 10) || 0) > 0,
+      price: hasPrice ? (parseFloat(priceRaw) || 0) : null,
+      image: row.image || groups[code].image || 'images/logo.png',
+      material: row.material != null ? String(row.material).trim() : groups[code].material,
+      subCat: row.sub_category != null ? String(row.sub_category).trim() : groups[code].subCat,
+      subSubCat: row.sub_sub_category != null ? String(row.sub_sub_category).trim() : groups[code].subSubCat,
+      typeCat: row.sub_sub_sub_category != null ? String(row.sub_sub_sub_category).trim() : groups[code].typeCat
+    });
+    if (row.image && String(row.image).indexOf('logo.png') === -1) {
+      if (!groups[code].image || String(groups[code].image).indexOf('logo.png') !== -1) {
+        groups[code].image = row.image;
+      }
+    }
+  }
+  return groups;
+};
+
+window.apbsFamilyStats = function apbsFamilyStats(rows, isLoggedIn) {
+  rows = rows || [];
+  var colors = {};
+  var sizes = {};
+  var priced = [];
+  var inStockCount = 0;
+  var quoteCount = 0;
+  rows.forEach(function (r) {
+    var col = String(r.color || '').trim();
+    if (col) colors[col] = true;
+    var sz = window.apbsCanonSize(r.size);
+    if (sz) sizes[sz] = true;
+    var quote = r.price == null ? false : !(parseFloat(r.price) > 0);
+    if (quote) quoteCount += 1;
+    else if (r.price != null && parseFloat(r.price) > 0) priced.push(parseFloat(r.price));
+    var stock = isLoggedIn ? (parseInt(r.qty, 10) || 0) > 0 : !!r.inStock;
+    if (quote || stock) inStockCount += 1;
+  });
+  var colorN = Object.keys(colors).length;
+  var sizeN = Object.keys(sizes).length;
+  var bits = [];
+  if (sizeN) bits.push(sizeN + (sizeN === 1 ? ' size' : ' sizes'));
+  if (colorN) bits.push(colorN + (colorN === 1 ? ' color' : ' colors'));
+  if (!bits.length) bits.push(rows.length + (rows.length === 1 ? ' option' : ' options'));
+  var allQuote = rows.length > 0 && quoteCount === rows.length;
+  var priceMin = priced.length ? Math.min.apply(null, priced) : 0;
+  var priceMax = priced.length ? Math.max.apply(null, priced) : 0;
+  return {
+    colorN: colorN,
+    sizeN: sizeN,
+    colors: Object.keys(colors),
+    sizes: Object.keys(sizes),
+    variantCount: rows.length,
+    inStockCount: inStockCount,
+    allQuote: allQuote,
+    priceMin: priceMin,
+    priceMax: priceMax,
+    label: bits.join(' · ')
+  };
+};
+
+window.apbsFamilyHasMatchingVariant = function apbsFamilyHasMatchingVariant(data, opts) {
+  opts = opts || {};
+  var rows = (data && data.rows) || [];
+  var sizeKeys = opts.sizeKeys || [];
+  var colorKeys = opts.colorKeys || [];
+  var stockOnly = !!opts.stockOnly;
+  var isLoggedIn = !!opts.isLoggedIn;
+  if (!rows.length) return false;
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var sz = window.apbsCanonSize(r.size);
+    var col = String(r.color || '').trim();
+    var quote = r.price == null ? false : !(parseFloat(r.price) > 0);
+    var stock = quote ? true : (isLoggedIn ? (parseInt(r.qty, 10) || 0) > 0 : !!r.inStock);
+    if (sizeKeys.length && sizeKeys.indexOf(sz) === -1) continue;
+    if (colorKeys.length && colorKeys.indexOf(col) === -1) continue;
+    if (stockOnly && !stock) continue;
+    return true;
+  }
+  return false;
+};
+
+window.apbsCartKey = 'apbs_cart';
+window.apbsGetCart = function apbsGetCart() {
+  try { return JSON.parse(localStorage.getItem(window.apbsCartKey) || '[]'); } catch (e) { return []; }
+};
+window.apbsSaveCart = function apbsSaveCart(cart) {
+  localStorage.setItem(window.apbsCartKey, JSON.stringify(cart || []));
+  var total = (cart || []).reduce(function (s, i) { return s + (parseInt(i.qty, 10) || 0); }, 0);
+  var el = document.getElementById('nav-cart-count');
+  if (el) el.textContent = total > 0 ? total : '';
+};
+window.apbsAddCartItem = function apbsAddCartItem(opts) {
+  opts = opts || {};
+  if (!window.apbsIsApprovedSession()) {
+    alert('You must be logged into an approved trade account to add items to your cart.');
+    window.location.href = window.apbsWithEnvQuery('login.html');
+    return { ok: false, reason: 'auth' };
+  }
+  var code = window.normalizeProductCode ? window.normalizeProductCode(opts.code) : String(opts.code || '').trim();
+  var size = window.apbsCanonSize(opts.size);
+  var color = String(opts.color || '').trim();
+  var desc = opts.description || opts.desc || '';
+  var pcs = parseInt(opts.pcsPerCtn != null ? opts.pcsPerCtn : opts.pcs, 10) || 1;
+  var price = parseFloat(opts.unitPrice != null ? opts.unitPrice : opts.price) || 0;
+  var onHand = parseInt(opts.maxQty != null ? opts.maxQty : opts.qty, 10);
+  if (!Number.isFinite(onHand) || onHand < 0) onHand = 0;
+  var isBackorder = !!opts.backorder || onHand <= 0;
+  var sess = null;
+  try { sess = JSON.parse(sessionStorage.getItem('apbs_user')); } catch (e) {}
+  var cartonOnly = !!opts.cartonOnly ||
+    (sess && window.apbsCanOrderPieces && !window.apbsCanOrderPieces(sess));
+  var want = parseInt(opts.addQty, 10);
+  if (!Number.isFinite(want) || want < 1) want = 1;
+  var addPieces = cartonOnly ? (want * pcs) : want;
+  if (addPieces < 1) return { ok: false, reason: 'qty' };
+  var cart = window.apbsGetCart();
+  var existing = cart.find(function (i) {
+    return i.code === code && i.size === size && String(i.color || '') === color;
+  });
+  if (existing) {
+    existing.qty = existing.qty + addPieces;
+    existing.maxQty = onHand;
+    existing.backorder = isBackorder || existing.qty > onHand;
+    if (!existing.unit) existing.unit = cartonOnly ? 'carton' : 'piece';
+    if (color && !existing.color) existing.color = color;
+  } else {
+    cart.push({
+      code: code, size: size, color: color, description: desc, pcsPerCtn: pcs,
+      unitPrice: price, qty: addPieces, unit: cartonOnly ? 'carton' : 'piece',
+      maxQty: onHand, backorder: isBackorder || addPieces > onHand
+    });
+  }
+  window.apbsSaveCart(cart);
+  return { ok: true, backorder: isBackorder };
+};
+
+window.apbsFindProduct = function apbsFindProduct(products, code, size, color) {
   if (!Array.isArray(products)) return null;
   const c = window.normalizeProductCode
     ? window.normalizeProductCode(code)
@@ -274,7 +605,8 @@ window.apbsFindProduct = function apbsFindProduct(products, code, size) {
     ? window.apbsSizeToCatalog(size)
     : window.normalizeProductSize(size);
   if (!c || !want) return null;
-  return products.find(function (p) {
+  const col = String(color == null ? '' : color).trim();
+  const matches = products.filter(function (p) {
     var pc = window.normalizeProductCode
       ? window.normalizeProductCode(p.code)
       : String(p.code || '').trim();
@@ -283,7 +615,14 @@ window.apbsFindProduct = function apbsFindProduct(products, code, size) {
       ? window.apbsSizeToCatalog(p.size)
       : window.normalizeProductSize(p.size);
     return ps === want;
-  }) || null;
+  });
+  if (!matches.length) return null;
+  if (col) {
+    var exact = matches.find(function (p) { return String(p.color || '').trim() === col; });
+    if (exact) return exact;
+  }
+  if (matches.length === 1) return matches[0];
+  return matches.find(function (p) { return !String(p.color || '').trim(); }) || matches[0];
 };
 
 window.apbsHashPassword = async function apbsHashPassword(password) {
@@ -377,7 +716,10 @@ function loadGlobalLayout() {
         <div class="nav-search-suggest" id="nav-search-suggest" hidden></div>
       </form>
       <ul class="nav-links">
-        <li><a href="products.html" style="cursor:none;">Products</a></li>
+        <li><a href="products.html?main=Flooring" style="cursor:none;">Flooring</a></li>
+        <li><a href="products.html?main=Plumbing" style="cursor:none;">Plumbing</a></li>
+        <li><a href="products.html?main=Windows" style="cursor:none;">Windows</a></li>
+        <li><a href="products.html" style="cursor:none;">Catalog</a></li>
         <li><a href="about.html" style="cursor:none;">About</a></li>
         <li><a href="contact.html" style="cursor:none;">Contact</a></li>
       </ul>
@@ -406,7 +748,10 @@ function loadGlobalLayout() {
       </form>
       <div class="mob-theme-row">${window.apbsThemeToggleHtml()}</div>
       <a href="index.html" style="cursor:none;">Home</a>
-      <a href="products.html" style="cursor:none;">Products</a>
+      <a href="products.html?main=Flooring" style="cursor:none;">Flooring</a>
+      <a href="products.html?main=Plumbing" style="cursor:none;">Plumbing</a>
+      <a href="products.html?main=Windows" style="cursor:none;">Windows</a>
+      <a href="products.html" style="cursor:none;">Catalog</a>
       <a href="about.html" style="cursor:none;">About</a>
       <a href="contact.html" style="cursor:none;">Contact</a>
       <a href="account.html" style="cursor:none;">Account</a>
@@ -421,7 +766,7 @@ function loadGlobalLayout() {
       <div class="ft-top">
         <div class="ft-brand">
           <img src="images/logo.png" alt="All Pro Building Supplies" class="ft-logo" onerror="this.style.display='none'"/>
-          <p class="ft-txt desktop-only-block">Contractor-grade building materials, plumbing, hardware, and contractor supplies. Fast response, real people, reliable service.</p>
+          <p class="ft-txt desktop-only-block">Building supplies and home furnishings — flooring, plumbing, and window coverings. Fast response, real people, reliable service.</p>
           <p class="ft-txt mobile-only-block">Contractor-grade materials. Fast response. Real people.</p>
           <div class="ft-socials">
             <a href="mailto:info@allprobuildingsupplies.com" class="soc">✉</a>
@@ -431,10 +776,10 @@ function loadGlobalLayout() {
         <div class="ft-col">
           <h4>Products</h4>
           <ul>
-            <li><a href="products.html?main=Building%20Materials">Building Materials</a></li>
+            <li><a href="products.html?main=Flooring">Flooring</a></li>
             <li><a href="products.html?main=Plumbing">Plumbing</a></li>
-            <li><a href="products.html?main=Hardware">Hardware</a></li>
-            <li><a href="products.html?main=Contractor%20Supplies">Contractor Supplies</a></li>
+            <li><a href="products.html?main=Windows">Windows</a></li>
+            <li><a href="products.html">Full catalog</a></li>
           </ul>
         </div>
         <div class="ft-col">
@@ -663,21 +1008,18 @@ function apbsReadCachedCatalog() {
 }
 
 function apbsLoadSuggestCatalog(forceNetwork) {
-  var cached = apbsReadCachedCatalog();
+  var csvMode = window.apbsShouldUseCsvCatalog && window.apbsShouldUseCsvCatalog();
+  var cached = csvMode ? null : apbsReadCachedCatalog();
   if (cached && !forceNetwork) return Promise.resolve(cached);
   if (window.__apbsSuggestCatalogPromise) return window.__apbsSuggestCatalogPromise;
-  if (!window.APBS_API_BASE) return Promise.resolve(cached || []);
+  if (!window.apbsFetchCatalogRows) return Promise.resolve(cached || []);
 
-  window.__apbsSuggestCatalogPromise = fetch(window.APBS_API_BASE + '/products', {
-    headers: window.apbsAuthHeaders ? window.apbsAuthHeaders() : {}
-  })
-    .then(function (r) { return r.ok ? r.json() : null; })
+  window.__apbsSuggestCatalogPromise = window.apbsFetchCatalogRows()
     .then(function (rows) {
       window.__apbsSuggestCatalogPromise = null;
       if (!Array.isArray(rows) || !rows.length) return cached || [];
       window.__apbsSuggestCatalog = rows;
       try { sessionStorage.setItem(apbsCatalogCacheKey(), JSON.stringify(rows)); } catch (_) {}
-      // If user is mid-typing, refresh the open dropdown now that data arrived.
       var active = window.__apbsSuggestActiveInput;
       if (active && document.activeElement === active && active.__apbsRenderSuggest) {
         active.__apbsRenderSuggest(active.value);
@@ -704,6 +1046,7 @@ function apbsCatalogHints(qt, rows) {
     if (!code || seen[code]) continue;
     var hay = (
       code + ' ' + (r.description || '') + ' ' + (r.size || '') + ' ' +
+      (r.color || '') + ' ' +
       (r.main_category || '') + ' ' + (r.sub_category || '')
     ).toLowerCase();
     if (hay.indexOf(qt) === -1) continue;
@@ -712,7 +1055,7 @@ function apbsCatalogHints(qt, rows) {
       code: code,
       desc: r.description || code,
       main: r.main_category || '',
-      href: 'products.html?q=' + encodeURIComponent(code)
+      href: window.apbsProductUrl ? window.apbsProductUrl(code) : ('product.html?code=' + encodeURIComponent(code))
     });
   }
   return out;
@@ -749,7 +1092,8 @@ function bindCatalogSuggestInput(input, suggest) {
     }
     suggest.innerHTML = items.map(function (it) {
       return '<button type="button" class="nav-search-hit" data-suggest-q="' +
-        window.apbsEscapeHtml(it.code).replace(/"/g, '&quot;') + '">' +
+        window.apbsEscapeHtml(it.code).replace(/"/g, '&quot;') + '"' +
+        (it.href ? ' data-href="' + window.apbsEscapeHtml(it.href).replace(/"/g, '&quot;') + '"' : '') + '>' +
         '<span class="nav-search-hit-code">' + window.apbsEscapeHtml(it.code) + '</span>' +
         '<span class="nav-search-hit-desc">' + window.apbsEscapeHtml(it.desc) + '</span>' +
         (it.main ? '<span class="nav-search-hit-cat">' + window.apbsEscapeHtml(it.main) + '</span>' : '') +
@@ -781,8 +1125,13 @@ function bindCatalogSuggestInput(input, suggest) {
     var hit = e.target.closest ? e.target.closest('[data-suggest-q]') : null;
     if (!hit) return;
     var q = hit.getAttribute('data-suggest-q') || '';
+    var href = hit.getAttribute('data-href') || '';
     input.value = q;
     hideSuggest();
+    if (href && /product\.html/.test(href)) {
+      window.location.href = href;
+      return;
+    }
     var form = input.form || input.closest('form');
     if (form) {
       if (typeof form.requestSubmit === 'function') form.requestSubmit();

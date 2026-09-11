@@ -1,10 +1,11 @@
 /* All Pro Building Supplies — service worker (PWA) */
-const CACHE_VERSION = 'apbs-pwa-v61';
+const CACHE_VERSION = 'apbs-pwa-v66';
 const SHELL = [
   './',
   './index.html',
   './products.html',
   './products-classic.html',
+  './product.html',
   './cart.html',
   './checkout.html',
   './login.html',
@@ -74,6 +75,7 @@ function isFreshAsset(url) {
     return (
       p.indexOf('/assets/style.css') !== -1 ||
       p.indexOf('/assets/main.js') !== -1 ||
+      p.indexOf('/assets/products.csv') !== -1 ||
       p.indexOf('/admin.html') !== -1 ||
       p.indexOf('/sw.js') !== -1
     );

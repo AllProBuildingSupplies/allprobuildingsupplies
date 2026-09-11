@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- window frame -->
+  <rect x="24" y="18" width="72" height="84" rx="3" stroke="#C8981F" stroke-width="3"/>
+  <path d="M60 18v84M24 60h72" stroke="#C8981F" stroke-width="2.5"/>
+  <!-- shade slats -->
+  <path d="M30 28h24M30 36h24M30 44h24" stroke="#E2AF34" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M66 28h24M66 36h24M66 44h24" stroke="#E2AF34" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- sill -->
+  <path d="M18 102h84" stroke="#C8981F" stroke-width="3" stroke-linecap="round"/>
+</svg>

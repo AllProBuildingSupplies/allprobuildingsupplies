@@ -1,0 +1,357 @@
+{
+  "order_id": "APBS-000005",
+  "note": "Backorder qty for each fitting = packing-list PCS on C3+C4+C5. Foam pipe is inbound stock counted in PKGS (20 ft lengths), not added as extra lines on this fittings PO.",
+  "lines": [
+    {
+      "code": "PVC-1/16HH",
+      "size": "1-1/2",
+      "qty": 200
+    },
+    {
+      "code": "PVC-1/16HH",
+      "size": "2",
+      "qty": 400
+    },
+    {
+      "code": "PVC-1/16HH",
+      "size": "3",
+      "qty": 100
+    },
+    {
+      "code": "PVC-1/16HS",
+      "size": "1-1/2",
+      "qty": 200
+    },
+    {
+      "code": "PVC-1/16HS",
+      "size": "2",
+      "qty": 200
+    },
+    {
+      "code": "PVC-1/16HS",
+      "size": "3",
+      "qty": 100
+    },
+    {
+      "code": "PVC-1/4HH",
+      "size": "1-1/2",
+      "qty": 2000
+    },
+    {
+      "code": "PVC-1/4HH",
+      "size": "2",
+      "qty": 2000
+    },
+    {
+      "code": "PVC-1/4HH",
+      "size": "3",
+      "qty": 816
+    },
+    {
+      "code": "PVC-1/4HH",
+      "size": "4",
+      "qty": 100
+    },
+    {
+      "code": "PVC-1/4HHLNG",
+      "size": "2",
+      "qty": 1200
+    },
+    {
+      "code": "PVC-1/4HHLNG",
+      "size": "3",
+      "qty": 600
+    },
+    {
+      "code": "PVC-1/4HHLNG",
+      "size": "4",
+      "qty": 20
+    },
+    {
+      "code": "PVC-1/4HS",
+      "size": "1-1/2",
+      "qty": 180
+    },
+    {
+      "code": "PVC-1/4HS",
+      "size": "2",
+      "qty": 200
+    },
+    {
+      "code": "PVC-1/4HS",
+      "size": "3",
+      "qty": 100
+    },
+    {
+      "code": "PVC-1/4HS",
+      "size": "4",
+      "qty": 20
+    },
+    {
+      "code": "PVC-1/4LOWHEEL",
+      "size": "3x3x2",
+      "qty": 320
+    },
+    {
+      "code": "PVC-1/8HH",
+      "size": "1-1/2",
+      "qty": 1500
+    },
+    {
+      "code": "PVC-1/8HH",
+      "size": "2",
+      "qty": 800
+    },
+    {
+      "code": "PVC-1/8HH",
+      "size": "3",
+      "qty": 800
+    },
+    {
+      "code": "PVC-1/8HH",
+      "size": "4",
+      "qty": 180
+    },
+    {
+      "code": "PVC-1/8HS",
+      "size": "1-1/2",
+      "qty": 800
+    },
+    {
+      "code": "PVC-1/8HS",
+      "size": "2",
+      "qty": 800
+    },
+    {
+      "code": "PVC-1/8HS",
+      "size": "3",
+      "qty": 800
+    },
+    {
+      "code": "PVC-1/8HS",
+      "size": "4",
+      "qty": 180
+    },
+    {
+      "code": "PVC-BUSHINGHS",
+      "size": "2x1-1/2",
+      "qty": 200
+    },
+    {
+      "code": "PVC-BUSHINGHS",
+      "size": "3x2",
+      "qty": 240
+    },
+    {
+      "code": "PVC-BUSHINGHS",
+      "size": "4x3",
+      "qty": 90
+    },
+    {
+      "code": "PVC-CAPSOC",
+      "size": "1-1/2",
+      "qty": 240
+    },
+    {
+      "code": "PVC-CAPSOC",
+      "size": "2",
+      "qty": 360
+    },
+    {
+      "code": "PVC-CAPSOC",
+      "size": "3",
+      "qty": 60
+    },
+    {
+      "code": "PVC-CAPSOC",
+      "size": "4",
+      "qty": 20
+    },
+    {
+      "code": "PVC-CLEANTEE",
+      "size": "2",
+      "qty": 300
+    },
+    {
+      "code": "PVC-CLEANTEE",
+      "size": "4",
+      "qty": 20
+    },
+    {
+      "code": "PVC-CLSTFLNGH",
+      "size": "4x3",
+      "qty": 200
+    },
+    {
+      "code": "PVC-CPLNG",
+      "size": "1-1/2",
+      "qty": 400
+    },
+    {
+      "code": "PVC-CPLNG",
+      "size": "2",
+      "qty": 1000
+    },
+    {
+      "code": "PVC-CPLNG",
+      "size": "3",
+      "qty": 600
+    },
+    {
+      "code": "PVC-CPLNG",
+      "size": "4",
+      "qty": 200
+    },
+    {
+      "code": "PVC-INCREDHH",
+      "size": "2x1-1/2",
+      "qty": 400
+    },
+    {
+      "code": "PVC-INCREDHH",
+      "size": "3x2",
+      "qty": 240
+    },
+    {
+      "code": "PVC-INCREDHH",
+      "size": "4x3",
+      "qty": 160
+    },
+    {
+      "code": "PVC-MADPTR",
+      "size": "1-1/2",
+      "qty": 600
+    },
+    {
+      "code": "PVC-MADPTR",
+      "size": "2",
+      "qty": 200
+    },
+    {
+      "code": "PVC-PTRAP",
+      "size": "1-1/2",
+      "qty": 50
+    },
+    {
+      "code": "PVC-PTRAP",
+      "size": "2",
+      "qty": 30
+    },
+    {
+      "code": "PVC-PTRAP",
+      "size": "3",
+      "qty": 20
+    },
+    {
+      "code": "PVC-PTRAPLOW",
+      "size": "1-1/2",
+      "qty": 150
+    },
+    {
+      "code": "PVC-PTRAPLOW",
+      "size": "2",
+      "qty": 360
+    },
+    {
+      "code": "PVC-PTRAPLOW",
+      "size": "3",
+      "qty": 200
+    },
+    {
+      "code": "PVC-PTRAPLOW",
+      "size": "4",
+      "qty": 40
+    },
+    {
+      "code": "PVC-SANTEE",
+      "size": "1-1/2",
+      "qty": 300
+    },
+    {
+      "code": "PVC-SANTEE",
+      "size": "2",
+      "qty": 280
+    },
+    {
+      "code": "PVC-SANTEE",
+      "size": "3",
+      "qty": 60
+    },
+    {
+      "code": "PVC-SANTEE",
+      "size": "4",
+      "qty": 20
+    },
+    {
+      "code": "PVC-SANTEEDBL",
+      "size": "2x2x1-1/2x1-1/2",
+      "qty": 100
+    },
+    {
+      "code": "PVC-SANTEERED",
+      "size": "2x1-1/2x1-1/2",
+      "qty": 600
+    },
+    {
+      "code": "PVC-SANTEERED",
+      "size": "2x1-1/2x2",
+      "qty": 600
+    },
+    {
+      "code": "PVC-SANTEERED",
+      "size": "2x2x1-1/2",
+      "qty": 600
+    },
+    {
+      "code": "PVC-SANTEERED",
+      "size": "3x3x2",
+      "qty": 90
+    },
+    {
+      "code": "PVC-SANTEERED",
+      "size": "4x4x3",
+      "qty": 20
+    },
+    {
+      "code": "PVC-WYEDBL",
+      "size": "3x3x2x2",
+      "qty": 150
+    },
+    {
+      "code": "PVC-WYEHUB",
+      "size": "1-1/2",
+      "qty": 100
+    },
+    {
+      "code": "PVC-WYEHUB",
+      "size": "2",
+      "qty": 600
+    },
+    {
+      "code": "PVC-WYEHUB",
+      "size": "3",
+      "qty": 150
+    },
+    {
+      "code": "PVC-WYEHUB",
+      "size": "4",
+      "qty": 40
+    },
+    {
+      "code": "PVC-WYERED",
+      "size": "3x3x2",
+      "qty": 480
+    },
+    {
+      "code": "PVC-WYERED",
+      "size": "4x4x2",
+      "qty": 40
+    },
+    {
+      "code": "PVC-WYERED",
+      "size": "4x4x3",
+      "qty": 40
+    }
+  ],
+  "total_pcs": 25266
+}

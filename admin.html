@@ -242,11 +242,12 @@
         <div class="wms-section-head">
           <div class="wms-action-title" style="margin:0;">Inbound containers</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="importInboundSeed()">Import invoices</button>
+            <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="importInboundSeed()">Import packing lists</button>
+            <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="syncNjpdBackorderFromInbound()">Match NJPD backorder</button>
             <button type="button" class="btn-view" style="padding:6px 12px;font-size:12px;" onclick="loadInboundShipments()">Refresh</button>
           </div>
         </div>
-        <p class="wms-hint" style="margin-bottom:10px;">Ocean containers in transit — expected pieces from commercial invoices. Stock stays off on-hand until you receive the container.</p>
+        <p class="wms-hint" style="margin-bottom:10px;">Containers 3, 4 &amp; 5 — ETA 9/18. Fittings qty = packing-list <strong>PCS</strong>. Foam pipe qty = packing-list <strong>PKGS</strong> (20 ft lengths); their PCS column is meters, not sticks. Every fitting on these three POs is allocated to NJPD APBS-000005. Do not receive into on-hand until the boxes land.</p>
         <div id="wms-inbound" class="wms-inbound" aria-live="polite">Loading…</div>
       </div>
 
@@ -351,6 +352,7 @@
           <th>Type</th>
           <th>Description</th>
           <th>Size</th>
+          <th>Color</th>
           <th>Pieces / Carton</th>
           <th>Inventory Qty</th>
           <th>Unit Price ($)</th>
@@ -895,18 +897,23 @@ function escAttr(val) {
     .replace(/</g, '&lt;');
 }
 
-function productOptionKey(code, size) {
-  return encodeURIComponent(String(code || '').trim() + '\x1e' + (window.normalizeProductSize ? window.normalizeProductSize(size) : String(size || '').trim()));
+function productOptionKey(code, size, color) {
+  return encodeURIComponent(
+    String(code || '').trim() + '\x1e' +
+    (window.normalizeProductSize ? window.normalizeProductSize(size) : String(size || '').trim()) +
+    '\x1e' + String(color || '').trim()
+  );
 }
 
 function productFromOptionKey(key) {
   if (!key) return null;
   const parts = decodeURIComponent(key).split('\x1e');
   const code = parts[0];
-  const size = parts.slice(1).join('\x1e');
-  return (window.apbsFindProduct || function(prods, c, s) {
-    return prods.find(p => p.code === c && p.size === s);
-  })(masterProducts, code, size);
+  const size = parts[1] || '';
+  const color = parts.slice(2).join('\x1e');
+  return (window.apbsFindProduct || function(prods, c, s, col) {
+    return prods.find(p => p.code === c && p.size === s && String(p.color || '') === String(col || ''));
+  })(masterProducts, code, size, color);
 }
 
 // --- ADMIN AUTH GATE ---
@@ -1353,6 +1360,7 @@ async function loadProducts() {
         size: window.apbsSizeToCatalog
           ? window.apbsSizeToCatalog(p.size)
           : (window.normalizeProductSize ? window.normalizeProductSize(p.size) : (p.size || '')),
+        color: p.color || '',
         pack: p.pack,
         stock: parseInt(p.qty, 10) || 0,
         price: parseFloat(p.price) || 0,
@@ -1372,6 +1380,7 @@ async function loadProducts() {
         <td data-label="Type"><input class="data-input" data-field="sub_sub_sub_category" value="${escAttr(p.sub_sub_sub_category)}"></td>
         <td data-label="Description"><input class="data-input" data-field="description" value="${escAttr(p.description)}"></td>
         <td data-label="Size"><input class="data-input" data-field="size" value="${escAttr(p.size)}"></td>
+        <td data-label="Color"><input class="data-input" data-field="color" value="${escAttr(p.color)}"></td>
         <td data-label="Pieces / Carton"><input type="number" class="data-input" data-field="pack" value="${escAttr(p.pack)}"></td>
         <td data-label="Inventory Qty"><input type="number" class="data-input" data-field="qty" value="${escAttr(p.stock)}"></td>
         <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" data-field="price" value="${escAttr(p.price)}"></td>
@@ -1446,6 +1455,16 @@ async function loadInboundShipments() {
     if (!r.ok) throw new Error((d && d.error) || 'Failed to load inbound');
     inboundShipmentsCache = Array.isArray(d.shipments) ? d.shipments : [];
     renderInboundShipments();
+    const sync = d.njpdBackorder;
+    if (sync && sync.success) {
+      if (typeof loadOrders === 'function') await loadOrders();
+      if (typeof renderWmsPickList === 'function') renderWmsPickList();
+      showStatus(
+        'NJPD APBS-000005 backorder set to ' + (sync.backorderPcs || '?') +
+        ' fitting pcs from C3/C4/C5 (' + (sync.lines || '?') + ' lines). On-hand unchanged.',
+        false
+      );
+    }
   } catch (e) {
     box.innerHTML = '<div class="wms-inbound-empty">' + escapeHtml(e.message || 'Could not load inbound') + '</div>';
   }
@@ -1456,7 +1475,7 @@ function renderInboundShipments() {
   if (!box) return;
   const list = inboundShipmentsCache || [];
   if (!list.length) {
-    box.innerHTML = '<div class="wms-inbound-empty">No inbound containers yet. Click <strong>Import invoices</strong> to load Container 3 &amp; 4 from the commercial invoices.</div>';
+    box.innerHTML = '<div class="wms-inbound-empty">No inbound containers yet. Click <strong>Import packing lists</strong> to load Containers 3, 4 &amp; 5 (ETA 9/18).</div>';
     return;
   }
   box.innerHTML = list.map(function (s) {
@@ -1469,7 +1488,9 @@ function renderInboundShipments() {
     const linesHtml = lines.length
       ? '<div class="wms-inbound-lines"><table><thead><tr><th>Code</th><th>Size</th><th>Qty</th></tr></thead><tbody>' +
         lines.map(function (it) {
-          return '<tr><td>' + escapeHtml(it.code) + '</td><td>' + escapeHtml(it.size) + '</td><td>' + escapeHtml(it.qty) + '</td></tr>';
+          var unit = it.unit || (it.code === 'PVC-PIPE-FOAM' || it.code === 'PVC-PIPE-SOLID' ? '20ft' : 'pcs');
+          var extra = it.meters ? ' <span style="color:var(--silver);font-size:11px;">(' + escapeHtml(it.meters) + ' m)</span>' : '';
+          return '<tr><td>' + escapeHtml(it.code) + '</td><td>' + escapeHtml(it.size) + '</td><td>' + escapeHtml(it.qty) + ' ' + escapeHtml(unit) + extra + '</td></tr>';
         }).join('') +
         '</tbody></table></div>'
       : '';
@@ -1488,8 +1509,9 @@ function renderInboundShipments() {
         '<div class="wms-inbound-meta">' +
           (s.label ? '<div><strong>' + escapeHtml(s.label) + '</strong></div>' : '') +
           '<div>' + escapeHtml(s.carrier || 'Carrier TBD') + ' · ETA <strong>' + eta + '</strong></div>' +
-          '<div>' + escapeHtml(s.lineCount || lines.length) + ' SKUs · <strong>' + escapeHtml(s.totalPcs || 0) + '</strong> pcs expected</div>' +
+          '<div>' + escapeHtml(s.lineCount || lines.length) + ' SKUs · <strong>' + escapeHtml(s.totalPcs || 0) + '</strong> expected</div>' +
           (s.invoiceRef ? '<div>Invoice ' + escapeHtml(s.invoiceRef) + '</div>' : '') +
+          (s.notes ? '<div>' + escapeHtml(s.notes) + '</div>' : '') +
         '</div>' +
         '<div class="wms-inbound-actions">' + markArrived + receiveBtn + '</div>' +
         linesHtml +
@@ -1499,7 +1521,7 @@ function renderInboundShipments() {
 }
 
 async function importInboundSeed() {
-  showStatus('Importing container invoices…', false);
+    showStatus('Importing packing lists…', false);
   try {
     const res = await fetch('data/inbound-containers.json?t=' + Date.now());
     if (!res.ok) throw new Error('Could not load data/inbound-containers.json');
@@ -1515,9 +1537,84 @@ async function importInboundSeed() {
     if (!r.ok) throw new Error((d && d.error) || 'Import failed');
     inboundShipmentsCache = d.shipments || [];
     renderInboundShipments();
-    showStatus('Imported ' + (d.count || containers.length) + ' inbound container(s). ETA 9/15 — not added to on-hand yet.', false);
+    showStatus('Imported ' + (d.count || containers.length) + ' inbound container(s). ETA 9/18 — not added to on-hand yet.', false);
+    await syncNjpdBackorderFromInbound({ silentConfirm: true });
   } catch (e) {
     showStatus(e.message || 'Import failed', true);
+  }
+}
+
+var NJPD_C345_INBOUND_IDS = {
+  'inbound-whsu9010053': true,
+  'inbound-whsu9004718': true,
+  'inbound-container-5': true
+};
+var NJPD_C345_INVOICE_REFS = {
+  '260509-003-SG': true,
+  '260430-010-SG': true
+};
+
+function isNjpdC345Inbound(s) {
+  if (!s) return false;
+  var id = String(s.id || '').trim().toLowerCase();
+  var inv = String(s.invoiceRef || s.invoice_ref || '').trim();
+  return !!(NJPD_C345_INBOUND_IDS[id] || NJPD_C345_INVOICE_REFS[inv]);
+}
+
+async function inboundFittingTotals(shipments) {
+  const totals = {};
+  (shipments || []).forEach(function (s) {
+    if (!isNjpdC345Inbound(s)) return;
+    (s.items || []).forEach(function (it) {
+      const code = String(it.code || '').trim();
+      if (!code || code === 'PVC-PIPE-FOAM') return;
+      const size = String(it.size || '').trim();
+      const key = code + '\t' + size;
+      totals[key] = (totals[key] || 0) + (parseInt(it.qty, 10) || 0);
+    });
+  });
+  return totals;
+}
+
+/** Set NJPD APBS-000005 backorder = fittings on C3/C4/C5. Does not touch on-hand. */
+async function syncNjpdBackorderFromInbound(opts) {
+  opts = opts || {};
+  try {
+    if (!inboundShipmentsCache || !inboundShipmentsCache.length) {
+      await loadInboundShipments();
+    }
+    const incoming = await inboundFittingTotals(inboundShipmentsCache || []);
+    const incomingPcs = Object.keys(incoming).reduce(function (s, k) { return s + incoming[k]; }, 0);
+    if (!incomingPcs) throw new Error('No inbound fittings loaded');
+    if (!opts.silentConfirm) {
+      if (!confirm(
+        'Set NJPD APBS-000005 backorder to the C3/C4/C5 packing-list fittings?\n\n' +
+        incomingPcs + ' inbound fitting pcs.\n' +
+        'Shipped C1/C2 qty stays. On-hand is not changed.'
+      )) return;
+    }
+    const r = await adminFetch('/admin/orders/sync-inbound-backorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: 'APBS-000005' }),
+    });
+    const d = await r.json().catch(function () { return {}; });
+    if (!r.ok) {
+      const err = (d && d.error) || 'NJPD backorder sync failed';
+      if (r.status === 404 || /route not found/i.test(err)) {
+        throw new Error('Match API was not on the live server. Refresh and try Match NJPD backorder again.');
+      }
+      throw new Error(err);
+    }
+    await loadOrders();
+    if (typeof renderWmsPickList === 'function') renderWmsPickList();
+    showStatus(
+      'NJPD APBS-000005 backorder set to ' + (d.backorderPcs || incomingPcs) +
+      ' fitting pcs from C3/C4/C5 (' + (d.lines || '?') + ' lines). On-hand unchanged.',
+      false
+    );
+  } catch (e) {
+    showStatus(e.message || 'NJPD backorder sync failed', true);
   }
 }
 
@@ -2199,6 +2296,7 @@ function addProductRow() {
     <td data-label="Type"><input class="data-input" data-field="sub_sub_sub_category" value=""></td>
     <td data-label="Description"><input class="data-input" data-field="description" value=""></td>
     <td data-label="Size"><input class="data-input" data-field="size" value=""></td>
+    <td data-label="Color"><input class="data-input" data-field="color" value=""></td>
     <td data-label="Pieces / Carton"><input type="number" class="data-input" data-field="pack" value=""></td>
     <td data-label="Inventory Qty"><input type="number" class="data-input" data-field="qty" value=""></td>
     <td data-label="Unit Price ($)"><input type="number" step="0.01" class="data-input" data-field="price" value=""></td>
@@ -2213,8 +2311,8 @@ function populateProductDropdown() {
   if(!sel) return;
   let html = '<option value="">-- Select Product to Add --</option>';
   masterProducts.forEach((p) => {
-    const key = productOptionKey(p.code, p.size);
-    const label = `${p.code} - ${p.description} ${p.size} ($${p.price.toFixed(2)}) [Stock: ${p.stock}]`;
+    const key = productOptionKey(p.code, p.size, p.color);
+    const label = `${p.code} - ${p.description} ${p.size}${p.color ? ' · ' + p.color : ''} ($${p.price.toFixed(2)}) [Stock: ${p.stock}]`;
     html += `<option value="${escAttr(key)}">${escAttr(label)}</option>`;
   });
   sel.innerHTML = html;
@@ -2243,6 +2341,7 @@ async function saveProducts() {
             sub_sub_sub_category: field('sub_sub_sub_category'),
             description: field('description'),
             size: norm(field('size')),
+            color: field('color'),
             pack: parseInt(field('pack'), 10) || 1,
             qty: parseInt(field('qty'), 10) || 0,
             price: parseFloat(field('price')) || 0,
@@ -2272,6 +2371,7 @@ function productsCsvHeaderMap(headerRow) {
     else if (key === 'lesso' || key === 'lessocode' || key === 'lessoscode') map.lesso_code = i;
     else if (key === 'description' || key === 'desc' || key === 'name') map.description = i;
     else if (key === 'size') map.size = i;
+    else if (key === 'color' || key === 'colour' || key === 'finish' || key === 'pattern') map.color = i;
     else if (key === 'pack' || key === 'pcsperctn' || key === 'pcspctn') map.pack = i;
     else if (key === 'qty' || key === 'quantity' || key === 'stock' || key === 'inventory' || key === 'inventoryqty') map.qty = i;
     else if (key === 'addqty' || key === 'qtyadd' || key === 'received' || key === 'receive' || key === 'shipment' || key === 'shipmentqty' || key === 'delta') map.addQty = i;
@@ -2299,7 +2399,7 @@ function exportProductsCsv() {
     return;
   }
   const headers = [
-    'Material', 'Code', 'Tommur-Code', 'Lesso-Code', 'Description', 'Size', 'Pack', 'Qty', 'AddQty',
+    'Material', 'Code', 'Tommur-Code', 'Lesso-Code', 'Description', 'Size', 'Color', 'Pack', 'Qty', 'AddQty',
     'Price', 'Image', 'main_category', 'sub_category', 'sub_sub_category', 'sub_sub_sub_category'
   ];
   const lines = [headers.join(',')];
@@ -2311,6 +2411,7 @@ function exportProductsCsv() {
       csvEscape(p.lesso_code || ''),
       csvEscape(p.description || ''),
       csvEscape(p.size || ''),
+      csvEscape(p.color || ''),
       csvEscape(p.pack != null ? p.pack : ''),
       csvEscape(p.stock != null ? p.stock : 0),
       '', // AddQty — fill with pieces received, then use Receive Shipment CSV
@@ -2415,7 +2516,7 @@ function processReceiveShipmentCsv(event) {
         return;
       }
 
-      payload.push({ code: code, size: size, qty: addQty });
+      payload.push({ code: code, size: size, color: cell(cols, map.color), qty: addQty });
       preview.push(code + ' / ' + size + ' +' + addQty);
     }
 
@@ -2522,6 +2623,7 @@ function processCSVUpload(event) {
         code: window.normalizeProductCode ? window.normalizeProductCode(code) : code,
         description: cleanText(cell(cols, map.description)),
         size: cleanCsvSize(cell(cols, map.size)),
+        color: cleanText(cell(cols, map.color)),
         pack: parseInt(cell(cols, map.pack), 10) || 1,
         qty: parseInt(cell(cols, map.qty), 10) || 0,
         price: Math.round(((parseFloat(cell(cols, map.price)) || 0) + Number.EPSILON) * 100) / 100,
