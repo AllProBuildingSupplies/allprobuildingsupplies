@@ -76,9 +76,13 @@ async function fetchMainProductsCsv() {
   return '';
 }
 
-const ACHIM_SEED_VERSION = 'pricebook-v3-color-images';
+const CATALOG_SEED_VERSION = 'baruch-list-v1-20260911';
 
-/** Insert Achim/Alveron rows from the public main-branch CSV. Never deletes plumbing stock. */
+/**
+ * Upsert every row from the public main-branch CSV (Baruch's sell list).
+ * ON CONFLICT keeps existing qty so warehouse on-hand is not wiped.
+ * Then drops SKUs that are no longer on the list (curtains, old PEX-B PIPE codes, etc.).
+ */
 async function ensureAchimCatalogSeed(env) {
   if (!env || !env.DB) return;
   if (achimSeedPromise) return achimSeedPromise;
@@ -89,10 +93,10 @@ async function ensureAchimCatalogSeed(env) {
     let current = null;
     try {
       current = await env.DB.prepare(
-        `SELECT value FROM app_meta WHERE key = 'achim_catalog'`
+        `SELECT value FROM app_meta WHERE key = 'catalog_list'`
       ).first();
     } catch (_) {}
-    if (current && String(current.value) === ACHIM_SEED_VERSION) return;
+    if (current && String(current.value) === CATALOG_SEED_VERSION) return;
 
     const csvText = await fetchMainProductsCsv();
     if (!csvText) return;
@@ -116,24 +120,36 @@ async function ensureAchimCatalogSeed(env) {
     const iLesso = idx('Lesso-Code');
     if (iCode < 0 || iSize < 0 || iColor < 0) return;
 
-    const stmts = [
-      env.DB.prepare(`DELETE FROM products WHERE code LIKE 'ACH-%' OR code LIKE 'ALV-%'`),
-    ];
+    const keepKeys = [];
+    const stmts = [];
     const seen = new Set();
     for (let r = 1; r < table.length; r++) {
       const cols = table[r];
       const code = normalizeProductCode(cols[iCode]);
-      if (!code || (!code.startsWith('ACH-') && !code.startsWith('ALV-'))) continue;
+      if (!code) continue;
       const size = canonicalizeSize(cols[iSize]);
       if (!size) continue;
       const color = normalizeColor(iColor >= 0 ? cols[iColor] : '');
       const key = code + '\0' + size + '\0' + color;
       if (seen.has(key)) continue;
       seen.add(key);
+      keepKeys.push({ code, size, color });
       const priceRaw = iPrice >= 0 ? cols[iPrice] : '';
       stmts.push(
         env.DB.prepare(
-          `INSERT OR REPLACE INTO products (${PRODUCT_INSERT_COLS}) VALUES (${PRODUCT_INSERT_PLACEHOLDERS})`
+          `INSERT INTO products (${PRODUCT_INSERT_COLS}) VALUES (${PRODUCT_INSERT_PLACEHOLDERS})
+           ON CONFLICT(code, size, color) DO UPDATE SET
+             description = excluded.description,
+             pack = excluded.pack,
+             price = excluded.price,
+             image = excluded.image,
+             material = excluded.material,
+             main_category = excluded.main_category,
+             sub_category = excluded.sub_category,
+             sub_sub_category = excluded.sub_sub_category,
+             sub_sub_sub_category = excluded.sub_sub_sub_category,
+             tommur_code = excluded.tommur_code,
+             lesso_code = excluded.lesso_code`
         ).bind(
           ...productInsertBinds(
             {
@@ -158,11 +174,34 @@ async function ensureAchimCatalogSeed(env) {
       );
     }
     if (seen.size < 1) return;
+
+    const existing = await env.DB.prepare(
+      `SELECT code, size, color FROM products`
+    ).all();
+    const keepSet = new Set(keepKeys.map((k) => k.code + '\0' + k.size + '\0' + k.color));
+    for (const row of existing.results || []) {
+      const key =
+        normalizeProductCode(row.code) +
+        '\0' +
+        canonicalizeSize(row.size) +
+        '\0' +
+        normalizeColor(row.color);
+      if (!keepSet.has(key)) {
+        stmts.push(
+          env.DB.prepare(`DELETE FROM products WHERE code = ? AND size = ? AND color = ?`).bind(
+            row.code,
+            row.size,
+            row.color
+          )
+        );
+      }
+    }
+
     stmts.push(
       env.DB.prepare(
-        `INSERT INTO app_meta (key, value) VALUES ('achim_catalog', ?)
+        `INSERT INTO app_meta (key, value) VALUES ('catalog_list', ?)
          ON CONFLICT(key) DO UPDATE SET value = excluded.value`
-      ).bind(ACHIM_SEED_VERSION)
+      ).bind(CATALOG_SEED_VERSION)
     );
     for (let i = 0; i < stmts.length; i += 40) {
       await env.DB.batch(stmts.slice(i, i + 40));
