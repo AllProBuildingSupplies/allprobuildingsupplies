@@ -67,7 +67,6 @@
       <div class="windows-subnav-row">
         <button type="button" class="windows-subnav-btn" data-sub="Blinds" onclick="setCatSub('Blinds')">Blinds</button>
         <button type="button" class="windows-subnav-btn" data-sub="Shades" onclick="setCatSub('Shades')">Shades</button>
-        <button type="button" class="windows-subnav-btn" data-sub="Curtains" onclick="setCatSub('Curtains')">Curtains</button>
       </div>
     </div>
 
@@ -184,7 +183,7 @@ window.catActiveSizes = {};
 window.catActiveColors = {};
 
 window.catCollapsedMaterials = window.catCollapsedMaterials || {};
-var MATERIAL_ORDER = ['Copper', 'PVC', 'CPVC', 'PEX', 'INSULATION', 'Vinyl Tiles', 'Vinyl Planks', 'Deck Tiles', 'Foam Tiles', 'Carpet Tiles', 'Rugs', 'Mats', 'Blinds', 'Shades', 'Curtains', 'Rods'];
+var MATERIAL_ORDER = ['Copper', 'PVC', 'CPVC', 'PEX', 'INSULATION', 'Vinyl Tiles', 'Vinyl Planks', 'Deck Tiles', 'Foam Tiles', 'Carpet Tiles', 'Rugs', 'Mats', 'Blinds', 'Shades'];
 
 function toggleMaterialSection(material) {
   var key = String(material || '');
