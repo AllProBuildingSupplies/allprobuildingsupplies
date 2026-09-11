@@ -1,12 +1,14 @@
 # All Pro Building Supplies — Category Sell Sheets
 
-Suggested wholesale prices from `assets/products.csv`. Rebuild: `npm run sell-sheets` from `brochure/`.
+Suggested wholesale from `assets/products.csv`. Rebuild: `npm run sell-sheets` from `brochure/`.
 
 Customer-facing PDFs never include factory, supplier, or internal sourcing names.
 
+Layout: plumbing is one photo + wrapping size/price row per fitting. Blinds and shades are a size/price table plus a color list (price is by size). Tiles, mats, and planks are a color photo grid with size and price once. Mixed size×color prices use a Size | Color | Price table. SKUs without photos are text only — the logo is never used as product art. Blank or $0 prices are omitted.
+
 ## Full catalog
 
-- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf` — cover, department covers, then every category
+- `brochure/sell-sheets/pdf/allpro-product-catalog.pdf`
 
 ## Department covers
 
@@ -41,5 +43,5 @@ Customer-facing PDFs never include factory, supplier, or internal sourcing names
 | Flooring | Foam Floor Tiles | `brochure/sell-sheets/pdf/foam-tiles-sell-sheet.pdf` | 1 | 3 |
 | Flooring | Entrance & Kitchen Mats | `brochure/sell-sheets/pdf/mats-sell-sheet.pdf` | 12 | 90 |
 | Flooring | Area Rug Sets | `brochure/sell-sheets/pdf/rugs-sell-sheet.pdf` | 1 | 7 |
-| Flooring | Vinyl Floor Planks | `brochure/sell-sheets/pdf/vinyl-planks-sell-sheet.pdf` | 10 | 29 |
+| Flooring | Vinyl Floor Planks | `brochure/sell-sheets/pdf/vinyl-planks-sell-sheet.pdf` | 5 | 29 |
 | Flooring | Vinyl Floor Tiles | `brochure/sell-sheets/pdf/vinyl-tiles-sell-sheet.pdf` | 8 | 121 |
