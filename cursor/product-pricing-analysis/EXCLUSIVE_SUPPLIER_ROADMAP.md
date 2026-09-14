@@ -63,7 +63,7 @@ Pitch after 2-104: “Same unit, one invoice, we stock the next 20 turns.”
 These are on the Artisent ticket or the glass ask. Same customer, same truck.
 
 1. **Carpet + pad + tackstrip** — carpet/pad FOB in but **do not beat** at $10k ocean. **Halex tackstrip FOB in and does beat** the US box. Samples, then 40HQ when the combined lock opens.
-2. **Clear float 6 / 10 / 12 mm** — Sphinx Egypt + Gold Plus India. Stock sizes, commercial grade. 20 ft A-frames. First 20 ft = **6 mm**.
+2. **Clear float 6 / 10 / 12 mm** — **Sphinx CFR Newark is in** (6 mm **$7.00/m²** dry). Gold Plus India still open as a check. First 20 ft = **6 mm**.
 3. **Mirrors** — same glass mill, silvered. Vanity and closet. Do not open a second mill.
 4. **1/4-round + cove base** — Vietnam / Indonesia MDF or PVC. Cheap, every unit, 208 LF on this ticket.
 5. **Transitions** — US (Roberts / Schluter knockoffs) until volume justifies a mill.

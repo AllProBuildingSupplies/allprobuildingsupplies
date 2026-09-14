@@ -65,7 +65,27 @@ Ask: FOB Alexandria / Damietta, **stock sizes**, 6 / 10 / 12 mm standard clear (
 - Form: `sphinx-glass/Sphinx_Prospect_Registration_AllPro.xlsx`
 - Email: `sphinx-glass/Sphinx_email_Mohamed_Nabil.txt`
 
-Do not attach the screenshots or this memo. Sign the blank SIGNATURE cell if they require it. FOB Egypt → Newark, warehouse 1600 Livingston Ave. No PO until FOB is in.
+Do not attach the screenshots or this memo. Sign the blank SIGNATURE cell if they require it. FOB Egypt → Newark, warehouse 1600 Livingston Ave.
+
+### Quote in (Mohamed Nabil, 14 Sep 2026) — CFR Newark, USD/m²
+
+They did **not** give FOB. They quoted **CFR Newark** (ocean to the port is inside the number). Dry vs open-top. Valid through **end of September**. Lead **4–5 weeks from payment**. **100% cash in advance**. Packing: wooden boxes. They will **not** do DDP (they wrote “DDB”). Quality: EN 572-2 / Sphinx commercial, green edge OK, standard sizes.
+
+Numbers: `sphinx-glass/Sphinx_CFR_Newark_14Sep.csv`
+
+| | Dry CFR Newark | Open-top CFR | After MFN + 12.5% overlay (if duty is on the CFR figure) |
+|---|---:|---:|---:|
+| **6 mm** (1/4") | **$7.00/m²** ($0.65/sf) | $7.15 | **~$8.02/m²** ($0.75/sf) at the terminal |
+| **10 mm** (3/8") | $11.50 ($1.07/sf) | $11.80 | **~$13.50/m²** ($1.25/sf) |
+| **12 mm** (1/2") | $13.80 ($1.28/sf) | $14.20 | **~$16.20/m²** ($1.51/sf) |
+
+Do **not** add the $10k planning ocean on top — CFR already includes the boat. Still add Newark THC / broker / dray to **1600 Livingston Ave** (~$0.40–$0.70/m² on a full 20 ft of 6 mm). Warehouse sketch for 6 mm dry: **~$8.50–$9.50/m²** (**$0.79–$0.88/sf**).
+
+US stock-sheet wholesale for 1/4" clear is typically **$2.45–$2.80/sf** (older distributor books) and shops sell annealed closer to **$3–$5/sf**. Sphinx 6 mm is in the right zip code: importer-cheap, not architectural. Open-top is only **$0.15/m²** more on 6 mm — take OT if the crates need it.
+
+**Gaps before a PO:** they still owe FOB Alexandria (split ocean so we do not pay overlay on freight), m² per 20 ft, crate count, kg/m², MOQ, tin-bath = Egypt on the invoice, packing photo. **Do not wire 100% CIA on a first container** — 30% deposit / 70% against B/L, or LC. Quote dies end of September.
+
+**First buy if terms move:** one **20 ft of 6 mm** (dry, or OT if packing requires). 10/12 mm only after that sells. Still get Gold Plus on paper so we are not single-sourced.
 
 ---
 

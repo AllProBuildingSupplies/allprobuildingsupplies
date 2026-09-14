@@ -1,0 +1,7 @@
+thickness_mm,us_sell_as,container,cfr_newark_usd_per_m2,cfr_usd_per_sf,hts,mfn,overlay_pct,duty_if_on_cfr_usd_m2,port_usd_per_m2,port_usd_per_sf,notes
+6,1/4",dry,7.00,0.650,7005.29.18,0.145 USD/m2,12.5,1.020,8.02,0.745,Volume SKU; first 20ft
+6,1/4",open-top,7.15,0.664,7005.29.18,0.145 USD/m2,12.5,1.039,8.19,0.761,OT premium $0.15/m2
+10,3/8",dry,11.50,1.068,7005.29.25,4.9%,12.5,2.001,13.50,1.254,After 6mm sells
+10,3/8",open-top,11.80,1.096,7005.29.25,4.9%,12.5,2.053,13.85,1.287,
+12,1/2",dry,13.80,1.282,7005.29.25,4.9%,12.5,2.401,16.20,1.505,Do not pay extra for 12.7 mm
+12,1/2",open-top,14.20,1.319,7005.29.25,4.9%,12.5,2.471,16.67,1.549,
