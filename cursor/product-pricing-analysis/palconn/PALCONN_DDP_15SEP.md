@@ -32,9 +32,9 @@ Spot checks that match the 10 Sep sheet:
 - 1" stick: FOB $0.256 → our **$0.399/ft** vs her **$0.399/ft** (exact)
 - ½" coil: FOB $0.081 → our **$0.153/ft** vs her **$0.126/ft** (she reused the stick rate)
 
-**Copper rings are the one place our 1.43 stack is too light.** Crimp rings are copper articles (CBP has classified them 7419; 7412 is also in play). 2026 Section **232 copper ~50%** can stack with 301 + overlay. Her DDP/FOB **1.94** is ~MFN + 301 + overlay + 232. Until a broker files the HTS, **use her DDP as the ring cost**, not FOB × 1.43.
+**Copper rings are the one place our 1.43 stack is too light.** Crimp rings are copper articles (CBP has classified them 7419; 7412 is also in play). 2026 Section **232 copper ~50%** can stack with 301 + overlay. Her DDP/FOB **1.94** is ~MFN + 301 + overlay + 232. **Use her DDP as the ring cost**, not FOB × 1.43.
 
-**DDP label vs door.** True DDP to Livingston also pays entry, DTHC, chassis, and dray. Those dest fees are **not** in FOB × 1.43 + ocean. Her DDP sitting *under* that number means this is **duty + ocean math**, not proven door-to-door. Prefer **FOB Qingdao + our forwarder** on the first buy. If she insists DDP, get in writing: who is IOR, who files entry, who pays DTHC/dray to 1600 Livingston.
+**DDP is net landed.** Baruch confirmed 16 Sep: her DDP includes delivery to **1600 Livingston Ave** — no extra fees or invoices after this payment. Cost = Palconn DDP. Our FOB×1.43+$10k number matching her DDP within 1% means the formula was already in the right neighborhood for all-in warehouse cost (she is absorbing dest, or her ocean is cheaper than $10k/40ft). No dest add-on on top.
 
 FOB unit prices on this PI match the **10 Sep** quote (PPSU −5%, PEX-B −1.2%). No new FOB cut.
 
@@ -89,12 +89,46 @@ PPSU workhorses (coupling / elbow / tee / most reducing tees) land **28–43%**.
 | ¾" | $0.23 | $0.385 | **−67%** | **$0.77** |
 | 1" | $0.41 | $0.475 | **−16%** | **$0.95** |
 
-Even our lighter FOB × 1.43 landed ($0.20 / $0.29 / $0.35) still loses on ½" and ¾" at current list. Do not sell rings at these cards.
+Even FOB × 1.43 ($0.20 / $0.29 / $0.35) still loses on ½" and ¾" at Gator/site. Do not sell Palconn rings at these cards.
+
+### Gator (NJPD) vs Palconn DDP — direct answers
+
+Sell cards on the site are Gator/NJPD (quote **11237145** fittings/rings, ack **11234952** 20 ft sticks), rounded up a few cents on most SKUs.
+
+**Yes — copper rings lose money** if Palconn DDP is the cost and you sell at Gator/site. Same unit (each). On this PI that is about **−$6,700**.
+
+| Ring | Gator (quote) | Site | Palconn DDP | $ / pc at site | This PI |
+|---|---:|---:|---:|---:|---:|
+| ½" EPCR0012 | $0.15 | $0.17 | **$0.269** | **−$0.10** | 30,000 pcs → **−$2,960** |
+| ¾" EPCR0034 | $0.21 | $0.23 | **$0.385** | **−$0.16** | 20,000 pcs → **−$3,100** |
+| 1" EPCR0100 | $0.38 | $0.41 | **$0.475** | **−$0.06** | 10,000 pcs → **−$650** |
+
+Copper 232 is why. Palconn FOB on ½" is only **$0.139** — below Gator — but her DDP is 1.94× FOB.
+
+**Other workhorses: you make money, not 50%.** At *site* (Gator rounded up) sticks and PPSU couplings/elbows/tees are **28–38% GM**. At *exact Gator* stick prices they are a bit thinner (**27–31%** on pipe, **20–32%** on those fittings). Not losing except rings. Not 50% either.
+
+| Item | Gator | Site | Palconn DDP | GM at Gator | GM at site |
+|---|---:|---:|---:|---:|---:|
+| ½" 20 ft stick | $3.55 | $3.91 | $2.53 | **29%** | **35%** |
+| ¾" 20 ft stick | $6.70 | $7.37 | $4.90 | **27%** | **34%** |
+| 1" 20 ft stick | $11.63 | $12.79 | $7.99 | **31%** | **38%** |
+| ½" coupling | $0.23 | $0.25 | $0.16 | **31%** | **36%** |
+| ¾" coupling | $0.38 | $0.42 | $0.30 | **20%** | **28%** |
+| 1" coupling | $0.77 | $0.85 | $0.56 | **27%** | **34%** |
+| ½" elbow | $0.33 | $0.36 | $0.23 | **30%** | **36%** |
+| ¾" elbow | $0.66 | $0.72 | $0.49 | **26%** | **32%** |
+| ½" tee | $0.45 | $0.49 | $0.33 | **26%** | **33%** |
+| ¾" tee | $0.92 | $1.02 | $0.66 | **28%** | **35%** |
+| 1" tee | $2.03 | $2.24 | $1.38 | **32%** | **39%** |
+
+Vs Tommur DDP those same Gator fittings were often **underwater**. Palconn DDP flips them to profit — just not 50%.
+
+Coils are not on the Gator NJPD ack (they buy 20 ft sticks). Site coil GM **50–63%**.
 
 ## Verdict
 
-1. **Landed math is right.** Palconn DDP on this mix equals FOB × 1.43 + $10k/40ft within 1%. Line differences are her flat 1.56× (plastic) / 1.94× (copper) vs our cube allocation — they cancel on the box. Copper rings: believe **her** DDP, not 1.43.
-2. **50% margin does not hold on this list.** Mix GM **~41%**. Coils yes. Sticks and most PPSU need ~**+30–50%** on the sell card. **Crimp rings must be repriced** (about 3× on ½" / ¾") or they lose money on every piece.
-3. **Do not take this as a DDP PO.** Same FOB as 10 Sep. Prefer FOB + our forwarder. No factory PO until the combined mill lock (Tommur PVC/DWV, Zhenpeng PPSU pallet, Palconn PEX-B + F1807).
+1. **Landed math is right, and her DDP is the cost.** Palconn DDP on this mix equals FOB × 1.43 + $10k/40ft within 1%. Delivery to Livingston is in that number — do not add dest on top. Copper rings: believe **her** DDP, not 1.43.
+2. **Matching Gator: rings lose money; everything else on this PI makes ~25–38% (site 28–38%), not 50%.** Coils at site are the 50% lines. Mix at site list **~41%**.
+3. **No factory PO until the combined mill lock** (Tommur PVC/DWV, Zhenpeng PPSU pallet, Palconn PEX-B + F1807). Drop or reprice rings before this mix ships if sell stays at Gator.
 
 Keep Zhenpeng for PPSU unless we unwind the REV PI — Palconn DDP does not change that. Palconn PVC pipe was not on this invoice (still do not buy).
