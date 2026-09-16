@@ -1,0 +1,39 @@
+family,code,desc,size,color,unit,qty,fob_amt,ddp_amt,pack,packages,cbm
+PPSU,PEX-CPLNG,Coupling F2159 PPSU crimp,1/2,,pc,3000,307,479,1000,3,0.036
+PPSU,PEX-CPLNG,Coupling F2159 PPSU crimp,1,,pc,3000,1080,1685,200,15,0.18
+PPSU,PEX-CPLNG,Coupling F2159 PPSU crimp,3/4,,pc,3000,582,908,500,6,0.072
+Copper ring,PEX-F1807-RING,Copper crimp ring,1/2,,pc,30000,4155,8061,2000,15,0.18
+Copper ring,PEX-F1807-RING,Copper crimp ring,1,,pc,10000,2447,4747,500,20,0.24
+Copper ring,PEX-F1807-RING,Copper crimp ring,3/4,,pc,20000,3970,7703,1000,20,0.24
+PPSU,PEX-ELBOW,90 elbow F2159 PPSU crimp,1/2,,pc,9000,1334,2081,600,15,0.18
+PPSU,PEX-ELBOW,90 elbow F2159 PPSU crimp,1,,pc,3000,1779,2775,150,20,0.24
+PPSU,PEX-ELBOW,90 elbow F2159 PPSU crimp,3/4,,pc,4500,1414,2205,300,15,0.18
+PPSU,PEX-PLUG,Plug F2159 PPSU,1/2,,pc,6000,402,628,2000,3,0.036
+PPSU,PEX-PLUG,Plug F2159 PPSU,1,,pc,3000,688,1074,600,5,0.06
+PPSU,PEX-PLUG,Plug F2159 PPSU,3/4,,pc,3000,371,578,1000,3,0.036
+PPSU,PEX-REDUCER,Reducing coupling F2159 PPSU,1 x 3/4,,pc,3000,868,1354,200,15,0.18
+PPSU,PEX-REDUCER,Reducing coupling F2159 PPSU,3/4 x 1/2,,pc,3000,476,743,500,6,0.072
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,1/2 x 1/2 x 3/4,,pc,3000,826,1288,200,15,0.18
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,1 x 1 x 1/2,,pc,3000,1652,2577,150,20,0.24
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,1 x 1 x 3/4,,pc,3000,1906,2973,100,30,0.36
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,1 x 3/4 x 1,,pc,3000,2118,3304,150,20,0.24
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,1 x 3/4 x 3/4,,pc,3000,1694,2643,150,20,0.24
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,3/4 x 1/2 x 1/2,,pc,3000,900,1404,300,10,0.12
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,3/4 x 1/2 x 3/4,,pc,3000,1112,1734,250,12,0.144
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,3/4 x 3/4 x 1/2,,pc,3000,1059,1652,250,12,0.144
+PPSU,PEX-REDTEE,Reducing tee F2159 PPSU,3/4 x 3/4 x 1,,pc,3000,1641,2560,100,30,0.36
+PPSU,PEX-TEE,Tee F2159 PPSU crimp,1/2,,pc,3000,635,991,400,7.5,0.09
+PPSU,PEX-TEE,Tee F2159 PPSU crimp,1,,pc,3000,2647,4129,100,30,0.36
+PPSU,PEX-TEE,Tee F2159 PPSU crimp,3/4,,pc,3000,1271,1982,200,15,0.18
+PEX-B stick,PEX-B-PIPE-ST-BLUE,"PEX-B potable pipe, 20 ft stick",1,Blue,ft,50000,12800,19968,20ft/stick 20sticks/bag,125,11.25
+PEX-B stick,PEX-B-PIPE-ST-RED,"PEX-B potable pipe, 20 ft stick",1,Red,ft,50000,12800,19968,20ft/stick 20sticks/bag,125,11.25
+PEX-B stick,PEX-B-PIPE-ST-RED,"PEX-B potable pipe, 20 ft stick",3/4,Red,ft,50000,7850,12246,20ft/stick 25sticks/bag,100,9.0
+PEX-B stick,PEX-B-PIPE-ST-BLUE,"PEX-B potable pipe, 20 ft stick",3/4,Blue,ft,50000,7850,12246,20ft/stick 25sticks/bag,100,9.0
+PEX-B stick,PEX-B-PIPE-ST-BLUE,"PEX-B potable pipe, 20 ft stick",1/2,Blue,ft,50000,4050,6318,20ft/stick 50sticks/bag,50,4.5
+PEX-B stick,PEX-B-PIPE-ST-RED,"PEX-B potable pipe, 20 ft stick",1/2,Red,ft,50000,4050,6318,20ft/stick 50sticks/bag,50,4.5
+PEX-B coil,PEX-B-PIPE-RL-BLUE,"PEX-B potable pipe, 100 ft coil",1/2,Blue,ft,50000,4050,6318,100,500,12.5
+PEX-B coil,PEX-B-PIPE-RL-RED,"PEX-B potable pipe, 100 ft coil",1/2,Red,ft,50000,4050,6318,100,500,12.5
+PEX-B coil,PEX-B-PIPE-RL-BLUE,"PEX-B potable pipe, 100 ft coil",3/4,Blue,ft,30000,4710,7348,100,300,12.9
+PEX-B coil,PEX-B-PIPE-RL-RED,"PEX-B potable pipe, 100 ft coil",3/4,Red,ft,30000,4710,7348,100,300,12.9
+PEX-B coil,PEX-B-PIPE-RL-BLUE,"PEX-B potable pipe, 100 ft coil",1,Blue,ft,30000,7680,11981,100,300,19.2
+PEX-B coil,PEX-B-PIPE-RL-RED,"PEX-B potable pipe, 100 ft coil",1,Red,ft,30000,7680,11981,100,300,19.2

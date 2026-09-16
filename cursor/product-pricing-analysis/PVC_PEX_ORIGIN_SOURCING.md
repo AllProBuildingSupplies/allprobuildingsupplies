@@ -9,7 +9,7 @@
 
 **Drop PEX larger than 1"** (pipe and fittings 1¼ / 1½ / 2") from factory orders. Do not restock. Live site SKUs can wait until catalog cleanup.
 
-Zhenpeng REV PI is **PPSU fittings** FOB Ningbo. **PEX-B pipe ½–1"** — Palconn (Leela) now gets the full plumbing RFQ (`palconn/Palconn_Full_Catalog_RFQ_SEND.xlsx`) so we can compare their FOB to Tommur PVC/DWV and Zhenpeng PPSU. Still ask Zhenpeng for pipe. Do not put PEX pipe back on Tommur.
+Zhenpeng REV PI is **PPSU fittings** FOB Ningbo. **PEX-B pipe ½–1"** — Palconn (Leela) now gets the full plumbing RFQ (`palconn/Palconn_Full_Catalog_RFQ_SEND.xlsx`) so we can compare their FOB to Tommur PVC/DWV and Zhenpeng PPSU. **15 Sep DDP PI** (`palconn/PALCONN_DDP_15SEP.md`): her DDP matches our FOB×1.43+$10k/40ft within 1%; do not take DDP on the first buy. Still ask Zhenpeng for pipe. Do not put PEX pipe back on Tommur.
 
 This is different from glass. Glass has China/Malaysia **AD/CVD** that makes those origins unusable. Plastic PVC/PEX pipe (HTS **3917**) has **no AD/CVD order**. China is still legal. The issue is stacked **Section 301** on China-origin articles, plus whether another country can even make the **US inch SKU tree** we already sell.
 

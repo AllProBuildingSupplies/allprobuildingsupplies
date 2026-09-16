@@ -5,6 +5,8 @@ Catalog: `palconn/2026_PALCONN_North_American_Market_Catalog.pdf` (44 pp, receiv
 **Quote 8 Sep:** `palconn/20260908 Palconn_Full_Catalog_RFQ_SEND.xlsx` — 118 of 167 lines priced.  
 **Quote 10 Sep:** `palconn/20260910 Palconn_Full_Catalog_RFQ_SEND.xlsx` — **84 lines** (PEX + PVC pipe only). PPSU **−5%**, PEX-B **−1.2%**, F1807 unchanged, PVC pipe **MOQ / CBM / GW filled**, six extra F2159 reducing tees. DWV and CPVC **omitted**. 1" F2159 female adapter still **blank**. Internal: `palconn/Palconn_Leela_quote_COMPARE.xlsx` (do not forward). Side-by-side mill sheet: `Three_Mill_FOB_Landed.xlsx`. Ocean **$10k / 67.7 CBM**. Rebuild: `python3 cursor/product-pricing-analysis/palconn/build_palconn_quote_compare.py`.
 
+**Invoice 15 Sep (DDP vs FOB):** `palconn/Palconn_IN2026-0915_DDP_invoice.jpg` — IN2026-0915 / PO PAL20260912. PPSU + copper rings + PEX-B stick/coil only. **FOB $119,614 / DDP $190,616**. Our FOB×1.43+$10k/40ft = **$192,213** (DDP **0.8% under** — landed math is right). Mix GM at list **40.7%**, not 50%. Coils work; sticks/PPSU thin; **rings underwater**. Memo: `palconn/PALCONN_DDP_15SEP.md`. Rebuild: `python3 cursor/product-pricing-analysis/palconn/build_palconn_ddp_check.py`. Prefer FOB, not this DDP.
+
 Send next: `palconn/Palconn_10Sep_quote_ack_SEND.txt`.
 
 ### Verdict (no PO until the combined lock)

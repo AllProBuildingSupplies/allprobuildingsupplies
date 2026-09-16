@@ -35,7 +35,7 @@ Glass (**Sphinx 14 Sep CFR Newark** — 6 mm **$7.00/m²** dry, ~$8.02/m² after
 
 **PVC pipe + DWV:** Tommur. Green Valve PI is a backup (still EXW — need FOB).
 
-**PEX (½–1" only):** Zhenpeng PPSU REV **held**. **Palconn 10 Sep** (`20260910 Palconn_Full_Catalog_RFQ_SEND.xlsx`): take Palconn for **PEX-B pipe + F1807**; keep Zhenpeng for PPSU (Palconn −5% but 1" elbow still Zhenpeng); **do not buy Palconn PVC pipe** (CBM in — 2" solid lands **~$16.04** vs site **$14.75**). Tommur = PVC/DWV. No PO until combined lock. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`.
+**PEX (½–1" only):** Zhenpeng PPSU REV **held**. **Palconn 10 Sep** (`20260910 Palconn_Full_Catalog_RFQ_SEND.xlsx`): take Palconn for **PEX-B pipe + F1807**; keep Zhenpeng for PPSU (Palconn −5% but 1" elbow still Zhenpeng); **do not buy Palconn PVC pipe** (CBM in — 2" solid lands **~$16.04** vs site **$14.75**). **15 Sep DDP invoice** (`palconn/PALCONN_DDP_15SEP.md`): DDP **$190,616** vs our landed **$192,213** (match). List GM **~41%**, not 50%; **crimp rings sell below her DDP**. Prefer FOB. Tommur = PVC/DWV. No PO until combined lock. Compare: `palconn/Palconn_Leela_quote_COMPARE.xlsx`.
 
 ## Tommur workbook rules
 
@@ -53,6 +53,7 @@ python3 cursor/product-pricing-analysis/build_factory_order_projection.py
 python3 cursor/product-pricing-analysis/build_hailiang_copper_rfq.py
 python3 cursor/product-pricing-analysis/palconn/build_palconn_full_rfq.py
 python3 cursor/product-pricing-analysis/palconn/build_palconn_quote_compare.py
+python3 cursor/product-pricing-analysis/palconn/build_palconn_ddp_check.py
 python3 cursor/product-pricing-analysis/build_three_mill_fob_landed.py
 python3 cursor/product-pricing-analysis/halex/build_halex_compare.py
 ```
