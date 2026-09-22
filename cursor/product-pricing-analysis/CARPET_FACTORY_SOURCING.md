@@ -43,6 +43,31 @@ Real mill in Liyang (Changzhou). ~1,500 staff, ~30 million m²/yr tufted. CRI. L
 
 **Ask Jessica:** 12 ft / 3.66 m (not only 4 m), 100% solution-dyed PET (not only nylon 66), textured cut pile, ActionBac, 25–35 oz, FOB Shanghai/Ningbo, MOQ, sample lead time. Send a photo of Ablaze-type beige/gold — “comparable color, not a brand copy.”
 
+**Quote in (Jessica, KLJC260922, 22 Sep 2026):** `kaili/Kaili_KLJC260922_FOB_Shanghai.jpg`. Numbers: `kaili/Kaili_KLJC260922.csv`. Send next: `kaili/Kaili_lighter_face_ask_SEND.txt`.
+
+| | |
+|---|---|
+| Spec | Tufted **cut pile**, **100% polyester**, **solution dye**, **ActionBac**, pile **8 mm**, **1200 g/m² (35 oz)**, **3.66 m × 25 m**, color “same as picture” |
+| Price | **FOB Shanghai $7.23/m²** × **5,490 m²** = **$39,692.70** (one 40HQ) |
+| Terms | Lead **25 days**. **30% TT / 70% against B/L copy**. HS 5703290000 |
+| Pack | 60 rolls × 91.5 m². **5,490 m² = 6,566 SY** |
+
+Landed at the same **1.43 + $10,000/40HQ** used on Dongsheng:
+
+| | $/SY |
+|---|---:|
+| FOB | **$6.05** |
+| Duty only (×1.43) | **$8.64** |
+| + $10k ocean | **$10.17** |
+| Artisent on the job | **$5.92** |
+| Dongsheng 1200 g landed | **$9.44** |
+
+**Does not work.** Duty alone ($8.64/SY) is already over Artisent **$5.92**, before ocean. Landed is about **72% above** the job price. Walkaway FOB on a 35 oz box was **~$3.82/m²**; this is **$7.23**.
+
+Vs Dongsheng 9 Sep **1200 g FOB Qingdao $6.77** (6,200 m² / 40HQ, lands **~$9.44/SY**): Kaili is **+$0.46/m²** and **710 m² less** in the box, so landed is about **$0.73/SY worse**. Spec match is good (3.66 m, solution-dyed PET, ActionBac, cut pile). Price is not. Better than Qianqiao’s unspecified **$8.92/m²**, still not a buy.
+
+**No PO.** Ask her for **800 / 850 / 1000 g** on the same construction, and a DHL sample of this color to Livingston. Do not take this 35 oz container.
+
 ---
 
 ## Option 2 — Qianqiao Carpet (12 ft PET on the website)
@@ -108,7 +133,7 @@ Vertical mill, ~23 million m²/yr, CRI Green Label Plus, IKEA / hotel groups. **
 | 30 oz | $5.02 | $7.17 | **$8.37** | **~$3.95/m²** |
 | 35 oz | $5.66 | $8.09 | **$9.44** | **~$3.82/m²** |
 
-Duty-only break-even is still **$4.95/m²** FOB. **800 g $5.16 is already over duty-only** ($6.17/SY vs Artisent $5.92) and lands **~$7.36/SY** at $10k ocean. It is also **lighter than 25 oz** builder (~23.6 oz). Do not switch the target to 800 g to “save” $0.28/m². 850 g dropped **$0.10** to **$5.44** and still lands **~$7.70**. Walkaway if she cannot get near **$3.95/m²**. **No PO.** Keep Kaili in parallel. Turkey (Tümer) is still the hedge — no Sec 301, so the same $10k ocean hurts less.
+Duty-only break-even is still **$4.95/m²** FOB. **800 g $5.16 is already over duty-only** ($6.17/SY vs Artisent $5.92) and lands **~$7.36/SY** at $10k ocean. It is also **lighter than 25 oz** builder (~23.6 oz). Do not switch the target to 800 g to “save” $0.28/m². 850 g dropped **$0.10** to **$5.44** and still lands **~$7.70**. Walkaway if she cannot get near **$3.95/m²**. **No PO.** **Kaili 22 Sep is in** and worse on 35 oz (`kaili/Kaili_KLJC260922.csv`). Turkey (Tümer) is still the hedge — no Sec 301, so the same $10k ocean hurts less.
 
 **Samples (same WhatsApp):** Stock / similar-quality samples **free**; she will send photos first, then ship after we confirm. **Custom-made samples are chargeable.** DHL freight on us to Livingston. Wait for photos.
 
@@ -295,6 +320,6 @@ Subject: Re: Carpet tackstrip Prices to All Pro Building Supplies LLC
 1. Email **Jessica (Kaili)** and **Qianqiao WhatsApp** the same day. Sample both.
 2. **Kash (Anerte) packing is in** — $22/roll (30 SY), 280–290 rolls/40HQ regular. **FOB Shanghai, not EXW.** No vacuum. Send the Incoterms + DHL follow-up. Do not PO yet.
 3. Do not order a container off one Memphis unit. Use samples to win the property, then 40HQ.
-4. Landed check before PO: FOB × **~1.43** (China) + **$10,000 / 40HQ**, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. **Dongsheng 9 Sep revision (800 g $5.16 / 850 g $5.44) and Anerte pad still do not clear that at $10k ocean.** If Kaili is also over, send the same RFQ to **Tümer**.
+4. Landed check before PO: FOB × **~1.43** (China) + **$10,000 / 40HQ**, vs Artisent **$5.92/SY** carpet and **$1.70/SY** pad. **Dongsheng 9 Sep (800 g $5.16 / 850 g $5.44), Kaili 22 Sep (1200 g $7.23, lands ~$10.17/SY), and Anerte pad still do not clear that at $10k ocean.** Next: ask Kaili for 800/850 g, then **Tümer** if both China mills stay over.
 5. **Halex tackstrip FOB is in and does beat** the US 100-pack at $10k ocean. Send `halex/Halex_Fred_quote_ack_SEND.txt` (samples + mixed 40HQ). No PO until the combined lock.
 6. Planks stay ours. Naplock / tub strips stay US.
