@@ -120,6 +120,24 @@ World’s ~5th largest float mill. Already has an **Americas sales desk**. Tell 
 
 Ask: FOB Mersin / Izmir / Gemlik, 6 / 10 / 12 mm **standard clear stock**, $/m², 20 ft crate packing, MOQ. Ocean to NJ (NY/NJ).
 
+**Quote in (Emre İskender, `eiskender@sisecam.com`, 22 Sep 2026):** `sisecam/Sisecam_price_list.jpg`. Clear-float landed: `sisecam/Sisecam_clear_landed.csv`. Full list: `sisecam/Sisecam_FOB_price_list.csv`. Send next: `sisecam/Sisecam_Emre_ack_SEND.txt`.
+
+FOB **Mersin or Gemlik**. Tin bath **Turkey**. MOQ **1 container**. Stock sizes 2140×3210, 2250×3210, 2140×3300, 2250×3300; they also cut 2400 / 2440 / 2550. Payment on the sheet: **100% before shipment**. Lead time written as “3–4 weeks after shipment” — confirm that means production, not transit.
+
+Standard clear is on the sheet (not only Ultra Clear). Ultra Clear 6 mm is **$12.00** vs clear **$4.90**. Tinted, mirror, and laminated are on the sheet for reference. First buy stays **clear 6 mm**.
+
+Landed uses the same planning ocean as the rest of this folder: **$10,000 per 20 ft** (do not assume half of a 40 ft), plus MFN + **12.5%** overlay on FOB+ocean. Under 10 mm: HTS 7005.29.18, MFN **$0.145/m²**. 10 mm and up: 7005.29.25, MFN **4.9%** + 12.5%.
+
+| Clear | FOB $/m² | m² / 20' | Ocean at $10k | Landed | Sphinx port |
+|---|---:|---:|---:|---:|---:|
+| 6 mm | **4.90** | 1,412 | $7.08 | **$13.62** ($1.27/sf) | **$8.02** |
+| 10 mm | 8.15 | 847 | $11.80 | **$23.43** | $13.50 |
+| 12 mm | 10.75 | 706 | $14.16 | **$29.25** | $16.20 |
+
+**FOB looks cheaper than Sphinx. Landed does not**, at this ocean number. Sphinx 6 mm CFR Newark is already **$7.00** to the port (**$8.02** after duty). Şişecam FOB $4.90 plus a $10k boat on only 1,412 m² is **$13.62** at the terminal — about **$5.60/m² more** than Sphinx. Still under typical US 1/4" wholesale (**$2.45–$2.80/sf**), so the mill price is fine. The 20 ft freight is what loses.
+
+Şişecam 6 mm beats Sphinx at the terminal only if Mersin/Gemlik → Newark on this cube is about **$3,000 or less** (~$2.10/m²). Get a real 20 ft rate before treating Turkey as the buy. **No PO.** Do not wire 100% before shipment on a first container. Gold Plus still open.
+
 ---
 
 ## Do not bother (for cheap annealed sheet)
@@ -151,7 +169,7 @@ We are a US B2B building-supplies importer. We need mill pricing for ordinary an
 
 ## How to play this
 
-1. Email **Sphinx `sales@sphinxglass.com`** and **Gold Plus `info@goldplusgroup.com`** the same day. Şişecam `archglass@sisecam.com` is the quality check — walk if they only quote Ultra Clear / jumbo.
+1. Email **Sphinx `sales@sphinxglass.com`** and **Gold Plus `info@goldplusgroup.com`** the same day. **Şişecam 22 Sep is in** (clear 6 mm FOB **$4.90/m²**, lands **~$13.62** at $10k/20ft vs Sphinx port **$8.02**). Walk Ultra Clear. Gold Plus still open.
 2. Compare **landed East Coast** (FOB + ocean + MFN + ~12.5% overlay), not FOB. Planning ocean is **$10,000 per 40ft**; use the same **$10,000** on a 20 ft A-frame until we have a 20ft quote (do not assume half). Glass is weight-limited. Pick the cheapest **6 mm** that is clear and flat. On ~1,500 m² of 6 mm, $10k is ~**$6.67/m²** of freight alone.
 3. Do not mix origins in one entry — CBP origin is the float line.
 4. First PO is **one 20 ft of 6 mm stock**. Add 10/12 mm only after that sells.

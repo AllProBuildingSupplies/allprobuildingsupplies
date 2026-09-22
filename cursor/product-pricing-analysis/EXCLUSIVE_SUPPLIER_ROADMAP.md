@@ -63,7 +63,7 @@ Pitch after 2-104: “Same unit, one invoice, we stock the next 20 turns.”
 These are on the Artisent ticket or the glass ask. Same customer, same truck.
 
 1. **Carpet + pad + tackstrip** — carpet/pad FOB in but **do not beat** at $10k ocean. **Halex tackstrip FOB in and does beat** the US box. Samples, then 40HQ when the combined lock opens.
-2. **Clear float 6 / 10 / 12 mm** — **Sphinx CFR Newark is in** (6 mm **$7.00/m²** dry). Gold Plus India still open as a check. First 20 ft = **6 mm**.
+2. **Clear float 6 / 10 / 12 mm** — **Sphinx CFR Newark is in** (6 mm **$7.00/m²** dry, ~$8.02 after duty). **Şişecam 22 Sep** clear 6 mm FOB **$4.90** lands **~$13.62** at $10k/20ft. Gold Plus India still open. First 20 ft = **6 mm from Sphinx** unless Turkey freight is ~$3k.
 3. **Mirrors** — same glass mill, silvered. Vanity and closet. Do not open a second mill.
 4. **1/4-round + cove base** — Vietnam / Indonesia MDF or PVC. Cheap, every unit, 208 LF on this ticket.
 5. **Transitions** — US (Roberts / Schluter knockoffs) until volume justifies a mill.
@@ -122,7 +122,7 @@ Price the **kit**, not 40 line items. Match floorplan names they already use (`3
 | Glue-down plank | **In house** | Existing |
 | 12 ft PET carpet | **Dongsheng 9 Sep** — 800 g $5.16/m² lands **~$7.36/SY**; 850 g $5.44 lands **~$7.70**. **Kaili 22 Sep** 1200 g **$7.23** FOB Shanghai lands **~$10.17/SY** (duty alone over $5.92). Need ~**$3.95/m²**. No PO. | **Dongsheng Selena** `julia.yuan@dongsheng.com`; Kaili Jessica `jessicachan10@foxmail.com`; Qianqiao `info@qianqiaocorp.com` |
 | Rebond pad | **Packing in** — $22/roll (30 SY / $0.73/SY), 280–290 rolls/40HQ regular. At **$10k/40HQ** lands **~$2.21/SY** vs Artisent $1.70. FOB Shanghai, not EXW. No vacuum. No PO. | Anerte Kash WhatsApp +86 177 0151 5750 |
-| Clear glass 6/10/12 mm | RFQ | Sphinx `sales@sphinxglass.com`; Gold Plus `info@goldplusgroup.com` |
+| Clear glass 6/10/12 mm | Sphinx CFR in; Şişecam FOB in (lands higher at $10k/20ft) | Sphinx `sales@sphinxglass.com`; Şişecam Emre `eiskender@sisecam.com`; Gold Plus `info@goldplusgroup.com` |
 | 1/4-round / cove | **Next scour** | Vietnam MDF / PVC extrusion |
 | Doors + hardware | After trim | Vietnam |
 | Tile | After glass | Turkey / India |
